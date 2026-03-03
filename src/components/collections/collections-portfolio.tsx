@@ -163,7 +163,7 @@ export function CollectionsPortfolioGrid({ collections }: { collections: Collect
           <p className="text-muted-foreground">No collections found matching your criteria</p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:gap-8 2xl:grid-cols-5 gap-4">
           {sortedCollections.map((collection) => (
             <Link key={collection.id} href={`/collections/${collection.nftAddress || collection.id}`}>
               <CollectionCard

@@ -1,12 +1,14 @@
 "use client"
 
 import { useMarketplaceListings } from "@/hooks/use-marketplace-events"
-import { AssetCard } from "@/components/asset-card"
+import { AssetCard, AssetCardSkeleton } from "@/components/asset-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useMemo } from "react"
+
+import { Shelf } from "@/components/ui/shelf"
 
 export interface AssetGridProps {
     sortOrder?: "recent" | "oldest"
@@ -34,17 +36,11 @@ export function AssetGrid({ sortOrder = "recent" }: AssetGridProps) {
 
     if (isLoading && activeListings.length === 0) {
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <Shelf title="Marketplace Listings">
                 {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="space-y-3">
-                        <Skeleton className="h-[300px] w-full rounded-xl" />
-                        <div className="space-y-2">
-                            <Skeleton className="h-4 w-3/4" />
-                            <Skeleton className="h-4 w-1/2" />
-                        </div>
-                    </div>
+                    <AssetCardSkeleton key={i} />
                 ))}
-            </div>
+            </Shelf>
         )
     }
 
@@ -78,35 +74,16 @@ export function AssetGrid({ sortOrder = "recent" }: AssetGridProps) {
 
     return (
         <div className="space-y-6 pb-20">
-            {/* Grid Header / Active Filters */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2 border-b border-border/10">
-                <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-foreground/80 tracking-tight">
-                        {activeListings.length} Assets Found
-                    </span>
-                    <div className="h-1 w-1 rounded-full bg-border/50" />
-                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest opacity-60">
-                        Live Market
-                    </span>
-                </div>
 
-                {/* Active Filter Pills */}
-                <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline" className="bg-muted/10 border-border/30 text-[10px] font-medium py-1 px-3 flex gap-2 items-center hover:bg-muted/20 transition-colors tracking-wide">
-                        <span className="w-1.5 h-1.5 rounded-full bg-outrun-cyan" />
-                        Sort: {sortOrder === 'recent' ? 'Recent' : 'Oldest'}
-                    </Badge>
-                </div>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <Shelf title="Marketplace Listings">
                 {activeListings.map((listing) => (
                     <AssetCard
                         key={listing.orderHash}
                         listing={listing}
                     />
                 ))}
-            </div>
+            </Shelf>
         </div>
     )
 }

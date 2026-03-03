@@ -37,14 +37,14 @@ export function Header() {
       className={cn(
         "fixed top-0 z-50 w-full transition-all duration-500",
         isScrolled
-          ? "bg-white/10 dark:bg-black/10 backdrop-blur-xl border-b border-b-outrun-gradient shadow-glass"
+          ? "bg-transparent backdrop-blur-xl shadow-glass"
           : "bg-gradient-to-b from-background/40 via-background/20 to-transparent pointer-events-none border-b border-transparent"
       )}
     >
-      <div className="container mx-auto flex items-center justify-between h-16 px-4 pointer-events-auto">
+      <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 flex items-center justify-between h-16 pointer-events-auto">
 
         {/* Left: Logo */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
           <Logo />
         </div>
 

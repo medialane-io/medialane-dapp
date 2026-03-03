@@ -8,9 +8,13 @@ import { Alert } from "@/components/ui/alert";
 import { CollectionValidator } from "@/lib/types";
 import { CollectionStats } from "@/components/collections/collections-stats";
 import Link from "next/link";
-import { ArrowRight, Grid3X3, Layers, Activity, Loader2 } from "lucide-react";
+import { ArrowRight, Grid3X3, Layers, Activity, Loader2, Compass } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
+import { Shelf } from "@/components/ui/shelf";
+import { CollectionCard } from "@/components/collection-card";
+import { AssetCard } from "@/components/asset-card";
+import { Button } from "@/components/ui/button";
 
 export default function PortfolioClientPage() {
     const { address } = useAccount();
@@ -21,9 +25,26 @@ export default function PortfolioClientPage() {
         return CollectionValidator.isValid(collection);
     });
 
+    // Flatten all minted tokens for the user
+    const allUserAssets = Object.entries(tokens).flatMap(([colId, collectionTokens]) => {
+        const collection = validCollections.find(c => String(c.id) === colId);
+        return collectionTokens.map(t => ({
+            id: `${t.collection_id}-${t.token_id}`,
+            tokenId: t.token_id,
+            nftAddress: collection?.nftAddress || t.collection_id,
+            collectionAddress: collection?.nftAddress || t.collection_id,
+            collectionName: collection?.name || "Unknown Collection",
+            owner: t.owner,
+            name: t.name,
+            image: t.image,
+            description: t.description,
+            type: collection?.type
+        }));
+    });
+
     return (
-        <div className="min-h-screen py-10">
-            <div className="container mx-auto px-4">
+        <div className="min-h-screen py-6 md:py-10">
+            <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto">
                 <PageHeader
                     title="IP Portfolio"
                     description={address
@@ -42,7 +63,7 @@ export default function PortfolioClientPage() {
                 {/* Show content when wallet is connected */}
                 {address && (
                     <Suspense fallback={<PortfolioSkeleton />}>
-                        <div className="space-y-12 container mx-auto">
+                        <div className="space-y-12 w-full mt-6">
                             {loading ? (
                                 <div className="space-y-8">
                                     <div className="flex flex-col items-center justify-center space-y-4 py-8 animate-in fade-in duration-500">
@@ -72,95 +93,63 @@ export default function PortfolioClientPage() {
 
                             {error && <Alert variant="destructive">{error}</Alert>}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {/* Collections Card */}
-                                <Link href="/portfolio/collections" className="group">
-                                    <div className="glass-card h-full rounded-2xl p-8 transition-all duration-300 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110 duration-500">
-                                            <Grid3X3 size={120} />
-                                        </div>
-
-                                        <div className="relative z-10 flex flex-col h-full justify-between space-y-6">
-                                            <div className="space-y-4">
-                                                <div className="h-12 w-12 rounded-xl bg-outrun-cyan/10 flex items-center justify-center text-outrun-cyan group-hover:bg-gradient-to-br group-hover:from-outrun-magenta group-hover:to-outrun-cyan group-hover:text-white group-hover:shadow-[0_0_20px_rgba(0,255,255,0.3)] transition-all duration-300">
-                                                    <Grid3X3 size={24} />
-                                                </div>
-                                                <div>
-                                                    <h2 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">My Collections</h2>
-                                                    <p className="text-muted-foreground">
-                                                        Manage your IP collections.
-                                                        {validCollections.length > 0 && <span className="block mt-2 font-medium text-foreground">{validCollections.length} Collections found</span>}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center text-sm font-medium text-primary group-hover:translate-x-2 transition-transform duration-300">
-                                                Open Collections <ArrowRight className="ml-2 h-4 w-4" />
-                                            </div>
-                                        </div>
+                            {/* Streaming Layout Shelves */}
+                            {validCollections.length === 0 && allUserAssets.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground bg-muted/5 rounded-2xl border border-border/10">
+                                    <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mb-6">
+                                        <Compass className="h-8 w-8 text-muted-foreground/50" />
                                     </div>
-                                </Link>
-
-                                {/* Assets Card */}
-                                <Link href="/portfolio/assets" className="group">
-                                    <div className="glass-card h-full rounded-2xl p-8 transition-all duration-300 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110 duration-500">
-                                            <Layers size={120} />
-                                        </div>
-
-                                        <div className="relative z-10 flex flex-col h-full justify-between space-y-6">
-                                            <div className="space-y-4">
-                                                <div className="h-12 w-12 rounded-xl bg-outrun-magenta/10 flex items-center justify-center text-outrun-magenta group-hover:bg-gradient-to-br group-hover:from-outrun-cyan group-hover:to-outrun-magenta group-hover:text-white group-hover:shadow-[0_0_20px_rgba(255,0,255,0.3)] transition-all duration-300">
-                                                    <Layers size={24} />
-                                                </div>
-                                                <div>
-                                                    <h2 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">My Assets</h2>
-                                                    <p className="text-muted-foreground">
-                                                        View your onchain portfolio of assets.
-                                                        {stats.totalNFTs > 0 && <span className="block mt-2 font-medium text-foreground">{stats.totalNFTs} Assets found</span>}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center text-sm font-medium text-primary group-hover:translate-x-2 transition-transform duration-300">
-                                                Open Assets <ArrowRight className="ml-2 h-4 w-4" />
-                                            </div>
-                                        </div>
+                                    <h3 className="text-xl font-semibold text-foreground mb-2">No Assets Found</h3>
+                                    <p className="max-w-md mx-auto mb-6">Your onchain portfolio is currently empty. Explore the marketplace or launchpad to acquire assets.</p>
+                                    <div className="flex gap-4">
+                                        <Link href="/marketplace">
+                                            <Button variant="default">Explore Marketplace</Button>
+                                        </Link>
+                                        <Link href="/launchpad">
+                                            <Button variant="outline">Browse Launchpad</Button>
+                                        </Link>
                                     </div>
-                                </Link>
+                                </div>
+                            ) : (
+                                <div className="space-y-16 pb-16">
+                                    {validCollections.length > 0 && (
+                                        <Shelf title="My Collections" href="/portfolio/collections">
+                                            {validCollections.map((collection, idx) => (
+                                                <CollectionCard key={collection.id} collection={collection} index={idx} />
+                                            ))}
+                                        </Shelf>
+                                    )}
 
-                                {/* Activities Card */}
-                                <Link href="/portfolio/activities" className="group">
-                                    <div className="glass-card h-full rounded-2xl p-8 transition-all duration-300 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110 duration-500">
-                                            <Activity size={120} />
+                                    {allUserAssets.length > 0 && (
+                                        <Shelf title="My Assets" href="/portfolio/assets">
+                                            {allUserAssets.map(asset => (
+                                                <AssetCard key={asset.id} asset={asset} />
+                                            ))}
+                                        </Shelf>
+                                    )}
+
+                                    {/* Activities Navigation Footer row */}
+                                    <div className="pt-8 border-t border-border/10 flex justify-between items-center bg-muted/5 rounded-2xl p-6">
+                                        <div>
+                                            <h3 className="font-semibold text-lg text-foreground flex items-center gap-2">
+                                                <Activity className="h-5 w-5 text-outrun-orange" />
+                                                Onchain Activity
+                                            </h3>
+                                            <p className="text-sm text-muted-foreground mt-1">Review your recent transactions across the protocol.</p>
                                         </div>
-
-                                        <div className="relative z-10 flex flex-col h-full justify-between space-y-6">
-                                            <div className="space-y-4">
-                                                <div className="h-12 w-12 rounded-xl bg-outrun-orange/10 flex items-center justify-center text-outrun-orange group-hover:bg-gradient-to-br group-hover:from-outrun-orange group-hover:to-outrun-magenta group-hover:text-white group-hover:shadow-[0_0_20px_rgba(255,153,0,0.3)] transition-all duration-300">
-                                                    <Activity size={24} />
-                                                </div>
-                                                <div>
-                                                    <h2 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">Activities</h2>
-                                                    <p className="text-muted-foreground">
-                                                        Track your onchain history.
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center text-sm font-medium text-primary group-hover:translate-x-2 transition-transform duration-300">
-                                                View Activities <ArrowRight className="ml-2 h-4 w-4" />
-                                            </div>
-                                        </div>
+                                        <Link href="/portfolio/activities">
+                                            <Button variant="outline" className="gap-2 bg-transparent hover:bg-muted/50 rounded-full border border-border/20 px-6">
+                                                View Activity Feed <ArrowRight className="h-4 w-4" />
+                                            </Button>
+                                        </Link>
                                     </div>
-                                </Link>
-                            </div>
+                                </div>
+                            )}
 
                         </div>
                     </Suspense>
                 )}
-            </div>
+            </main>
         </div>
     );
 }

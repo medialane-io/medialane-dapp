@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Shelf } from "@/components/ui/shelf"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -72,8 +73,8 @@ export default function AssetsPage() {
     }, [listings])
 
     return (
-        <div className="min-h-screen py-10">
-            <main className="container mx-auto px-4 py-4">
+        <div className="min-h-screen py-6 md:py-10">
+            <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto py-4">
 
                 <PageHeader
                     title="Explore Onchain IP Assets"
@@ -155,12 +156,23 @@ export default function AssetsPage() {
                         </Card>
                     ) : (
                         <>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {filteredAssets.map((asset) => {
-                                    const key = `${asset.collectionAddress.toLowerCase()}-${asset.tokenId}`
-                                    const matchedListing = activeListingsMap.get(key)
-                                    return <AssetCard key={asset.id} asset={asset} listing={matchedListing} />
-                                })}
+                            <div className="space-y-12">
+                                {Array.from(
+                                    filteredAssets.reduce((acc, asset) => {
+                                        const type = asset.ipType || "Other";
+                                        if (!acc.has(type)) acc.set(type, []);
+                                        acc.get(type)!.push(asset);
+                                        return acc;
+                                    }, new Map<string, typeof filteredAssets>())
+                                ).map(([type, typeAssets]) => (
+                                    <Shelf key={type} title={type === 'Other' ? 'Discover More IP' : `${type} Assets`}>
+                                        {typeAssets.map((asset) => {
+                                            const key = `${asset.collectionAddress.toLowerCase()}-${asset.tokenId}`
+                                            const matchedListing = activeListingsMap.get(key)
+                                            return <AssetCard key={asset.id} asset={asset} listing={matchedListing} />
+                                        })}
+                                    </Shelf>
+                                ))}
                             </div>
 
                             {/* Load More Pagination */}

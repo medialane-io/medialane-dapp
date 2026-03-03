@@ -28,8 +28,8 @@ export default function CollectionsClientPage() {
     });
 
     return (
-        <div className="min-h-screen py-10">
-            <div className="container mx-auto px-4 py-8">
+        <div className="min-h-screen py-6 md:py-10">
+            <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto">
                 <PageHeader
                     title="My Collections"
                     description="Manage your created collections"
@@ -51,7 +51,7 @@ export default function CollectionsClientPage() {
                 {/* Show content when wallet is connected */}
                 {address && (
                     <Suspense fallback={<CollectionsSkeleton />}>
-                        <div className="space-y-8 container mx-auto">
+                        <div className="space-y-8 w-full mt-6">
 
                             {loading ? (
                                 <CollectionsSkeleton />
@@ -82,7 +82,7 @@ export default function CollectionsClientPage() {
                         </div>
                     </Suspense>
                 )}
-            </div>
+            </main>
         </div>
     );
 }

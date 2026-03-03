@@ -61,14 +61,13 @@ export function CreatorHeader() {
             </div>
 
             {/* --- Content Layer --- */}
-            <div className="relative z-10 container mx-auto px-4 max-w-7xl">
-                <div className="flex flex-col items-center justify-center gap-8 text-center pt-8">
+            <div className="relative z-10 w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto">
+                <div className="flex flex-col md:flex-row items-center md:items-end gap-8 pt-20 pb-4">
 
-                    {/* Avatar */}
-                    <div className="relative group">
+                    {/* Avatar Group */}
+                    <div className="relative group shrink-0">
                         <div className={`absolute -inset-4 rounded-full blur-2xl opacity-60 transition-opacity duration-1000 ${avatarImage ? "bg-outrun-magenta/50" : "bg-gradient-to-r from-outrun-magenta via-outrun-purple to-neon-cyan"}`} />
-
-                        <div className="relative h-64 w-64 rounded-full overflow-hidden shadow-neon-magenta/30 backdrop-blur-xl bg-background/50 border-4 border-white/20 dark:border-white/10">
+                        <div className="relative h-48 w-48 md:h-56 md:w-56 rounded-full overflow-hidden shadow-2xl backdrop-blur-xl bg-background/50 border-4 border-white/20 dark:border-white/10 ring-2 ring-background">
                             {avatarImage ? (
                                 <Image
                                     src={avatarImage}
@@ -76,6 +75,7 @@ export function CreatorHeader() {
                                     fill
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                                     priority
+                                    sizes="(max-width: 768px) 192px, 224px"
                                 />
                             ) : (
                                 <div className="w-full h-full bg-gradient-to-tr from-outrun-magenta/20 via-outrun-purple/10 to-neon-cyan/20 flex items-center justify-center">
@@ -85,93 +85,76 @@ export function CreatorHeader() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col items-center gap-3 max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-backwards glass-panel p-8 rounded-3xl mt-4">
+                    {/* Metadata & Actions Stack */}
+                    <div className="flex flex-col items-center md:items-start flex-1 gap-4 text-center md:text-left animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-backwards mb-2">
 
-                        {/* Name + Verified Badge */}
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-3xl font-bold tracking-tight text-foreground drop-shadow-sm font-sans">
+                        {/* Title & Verified */}
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                            <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-foreground drop-shadow-lg">
                                 {creatorInfo.name}
                             </h1>
                             {creatorInfo.verified && (
-                                <Badge variant="secondary" className="flex items-center gap-1 px-2 py-0.5 bg-neon-cyan/10 border-neon-cyan/30 text-neon-cyan shadow-glow-sm shadow-neon-cyan/20">
-                                    <CheckCircle2 className="h-3.5 w-3.5 text-neon-cyan" />
-                                    <span className="text-xs">Verified</span>
+                                <Badge variant="secondary" className="px-3 py-1 bg-neon-cyan/10 border-neon-cyan/30 text-neon-cyan shadow-glow-sm shadow-neon-cyan/20">
+                                    <CheckCircle2 className="h-4 w-4 mr-1 text-neon-cyan" />
+                                    Verified
                                 </Badge>
                             )}
                         </div>
 
                         {/* Bio */}
                         {creatorInfo.bio && (
-                            <p className="text-muted-foreground/80 max-w-md text-sm">{creatorInfo.bio}</p>
+                            <p className="text-muted-foreground md:text-lg max-w-2xl font-light">
+                                {creatorInfo.bio}
+                            </p>
                         )}
 
-                        {/* Stats Row */}
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>
-                                <span className="font-semibold text-foreground">
-                                    {collectionsLoading ? "—" : collections.length}
-                                </span>{" "}
-                                Collections
-                            </span>
-                            <span className="text-muted-foreground/40">·</span>
-                            <span>
-                                <span className="font-semibold text-foreground">
-                                    {assetsLoading ? "—" : standardTokens.length}
-                                </span>{" "}
-                                Assets
-                            </span>
-                        </div>
-
-                        {/* Social Links */}
-                        {(creatorInfo.twitter || creatorInfo.instagram || creatorInfo.website) && (
-                            <div className="flex items-center gap-2">
-                                {creatorInfo.twitter && (
-                                    <a
-                                        href={creatorInfo.twitter}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="p-2 rounded-full bg-white/5 backdrop-blur-md hover:bg-outrun-cyan/20 text-muted-foreground hover:text-outrun-cyan hover:shadow-glow-sm hover:shadow-neon-cyan/30 transition-all duration-300"
-                                    >
-                                        <Twitter className="h-4 w-4" />
-                                    </a>
-                                )}
-                                {creatorInfo.instagram && (
-                                    <a
-                                        href={creatorInfo.instagram}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="p-2 rounded-full bg-white/5 backdrop-blur-md hover:bg-outrun-magenta/20 text-muted-foreground hover:text-outrun-magenta hover:shadow-glow-sm hover:shadow-neon-magenta/30 transition-all duration-300"
-                                    >
-                                        <Instagram className="h-4 w-4" />
-                                    </a>
-                                )}
-                                {creatorInfo.website && (
-                                    <a
-                                        href={creatorInfo.website}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="p-2 rounded-full bg-white/5 backdrop-blur-md hover:bg-neon-cyan/20 text-muted-foreground hover:text-neon-cyan hover:shadow-glow-sm hover:shadow-neon-cyan/30 transition-all duration-300"
-                                    >
-                                        <Globe className="h-4 w-4" />
-                                    </a>
-                                )}
+                        {/* Action Bar (Stats + Social + Share) */}
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-2">
+                            {/* Glass Stats */}
+                            <div className="flex flex-wrap items-center gap-2 glass-panel px-4 py-2 rounded-2xl border border-white/5 bg-background/40 backdrop-blur-md">
+                                <div className="flex items-center gap-2 px-2 border-r border-white/10">
+                                    <span className="font-black text-foreground text-xl leading-none">{collectionsLoading ? "—" : collections.length}</span>
+                                    <span className="text-muted-foreground uppercase tracking-widest text-[10px] font-bold">Collections</span>
+                                </div>
+                                <div className="flex items-center gap-2 px-2">
+                                    <span className="font-black text-foreground text-xl leading-none">{assetsLoading ? "—" : standardTokens.length}</span>
+                                    <span className="text-muted-foreground uppercase tracking-widest text-[10px] font-bold">Assets</span>
+                                </div>
                             </div>
-                        )}
 
-                        {/* Share Button */}
-                        <div className="mt-2">
+                            {/* Social Loop */}
+                            {(creatorInfo.twitter || creatorInfo.instagram || creatorInfo.website) && (
+                                <div className="flex items-center gap-2 glass-panel px-3 py-2 rounded-2xl border border-white/5 bg-background/40 backdrop-blur-md">
+                                    {creatorInfo.twitter && (
+                                        <a href={creatorInfo.twitter} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-full hover:bg-outrun-cyan/20 text-muted-foreground hover:text-outrun-cyan transition-all duration-300">
+                                            <Twitter className="h-4 w-4" />
+                                        </a>
+                                    )}
+                                    {creatorInfo.instagram && (
+                                        <a href={creatorInfo.instagram} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-full hover:bg-outrun-magenta/20 text-muted-foreground hover:text-outrun-magenta transition-all duration-300">
+                                            <Instagram className="h-4 w-4" />
+                                        </a>
+                                    )}
+                                    {creatorInfo.website && (
+                                        <a href={creatorInfo.website} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-full hover:bg-neon-cyan/20 text-muted-foreground hover:text-neon-cyan transition-all duration-300">
+                                            <Globe className="h-4 w-4" />
+                                        </a>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Share */}
                             <Button
                                 variant="outline"
-                                size="lg"
+                                size="sm"
                                 onClick={handleShare}
-                                className="h-11 px-8 border-white/20 hover:bg-white/10 hover:border-white/30 hover:text-outrun-magenta transition-all duration-300 rounded-full glass-panel active:scale-95"
+                                className="h-10 rounded-2xl glass-panel border-white/10 hover:bg-white/10 hover:text-outrun-magenta transition-all active:scale-95"
                             >
-                                <Share2 className="mr-2 h-4 w-4" />
-                                Share Profile
+                                <Share2 className="h-4 w-4 mr-2" />
+                                Share
                             </Button>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>

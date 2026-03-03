@@ -16,25 +16,24 @@ export function PageHeader({
     ...props
 }: PageHeaderProps) {
     return (
-        <div className={cn("flex flex-col gap-4 md:gap-8 pt-20 pb-10", className)} {...props}>
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex flex-col space-y-2">
-                    <h1 className="text-3xl tracking-tight bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
+        <div className={cn("pt-24 pb-8 mb-8 border-b border-border/10", className)} {...props}>
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+                <div className="flex flex-col space-y-3 max-w-3xl">
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground/90">
                         {title}
                     </h1>
                     {description && (
-                        <div className="text-sm text-muted-foreground w-full max-w-[700px]">
+                        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
                             {description}
-                        </div>
+                        </p>
                     )}
                 </div>
                 {children && (
-                    <div className="flex items-center gap-2 mt-4 md:mt-0">
+                    <div className="flex items-center gap-3 w-full lg:w-auto shrink-0 mt-2 lg:mt-0">
                         {children}
                     </div>
                 )}
             </div>
-            {/* Optional divider if needed later, currently keeping it clean */}
         </div>
     )
 }

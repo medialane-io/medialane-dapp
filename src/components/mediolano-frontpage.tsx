@@ -88,7 +88,7 @@ export function MediolanoFrontpage() {
   return (
     <>
 
-      <section className="container mx-auto space-y-10 mt-12">
+      <section className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto space-y-10 mt-12">
         <div className="text-center max-w-3xl mx-auto space-y-4">
 
           <h2 className="text-1xl md:text-3xl text-balance">Creators Capital Markets</h2>
@@ -105,7 +105,7 @@ export function MediolanoFrontpage() {
       </section>
 
 
-      <section className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-5 mt-12 mb-20">
+      <section className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto grid grid-cols-1 md:grid-cols-3 gap-5 mt-12 mb-20">
 
         <Link href="/create" className="group">
           <div className="relative overflow-hidden p-8 rounded-2xl border bg-card/20 hover:bg-card/40 hover:shadow-sm transition-all duration-300 h-full">

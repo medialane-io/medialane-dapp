@@ -26,7 +26,7 @@ export default function CreatorCollectionsPage() {
     }, [collections, searchQuery])
 
     return (
-        <div className="container mx-auto px-4 py-8 pb-20">
+        <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto py-8 pb-20">
             {/* Search Bar */}
             <div className="mb-6 flex items-center gap-3">
                 <div className="relative max-w-md flex-1">

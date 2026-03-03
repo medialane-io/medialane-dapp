@@ -292,19 +292,32 @@ export default AssetCard;
 
 export function AssetCardSkeleton() {
   return (
-    <Card className="overflow-hidden glass-panel">
-      <Skeleton className="aspect-square w-full" />
-      <div className="p-4 space-y-3">
-        <div className="flex items-start justify-between gap-2">
-          <Skeleton className="h-5 w-3/4" />
-          <Skeleton className="h-5 w-12" />
+    <Card className="overflow-hidden border-border/20 bg-card/50 relative hover:shadow-neon-magenta/10 transition-all duration-500 h-full flex flex-col group">
+      {/* Premium Shimmer overlay */}
+      <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent z-10" />
+
+      <div className="relative aspect-square w-full bg-muted/20" />
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="pb-3 mb-3 border-b border-border/10">
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <Skeleton className="h-5 w-2/3 bg-muted/40" />
+            <Skeleton className="h-5 w-16 bg-muted/40" />
+          </div>
+          <Skeleton className="h-4 w-1/3 bg-muted/40" />
         </div>
-        <Skeleton className="h-4 w-1/2" />
-        <div className="pt-2 flex gap-2">
-          <Skeleton className="h-8 flex-1" />
-          <Skeleton className="h-8 w-8" />
+
+        <div className="flex justify-between items-end mt-auto h-[38px]">
+          <div className="space-y-1.5 w-full">
+            <Skeleton className="h-3 w-8 bg-muted/40" />
+            <Skeleton className="h-5 w-20 bg-muted/40" />
+          </div>
         </div>
       </div>
+      <CardFooter className="p-4 pt-0 gap-2 grid grid-cols-[1fr,1fr,auto]">
+        <Skeleton className="h-9 w-full bg-muted/40" />
+        <Skeleton className="h-9 w-full bg-muted/40" />
+        <Skeleton className="h-9 w-10 bg-muted/40" />
+      </CardFooter>
     </Card>
   )
 }

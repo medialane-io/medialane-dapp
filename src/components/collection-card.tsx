@@ -41,90 +41,79 @@ export function CollectionCard({ collection, index }: CollectionCardProps) {
 
   return (
     <>
-      <div className="group h-full rounded-lg">
-        <Card className="h-full glass flex flex-col">
-          <CardHeader className="p-0">
-            <div className="relative aspect-video overflow-hidden rounded-lg">
-              <LazyImage
-                src={collection.image}
-                fallbackSrc="/placeholder.svg"
-                alt={`${collection.name} preview ${index + 1}`}
-                fill
-                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              />
+      <div className="group relative w-full h-full rounded-2xl overflow-hidden bg-muted/20 isolate">
+        <Link href={`/collections/${collection.nftAddress || collection.id}`} className="block h-full w-full">
+          {/* Image Container */}
+          <div className="relative aspect-[4/5] sm:aspect-[3/4] w-full overflow-hidden bg-muted/10">
+            <LazyImage
+              src={collection.image}
+              fallbackSrc="/placeholder.svg"
+              alt={`${collection.name} preview ${index + 1}`}
+              fill
+              className="h-full w-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
 
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                <Badge variant="secondary" className="bg-white/20 text-white backdrop-blur-sm">
-                  {collection.type || "Collection"}
-                </Badge>
-              </div>
+            {/* Dark Gradient Overlay for Text Legibility */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
+
+            {/* Top Right: Asset Count (Subtle) */}
+            <div className="absolute top-3 left-3 z-10 transition-opacity duration-300">
+              <Badge variant="secondary" className="bg-black/40 text-white/90 backdrop-blur-md border-none text-[9px] uppercase tracking-widest px-2 py-0.5 font-medium shadow-sm">
+                {collection.type || "Collection"}
+              </Badge>
             </div>
-          </CardHeader>
 
-          <CardContent className="p-4 flex-1">
-            <div className="space-y-3">
-              <div>
-                <h3 className="font-semibold text-lg leading-tight group-hover:text-primary transition-colors">
+            {/* Bottom Content Area */}
+            <div className="absolute bottom-0 left-0 w-full p-4 sm:p-5 flex flex-col justify-end z-10">
+              <div className="transform transition-transform duration-500 group-hover:translate-y-[-4px]">
+                <h3 className="font-bold text-lg sm:text-xl text-white leading-tight line-clamp-1 drop-shadow-md">
                   {collection.name}
                 </h3>
-                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{collection.description}</p>
+
+                {collection.description && (
+                  <p className="text-xs text-white/70 mt-1.5 line-clamp-2 opacity-0 -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500">
+                    {collection.description}
+                  </p>
+                )}
               </div>
-
-              <div className="flex items-center justify-between text-sm">
-
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  {/* 
-                  <Users className="h-4 w-4" />
-                  <AddressLink address={collection.owner} className="font-medium text-muted-foreground hover:text-primary z-20 relative" />
-                  */}
-                </div>
-
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Shield className="h-4 w-4" />
-                </div>
-              </div>
-
             </div>
-          </CardContent>
+          </div>
+        </Link>
 
-          <CardFooter className="p-4 pt-0 flex gap-2">
-            <Link href={`/collections/${collection.nftAddress || collection.id}`} className="flex-1">
-              <Button className="w-full bg-transparent" variant="outline">
-                View Collection
+        {/* Actions Dropdown Button - Top Right */}
+        <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full bg-black/40 text-white hover:bg-black/60 hover:text-white backdrop-blur-md border-none shadow-sm"
+              >
+                <MoreHorizontal className="h-4 w-4" />
               </Button>
-            </Link>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="bg-transparent shrink-0"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link href={`/collections/${collection.nftAddress || collection.id}`} className="cursor-pointer">
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Collection
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share Collection
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setIsReportOpen(true)}>
-                  <Flag className="mr-2 h-4 w-4" />
-                  Report Collection
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </CardFooter>
-        </Card>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[180px] rounded-xl border-border/10 bg-background/95 backdrop-blur-xl">
+              <DropdownMenuItem asChild>
+                <Link href={`/collections/${collection.nftAddress || collection.id}`} className="cursor-pointer py-2.5 px-3 rounded-lg focus:bg-accent/50 transition-colors">
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Collection
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer py-2.5 px-3 rounded-lg focus:bg-accent/50 transition-colors">
+                <Share2 className="mr-2 h-4 w-4" />
+                Share Collection
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => setIsReportOpen(true)}
+                className="cursor-pointer py-2.5 px-3 rounded-lg focus:bg-destructive/10 text-destructive focus:text-destructive transition-colors"
+              >
+                <Flag className="mr-2 h-4 w-4" />
+                Report Collection
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <ReportCollectionDialog

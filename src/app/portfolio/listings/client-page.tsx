@@ -22,47 +22,49 @@ export default function ListingsClientPage() {
     const [searchQuery, setSearchQuery] = useState("");
 
     return (
-        <div className="container max-w-7xl mx-auto px-4 py-10">
-            {/* Header Section */}
-            <PageHeader
-                title="My Listings"
-                description="Manage your active marketplace listings."
-                className="pt-8 pb-8"
-            >
-                {!address ? null : (
-                    <div className="relative group flex-1 sm:min-w-[300px]">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <Input
-                            placeholder="Search your listings..."
-                            className="pl-10 h-11 bg-muted/40 border-border/40 focus:bg-background transition-all rounded-xl"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-                )}
-            </PageHeader>
+        <div className="min-h-screen py-6 md:py-10">
+            <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto">
+                {/* Header Section */}
+                <PageHeader
+                    title="My Listings"
+                    description="Manage your active marketplace listings."
+                    className="pt-8 pb-8"
+                >
+                    {!address ? null : (
+                        <div className="relative group flex-1 sm:min-w-[300px]">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Input
+                                placeholder="Search your listings..."
+                                className="pl-10 h-11 bg-muted/40 border-border/40 focus:bg-background transition-all rounded-xl"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    )}
+                </PageHeader>
 
-            {/* Quick Navigation Tabs */}
-            <PortfolioTabs activePath="/portfolio/listings" />
+                {/* Quick Navigation Tabs */}
+                <PortfolioTabs activePath="/portfolio/listings" />
 
-            {/* Content Area */}
-            <div className="relative">
-                {!address ? (
-                    <div className="max-w-4xl mx-auto py-12">
-                        <WalletConnectCTA
-                            title="Connect wallet"
-                            description="Securely manage your active marketplace listings."
-                        />
-                    </div>
-                ) : (
-                    <Suspense fallback={<ListingsSkeleton />}>
-                        <PortfolioListings searchQuery={searchQuery} mode="listings" />
-                    </Suspense>
-                )}
+                {/* Content Area */}
+                <div className="relative">
+                    {!address ? (
+                        <div className="max-w-4xl mx-auto py-12">
+                            <WalletConnectCTA
+                                title="Connect wallet"
+                                description="Securely manage your active marketplace listings."
+                            />
+                        </div>
+                    ) : (
+                        <Suspense fallback={<ListingsSkeleton />}>
+                            <PortfolioListings searchQuery={searchQuery} mode="listings" />
+                        </Suspense>
+                    )}
 
-                {/* Decorative background element */}
-                <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10" />
-            </div>
+                    {/* Decorative background element */}
+                    <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10" />
+                </div>
+            </main>
         </div>
     );
 }
