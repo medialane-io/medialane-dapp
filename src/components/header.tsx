@@ -38,7 +38,7 @@ export function Header() {
         "fixed top-0 z-50 w-full transition-all duration-500",
         isScrolled
           ? "bg-transparent backdrop-blur-xl shadow-glass"
-          : "bg-gradient-to-b from-background/40 via-background/20 to-transparent pointer-events-none border-b border-transparent"
+          : "bg-gradient-to-b from-background/40 via-background/20 to-transparent pointer-events-none border-transparent"
       )}
     >
       <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 flex items-center justify-between h-16 pointer-events-auto">
