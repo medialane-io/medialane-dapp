@@ -177,7 +177,7 @@ function StatsSkeleton() {
 
 function PortfolioSkeleton() {
     return (
-        <div className="space-y-8 container mx-auto">
+        <div className="space-y-8 w-full mt-6">
             <StatsSkeleton />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Skeleton className="h-64 w-full rounded-2xl" />

@@ -173,15 +173,11 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
 
   return (
     <div className="relative space-y-12 pb-20">
-      {/* Background Blooms - subtle for both themes */}
-      <div className="absolute top-0 -left-20 w-96 h-96 bg-primary/10 dark:bg-primary/20 rounded-xl blur-[120px] -z-10 animate-pulse" />
-      <div className="absolute bottom-40 -right-20 w-80 h-80 bg-blue-500/5 dark:bg-blue-500/10 rounded-xl blur-[100px] -z-10" />
-
       {/* Main Asset Section - Focus on Ownership */}
       <section className="relative overflow-hidden glass-card backdrop-blur-2xl transition-colors animate-in fade-in zoom-in duration-500">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 min-h-[500px]">
-          {/* Vertical Image - uses all available height */}
-          <div className="lg:col-span-5 h-[400px] lg:h-auto relative group overflow-hidden border-b lg:border-b-0 lg:border-r border-border">
+        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 lg:gap-12 min-h-[500px]">
+          {/* Main Hero Image - Half width flex */}
+          <div className="flex-shrink-0 relative group w-full lg:w-1/2 h-[400px] lg:h-[500px] overflow-hidden rounded-2xl shadow-2xl border border-white/10 bg-black/20 backdrop-blur-sm">
             <motion.div
               initial={{ scale: 1.05, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -200,17 +196,17 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
           </div>
 
           {/* Content & Ownership Details */}
-          <div className="lg:col-span-7 p-6 lg:p-12 flex flex-col justify-center space-y-10">
+          <div className="flex-1 flex flex-col justify-center space-y-10 lg:py-6">
             <div className="space-y-4">
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground">
+                <h1 className="text-3xl lg:text-5xl font-black tracking-tight text-foreground">
                   {asset.name}
                 </h1>
-                <p className="text-base text-muted-foreground mt-4 font-light leading-relaxed max-w-lg">
+                <p className="text-base lg:text-lg text-muted-foreground mt-4 font-light leading-relaxed max-w-lg">
                   {asset.description}
                 </p>
               </motion.div>
@@ -221,9 +217,9 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
               {/* Creator Info */}
               <div className="space-y-4">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Creator</p>
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-secondary/30 border border-border group hover:bg-secondary/50 transition-all duration-300">
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-secondary/30 border border-white/10 backdrop-blur-md group hover:bg-secondary/50 transition-all duration-300 shadow-xl">
                   <div className="min-w-0">
-                    <AddressLink address={asset.creator.address} className="font-mono block" />
+                    <AddressLink address={asset.creator.address} className="font-mono block text-foreground" />
                   </div>
                 </div>
               </div>
@@ -231,16 +227,16 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
               {/* Current Owner Info */}
               <div className="space-y-4">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Owner</p>
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-primary/5 border border-primary/10 group hover:bg-primary/10 transition-all duration-300">
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-primary/10 border border-primary/20 backdrop-blur-md group hover:bg-primary/20 transition-all duration-300 shadow-xl shadow-primary/5">
                   <div className="min-w-0">
-                    <AddressLink address={asset.currentOwner.address} className="font-mono block" />
+                    <AddressLink address={asset.currentOwner.address} className="font-mono block text-foreground" />
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Minor Metadata Footer */}
-            <div className="flex flex-wrap items-center gap-6 pt-6 border-t border-border/50">
+            <div className="flex flex-wrap items-center gap-6 pt-6 border-t border-border/20">
               <div className="flex flex-col">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Token ID</span>
                 <span className="font-mono text-sm font-bold text-foreground/80">#{asset.tokenId}</span>
@@ -250,7 +246,7 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
                 <span className="text-sm font-bold text-foreground/80">{asset.blockchain}</span>
               </div>
               <div className="ml-auto">
-                <Badge variant="outline" className="rounded-xl px-4 py-1.5 border-border bg-background/50 hover:bg-accent transition-colors font-medium">
+                <Badge variant="outline" className="rounded-xl px-4 py-1.5 border-white/10 bg-background/50 backdrop-blur-md shadow-lg hover:bg-accent transition-colors font-medium text-foreground">
                   ERC-721
                 </Badge>
               </div>
@@ -260,7 +256,7 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
       </section>
 
       {/* Main Timeline Content */}
-      <section className="max-w-4xl mx-auto space-y-12">
+      <section className="w-full mx-auto space-y-12">
         <div className="text-center space-y-4 px-4">
           <h2 className="text-3xl font-black text-foreground">Onchain History</h2>
           <p className="text-muted-foreground max-w-lg mx-auto font-light">
@@ -305,7 +301,7 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
                   </div>
 
                   {/* Event Card */}
-                  <div className="p-5 sm:p-6 rounded-2xl border border-border/80 bg-card/80 backdrop-blur-sm hover:border-border hover:bg-card transition-all duration-300">
+                  <div className="p-5 sm:p-6 rounded-2xl border border-white/5 bg-background/40 shadow-2xl backdrop-blur-xl hover:border-white/10 hover:bg-background/60 transition-all duration-300">
                     {/* Header */}
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
                       <div>
@@ -389,8 +385,8 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
         )}
       </section>
 
-      {/* Modern Digital Fingerprint - same glassmorphism style */}
-      <section className="p-8 rounded-xl glass-card relative overflow-hidden">
+      {/* Modern Digital Fingerprint - Premium Glassmorphism style */}
+      <section className="p-8 rounded-2xl border border-white/5 bg-background/40 shadow-2xl backdrop-blur-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 -z-10" />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">

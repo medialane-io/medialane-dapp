@@ -55,7 +55,7 @@ export function CollectionCard({ collection, index }: CollectionCardProps) {
             />
 
             {/* Dark Gradient Overlay for Text Legibility */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
 
             {/* Top Right: Asset Count (Subtle) */}
             <div className="absolute top-3 left-3 z-10 transition-opacity duration-300">

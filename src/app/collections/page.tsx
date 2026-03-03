@@ -24,15 +24,14 @@ export default function CollectionsPage() {
   });
 
   return (
-    <main className="container mx-auto px-4 py-10">
+    <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto py-10">
 
       <PageHeader
         title="Collections"
         description="Explore and collect verified IP assets from the Medialane protocol."
       />
 
-      <div className="container">
-
+      <div className="w-full mt-8">
 
         {/* Show loading state while data is being fetched */}
         {loading && (

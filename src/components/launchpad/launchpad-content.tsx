@@ -137,7 +137,7 @@ const features: LaunchpadFeatureData[] = [
 export function LaunchpadContent() {
     return (
         <div className="min-h-screen py-10">
-            <main className="container mx-auto max-w-6xl">
+            <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto">
 
                 <CreatorStatsBar />
 

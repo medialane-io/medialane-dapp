@@ -182,7 +182,7 @@ export default function ProvenancePage({ params }: ProvenancePageProps) {
 
 
 
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
+      <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto py-10">
 
         <PageHeader
           title="Provenance"

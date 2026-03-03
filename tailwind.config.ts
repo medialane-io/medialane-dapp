@@ -142,6 +142,11 @@ const config: Config = {
 						transform: 'translateY(-10px)'
 					}
 				},
+				gradient: {
+					'0%': { backgroundPosition: '0% 50%' },
+					'50%': { backgroundPosition: '100% 50%' },
+					'100%': { backgroundPosition: '0% 50%' },
+				},
 				'gradient-x': {
 					'0%, 100%': {
 						backgroundPosition: '0% 50%'
@@ -184,8 +189,10 @@ const config: Config = {
 				'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
 				float: 'float 3s ease-in-out infinite',
 				'gradient-x': 'gradient-x 4s ease infinite',
-				'border-glow': 'border-glow 4s ease infinite',
-				'shimmer-vivid': 'shimmer-vivid 3s linear infinite',
+				'border-glow': 'border-glow 3s linear infinite',
+				'shimmer-vivid': 'shimmer-vivid 2.5s ease-in-out infinite alternate',
+				'tilt': 'tilt 10s infinite linear',
+				'gradient': 'gradient 15s ease infinite',
 				'glow-pulse-vivid': 'glow-pulse-vivid 3s ease-in-out infinite'
 			}
 		}

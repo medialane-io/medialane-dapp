@@ -231,7 +231,7 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
                   fallbackSrc="/background.jpg"
                   alt="Background"
                   fill
-                  className="object-cover opacity-60 blur-2xl scale-110"
+                  className="object-cover opacity-30 blur-2xl scale-110"
                   priority
                 />
 
@@ -239,7 +239,7 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-background/90 backdrop-blur-[2px]" />
               </div>
 
-              <div className="relative z-10 container mx-auto px-4 max-w-7xl">
+              <div className="relative z-10 w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto">
                 {asset && isAssetReported(asset.id) && (
                   <Alert variant="destructive" className="mb-6 lg:mb-8 border-destructive/50 bg-destructive/10 text-destructive dark:border-destructive/50 backdrop-blur-md">
                     <AlertTriangle className="h-4 w-4" />
@@ -250,9 +250,9 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
                   </Alert>
                 )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 lg:gap-12">
                   {/* Asset Image - Large, Half-Screen on Desktop */}
-                  <div className="relative group w-full max-w-md lg:max-w-none mx-auto lg:mx-0">
+                  <div className="flex-shrink-0 relative group w-full lg:w-1/2 mx-auto lg:mx-0">
                     <div
                       className="relative w-full rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-black/20 backdrop-blur-sm"
                       style={{ aspectRatio: imageRatio || "1/1" }}
@@ -330,38 +330,10 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
             </div>
 
             {/* Main Content Area - Tabs */}
-            <div className="container mx-auto px-4 pt-8 pb-16 max-w-7xl relative z-20">
+            <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto pt-8 pb-16 relative z-20">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left Column: Tabs & Details (Spans 2 cols) */}
                 <div className="lg:col-span-2 space-y-8">
-                  {/* Quick Stats Grid */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 -mt-12 mb-12 relative z-30">
-                    <div className="glass-panel p-4 rounded-xl">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                        <Cpu className="h-3 w-3" /> Blockchain
-                      </p>
-                      <p className="font-bold">Starknet</p>
-                    </div>
-                    <div className="glass-panel p-4 rounded-xl">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                        <FileCode className="h-3 w-3" /> Standard
-                      </p>
-                      <p className="font-bold">ERC-721</p>
-                    </div>
-                    <div className="glass-panel p-4 rounded-xl">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                        <Layers className="h-3 w-3" /> IP Type
-                      </p>
-                      <p className="font-bold truncate" title={asset?.type}>{asset?.type || "Generic"}</p>
-                    </div>
-                    <div className="glass-panel p-4 rounded-xl">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                        <Check className="h-3 w-3" /> Status
-                      </p>
-                      <Badge variant="secondary" className="text-foreground">Onchain</Badge>
-                    </div>
-                  </div>
-
                   <Tabs defaultValue="overview" className="w-full">
                     <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-muted/50 rounded-xl">
                       <TabsTrigger value="overview" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Overview</TabsTrigger>
