@@ -16,7 +16,7 @@ export function AssetAttributes({ attributes }: { attributes: Attribute[] }) {
                 <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-sm">
                     <CardContent className="p-3 text-center">
                         <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{attr.trait}</p>
-                        <p className="font-semibold text-white truncate" title={attr.value}>{attr.value}</p>
+                        <p className="font-semibold text-foreground truncate" title={attr.value}>{attr.value}</p>
                         {attr.rarity && (
                             <p className="text-xs text-blue-400 mt-1">{attr.rarity}</p>
                         )}

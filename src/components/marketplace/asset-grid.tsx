@@ -59,13 +59,13 @@ export function AssetGrid({ sortOrder = "recent" }: AssetGridProps) {
 
     if (activeListings.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground bg-muted/5 rounded-xl border border-dashed border-white/10 backdrop-blur-sm">
+            <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground bg-muted/5 rounded-xl border border-dashed border-border/50 backdrop-blur-sm">
                 <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mb-6">
                     <AlertCircle className="h-8 w-8 opacity-50" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">Marketplace is Quiet</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-2">Marketplace is Quiet</h3>
                 <p className="max-w-xs mx-auto">There are currently no active intellectual property assets listed for trading.</p>
-                <Button variant="outline" onClick={() => refetch()} className="mt-6 border-white/10 hover:bg-white/5">
+                <Button variant="outline" onClick={() => refetch()} className="mt-6 border-border hover:bg-muted">
                     <RefreshCw className="mr-2 h-4 w-4" /> Refresh Marketplace
                 </Button>
             </div>

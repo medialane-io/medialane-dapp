@@ -275,17 +275,17 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
                   </div>
 
                   {/* Asset Info */}
-                  <div className="flex-1 text-white text-center lg:text-left flex flex-col justify-center h-full pt-4">
+                  <div className="flex-1 text-foreground text-center lg:text-left flex flex-col justify-center h-full pt-4">
                     <div className="flex flex-col gap-6">
                       <div>
                         <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-4">
                           {collectionDisplayName !== "Loading..." && (
-                            <Badge className="bg-white/10 text-white hover:bg-white/20 border-white/20 backdrop-blur-md px-3 py-1 text-sm h-7">
+                            <Badge className="bg-background/20 text-foreground hover:bg-background/40 border-border/50 backdrop-blur-md px-3 py-1 text-sm h-7">
                               {collectionDisplayName}
                             </Badge>
                           )}
                           {asset.type && (
-                            <Badge variant="outline" className="border-white/30 text-white/90 bg-white/5 backdrop-blur-sm h-7">
+                            <Badge variant="outline" className="border-border/50 text-foreground/90 bg-background/10 backdrop-blur-sm h-7">
                               {asset.type}
                             </Badge>
                           )}
@@ -335,11 +335,10 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
                 {/* Left Column: Tabs & Details (Spans 2 cols) */}
                 <div className="lg:col-span-2 space-y-8">
                   <Tabs defaultValue="overview" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-muted/50 rounded-xl">
+                    <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 rounded-xl">
                       <TabsTrigger value="overview" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Overview</TabsTrigger>
                       <TabsTrigger value="provenance" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Provenance</TabsTrigger>
                       <TabsTrigger value="license" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">License</TabsTrigger>
-                      <TabsTrigger value="activity" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Activity</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="overview" className="mt-6 space-y-6">
@@ -359,7 +358,7 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
                       </div>
                     </TabsContent>
 
-                    <TabsContent value="provenance" className="mt-6">
+                    <TabsContent value="provenance" className="mt-6 space-y-6">
                       <Card className="border-border/50 p-6 min-h-[400px]">
                         {enhancedAsset ? (
                           <SimpleProvenance
@@ -372,16 +371,19 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
                           </div>
                         )}
                       </Card>
+
+                      <div className="space-y-4">
+                        <h3 className="text-xl font-semibold tracking-tight">Activity</h3>
+                        <Card className="border-border/50 p-6">
+                          <AssetHistory nftAddress={nftAddress || ""} tokenId={String(tokenId)} />
+                        </Card>
+                      </div>
                     </TabsContent>
 
                     <TabsContent value="license" className="mt-6 space-y-8">
                       <Card className="border-border/50 p-6">
                         <LicenseTab asset={asset!} />
                       </Card>
-                    </TabsContent>
-
-                    <TabsContent value="activity" className="mt-6">
-                      <AssetHistory nftAddress={nftAddress || ""} tokenId={String(tokenId)} />
                     </TabsContent>
                   </Tabs>
                 </div>

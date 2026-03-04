@@ -54,7 +54,7 @@ export function AssetActionPanel({
         }
     }
 
-    const actionButtonClass = "h-10 justify-start w-full text-foreground hover:bg-white/5 hover:text-white rounded-lg text-sm font-medium transition-colors"
+    const actionButtonClass = "h-10 justify-start w-full text-foreground hover:bg-accent hover:text-accent-foreground rounded-lg text-sm font-medium transition-colors"
 
     return (
         <div className="sticky top-24 space-y-4">
