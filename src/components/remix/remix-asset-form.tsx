@@ -523,7 +523,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                                 value={selectedCollectionId}
                                 onValueChange={setSelectedCollectionId}
                             >
-                                <SelectTrigger className="h-12 bg-white/5 border-white/10 focus:ring-primary/50">
+                                <SelectTrigger className="h-12 ">
                                     <SelectValue placeholder="Select a collection..." />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -691,7 +691,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                                 value={formData.name}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                                 placeholder="Enter remix name"
-                                className="bg-white/5 border-white/10 focus:ring-primary/50 h-11"
+                                className="h-11"
                             />
                         </div>
 
@@ -703,7 +703,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                                 onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                                 placeholder="Describe your remix and how it relates to the original"
                                 rows={4}
-                                className="bg-white/5 border-white/10 focus:ring-primary/50 resize-none"
+                                className="resize-none"
                             />
                         </div>
 
@@ -714,7 +714,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                                 value={formData.tags}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, tags: e.target.value }))}
                                 placeholder="remix, cyber, abstract..."
-                                className="bg-white/5 border-white/10 focus:ring-primary/50 h-11"
+                                className="h-11"
                             />
                         </div>
                     </div>
@@ -738,7 +738,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                                     value={formData.license}
                                     onValueChange={(value) => setFormData((prev) => ({ ...prev, license: value }))}
                                 >
-                                    <SelectTrigger className="bg-white/5 border-white/10 focus:ring-primary/50 h-11">
+                                    <SelectTrigger className="h-11">
                                         <SelectValue placeholder="Select license" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -757,7 +757,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                                     value={formData.geographicScope}
                                     onValueChange={(value) => setFormData((prev) => ({ ...prev, geographicScope: value }))}
                                 >
-                                    <SelectTrigger className="bg-white/5 border-white/10 focus:ring-primary/50 h-11">
+                                    <SelectTrigger className="h-11">
                                         <SelectValue placeholder="Select scope" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -779,7 +779,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                                     placeholder="e.g. Germany, France, Japan..."
                                     value={formData.territory}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, territory: e.target.value }))}
-                                    className="bg-white/5 border-white/10 focus:ring-primary/50"
+                                    className=""
                                 />
                             </div>
                         )}
@@ -792,7 +792,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                                     placeholder="e.g. Medical, Gaming..."
                                     value={formData.fieldOfUse}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, fieldOfUse: e.target.value }))}
-                                    className="bg-white/5 border-white/10 focus:ring-primary/50 h-11"
+                                    className="h-11"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -802,7 +802,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                                     placeholder="e.g. Perpetual, 5 years..."
                                     value={formData.licenseDuration}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, licenseDuration: e.target.value }))}
-                                    className="bg-white/5 border-white/10 focus:ring-primary/50 h-11"
+                                    className="h-11"
                                 />
                             </div>
                         </div>
@@ -817,7 +817,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                                         placeholder="Conditions for improvements..."
                                         value={formData.grantBack}
                                         onChange={(e) => setFormData((prev) => ({ ...prev, grantBack: e.target.value }))}
-                                        className="bg-white/5 border-white/10 focus:ring-primary/50"
+                                        className=""
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -827,7 +827,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                                         placeholder="AI Training allowed/prohibited..."
                                         value={formData.aiRights}
                                         onChange={(e) => setFormData((prev) => ({ ...prev, aiRights: e.target.value }))}
-                                        className="bg-white/5 border-white/10 focus:ring-primary/50"
+                                        className=""
                                     />
                                 </div>
                             </div>

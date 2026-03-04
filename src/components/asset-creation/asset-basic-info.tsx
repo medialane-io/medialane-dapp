@@ -90,7 +90,7 @@ export function AssetBasicInfo({
                     placeholder="e.g. Cosmic Dreams #01"
                     value={formState.title}
                     onChange={(e) => updateFormField("title", e.target.value)}
-                    className="h-12 text-base bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+                    className="h-12 text-base bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
                 />
             </div>
 
@@ -103,7 +103,7 @@ export function AssetBasicInfo({
                     value={formState.description}
                     onChange={(e) => updateFormField("description", e.target.value)}
                     rows={4}
-                    className="resize-none text-base bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+                    className="resize-none text-base bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
                 />
             </div>
 
@@ -188,7 +188,7 @@ export function AssetBasicInfo({
                     }}
                     disabled={isLoadingCollections && !collections?.length}
                 >
-                    <SelectTrigger className="h-12 bg-background/40 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
+                    <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
                         <SelectValue placeholder="Select Collection" />
                     </SelectTrigger>
                     <SelectContent>
@@ -231,7 +231,7 @@ export function AssetBasicInfo({
                     placeholder="https://yoursite.com/item/123"
                     value={formState.externalUrl || ""}
                     onChange={(e) => updateFormField("externalUrl", e.target.value)}
-                    className="h-12 text-base bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+                    className="h-12 text-base bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
                 />
                 <p className="text-xs text-muted-foreground">
                     Link to your website or the detailed project page for this asset.

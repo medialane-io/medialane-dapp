@@ -54,7 +54,7 @@ export function AssetDetails({
                     placeholder="Creator name or address"
                     value={formState.creator}
                     onChange={(e) => updateFormField("creator", e.target.value)}
-                    className="h-12 text-base bg-background/40 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
+                    className="h-12 text-base bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
                 />
                 <p className="text-xs text-muted-foreground">
                     Defaults to your wallet address.
@@ -84,7 +84,7 @@ export function AssetDetails({
                 <Input
                     placeholder="Type tag and press Enter"
                     onKeyDown={handleTagKeyPress}
-                    className="h-12 text-base bg-background/40 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
+                    className="h-12 text-base bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
                 />
             </div>
         </div>

@@ -80,13 +80,13 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., 3:45"
           value={getMetadataValue("duration")}
           onChange={(e) => updateMetadataField("duration", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
         <Label htmlFor="genre">Genre</Label>
         <Select value={getMetadataValue("genre")} onValueChange={(value) => updateMetadataField("genre", value)}>
-          <SelectTrigger className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+          <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
             <SelectValue placeholder="Select genre" />
           </SelectTrigger>
           <SelectContent>
@@ -109,7 +109,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., 120"
           value={getMetadataValue("bpm")}
           onChange={(e) => updateMetadataField("bpm", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
@@ -119,7 +119,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., C Major"
           value={getMetadataValue("key")}
           onChange={(e) => updateMetadataField("key", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2 md:col-span-2">
@@ -129,7 +129,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., Guitar, Piano, Drums"
           value={getMetadataValue("instruments")}
           onChange={(e) => updateMetadataField("instruments", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2 md:col-span-2">
@@ -149,7 +149,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., https://open.spotify.com/track/..."
           value={getMetadataValue("spotifyUrl")}
           onChange={(e) => updateMetadataField("spotifyUrl", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2 md:col-span-2">
@@ -159,7 +159,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., https://youtube.com/watch?v=..."
           value={getMetadataValue("youtubeUrl")}
           onChange={(e) => updateMetadataField("youtubeUrl", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
 
@@ -171,7 +171,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
       <div className="space-y-2">
         <Label htmlFor="medium">Medium</Label>
         <Select value={getMetadataValue("medium")} onValueChange={(value) => updateMetadataField("medium", value)}>
-          <SelectTrigger className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+          <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
             <SelectValue placeholder="Select medium" />
           </SelectTrigger>
           <SelectContent>
@@ -193,7 +193,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., Abstract, Realistic, Impressionist"
           value={getMetadataValue("style")}
           onChange={(e) => updateMetadataField("style", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
@@ -203,7 +203,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., 1920x1080 or 24x36 inches"
           value={getMetadataValue("dimensions")}
           onChange={(e) => updateMetadataField("dimensions", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
@@ -213,7 +213,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., 2024 or 2024-01-20"
           value={getMetadataValue("creationDate")}
           onChange={(e) => updateMetadataField("creationDate", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2 md:col-span-2">
@@ -239,7 +239,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., 5:30"
           value={getMetadataValue("duration")}
           onChange={(e) => updateMetadataField("duration", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
@@ -248,7 +248,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           value={getMetadataValue("resolution")}
           onValueChange={(value) => updateMetadataField("resolution", value)}
         >
-          <SelectTrigger className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+          <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
             <SelectValue placeholder="Select resolution" />
           </SelectTrigger>
           <SelectContent>
@@ -266,7 +266,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           value={getMetadataValue("frameRate")}
           onValueChange={(value) => updateMetadataField("frameRate", value)}
         >
-          <SelectTrigger className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+          <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
             <SelectValue placeholder="Select frame rate" />
           </SelectTrigger>
           <SelectContent>
@@ -284,7 +284,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., Documentary, Animation, Music Video"
           value={getMetadataValue("genre")}
           onChange={(e) => updateMetadataField("genre", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2 md:col-span-2">
@@ -304,7 +304,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., https://youtube.com/watch?v=..."
           value={getMetadataValue("youtubeUrl")}
           onChange={(e) => updateMetadataField("youtubeUrl", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
 
@@ -320,7 +320,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., 1.0.0"
           value={getMetadataValue("version")}
           onChange={(e) => updateMetadataField("version", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
@@ -330,13 +330,13 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., JavaScript, Python, Java"
           value={getMetadataValue("programmingLanguage")}
           onChange={(e) => updateMetadataField("programmingLanguage", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
         <Label htmlFor="platform">Platform</Label>
         <Select value={getMetadataValue("platform")} onValueChange={(value) => updateMetadataField("platform", value)}>
-          <SelectTrigger className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+          <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
             <SelectValue placeholder="Select platform" />
           </SelectTrigger>
           <SelectContent>
@@ -354,7 +354,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           value={getMetadataValue("license")}
           onValueChange={(value) => updateMetadataField("license", value)}
         >
-          <SelectTrigger className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+          <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
             <SelectValue placeholder="Select license" />
           </SelectTrigger>
           <SelectContent>
@@ -388,7 +388,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           value={getMetadataValue("blockchain")}
           onValueChange={(value) => updateMetadataField("blockchain", value)}
         >
-          <SelectTrigger className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+          <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
             <SelectValue placeholder="Select blockchain" />
           </SelectTrigger>
           <SelectContent>
@@ -402,7 +402,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           value={getMetadataValue("tokenStandard")}
           onValueChange={(value) => updateMetadataField("tokenStandard", value)}
         >
-          <SelectTrigger className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+          <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
             <SelectValue placeholder="Select standard" />
           </SelectTrigger>
           <SelectContent>
@@ -418,13 +418,13 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., 1 for unique, 100 for limited"
           value={getMetadataValue("editionSize")}
           onChange={(e) => updateMetadataField("editionSize", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
         <Label htmlFor="rarity">Rarity Level</Label>
         <Select value={getMetadataValue("rarity")} onValueChange={(value) => updateMetadataField("rarity", value)}>
-          <SelectTrigger className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+          <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
             <SelectValue placeholder="Select rarity" />
           </SelectTrigger>
           <SelectContent>
@@ -444,7 +444,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           value={getMetadataValue("traits")}
           onChange={(e) => updateMetadataField("traits", e.target.value)}
           rows={3}
-          className="bg-background/40 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
+          className="bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
     </div>
@@ -458,7 +458,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           value={getMetadataValue("documentType")}
           onValueChange={(value) => updateMetadataField("documentType", value)}
         >
-          <SelectTrigger className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+          <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
           <SelectContent>
@@ -478,7 +478,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., English, Spanish, French"
           value={getMetadataValue("language")}
           onChange={(e) => updateMetadataField("language", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
@@ -489,13 +489,13 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., 25"
           value={getMetadataValue("pageCount")}
           onChange={(e) => updateMetadataField("pageCount", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
         <Label htmlFor="format">Format</Label>
         <Select value={getMetadataValue("format")} onValueChange={(value) => updateMetadataField("format", value)}>
-          <SelectTrigger className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+          <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
             <SelectValue placeholder="Select format" />
           </SelectTrigger>
           <SelectContent>
@@ -530,7 +530,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., Educational, Entertainment, Business"
           value={getMetadataValue("category")}
           onChange={(e) => updateMetadataField("category", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
@@ -540,7 +540,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., Digital, Physical, Hybrid"
           value={getMetadataValue("format")}
           onChange={(e) => updateMetadataField("format", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2 md:col-span-2">
@@ -551,7 +551,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           value={getMetadataValue("additionalNotes")}
           onChange={(e) => updateMetadataField("additionalNotes", e.target.value)}
           rows={3}
-          className="bg-background/40 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
+          className="bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
 
@@ -567,7 +567,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., Canon EOS R5, Sony A7IV"
           value={getMetadataValue("camera")}
           onChange={(e) => updateMetadataField("camera", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
@@ -577,13 +577,13 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., 24-70mm f/2.8"
           value={getMetadataValue("lens")}
           onChange={(e) => updateMetadataField("lens", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
         <Label htmlFor="fileFormat">File Format</Label>
         <Select value={getMetadataValue("fileFormat")} onValueChange={(value) => updateMetadataField("fileFormat", value)}>
-          <SelectTrigger className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+          <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
             <SelectValue placeholder="Select format" />
           </SelectTrigger>
           <SelectContent>
@@ -602,7 +602,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., 45MP, 8192x5464"
           value={getMetadataValue("resolution")}
           onChange={(e) => updateMetadataField("resolution", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
 
@@ -613,7 +613,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., 100, 400, 1600"
           value={getMetadataValue("iso")}
           onChange={(e) => updateMetadataField("iso", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
@@ -623,7 +623,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., f/1.8, f/5.6"
           value={getMetadataValue("aperture")}
           onChange={(e) => updateMetadataField("aperture", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
@@ -633,7 +633,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., 1/200, 30s"
           value={getMetadataValue("shutterSpeed")}
           onChange={(e) => updateMetadataField("shutterSpeed", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
@@ -643,7 +643,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., 35mm, 85mm"
           value={getMetadataValue("focalLength")}
           onChange={(e) => updateMetadataField("focalLength", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
 
@@ -654,7 +654,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           type="date"
           value={getMetadataValue("takenDate")}
           onChange={(e) => updateMetadataField("takenDate", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
@@ -664,7 +664,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., New York, NY"
           value={getMetadataValue("location")}
           onChange={(e) => updateMetadataField("location", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
 
@@ -675,7 +675,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., Lightroom, Photoshop"
           value={getMetadataValue("software")}
           onChange={(e) => updateMetadataField("software", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
     </div>
@@ -686,7 +686,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
       <div className="space-y-2">
         <Label htmlFor="platform">Platform</Label>
         <Select value={getMetadataValue("platform")} onValueChange={(value) => updateMetadataField("platform", value)}>
-          <SelectTrigger className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+          <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
             <SelectValue placeholder="Select platform" />
           </SelectTrigger>
           <SelectContent>
@@ -706,7 +706,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           type="date"
           value={getMetadataValue("publicationDate")}
           onChange={(e) => updateMetadataField("publicationDate", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
@@ -716,7 +716,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., Lifestyle, Tech, News"
           value={getMetadataValue("category")}
           onChange={(e) => updateMetadataField("category", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2">
@@ -727,7 +727,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="e.g., 280"
           value={getMetadataValue("wordCount")}
           onChange={(e) => updateMetadataField("wordCount", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
 
@@ -744,7 +744,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="https://instagram.com/..."
           value={getMetadataValue("instagramUrl")}
           onChange={(e) => updateMetadataField("instagramUrl", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2 md:col-span-2">
@@ -754,7 +754,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="https://tiktok.com/@..."
           value={getMetadataValue("tiktokUrl")}
           onChange={(e) => updateMetadataField("tiktokUrl", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2 md:col-span-2">
@@ -764,7 +764,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="https://youtube.com/..."
           value={getMetadataValue("youtubeUrl")}
           onChange={(e) => updateMetadataField("youtubeUrl", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2 md:col-span-2">
@@ -774,7 +774,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="https://facebook.com/..."
           value={getMetadataValue("facebookUrl")}
           onChange={(e) => updateMetadataField("facebookUrl", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
       <div className="space-y-2 md:col-span-2">
@@ -784,7 +784,7 @@ export function TemplateSpecificFields({ template, formState, updateFormField, o
           placeholder="https://x.com/..."
           value={getMetadataValue("xUrl")}
           onChange={(e) => updateMetadataField("xUrl", e.target.value)}
-          className="h-12 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+          className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
         />
       </div>
 

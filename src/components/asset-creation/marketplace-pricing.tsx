@@ -49,7 +49,7 @@ export function MarketplacePricing({ formState, updateFormField }: MarketplacePr
                                 updateFormField("listOnMarketplace", false)
                             }
                         }}
-                        className="h-14 text-xl font-bold pl-10 pr-16 bg-black/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 dark:border-white/5 hover:border-outrun-cyan/50 focus:border-outrun-cyan focus:ring-2 focus:ring-outrun-cyan/20 transition-all rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+                        className="h-14 text-xl font-bold pl-10 pr-16 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
                         <span className="text-xs font-black text-primary/50 tracking-tighter">USDC</span>

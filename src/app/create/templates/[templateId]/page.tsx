@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Loader, FileText, Settings2 } from "lucide-react"
+import { Loader, FileText, Settings2, Scale, Tag } from "lucide-react"
 import {
   Accordion,
   AccordionContent,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/accordion"
 
 import { AssetPreview } from "@/components/asset-creation/asset-preview"
+import { PageHeader } from "@/components/page-header"
 import { AssetConfirmation } from "@/components/asset-creation/asset-confirmation"
 import { AssetBasicInfo } from "@/components/asset-creation/asset-basic-info"
 import { AssetDetails } from "@/components/asset-creation/asset-details"
@@ -362,21 +363,29 @@ export default function CreateAssetFromTemplate() {
       )}
 
       <main className="container mx-auto p-4 max-w-7xl">
+        <PageHeader
+          title={`Create ${template.name} Asset`}
+          description={`Register your ${template.name.toLowerCase()} intellectual property on the blockchain with optimized metadata.`}
+          className="mb-8"
+        />
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-3 space-y-8">
 
             <Accordion type="multiple" defaultValue={["basic-info", "ip-type"]} className="w-full space-y-4">
 
               {/* 1. Basic Information (Top Priority) */}
-              <AccordionItem value="basic-info" className="border border-border/50 rounded-2xl bg-card/40 dark:bg-card/20 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.1)] px-2 overflow-hidden transition-all">
-                <AccordionTrigger className="hover:no-underline px-4 py-4 text-xl font-semibold">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-primary" />
-                    <span>Basic Information</span>
+              <AccordionItem value="basic-info" className="relative group rounded-xl border border-border/50 bg-card/40 backdrop-blur-xl shadow-sm overflow-hidden transition-all hover:border-outrun-cyan/40">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-outrun-cyan/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <AccordionTrigger className="hover:no-underline px-6 py-5 text-lg font-medium transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 text-primary shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+                      <FileText className="h-5 w-5" />
+                    </div>
+                    <span className="text-foreground/90">Asset Info</span>
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="px-4 pb-6 pt-2">
+                <AccordionContent className="px-6 pb-6 pt-6 border-t border-border/10 bg-background/50">
                   <AssetBasicInfo
                     formState={formState}
                     updateFormField={updateFormField}
@@ -391,14 +400,17 @@ export default function CreateAssetFromTemplate() {
               </AccordionItem>
 
               {/* 2. IP Type (Template Specifics) */}
-              <AccordionItem value="ip-type" className="border border-border/50 rounded-2xl bg-card/40 dark:bg-card/20 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.1)] px-2 overflow-hidden transition-all">
-                <AccordionTrigger className="hover:no-underline px-4 py-4 text-xl font-semibold">
-                  <div className="flex items-center gap-2">
-                    <Settings2 className="h-5 w-5 text-primary" />
-                    <span>{template.name} Details</span>
+              <AccordionItem value="ip-type" className="relative group rounded-xl border border-border/50 bg-card/40 backdrop-blur-xl shadow-sm overflow-hidden transition-all hover:border-outrun-magenta/40">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-outrun-magenta/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <AccordionTrigger className="hover:no-underline px-6 py-5 text-lg font-medium transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 text-primary shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+                      <Settings2 className="h-5 w-5" />
+                    </div>
+                    <span className="text-foreground/90">{template.name} Details</span>
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="px-4 pb-6 pt-2">
+                <AccordionContent className="px-6 pb-6 pt-6 border-t border-border/10 bg-background/50">
                   <p className="text-sm text-muted-foreground mb-4">
                     {template.description}
                   </p>
@@ -412,33 +424,41 @@ export default function CreateAssetFromTemplate() {
               </AccordionItem>
 
               {/* 3. Advanced Configuration */}
-              <AccordionItem value="advanced-info" className="border border-border/50 rounded-2xl bg-card/40 dark:bg-card/20 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.1)] px-2 overflow-hidden transition-all">
-                <AccordionTrigger className="hover:no-underline px-4 py-4 text-xl font-semibold">
-                  <div className="flex items-center gap-2">
-                    <Settings2 className="h-5 w-5 text-primary" />
-                    <span>Advanced Information</span>
+              <AccordionItem value="advanced-info" className="relative group rounded-xl border border-border/50 bg-card/40 backdrop-blur-xl shadow-sm overflow-hidden transition-all hover:border-outrun-yellow/40">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-outrun-yellow/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <AccordionTrigger className="hover:no-underline px-6 py-5 text-lg font-medium transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 text-primary shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+                      <Tag className="h-5 w-5" />
+                    </div>
+                    <span className="text-foreground/90">Advanced Information</span>
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="px-4 pb-6 pt-2">
-                  <h3 className="text-lg font-medium mb-4 flex items-center gap-2 text-muted-foreground">
-                    Categorization
-                  </h3>
-                  <AssetDetails
-                    formState={formState}
-                    updateFormField={updateFormField}
-                  />
+                <AccordionContent className="px-6 pb-6 pt-6 border-t border-border/10 bg-background/50 space-y-8">
+                  <div id="asset-details" className="pt-2">
+                    <h3 className="text-lg font-medium mb-4 flex items-center gap-2 text-muted-foreground">
+                      Categorization
+                    </h3>
+                    <AssetDetails
+                      formState={formState}
+                      updateFormField={updateFormField}
+                    />
+                  </div>
                 </AccordionContent>
               </AccordionItem>
 
               {/* 4. Licensing Options */}
-              <AccordionItem value="licensing" className="border border-border/50 rounded-2xl bg-card/40 dark:bg-card/20 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.1)] px-2 overflow-hidden transition-all">
-                <AccordionTrigger className="hover:no-underline px-4 py-4 text-xl font-semibold">
-                  <div className="flex items-center gap-2">
-                    <Settings2 className="h-5 w-5 text-primary" />
-                    <span>Licensing & Rights</span>
+              <AccordionItem value="licensing" className="relative group rounded-xl border border-border/50 bg-card/40 backdrop-blur-xl shadow-sm overflow-hidden transition-all hover:border-neon-cyan/40">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neon-cyan/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <AccordionTrigger className="hover:no-underline px-6 py-5 text-lg font-medium transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 text-primary shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+                      <Scale className="h-5 w-5" />
+                    </div>
+                    <span className="text-foreground/90">Programmable Licensing</span>
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="px-4 pb-6 pt-2">
+                <AccordionContent className="px-6 pb-6 pt-6 border-t border-border/10 bg-background/50">
                   <LicensingOptions
                     formState={formState}
                     updateFormField={updateFormField}
@@ -449,7 +469,7 @@ export default function CreateAssetFromTemplate() {
             </Accordion>
 
             {/* Submit Button */}
-            <div className="flex justify-end pt-6">
+            <div className="flex justify-end pt-4">
               <Button
                 onClick={handleSubmit}
                 disabled={
@@ -461,9 +481,9 @@ export default function CreateAssetFromTemplate() {
                   !formState.collection
                 }
                 size="lg"
-                className="px-8 bg-gradient-to-r from-outrun-cyan to-outrun-magenta text-white shadow-[0_0_15px_rgba(0,255,255,0.4)] border-none hover:-translate-y-0.5 hover:shadow-[0_0_20px_rgba(255,0,255,0.5)] transition-all font-bold tracking-wide"
+                className="px-10 h-14 text-lg font-bold tracking-wider bg-gradient-to-r from-outrun-cyan to-outrun-magenta hover:from-outrun-cyan/90 hover:to-outrun-magenta/90 text-white shadow-lg shadow-outrun-magenta/20 transition-all rounded-xl hover:-translate-y-0.5 border border-white/10 w-full sm:w-auto"
               >
-                {loading && <Loader className="animate-spin h-5 w-5 mr-2" />}
+                {loading && <Loader className="animate-spin h-5 w-5 mr-3" />}
                 {loading
                   ? (upload_loading ? "Uploading..." : isCreating ? "Minting..." : "Processing")
                   : `Create ${template.name} Asset`
@@ -482,7 +502,7 @@ export default function CreateAssetFromTemplate() {
               <AssetPreview formState={formState} template={template} />
 
               {/* Help Card */}
-              <Card className="relative bg-card/40 dark:bg-card/20 backdrop-blur-2xl border border-border/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.1)] rounded-2xl overflow-hidden">
+              <Card className="relative bg-card/40 backdrop-blur-xl border border-border/50 shadow-sm rounded-xl overflow-hidden">
                 <CardContent className="p-4">
                   <h4 className="font-medium mb-2 flex items-center gap-2">
                     <FileText className="h-4 w-4" />

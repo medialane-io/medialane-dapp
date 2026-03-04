@@ -19,7 +19,7 @@ export function AssetPreview({ formState, template }: AssetPreviewProps) {
     Object.keys(formState.metadataFields).length > 0;
 
   return (
-    <Card>
+    <Card className="relative bg-card/40 backdrop-blur-xl border border-border/50 shadow-sm rounded-xl overflow-hidden">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Eye className="h-5 w-5" />

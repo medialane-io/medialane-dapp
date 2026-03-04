@@ -44,7 +44,7 @@ export function TemplateInfoCard({ template }: TemplateInfoCardProps) {
   const isPopular = template.id === "audio" || template.id === "art" || template.id === "nft"
 
   return (
-    <Card className="relative bg-card/40 dark:bg-card/20 backdrop-blur-2xl border border-border/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.1)] rounded-2xl overflow-hidden">
+    <Card className="relative bg-card/40 backdrop-blur-xl border border-border/50 shadow-sm rounded-xl overflow-hidden">
       <CardHeader className={cn("pb-4 relative overflow-hidden/20", colorClasses.bgGradient)}>
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent mix-blend-overlay" />
         <div className="relative">
