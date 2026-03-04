@@ -39,7 +39,7 @@ export function CreationOptionDetails({ option }: CreationOptionDetailsProps) {
   return (
     <div className="space-y-6">
       {/* Main Details Card */}
-      <Card className="glass-panel border-outrun-cyan/30 bg-card/5 backdrop-blur-md shadow-[inset_0_0_20px_rgba(0,0,0,0.2)]">
+      <Card className="glass-panel border-outrun-cyan/30 bg-card/5 backdrop-blur-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
@@ -63,18 +63,18 @@ export function CreationOptionDetails({ option }: CreationOptionDetailsProps) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg bg-neon-cyan/10 ring-1 ring-neon-cyan/30">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-neon-cyan/5 ring-1 ring-neon-cyan/20">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-neon-cyan drop-shadow-[0_0_5px_rgba(0,255,255,0.8)]" />
               <span className="text-sm font-medium">Estimated Fee</span>
             </div>
-            <Badge variant="secondary" className="bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/50 shadow-glow-sm shadow-neon-cyan/20">
+            <Badge variant="secondary" className="bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/30 shadow-glow-sm shadow-neon-cyan/10">
               {option.estimatedFee} STRK
             </Badge>
           </div>
 
           <Link href={option.href} className="block mt-4">
-            <Button className="w-full gradient-vivid shadow-glow-sm shadow-neon-cyan/20 hover:scale-[1.02] transition-all text-white font-bold tracking-wider" size="lg">
+            <Button className="w-full gradient-vivid shadow-glow-sm shadow-neon-cyan/20 hover:shadow-neon-cyan/40 hover:scale-[1.02] transition-all text-white font-bold tracking-wider" size="lg">
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

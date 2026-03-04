@@ -420,7 +420,7 @@ export default function CreatePage() {
               ) : (
                 <>
                   {/* Popular Templates */}
-                  <Card className="glass-panel border-outrun-cyan/30 bg-card/5 backdrop-blur-md shadow-[inset_0_0_20px_rgba(0,0,0,0.2)]">
+                  <Card className="glass-panel border-outrun-cyan/30 bg-card/5 backdrop-blur-md">
                     <CardHeader className="pb-3 border-b border-outrun-cyan/10">
                       <CardTitle className="text-base flex items-center gap-2 font-bold tracking-wide">
                         <TrendingUp className="h-4 w-4 text-neon-cyan drop-shadow-[0_0_5px_rgba(0,255,255,0.8)]" />
@@ -483,7 +483,7 @@ export default function CreatePage() {
                   </Card>*/}
 
                   {/* Benefits */}
-                  <Card className="glass-panel border-outrun-magenta/30 bg-card/5 backdrop-blur-md shadow-[inset_0_0_20px_rgba(0,0,0,0.2)]">
+                  <Card className="glass-panel border-outrun-magenta/30 bg-card/5 backdrop-blur-md">
                     <CardContent className="p-5">
                       <h4 className="font-bold mb-4 text-outrun-magenta tracking-wide">Why tokenize with Medialane?</h4>
                       <div className="space-y-3">

@@ -25,8 +25,6 @@ const config: Config = {
 				mesh: 'radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%)'
 			},
 			boxShadow: {
-				glass: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), inset 0 0 20px 0 rgba(255, 255, 255, 0.05)',
-				'glass-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1), inset 0 0 20px 0 rgba(255, 255, 255, 0.1)',
 				'neon-cyan': '0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3)',
 				'neon-pink': '0 0 10px rgba(255, 0, 255, 0.5), 0 0 20px rgba(255, 0, 255, 0.3)',
 				'neon-magenta': '0 0 15px rgba(255, 0, 255, 0.6), 0 0 30px rgba(255, 0, 255, 0.3)',
@@ -42,6 +40,8 @@ const config: Config = {
 					DEFAULT: '#1fb6ff',
 					dark: '#000000'
 				},
+				brandPrimary: '#0ea5e9',
+				brandSecondary: '#6366f1',
 				blue: {
 					light: '#85d7ff',
 					DEFAULT: '#1fb6ff',
@@ -100,7 +100,15 @@ const config: Config = {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				'void': '#030303',
+				'stark': '#fafafa'
+			},
+			transitionDuration: {
+				'mechanical': '80ms',
+			},
+			transitionTimingFunction: {
+				'mechanical': 'cubic-bezier(0.4, 0, 0.2, 1)',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -109,91 +117,27 @@ const config: Config = {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
 				},
-				'pulse-glow': {
-					'0%, 100%': {
-						opacity: '1',
-						boxShadow: '0 0 10px #00f3ff'
-					},
-					'50%': {
-						opacity: '0.8',
-						boxShadow: '0 0 20px #00f3ff'
-					}
+				'pulse-status': {
+					'0%, 100%': { opacity: '1', transform: 'scale(1)' },
+					'50%': { opacity: '0.5', transform: 'scale(0.95)' }
 				},
-				float: {
-					'0%, 100%': {
-						transform: 'translateY(0)'
-					},
-					'50%': {
-						transform: 'translateY(-10px)'
-					}
-				},
-				gradient: {
-					'0%': { backgroundPosition: '0% 50%' },
-					'50%': { backgroundPosition: '100% 50%' },
-					'100%': { backgroundPosition: '0% 50%' },
-				},
-				'gradient-x': {
-					'0%, 100%': {
-						backgroundPosition: '0% 50%'
-					},
-					'50%': {
-						backgroundPosition: '100% 50%'
-					}
-				},
-				'border-glow': {
-					'0%, 100%': {
-						borderColor: 'rgba(255, 0, 255, 0.5)'
-					},
-					'33%': {
-						borderColor: 'rgba(0, 255, 255, 0.5)'
-					},
-					'66%': {
-						borderColor: 'rgba(255, 153, 0, 0.5)'
-					}
-				},
-				'shimmer-vivid': {
-					'0%': {
-						backgroundPosition: '-200% 0'
-					},
-					'100%': {
-						backgroundPosition: '200% 0'
-					}
-				},
-				'glow-pulse-vivid': {
-					'0%, 100%': {
-						boxShadow: '0 0 10px rgba(0, 255, 255, 0.4)'
-					},
-					'50%': {
-						boxShadow: '0 0 25px rgba(255, 0, 255, 0.6)'
-					}
+				'double-pulse': {
+					'0%, 100%': { opacity: '1', transform: 'scale(1)' },
+					'50%': { opacity: '0.8', transform: 'scale(1.05)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-				float: 'float 3s ease-in-out infinite',
-				'gradient-x': 'gradient-x 4s ease infinite',
-				'border-glow': 'border-glow 3s linear infinite',
-				'shimmer-vivid': 'shimmer-vivid 2.5s ease-in-out infinite alternate',
-				'tilt': 'tilt 10s infinite linear',
-				'gradient': 'gradient 15s ease infinite',
-				'glow-pulse-vivid': 'glow-pulse-vivid 3s ease-in-out infinite'
+				'pulse-status': 'pulse-status 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+				'double-pulse': 'double-pulse 2s ease-in-out infinite'
 			}
 		}
 	},

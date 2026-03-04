@@ -47,30 +47,30 @@ export function TemplateDetails({ template }: TemplateDetailsProps) {
   const isPopular = template.id === "audio" || template.id === "art" || template.id === "nft"
 
   return (
-    <Card className="relative bg-card/40 dark:bg-card/20 backdrop-blur-2xl border border-border/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.1)] rounded-2xl overflow-hidden">
-      <CardHeader className={cn("pb-4 relative overflow-hidden", colorClasses.bgGradient)}>
-        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
-        <div className="relative">
-          <div className="flex items-start justify-between mb-3">
-            <div className={cn("p-3 rounded-xl backdrop-blur-md border shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]", colorClasses.iconBg)}>
-              <IconComponent className={cn("h-6 w-6", colorClasses.iconColor)} />
-            </div>
-            <div className="flex flex-col gap-1">
-              {isPopular && (
-                <Badge className="bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/50 text-[10px] tracking-wider uppercase shadow-[0_0_10px_rgba(245,158,11,0.2)] backdrop-blur-md">
-                  <Sparkles className="h-3 w-3 mr-1" />
-                  Popular
-                </Badge>
-              )}
-            </div>
-          </div>
+    <Card className="glass-panel overflow-hidden relative border-border/50">
+      {/* Gradient top border matching the new card style */}
+      <div className={cn("absolute top-0 inset-x-0 h-1 bg-gradient-to-r", colorClasses.borderGradient)} />
 
-          <CardTitle className="text-xl mb-2">{template.name} Template</CardTitle>
-          <div className="flex items-center gap-3 text-sm">
-            <Badge variant="outline" className="text-xs bg-black/5 dark:bg-black/20 border-white/10 dark:border-white/5 text-foreground/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
-              {template.category}
-            </Badge>
+      <CardHeader className="pt-8 pb-4">
+        <div className="flex items-start justify-between mb-4">
+          <div className={cn("p-3 rounded-xl backdrop-blur-md border", colorClasses.iconBg)}>
+            <IconComponent className={cn("h-7 w-7", colorClasses.iconColor)} />
           </div>
+          <div className="flex flex-col gap-1">
+            {isPopular && (
+              <Badge className="gap-1 bg-outrun-yellow/20 text-outrun-yellow border-outrun-yellow/30 shadow-[0_0_10px_rgba(255,255,0,0.2)] text-[10px] tracking-wider uppercase backdrop-blur-md">
+                <Sparkles className="h-3 w-3 mr-1" />
+                Popular
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        <CardTitle className="text-2xl mb-2 font-bold">{template.name}</CardTitle>
+        <div className="flex items-center gap-3 text-sm">
+          <Badge variant="outline" className="text-xs uppercase tracking-wider bg-transparent text-foreground/80">
+            {template.category}
+          </Badge>
         </div>
       </CardHeader>
 
@@ -153,63 +153,57 @@ function getIconComponent(iconName: string) {
   }
 }
 
-// Helper function to get Tailwind color classes based on the color name
 function getColorClasses(color: string) {
+  // Mapping the old abstract colors to the explicit Tailwind gradient classes used in CreationOptionCard for consistency
   switch (color) {
     case "blue":
+    case "sky":
+    case "indigo":
       return {
-        bgGradient: "bg-outrun-cyan/10",
+        borderGradient: "from-blue-500 to-blue-700",
+        iconBg: "bg-outrun-cyan/10 ring-1 ring-outrun-cyan/30",
+        iconColor: "text-outrun-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.8)]",
         bgLight: "bg-outrun-cyan/5 border border-outrun-cyan/20",
-        iconColor: "text-outrun-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.6)]",
-        iconBg: "bg-outrun-cyan/10 border-outrun-cyan/30",
-      }
-    case "purple":
-    case "violet":
-      return {
-        bgGradient: "bg-outrun-magenta/10",
-        bgLight: "bg-outrun-magenta/5 border border-outrun-magenta/20",
-        iconColor: "text-outrun-magenta drop-shadow-[0_0_8px_rgba(255,0,255,0.6)]",
-        iconBg: "bg-outrun-magenta/10 border-outrun-magenta/30",
-      }
-    case "amber":
-    case "orange":
-      return {
-        bgGradient: "bg-outrun-yellow/10",
-        bgLight: "bg-amber-500/5 border border-amber-500/20",
-        iconColor: "text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]",
-        iconBg: "bg-amber-500/10 border-amber-500/30",
       }
     case "teal":
     case "emerald":
       return {
-        bgGradient: "bg-neon-cyan/10",
-        bgLight: "bg-teal-500/5 border border-teal-500/20",
-        iconColor: "text-teal-500 drop-shadow-[0_0_8px_rgba(20,184,166,0.6)]",
-        iconBg: "bg-teal-500/10 border-teal-500/30",
+        borderGradient: "from-green-500 to-green-700",
+        iconBg: "bg-green-500/10 ring-1 ring-green-500/30",
+        iconColor: "text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]",
+        bgLight: "bg-green-500/5 border border-green-500/20",
+      }
+    case "purple":
+    case "violet":
+      return {
+        borderGradient: "from-purple-500 to-purple-700",
+        iconBg: "bg-outrun-purple/10 ring-1 ring-outrun-purple/30",
+        iconColor: "text-outrun-purple drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]",
+        bgLight: "bg-outrun-purple/5 border border-outrun-purple/20",
+      }
+    case "amber":
+    case "orange":
+      return {
+        borderGradient: "from-amber-500 to-amber-700",
+        iconBg: "bg-outrun-yellow/10 ring-1 ring-outrun-yellow/30",
+        iconColor: "text-outrun-yellow drop-shadow-[0_0_8px_rgba(255,255,0,0.8)]",
+        bgLight: "bg-outrun-yellow/5 border border-outrun-yellow/20",
       }
     case "red":
       return {
-        bgGradient: "bg-red-500/10",
-        bgLight: "bg-red-500/5 border border-red-500/20",
-        iconColor: "text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]",
-        iconBg: "bg-red-500/10 border-red-500/30",
-      }
-    case "sky":
-    case "indigo":
-      return {
-        bgGradient: "bg-blue-500/10",
-        bgLight: "bg-blue-500/5 border border-blue-500/20",
-        iconColor: "text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]",
-        iconBg: "bg-blue-500/10 border-blue-500/30",
+        borderGradient: "from-orange-500 to-red-500",
+        iconBg: "bg-orange-500/10 ring-1 ring-orange-500/30",
+        iconColor: "text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]",
+        bgLight: "bg-orange-500/5 border border-orange-500/20",
       }
     case "slate":
     case "gray":
     default:
       return {
-        bgGradient: "bg-muted/30",
+        borderGradient: "from-gray-500 to-gray-700",
+        iconBg: "bg-muted/50 ring-1 ring-muted",
+        iconColor: "text-muted-foreground",
         bgLight: "bg-muted/30 border border-border",
-        iconColor: "text-foreground",
-        iconBg: "bg-foreground/5 border-border",
       }
   }
 }

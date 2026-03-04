@@ -50,15 +50,14 @@ export function TemplateCard({ template, isSelected, onSelect }: TemplateCardPro
   return (
     <Card
       className={cn(
-        "group overflow-hidden cursor-pointer transition-all duration-500 relative rounded-2xl border border-border/50 bg-card/40 dark:bg-card/20 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.1)]",
-        isSelected
-          ? `ring-1 ring-offset-2 ring-offset-background ring-${colorClasses.border.split('-')[1]} border-${colorClasses.border.split('-')[1]} shadow-glow-md shadow-${colorClasses.border.split('-')[1]}/30`
-          : "hover:-translate-y-1 hover:border-white/20 dark:hover:border-white/10"
+        "glass-panel overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,255,255,0.12)] hover:-translate-y-2 group relative",
+        "border-border/50 hover:border-outrun-cyan/30",
+        isSelected ? "ring-2 ring-outrun-cyan ring-offset-2 ring-offset-background shadow-lg shadow-outrun-cyan/20" : "",
       )}
       onClick={onSelect}
     >
-      {/* Status Badges */}
-      <div className={cn("absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity", colorClasses.topBorderGradient)} />
+      {/* Gradient top border matching CreationOptionCard */}
+      <div className={cn("h-1 bg-gradient-to-r", colorClasses.borderGradient)} />
       {/* Status Badges */}
       <div className="absolute top-3 right-3 flex flex-col gap-1 z-20">
         {isPopular && (
@@ -69,61 +68,67 @@ export function TemplateCard({ template, isSelected, onSelect }: TemplateCardPro
         )}
       </div>
 
-      <CardContent className="p-0">
-        {/* Header with gradient background */}
-        <div className={cn("p-6 pb-4 relative overflow-hidden", colorClasses.bgGradient)}>
-          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent mix-blend-overlay" />
-          <div className="relative flex items-start justify-between z-10">
-            <div className={cn("p-3 rounded-xl backdrop-blur-md border shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] transition-transform duration-500 group-hover:scale-110", colorClasses.iconBg)}>
-              <IconComponent className={cn("h-6 w-6", colorClasses.iconColor)} />
-            </div>
+      <CardContent className="p-6 space-y-4">
+        {/* Header (No background block, just icon matching CreationOptionCard) */}
+        <div className="flex items-start gap-4">
+          <div
+            className={cn(
+              "p-3 rounded-xl transition-transform group-hover:scale-110",
+              colorClasses.iconBg
+            )}
+          >
+            <IconComponent className={cn("h-7 w-7", colorClasses.iconColor)} />
+          </div>
+          <div className="flex-1 min-w-0">
             {isSelected && (
-              <div className={cn("h-6 w-6 rounded-full flex items-center justify-center backdrop-blur-md border shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]", colorClasses.iconBg)}>
-                <CheckCircle2 className={cn("h-4 w-4", colorClasses.iconColor)} />
+              <div className="mb-2">
+                <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
+                  <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
+                </div>
               </div>
             )}
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6 pt-2">
-          <div className="mb-3">
-            <h3 className="text-lg font-semibold mb-1 tracking-wide">{template.name}</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Badge variant="secondary" className="text-[10px] border border-white/10 dark:border-white/5 uppercase tracking-wider bg-black/5 dark:bg-black/20 text-foreground/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
-                {template.category}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h3 className="text-xl font-bold group-hover:text-primary transition-colors">{template.name}</h3>
+            <Badge variant="outline" className="text-[10px] uppercase tracking-wider bg-transparent text-foreground/80">
+              {template.category}
+            </Badge>
+          </div>
+
+          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{template.description}</p>
+        </div>
+
+        {/* Features Preview */}
+        <div className="space-y-2">
+          <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Key Features</h4>
+          <div className="flex flex-wrap gap-1.5">
+            {template.features.slice(0, 2).map((feature, index) => (
+              <Badge key={index} variant="secondary" className="text-[10px] bg-card/50 dark:bg-black/20 border border-white/10 dark:border-white/5 text-foreground/80">
+                {feature}
               </Badge>
-            </div>
+            ))}
+            {template.features.length > 2 && (
+              <Badge variant="secondary" className="text-[10px] bg-card/50 dark:bg-black/20 border border-white/10 dark:border-white/5 text-foreground/80">
+                +{template.features.length - 2} more
+              </Badge>
+            )}
           </div>
+        </div>
 
-          <p className="text-sm text-foreground/80 line-clamp-2 mb-4 leading-relaxed">{template.description}</p>
-
-          {/* Features Preview */}
-          <div className="space-y-2">
-            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Key Features</h4>
-            <div className="flex flex-wrap gap-1.5">
-              {template.features.slice(0, 2).map((feature, index) => (
-                <Badge key={index} variant="secondary" className="text-[10px] bg-card/50 dark:bg-black/20 border border-white/10 dark:border-white/5 text-foreground/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
-                  {feature}
-                </Badge>
-              ))}
-              {template.features.length > 2 && (
-                <Badge variant="secondary" className="text-[10px] bg-card/50 dark:bg-black/20 border border-white/10 dark:border-white/5 text-foreground/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
-                  +{template.features.length - 2} more
-                </Badge>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-5 pt-2 relative z-10">
-            <Link href={`/create/templates/${template.id}`} onClick={(e) => e.stopPropagation()} className="block w-full">
-              <Button className={cn("w-full gap-2 transition-all active:scale-[0.98] font-bold tracking-wide",
-                isSelected ? "bg-gradient-to-r from-outrun-cyan to-outrun-magenta text-white shadow-[0_0_15px_rgba(0,255,255,0.4)] border-none hover:-translate-y-0.5" : `bg-card/40 dark:bg-white/5 backdrop-blur-md hover:bg-white/10 dark:hover:bg-white/10 border border-border/50 text-foreground group-[&:hover]:border-primary/50 dark:group-[&:hover]:border-white/30 group-[&:hover]:text-primary dark:group-[&:hover]:text-white  transition-all duration-300`)} size="sm">
-                Use Template
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
-            </Link>
-          </div>
+        {/* Action Button */}
+        <div className="pt-2">
+          <Link href={`/create/templates/${template.id}`} onClick={(e) => e.stopPropagation()} className="block w-full">
+            <Button
+              className="w-full gap-2 transition-all duration-300 gradient-vivid shadow-glow-sm shadow-neon-cyan/20 hover:scale-[1.02] text-white font-bold tracking-wider"
+              size="lg"
+            >
+              Use Template <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Button>
+          </Link>
         </div>
 
       </CardContent>
@@ -163,68 +168,50 @@ function getIconComponent(iconName: string) {
 
 // Helper function to get Tailwind color classes based on the color name
 function getColorClasses(color: string) {
+  // Mapping the old abstract colors to the explicit Tailwind gradient classes used in CreationOptionCard for consistency
   switch (color) {
     case "blue":
+    case "sky":
+    case "indigo":
       return {
-        bgGradient: "bg-outrun-cyan/5 dark:bg-outrun-cyan/10",
-        iconBg: "bg-outrun-cyan/10 border-outrun-cyan/30 group-hover:border-outrun-cyan/60 group-hover:bg-outrun-cyan/20",
-        iconColor: "text-outrun-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.6)]",
-        border: "border-outrun-cyan",
-        topBorderGradient: "via-outrun-cyan/70"
-      }
-    case "purple":
-    case "violet":
-      return {
-        bgGradient: "bg-outrun-magenta/5 dark:bg-outrun-magenta/10",
-        iconBg: "bg-outrun-magenta/10 border-outrun-magenta/30 group-hover:border-outrun-magenta/60 group-hover:bg-outrun-magenta/20",
-        iconColor: "text-outrun-magenta drop-shadow-[0_0_8px_rgba(255,0,255,0.6)]",
-        border: "border-outrun-magenta",
-        topBorderGradient: "via-outrun-magenta/70"
-      }
-    case "amber":
-    case "orange":
-      return {
-        bgGradient: "bg-outrun-yellow/5 dark:bg-outrun-yellow/10",
-        iconBg: "bg-amber-500/10 border-amber-500/30 group-hover:border-amber-500/60 group-hover:bg-amber-500/20",
-        iconColor: "text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]",
-        border: "border-amber-500",
-        topBorderGradient: "via-amber-500/70"
+        borderGradient: "from-blue-500 to-blue-700",
+        iconBg: "bg-outrun-cyan/10 ring-1 ring-outrun-cyan/30",
+        iconColor: "text-outrun-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.8)]",
       }
     case "teal":
     case "emerald":
       return {
-        bgGradient: "bg-neon-cyan/5 dark:bg-neon-cyan/10",
-        iconBg: "bg-teal-500/10 border-teal-500/30 group-hover:border-teal-500/60 group-hover:bg-teal-500/20",
-        iconColor: "text-teal-500 drop-shadow-[0_0_8px_rgba(20,184,166,0.6)]",
-        border: "border-teal-500",
-        topBorderGradient: "via-teal-500/70"
+        borderGradient: "from-green-500 to-green-700",
+        iconBg: "bg-green-500/10 ring-1 ring-green-500/30",
+        iconColor: "text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]",
+      }
+    case "purple":
+    case "violet":
+      return {
+        borderGradient: "from-purple-500 to-purple-700",
+        iconBg: "bg-outrun-purple/10 ring-1 ring-outrun-purple/30",
+        iconColor: "text-outrun-purple drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]",
+      }
+    case "amber":
+    case "orange":
+      return {
+        borderGradient: "from-amber-500 to-amber-700",
+        iconBg: "bg-outrun-yellow/10 ring-1 ring-outrun-yellow/30",
+        iconColor: "text-outrun-yellow drop-shadow-[0_0_8px_rgba(255,255,0,0.8)]",
       }
     case "red":
       return {
-        bgGradient: "bg-red-500/5 dark:bg-red-500/10",
-        iconBg: "bg-red-500/10 border-red-500/30 group-hover:border-red-500/60 group-hover:bg-red-500/20",
-        iconColor: "text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]",
-        border: "border-red-500",
-        topBorderGradient: "via-red-500/70"
-      }
-    case "sky":
-    case "indigo":
-      return {
-        bgGradient: "bg-blue-500/5 dark:bg-blue-500/10",
-        iconBg: "bg-blue-500/10 border-blue-500/30 group-hover:border-blue-500/60 group-hover:bg-blue-500/20",
-        iconColor: "text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]",
-        border: "border-blue-500",
-        topBorderGradient: "via-blue-500/70"
+        borderGradient: "from-orange-500 to-red-500",
+        iconBg: "bg-orange-500/10 ring-1 ring-orange-500/30",
+        iconColor: "text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]",
       }
     case "slate":
     case "gray":
     default:
       return {
-        bgGradient: "bg-muted/30 dark:bg-white/5",
-        iconBg: "bg-foreground/5 border-border group-hover:border-primary/40 group-hover:bg-foreground/10",
-        iconColor: "text-foreground",
-        border: "border-border",
-        topBorderGradient: "via-primary/50"
+        borderGradient: "from-gray-500 to-gray-700",
+        iconBg: "bg-muted/50 ring-1 ring-muted",
+        iconColor: "text-muted-foreground",
       }
   }
 }

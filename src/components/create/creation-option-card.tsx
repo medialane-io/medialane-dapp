@@ -61,9 +61,9 @@ export function CreationOptionCard({ option, viewMode, isSelected, onSelect }: C
   return (
     <Card
       className={cn(
-        "glass-card overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,255,255,0.12)] hover:-translate-y-2 group relative",
-        "hover:border-outrun-cyan/30",
-        isSelected ? "ring-2 ring-outrun-cyan ring-offset-2 shadow-lg" : "",
+        "glass-panel overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,255,255,0.12)] hover:-translate-y-2 group relative",
+        "border-border/50 hover:border-outrun-cyan/30",
+        isSelected ? "ring-2 ring-outrun-cyan ring-offset-2 ring-offset-background shadow-lg shadow-outrun-cyan/20" : "",
       )}
       onClick={onSelect}
     >
