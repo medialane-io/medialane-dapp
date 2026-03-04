@@ -37,6 +37,7 @@ export interface AssetFormState {
   // Marketplace listing
   listOnMarketplace: boolean
   listingPrice: string
+  listingDuration: number
 }
 
 const initialState: AssetFormState = {
@@ -65,6 +66,7 @@ const initialState: AssetFormState = {
   // Marketplace listing
   listOnMarketplace: false,
   listingPrice: "",
+  listingDuration: 2592000, // 30 days default
 }
 
 export function useAssetForm(defaultValues?: Partial<AssetFormState>) {

@@ -42,6 +42,9 @@ import { MintSuccessDrawer, MintDrawerStep } from "@/components/mint-success-dra
 import { IMintResult } from "@/hooks/use-create-asset"
 import { licenseTypes, geographicScopes } from "@/types/asset"
 import { cn, shortenAddress } from "@/lib/utils"
+import { useMarketplace } from "@/hooks/use-marketplace"
+import { SUPPORTED_TOKENS } from "@/lib/constants"
+import { MarketplacePricing } from "@/components/asset-creation/marketplace-pricing"
 
 const remixTypes = [
     {
@@ -122,10 +125,15 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
         licenseDuration: "perpetual",
         grantBack: "",
         aiRights: "",
+        // Monetization
+        listOnMarketplace: false,
+        listingPrice: "",
     })
 
     // Hooks
     const { uploadToIpfs, uploadMetadataToIpfs, progress: uploadProgress } = useIpfsUpload()
+    const { createListing } = useMarketplace()
+    const usdcToken = SUPPORTED_TOKENS.find(t => t.symbol === "USDC")
 
     // Get selected collection
     const selectedCollection = useMemo(() =>
@@ -327,6 +335,47 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                     collectionId: selectedCollection.id.toString(),
                     assetSlug: mintedId ? `${selectedCollection.nftAddress}-${mintedId}` : ""
                 });
+
+                setProgress(90);
+
+                // --- AUTO-LIST ON MARKETPLACE ---
+                if (formData.listOnMarketplace && formData.listingPrice && parseFloat(formData.listingPrice) > 0) {
+                    try {
+                        setCreationStep("listing" as any);
+                        setProgress(92);
+
+                        const usdcAddress = usdcToken?.address || "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8";
+                        const usdcDecimals = usdcToken?.decimals || 6;
+                        const duration = 30 * 24 * 60 * 60; // 30 days default
+
+                        setProgress(95);
+
+                        // We safely pass the known addresses string
+                        const nftAddressForListing = selectedCollection.nftAddress as string || "";
+
+                        const listingTxHash = await createListing(
+                            nftAddressForListing,
+                            mintedId,
+                            formData.listingPrice,
+                            "USDC",
+                            duration
+                        );
+
+                        if (listingTxHash) {
+                            toast({
+                                title: "🏷️ Listed on Marketplace!",
+                                description: `Your remix is now listed for ${formData.listingPrice} USDC.`,
+                            });
+                        }
+                    } catch (listingError) {
+                        console.error("Auto-listing failed:", listingError);
+                        toast({
+                            title: "Mint succeeded, listing failed",
+                            description: "Your remix was minted but couldn't be listed. You can list it manually from the asset page.",
+                            variant: "destructive",
+                        });
+                    }
+                }
 
                 setCreationStep("success");
                 setProgress(100);
@@ -786,6 +835,12 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                     </div>
                 </div>
 
+                {/* Monetization */}
+                <MarketplacePricing
+                    formState={formData}
+                    updateFormField={(field, value) => setFormData(prev => ({ ...prev, [field]: value }))}
+                />
+
                 {/* Submit Section */}
                 {/* Submit Section */}
                 <div className="glass-card p-6 flex flex-col sm:flex-row gap-6 items-center justify-between z-20 backdrop-blur-xl border-primary/20 shadow-2xl">
@@ -828,7 +883,8 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                 data={{
                     "Remix Type": remixTypes.find(t => t.id === formData.remixType)?.name || "Unknown",
                     "License": licenseTypes.find(l => l.id === formData.license)?.name || "Unknown",
-                    "Collection": selectedCollection?.name || "Unknown"
+                    "Collection": selectedCollection?.name || "Unknown",
+                    ...(formData.listOnMarketplace && formData.listingPrice ? { "Listing Price": `${formData.listingPrice} USDC` } : {}),
                 }}
             />
         </div>

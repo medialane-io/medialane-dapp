@@ -238,7 +238,7 @@ export default function CreateAssetPage() {
           const usdcAddress = usdcToken?.address || "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8";
           const usdcDecimals = usdcToken?.decimals || 6;
 
-          const duration = 30 * 24 * 60 * 60; // 30 days default
+          const duration = formState.listingDuration || 30 * 24 * 60 * 60; // Form duration or 30 days default
 
           setMintProgress(95);
           const listingTxHash = await createListing(
