@@ -12,17 +12,22 @@ import {
     Fingerprint,
     Lock,
     AlertTriangle,
+    Tag,
+    ShoppingCart,
+    Gavel,
+    XCircle,
 } from "lucide-react"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface ProvenanceEvent {
     id: string
-    type: "mint" | "transfer" | "license" | "modification" | "verification" | "dispute"
+    type: "mint" | "transfer" | "license" | "modification" | "verification" | "dispute" | "list" | "sale" | "offer" | "cancel" | "accept"
     title: string
     description: string
     from?: string
     to?: string
+    price?: string
     date?: string
     timestamp: string
     transactionHash?: string
@@ -33,9 +38,10 @@ interface ProvenanceEvent {
 interface SimpleProvenanceProps {
     events: ProvenanceEvent[]
     compact?: boolean
+    isLoading?: boolean
 }
 
-export function SimpleProvenance({ events, compact = false }: SimpleProvenanceProps) {
+export function SimpleProvenance({ events, compact = false, isLoading = false }: SimpleProvenanceProps) {
     const [copied, setCopied] = useState<string | null>(null)
 
     const handleCopy = async (text: string, type: string) => {
@@ -56,6 +62,15 @@ export function SimpleProvenance({ events, compact = false }: SimpleProvenancePr
                 return <ArrowRight className="h-4 w-4" />
             case "license":
                 return <Lock className="h-4 w-4" />
+            case "list":
+                return <Tag className="h-4 w-4" />
+            case "sale":
+            case "accept":
+                return <ShoppingCart className="h-4 w-4" />
+            case "offer":
+                return <Gavel className="h-4 w-4" />
+            case "cancel":
+                return <XCircle className="h-4 w-4" />
             case "modification":
                 return <Fingerprint className="h-4 w-4" />
             case "verification":
@@ -71,6 +86,11 @@ export function SimpleProvenance({ events, compact = false }: SimpleProvenancePr
         switch (type) {
             case "mint": return "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 border-blue-200 dark:border-blue-800"
             case "transfer": return "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+            case "sale":
+            case "accept": return "bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400 border-green-200 dark:border-green-800"
+            case "cancel": return "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 border-red-200 dark:border-red-800"
+            case "offer": return "bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400 border-purple-200 dark:border-purple-800"
+            case "list": return "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 border-blue-200 dark:border-blue-800"
             case "license": return "bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400 border-purple-200 dark:border-purple-800"
             default: return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700"
         }
@@ -93,6 +113,16 @@ export function SimpleProvenance({ events, compact = false }: SimpleProvenancePr
     const truncateAddress = (address: string) => {
         if (!address) return "0x00...0000"
         return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
+    }
+
+    if (isLoading && events.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-12 px-4 text-center border rounded-xl border-dashed bg-muted/30">
+                <Activity className="h-10 w-10 text-muted-foreground/40 mb-3 animate-pulse" />
+                <p className="text-foreground/80 font-medium animate-pulse">Retrieving onchain history...</p>
+                <p className="text-muted-foreground text-xs mt-1">This may take a few seconds</p>
+            </div>
+        )
     }
 
     if (events.length === 0) {
@@ -119,7 +149,7 @@ export function SimpleProvenance({ events, compact = false }: SimpleProvenancePr
                             </div>
 
                             {/* Content Card */}
-                            <div className="flex flex-col bg-card/50 border rounded-xl p-4 transition-all hover:bg-card hover:border-primary/20 hover:shadow-sm">
+                            <div className="flex flex-col bg-card/50 border border-border/10 rounded-xl p-4 transition-all hover:bg-card hover:border-border/30 hover:shadow-sm">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                                     <div className="flex items-center gap-2">
                                         <span className="font-semibold text-sm text-foreground">{event.title}</span>
@@ -139,13 +169,25 @@ export function SimpleProvenance({ events, compact = false }: SimpleProvenancePr
                                             {event.from && BigInt(event.from) !== 0n ? truncateAddress(event.from) : "Null Address"}
                                         </span>
                                     </div>
-                                    <ArrowRight className="h-3 w-3 opacity-50 shrink-0" />
-                                    <div className="flex items-center">
-                                        <span className="w-8">To:</span>
-                                        <span className="text-foreground/80 truncate max-w-[100px] sm:max-w-none">
-                                            {event.to ? truncateAddress(event.to) : "Unknown"}
-                                        </span>
-                                    </div>
+                                    {event.to && (
+                                        <>
+                                            <ArrowRight className="h-3 w-3 opacity-50 shrink-0" />
+                                            <div className="flex items-center">
+                                                <span className="w-8">To:</span>
+                                                <span className="text-foreground/80 truncate max-w-[100px] sm:max-w-none">
+                                                    {truncateAddress(event.to)}
+                                                </span>
+                                            </div>
+                                        </>
+                                    )}
+                                    {event.price && (
+                                        <>
+                                            <div className="mx-2 h-3 w-px bg-border/50 shrink-0 hidden sm:block" />
+                                            <div className="flex items-center gap-1.5 ml-auto text-foreground font-semibold">
+                                                <span>{event.price}</span>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
 
                                 {event.transactionHash && (

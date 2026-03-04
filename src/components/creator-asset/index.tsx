@@ -18,11 +18,11 @@ import { OverviewTab } from "@/components/asset/overview-tab";
 import { LicenseTab } from "@/components/asset/license-tab";
 import { OwnerTab } from "@/components/asset/owner-tab";
 import { AssetTimelineTab } from "./creator-asset-timeline-tab";
-import { AssetHistory } from "@/components/marketplace/asset/asset-history";
 import { ReportAssetDialog } from "@/components/report-asset-dialog";
 import { useAsset } from "@/hooks/use-asset";
 import { AssetActionPanel } from "@/components/marketplace/asset/asset-action-panel";
 import { MarketplaceActions } from "@/components/marketplace/marketplace-actions";
+import { useMarketplaceListings } from "@/hooks/use-marketplace-events";
 import { useGetCollection } from "@/hooks/use-collection";
 import { AssetLoadingState } from "@/components/asset/asset-loading-state";
 import { AssetErrorBoundary } from "@/components/asset/asset-error-boundary";
@@ -96,13 +96,84 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
     Number.isFinite(tokenId) ? tokenId : undefined
   );
 
-  const { events: provenanceEventsData } = useAssetProvenanceEvents(nftAddress || "", tokenIdStr || "");
+  const { events: provenanceEventsData, isLoading: isLoadingProvenance } = useAssetProvenanceEvents(nftAddress || "", tokenIdStr || "");
+  const { allOrders } = useMarketplaceListings();
 
   const provenanceEvents = useMemo(() => {
-    // The hook returns processed events, we just need to ensure they match the interface if needed or just pass them through
-    // The hook in useEvents.ts returns objects compatible with SimpleProvenance
-    return provenanceEventsData || [];
-  }, [provenanceEventsData]);
+    const combinedEvents: any[] = [];
+
+    // 1. Add Protocol Provenance Events
+    if (provenanceEventsData && provenanceEventsData.length > 0) {
+      combinedEvents.push(...provenanceEventsData);
+    }
+
+    // 2. Add Marketplace Activity Events
+    if (allOrders && allOrders.length > 0 && nftAddress && tokenIdStr) {
+      const normalizedNft = normalizeStarknetAddress(nftAddress).toLowerCase();
+      let targetId: bigint;
+      try {
+        targetId = BigInt(tokenIdStr);
+
+        const assetOrders = allOrders.filter(order => {
+          try {
+            if (order.offerType === "ERC721") {
+              const oToken = normalizeStarknetAddress(order.offerToken).toLowerCase();
+              const oId = BigInt(order.offerIdentifier);
+              return oToken === normalizedNft && oId === targetId;
+            }
+            if (order.offerType === "ERC20" && order.considerationType === "ERC721") {
+              const cToken = normalizeStarknetAddress(order.considerationToken).toLowerCase();
+              const cId = BigInt(order.considerationIdentifier);
+              return cToken === normalizedNft && cId === targetId;
+            }
+            return false;
+          } catch { return false; }
+        });
+
+        // Convert orders to ProvenanceEvent format  
+        const { lookupToken, formatPrice } = require("@/lib/activity-ui");
+
+        assetOrders.forEach(order => {
+          const isListing = order.offerType === "ERC721";
+          let type: "list" | "sale" | "offer" | "cancel" | "accept" = "list";
+          let title = "";
+          let description = "";
+
+          if (isListing) {
+            if (order.status === "fulfilled") { type = "sale"; title = "Asset Sold"; description = "Purchased on marketplace"; }
+            else if (order.status === "cancelled") { type = "cancel"; title = "Listing Cancelled"; description = "Seller removed the listing"; }
+            else { type = "list"; title = "Asset Listed"; description = "Listed for sale on marketplace"; }
+          } else {
+            if (order.status === "fulfilled") { type = "accept"; title = "Offer Accepted"; description = "Owner accepted an offer"; }
+            else if (order.status === "cancelled") { type = "cancel"; title = "Offer Cancelled"; description = "Buyer rescinded offer"; }
+            else { type = "offer"; title = "Offer Placed"; description = "User made an offer"; }
+          }
+
+          const priceToken = isListing ? order.considerationToken : order.offerToken;
+          const priceAmount = isListing ? order.considerationAmount : order.offerAmount;
+          const { symbol, decimals } = lookupToken ? lookupToken(priceToken) ?? { symbol: "TOKEN", decimals: 18 } : { symbol: "USDC", decimals: 6 };
+          const priceString = formatPrice ? `${formatPrice(priceAmount, decimals)} ${symbol}` : "Price Data";
+
+          combinedEvents.push({
+            id: order.orderHash,
+            type,
+            title,
+            description,
+            from: order.offerer,
+            price: priceString,
+            timestamp: new Date(order.startTime * 1000).toISOString(),
+            transactionHash: undefined,
+            verified: true,
+          });
+        });
+      } catch (e) {
+        console.warn("Failed to parse asset events", e);
+      }
+    }
+
+    // Sort all events by timestamp descending
+    return combinedEvents.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }, [provenanceEventsData, allOrders, nftAddress, tokenIdStr]);
 
   const enhancedAsset = useMemo(() => {
     if (!asset) return null;
@@ -364,6 +435,7 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
                           <SimpleProvenance
                             events={provenanceEvents}
                             compact={true}
+                            isLoading={isLoadingProvenance}
                           />
                         ) : (
                           <div className="flex items-center justify-center h-48 text-muted-foreground">
@@ -372,12 +444,6 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
                         )}
                       </Card>
 
-                      <div className="space-y-4">
-                        <h3 className="text-xl font-semibold tracking-tight">Activity</h3>
-                        <Card className="border-border/50 p-6">
-                          <AssetHistory nftAddress={nftAddress || ""} tokenId={String(tokenId)} />
-                        </Card>
-                      </div>
                     </TabsContent>
 
                     <TabsContent value="license" className="mt-6 space-y-8">

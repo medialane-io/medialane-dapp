@@ -27,6 +27,10 @@ import {
   Users,
   Activity,
   User,
+  Tag,
+  ShoppingCart,
+  Gavel,
+  XCircle,
 } from "lucide-react"
 import { useState } from "react"
 import { AddressLink } from "@/components/ui/address-link"
@@ -38,11 +42,12 @@ import Link from "next/link"
 
 interface ProvenanceEvent {
   id: string
-  type: "mint" | "transfer" | "license" | "modification" | "verification" | "dispute"
+  type: "mint" | "transfer" | "license" | "modification" | "verification" | "dispute" | "list" | "sale" | "offer" | "cancel" | "accept"
   title: string
   description: string
   from?: string
   to?: string
+  price?: string
   date?: string
   timestamp: string
   transactionHash?: string
@@ -128,6 +133,15 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
         return <ArrowRight className="h-5 w-5" />
       case "license":
         return <Lock className="h-5 w-5" />
+      case "list":
+        return <Tag className="h-5 w-5" />
+      case "sale":
+      case "accept":
+        return <ShoppingCart className="h-5 w-5" />
+      case "offer":
+        return <Gavel className="h-5 w-5" />
+      case "cancel":
+        return <XCircle className="h-5 w-5" />
       case "modification":
         return <Fingerprint className="h-5 w-5" />
       case "verification":
@@ -141,11 +155,16 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
 
   const getEventColorCode = (type: ProvenanceEvent["type"]) => {
     switch (type) {
-      case "mint": return "from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 shadow-blue-500/10"
-      case "transfer": return "from-emerald-500 to-teal-600 dark:from-emerald-600 dark:to-teal-700 shadow-emerald-500/10"
-      case "license": return "from-purple-500 to-pink-600 dark:from-purple-600 dark:to-pink-700 shadow-purple-500/10"
-      case "verification": return "from-cyan-500 to-blue-600 shadow-cyan-500/20"
-      default: return "from-orange-500 to-red-600 dark:from-orange-600 dark:to-red-700 shadow-orange-500/10"
+      case "mint": return "from-blue-500/80 to-indigo-600/80 dark:from-blue-600/80 dark:to-indigo-700/80 shadow-sm"
+      case "transfer": return "from-emerald-500/80 to-teal-600/80 dark:from-emerald-600/80 dark:to-teal-700/80 shadow-sm"
+      case "sale":
+      case "accept": return "from-green-500/80 to-emerald-600/80 dark:from-green-600/80 dark:to-emerald-700/80 shadow-sm"
+      case "cancel": return "from-red-500/80 to-rose-600/80 dark:from-red-600/80 dark:to-rose-700/80 shadow-sm"
+      case "offer":
+      case "license": return "from-purple-500/80 to-pink-600/80 dark:from-purple-600/80 dark:to-pink-700/80 shadow-sm"
+      case "list": return "from-blue-400/80 to-indigo-500/80 dark:from-blue-500/80 dark:to-indigo-600/80 shadow-sm"
+      case "verification": return "from-cyan-500/80 to-blue-600/80 shadow-sm"
+      default: return "from-orange-500/80 to-red-600/80 dark:from-orange-600/80 dark:to-red-700/80 shadow-sm"
     }
   }
 
@@ -174,10 +193,10 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
   return (
     <div className="relative space-y-12 pb-20">
       {/* Main Asset Section - Focus on Ownership */}
-      <section className="relative overflow-hidden glass-card backdrop-blur-2xl transition-colors animate-in fade-in zoom-in duration-500">
+      <section className="relative transition-colors animate-in fade-in zoom-in duration-500">
         <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 lg:gap-12 min-h-[500px]">
           {/* Main Hero Image - Half width flex */}
-          <div className="flex-shrink-0 relative group w-full lg:w-1/2 h-[400px] lg:h-[500px] overflow-hidden rounded-2xl shadow-2xl border border-white/10 bg-black/20 backdrop-blur-sm">
+          <div className="flex-shrink-0 relative group w-full lg:w-1/2 h-[400px] lg:h-[500px] overflow-hidden rounded-2xl border border-border/10 bg-muted/10">
             <motion.div
               initial={{ scale: 1.05, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -217,7 +236,7 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
               {/* Creator Info */}
               <div className="space-y-4">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Creator</p>
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-secondary/30 border border-white/10 backdrop-blur-md group hover:bg-secondary/50 transition-all duration-300 shadow-xl">
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30 border border-border/10 group hover:bg-muted/50 transition-all duration-300">
                   <div className="min-w-0">
                     <AddressLink address={asset.creator.address} className="font-mono block text-foreground" />
                   </div>
@@ -227,7 +246,7 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
               {/* Current Owner Info */}
               <div className="space-y-4">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Owner</p>
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-primary/10 border border-primary/20 backdrop-blur-md group hover:bg-primary/20 transition-all duration-300 shadow-xl shadow-primary/5">
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-primary/5 border border-primary/10 group hover:bg-primary/10 transition-all duration-300">
                   <div className="min-w-0">
                     <AddressLink address={asset.currentOwner.address} className="font-mono block text-foreground" />
                   </div>
@@ -246,7 +265,7 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
                 <span className="text-sm font-bold text-foreground/80">{asset.blockchain}</span>
               </div>
               <div className="ml-auto">
-                <Badge variant="outline" className="rounded-xl px-4 py-1.5 border-white/10 bg-background/50 backdrop-blur-md shadow-lg hover:bg-accent transition-colors font-medium text-foreground">
+                <Badge variant="outline" className="rounded-xl px-4 py-1.5 border-border/20 bg-muted/10 font-medium text-foreground">
                   ERC-721
                 </Badge>
               </div>
@@ -301,7 +320,7 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
                   </div>
 
                   {/* Event Card */}
-                  <div className="p-5 sm:p-6 rounded-2xl border border-white/5 bg-background/40 shadow-2xl backdrop-blur-xl hover:border-white/10 hover:bg-background/60 transition-all duration-300">
+                  <div className="p-5 sm:p-6 rounded-2xl glass-panel shadow-sm hover:shadow-md hover:border-border/30">
                     {/* Header */}
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
                       <div>
@@ -343,7 +362,7 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
                     </div>
 
                     {/* From → To */}
-                    <div className="flex items-center gap-3 text-sm">
+                    <div className="flex items-center gap-3 text-sm flex-wrap">
                       <div className="flex items-center gap-2 min-w-0">
                         <div className="w-7 h-7 rounded-xl bg-white/5 flex items-center justify-center text-[10px] font-medium text-muted-foreground shrink-0">
                           {event.from && event.from !== "0x0" ? event.from.substring(2, 4).toUpperCase() : "Ø"}
@@ -353,16 +372,28 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
                         </span>
                       </div>
 
-                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+                      {event.to && (
+                        <>
+                          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-7 h-7 rounded-xl bg-primary/10 flex items-center justify-center text-[10px] font-medium text-primary shrink-0">
+                              {event.to.substring(2, 4).toUpperCase()}
+                            </div>
+                            <span className="font-mono text-xs text-foreground/80 truncate">
+                              {truncateAddress(event.to)}
+                            </span>
+                          </div>
+                        </>
+                      )}
 
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-7 h-7 rounded-xl bg-primary/10 flex items-center justify-center text-[10px] font-medium text-primary shrink-0">
-                          {event.to ? event.to.substring(2, 4).toUpperCase() : "??"}
-                        </div>
-                        <span className="font-mono text-xs text-foreground/80 truncate">
-                          {truncateAddress(event.to || "0x0")}
-                        </span>
-                      </div>
+                      {event.price && (
+                        <>
+                          <div className="h-3 w-px bg-border max-sm:hidden" />
+                          <div className="flex items-center font-semibold text-foreground">
+                            {event.price}
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -386,8 +417,8 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
       </section>
 
       {/* Modern Digital Fingerprint - Premium Glassmorphism style */}
-      <section className="p-8 rounded-2xl border border-white/5 bg-background/40 shadow-2xl backdrop-blur-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 -z-10" />
+      <section className="relative overflow-hidden pt-8 border-t border-border/10">
+        <div className="absolute top-0 right-0 w-64 h-64 -z-10 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full" />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
@@ -412,7 +443,7 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
               </Link>
             </Button>
 
-            <div className="bg-background/80 border border-border rounded-2xl p-6 group hover:border-primary/30 transition-all duration-500">
+            <div className="bg-muted/10 border border-border/20 rounded-2xl p-6 group hover:border-border/40 transition-all duration-300">
               <div className="flex items-center justify-between mb-3 px-1">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Metadata</span>
                 <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px] text-primary" onClick={() => handleCopy(asset.fingerprint, "fp")}>
