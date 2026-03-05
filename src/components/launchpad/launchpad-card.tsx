@@ -67,8 +67,8 @@ export function LaunchpadCard({ feature, index }: LaunchpadCardProps) {
             className={cn(
                 "h-full rounded-m3-2xl border transition-all duration-m3-medium ease-m3-standard",
                 isActive
-                    ? "bg-m3-surface-container shadow-m3-2 hover:shadow-m3-3 border-m3-outline-variant/15 cursor-pointer"
-                    : "bg-m3-surface-container-low shadow-m3-1 border-m3-outline-variant/10 opacity-60 cursor-default",
+                    ? "bg-m3-surface-container-lowest shadow-m3-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border-m3-outline-variant hover:border-blue-500/40 cursor-pointer"
+                    : "bg-m3-surface-variant/30 shadow-none border-transparent opacity-60 cursor-default",
             )}
         >
             <div className="relative z-[2] p-5 flex flex-col h-full">
@@ -76,15 +76,15 @@ export function LaunchpadCard({ feature, index }: LaunchpadCardProps) {
                 <div className="flex items-start justify-between mb-3">
                     <div
                         className={cn(
-                            "w-10 h-10 rounded-m3-lg flex items-center justify-center",
+                            "w-10 h-10 rounded-m3-lg flex items-center justify-center border",
                             isActive
-                                ? "bg-m3-primary-container"
-                                : "bg-m3-surface-variant",
+                                ? "bg-blue-600 border-blue-600 shadow-[0_4px_14px_rgba(37,99,235,0.4)]"
+                                : "bg-m3-surface-variant border-transparent",
                         )}
                     >
                         <Icon className={cn(
                             "h-[18px] w-[18px]",
-                            isActive ? "text-m3-on-primary-container" : "text-m3-on-surface-variant/50"
+                            isActive ? "text-white" : "text-m3-on-surface-variant/50"
                         )} />
                     </div>
 

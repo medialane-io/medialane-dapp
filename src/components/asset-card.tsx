@@ -102,8 +102,8 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
   const isLoading = shouldFetchMetadata && metadataLoading;
 
   return (
-    <Card className="overflow-hidden bg-m3-surface-container rounded-m3-xl shadow-m3-1 hover:shadow-m3-3 border border-m3-outline-variant/15 transition-shadow duration-m3-medium ease-m3-standard group flex flex-col h-full relative">
-      <Link href={assetUrl} className="block relative aspect-square overflow-hidden bg-m3-surface-container-high rounded-t-m3-xl">
+    <Card className="overflow-hidden bg-m3-surface-container-lowest rounded-m3-xl shadow-m3-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-m3-outline-variant hover:border-blue-600/40 transition-all duration-m3-medium ease-m3-standard group flex flex-col h-full relative">
+      <Link href={assetUrl} className="block relative aspect-square overflow-hidden bg-m3-surface-variant/30 rounded-t-m3-xl">
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center">
             <Loader2 className="w-8 h-8 animate-spin text-m3-on-surface-variant/30" />
@@ -198,7 +198,7 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
           isOwn ? (
             <Link href={assetUrl} className="w-full">
               <Button
-                variant="outline"
+                variant="default"
                 className="w-full h-9 gap-2 font-medium active:scale-[0.98] transition-transform"
               >
                 <Eye className="h-3.5 w-3.5" />
@@ -207,10 +207,10 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
             </Link>
           ) : (
             <Button
-              variant={isInCart ? "secondary" : "default"}
+              variant={isInCart ? "secondary" : "premium"}
               onTouchStart={handleCartAction}
               onClick={handleCartAction}
-              className="w-full h-9 gap-2 font-medium active:scale-[0.98] transition-transform"
+              className="w-full h-9 gap-2 font-bold active:scale-[0.98] transition-transform"
             >
               <ShoppingBag className="h-3.5 w-3.5" />
               {isInCart ? "In Cart" : "Add to Cart"}
@@ -219,7 +219,7 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
         ) : (
           <Link href={assetUrl} className="w-full">
             <Button
-              variant="outline"
+              variant="default"
               className="w-full h-9 gap-2 font-medium active:scale-[0.98] transition-transform"
             >
               <Eye className="h-3.5 w-3.5 mr-1" />

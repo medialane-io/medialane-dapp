@@ -94,7 +94,13 @@ export default function PortfolioClientPage() {
                             {error && <Alert variant="destructive">{error}</Alert>}
 
                             {/* Streaming Layout Shelves */}
-                            {validCollections.length === 0 && allUserAssets.length === 0 ? (
+                            {loading ? (
+                                <div className="flex flex-col items-center justify-center p-16 text-center opacity-80 animate-in fade-in duration-m3-long ease-m3-standard">
+                                    <Loader2 className="h-10 w-10 animate-spin text-m3-primary mb-6 mx-auto" />
+                                    <h3 className="text-xl font-semibold text-foreground mb-2">Retrieving Onchain Assets</h3>
+                                    <p className="text-muted-foreground max-w-md mx-auto">Please wait while we sync your portfolio from the Starknet blockchain.</p>
+                                </div>
+                            ) : validCollections.length === 0 && allUserAssets.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground bg-muted/5 rounded-2xl border border-border/10">
                                     <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mb-6">
                                         <Compass className="h-8 w-8 text-muted-foreground/50" />

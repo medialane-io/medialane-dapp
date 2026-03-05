@@ -20,7 +20,7 @@ export function CollectionCard({ collection, index }: CollectionCardProps) {
 
   return (
     <>
-      <div className="group relative w-full h-full rounded-m3-xl overflow-hidden bg-m3-surface-container isolate shadow-m3-1 hover:shadow-m3-3 transition-shadow duration-m3-medium ease-m3-standard">
+      <div className="group relative w-full h-full rounded-m3-xl overflow-hidden bg-m3-surface-container-lowest isolate shadow-m3-1 ring-1 ring-m3-outline-variant hover:ring-blue-600/40 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)] transition-all duration-m3-medium ease-m3-standard">
         <Link href={`/collections/${collection.nftAddress || collection.id}`} className="block h-full w-full">
           {/* Image Container */}
           <div className="relative aspect-[4/5] sm:aspect-[3/4] w-full overflow-hidden bg-m3-surface-variant/30">
@@ -65,9 +65,9 @@ export function CollectionCard({ collection, index }: CollectionCardProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="ghost"
+                variant="default"
                 size="icon"
-                className="h-8 w-8 rounded-m3-full bg-m3-inverse-surface/50 text-m3-inverse-on-surface hover:bg-m3-inverse-surface/70 border-none"
+                className="h-8 w-8 rounded-m3-full bg-blue-600/90 text-white hover:bg-blue-500 border-none shadow-[0_2px_10px_rgba(37,99,235,0.4)]"
               >
                 <MoreHorizontal className="h-4 w-4" />
               </Button>

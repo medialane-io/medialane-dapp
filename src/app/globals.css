@@ -10,55 +10,71 @@
 
 @layer base {
   :root {
-    /* ── Primary (Blue #2563EB) ── */
+    /* ── Primary (Brand True Blue) ── */
     --m3-primary: 221 83% 53%;
+    /* #2563EB - Rich True Blue */
     --m3-on-primary: 0 0% 100%;
-    --m3-primary-container: 214 95% 93%;
-    --m3-on-primary-container: 221 83% 25%;
+    --m3-primary-container: 221 83% 40%;
+    /* Darker blue instead of light blue */
+    --m3-on-primary-container: 0 0% 100%;
 
-    /* ── Secondary (Navy Blue #1E3A5F) ── */
-    --m3-secondary: 213 52% 24%;
+    /* ── Secondary (Brand Navy Blue) ── */
+    --m3-secondary: 213 60% 18%;
+    /* #12213D - Deep Premium Navy */
     --m3-on-secondary: 0 0% 100%;
-    --m3-secondary-container: 214 45% 90%;
-    --m3-on-secondary-container: 213 52% 15%;
+    --m3-secondary-container: 213 60% 12%;
+    /* Very deep navy */
+    --m3-on-secondary-container: 0 0% 100%;
 
-    /* ── Tertiary (Orange #F97316) ── */
+    /* ── Tertiary (Brand Orange) ── */
     --m3-tertiary: 25 95% 53%;
+    /* #F97316 - Vibrant Orange Accent */
     --m3-on-tertiary: 0 0% 100%;
-    --m3-tertiary-container: 30 100% 92%;
-    --m3-on-tertiary-container: 25 95% 25%;
+    --m3-tertiary-container: 25 95% 45%;
+    /* Darker orange */
+    --m3-on-tertiary-container: 0 0% 100%;
 
-    /* ── Error ── */
-    --m3-error: 0 75% 42%;
+    /* ── Brand Mauve (Used for subtle accents/surfaces) ── */
+    --brand-mauve: 270 20% 40%;
+    --brand-mauve-light: 270 20% 96%;
+
+    /* ── Error (Vivid Red) ── */
+    --m3-error: 0 84% 60%;
     --m3-on-error: 0 0% 100%;
-    --m3-error-container: 0 100% 93%;
-    --m3-on-error-container: 0 75% 22%;
+    --m3-error-container: 0 84% 40%;
+    --m3-on-error-container: 0 0% 100%;
 
-    /* ── Surfaces (Mauve undertone — warm neutral) ── */
-    --m3-surface: 270 10% 99%;
-    --m3-on-surface: 270 15% 10%;
-    --m3-surface-variant: 270 12% 92%;
-    --m3-on-surface-variant: 270 10% 35%;
+    /* ── Surfaces (High-Fidelity Pristine Whites & Cool Greys) ── */
+    --m3-surface: 0 0% 100%;
+    /* Pure White */
+    --m3-on-surface: 213 60% 12%;
+    /* Very Dark Navy (Text) */
+    --m3-surface-variant: 270 10% 96%;
+    /* Very subtle Mauve-tinted off-white */
+    --m3-on-surface-variant: 213 30% 40%;
+    /* Muted Navy */
+
     --m3-surface-container-lowest: 0 0% 100%;
-    --m3-surface-container-low: 270 15% 97%;
-    --m3-surface-container: 270 12% 94%;
-    --m3-surface-container-high: 270 10% 91%;
-    --m3-surface-container-highest: 270 8% 88%;
-    --m3-surface-dim: 270 10% 87%;
-    --m3-surface-bright: 270 15% 98%;
+    --m3-surface-container-low: 0 0% 100%;
+    --m3-surface-container: 270 10% 98%;
+    /* Barely-there Mauve grey tint */
+    --m3-surface-container-high: 270 10% 96%;
+    --m3-surface-container-highest: 270 10% 92%;
+    --m3-surface-dim: 270 10% 94%;
+    --m3-surface-bright: 0 0% 100%;
 
-    /* ── Outline ── */
-    --m3-outline: 270 5% 50%;
-    --m3-outline-variant: 270 10% 80%;
+    /* ── Crisp Outlines ── */
+    --m3-outline: 213 20% 80%;
+    --m3-outline-variant: 213 20% 90%;
 
     /* ── Inverse ── */
-    --m3-inverse-surface: 270 15% 15%;
-    --m3-inverse-on-surface: 270 10% 95%;
-    --m3-inverse-primary: 217 90% 72%;
+    --m3-inverse-surface: 213 60% 12%;
+    --m3-inverse-on-surface: 0 0% 100%;
+    --m3-inverse-primary: 221 83% 53%;
 
     /* ── Scrim / Shadow ── */
-    --m3-scrim: 0 0% 0%;
-    --m3-shadow: 0 0% 0%;
+    --m3-scrim: 213 60% 10%;
+    --m3-shadow: 213 60% 10%;
 
     /* ── Legacy mappings (shadcn/ui compat) ── */
     --background: var(--m3-surface);
@@ -69,12 +85,12 @@
     --popover-foreground: var(--m3-on-surface);
     --primary: var(--m3-primary);
     --primary-foreground: var(--m3-on-primary);
-    --secondary: var(--m3-secondary-container);
-    --secondary-foreground: var(--m3-on-secondary-container);
+    --secondary: var(--m3-secondary);
+    --secondary-foreground: var(--m3-on-secondary);
     --muted: var(--m3-surface-variant);
     --muted-foreground: var(--m3-on-surface-variant);
-    --accent: var(--m3-secondary-container);
-    --accent-foreground: var(--m3-on-secondary-container);
+    --accent: var(--m3-secondary);
+    --accent-foreground: var(--m3-on-secondary);
     --destructive: var(--m3-error);
     --destructive-foreground: var(--m3-on-error);
     --border: var(--m3-outline-variant);
@@ -86,57 +102,67 @@
     --sidebar-foreground: var(--m3-on-surface);
     --sidebar-primary: var(--m3-primary);
     --sidebar-primary-foreground: var(--m3-on-primary);
-    --sidebar-accent: var(--m3-secondary-container);
-    --sidebar-accent-foreground: var(--m3-on-secondary-container);
+    --sidebar-accent: var(--m3-secondary);
+    --sidebar-accent-foreground: var(--m3-on-secondary);
     --sidebar-border: var(--m3-outline-variant);
     --sidebar-ring: var(--m3-primary);
   }
 
   .dark {
-    /* ── Primary (Blue — dark scheme) ── */
-    --m3-primary: 217 90% 72%;
-    --m3-on-primary: 221 83% 20%;
-    --m3-primary-container: 221 65% 28%;
-    --m3-on-primary-container: 214 95% 90%;
+    /* ── Primary (Brand True Blue) ── */
+    --m3-primary: 221 83% 53%;
+    --m3-on-primary: 0 0% 100%;
+    --m3-primary-container: 221 83% 40%;
+    --m3-on-primary-container: 0 0% 100%;
 
-    /* ── Secondary (Navy — dark scheme) ── */
-    --m3-secondary: 214 40% 72%;
-    --m3-on-secondary: 213 52% 12%;
-    --m3-secondary-container: 213 45% 22%;
-    --m3-on-secondary-container: 214 45% 88%;
+    /* ── Secondary (Brand Navy Blue) ── */
+    --m3-secondary: 213 60% 30%;
+    /* Slightly lighter Navy for dark mode contrast */
+    --m3-on-secondary: 0 0% 100%;
+    --m3-secondary-container: 213 60% 20%;
+    --m3-on-secondary-container: 0 0% 100%;
 
-    /* ── Tertiary (Orange — dark scheme) ── */
-    --m3-tertiary: 25 100% 70%;
-    --m3-on-tertiary: 25 95% 18%;
-    --m3-tertiary-container: 25 70% 28%;
-    --m3-on-tertiary-container: 30 100% 90%;
+    /* ── Tertiary (Brand Orange) ── */
+    --m3-tertiary: 25 95% 53%;
+    --m3-on-tertiary: 0 0% 100%;
+    --m3-tertiary-container: 25 95% 40%;
+    --m3-on-tertiary-container: 0 0% 100%;
 
-    /* ── Error (dark scheme) ── */
-    --m3-error: 0 100% 80%;
-    --m3-on-error: 0 75% 18%;
-    --m3-error-container: 0 50% 25%;
-    --m3-on-error-container: 0 100% 90%;
+    /* ── Brand Mauve (Dark Mode) ── */
+    --brand-mauve: 270 30% 50%;
+    --brand-mauve-dark: 270 30% 15%;
 
-    /* ── Surfaces (dark — Mauve undertone) ── */
-    --m3-surface: 260 15% 8%;
-    --m3-on-surface: 270 10% 90%;
-    --m3-surface-variant: 260 10% 18%;
-    --m3-on-surface-variant: 270 8% 65%;
-    --m3-surface-container-lowest: 260 20% 5%;
-    --m3-surface-container-low: 260 15% 10%;
-    --m3-surface-container: 260 12% 13%;
-    --m3-surface-container-high: 260 10% 17%;
-    --m3-surface-container-highest: 260 8% 22%;
-    --m3-surface-dim: 260 12% 6%;
-    --m3-surface-bright: 260 10% 18%;
+    /* ── Error (Vivid Red) ── */
+    --m3-error: 0 84% 65%;
+    --m3-on-error: 0 0% 100%;
+    --m3-error-container: 0 84% 30%;
+    --m3-on-error-container: 0 0% 100%;
 
-    /* ── Outline (dark) ── */
-    --m3-outline: 260 5% 45%;
-    --m3-outline-variant: 260 8% 25%;
+    /* ── Surfaces (Deep Navy / Mauve, high contrast premium dark mode) ── */
+    --m3-surface: 213 50% 4%;
+    /* Extremely deep Navy */
+    --m3-on-surface: 213 20% 95%;
+    /* Stark white text */
+    --m3-surface-variant: 270 30% 10%;
+    /* Very deep Mauve tint for variants */
+    --m3-on-surface-variant: 213 20% 75%;
+    --m3-surface-container-lowest: 213 50% 3%;
+    --m3-surface-container-low: 213 45% 6%;
+    --m3-surface-container: 270 20% 8%;
+    /* Mauve-tinted deep background */
+    --m3-surface-container-high: 270 20% 10%;
+    --m3-surface-container-highest: 270 20% 12%;
+    --m3-surface-dim: 213 50% 3%;
+    --m3-surface-bright: 213 40% 12%;
+
+    /* ── Outline (Crisp dark borders) ── */
+    --m3-outline: 230 20% 45%;
+    --m3-outline-variant: 230 25% 16%;
+    /* Sharp subtle borders */
 
     /* ── Inverse (dark) ── */
-    --m3-inverse-surface: 270 10% 90%;
-    --m3-inverse-on-surface: 270 15% 15%;
+    --m3-inverse-surface: 221 20% 90%;
+    --m3-inverse-on-surface: 221 30% 10%;
     --m3-inverse-primary: 221 83% 53%;
 
     /* ── Scrim / Shadow (dark) ── */
@@ -156,18 +182,22 @@
 }
 
 @layer components {
+
   /* ── M3 Surface Tint ──
      Used on elevated surfaces: the higher the elevation,
      the more primary-tint is blended into the surface. */
   .m3-surface-tint-1 {
     @apply bg-m3-surface-container-low;
   }
+
   .m3-surface-tint-2 {
     @apply bg-m3-surface-container;
   }
+
   .m3-surface-tint-3 {
     @apply bg-m3-surface-container-high;
   }
+
   .m3-surface-tint-4 {
     @apply bg-m3-surface-container-highest;
   }
@@ -178,9 +208,11 @@
   .m3-state-hover {
     @apply hover:bg-m3-on-surface/8;
   }
+
   .m3-state-pressed {
     @apply active:bg-m3-on-surface/12;
   }
+
   .m3-state-focus {
     @apply focus-visible:bg-m3-on-surface/12;
   }

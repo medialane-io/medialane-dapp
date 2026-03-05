@@ -37,7 +37,7 @@ export default function MarketplacePage() {
                 <PageHeader title="Marketplace">
                     <Sheet>
                         <SheetTrigger asChild>
-                            <Button variant="outline" className="gap-2 h-11 px-6 border-m3-outline text-sm font-medium shadow-m3-1">
+                            <Button className="gap-2 h-11 px-6 font-medium">
                                 <Filter className="h-4 w-4" />
                                 <span>Search & Filters</span>
                             </Button>

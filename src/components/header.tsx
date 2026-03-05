@@ -37,8 +37,8 @@ export function Header() {
       className={cn(
         "fixed top-0 z-50 w-full transition-all duration-m3-medium ease-m3-standard",
         isScrolled
-          ? "bg-m3-surface-container shadow-m3-2"
-          : "bg-m3-surface/80"
+          ? "bg-m3-surface-container/70 shadow-m3-2 backdrop-blur-md"
+          : "bg-transparent border-b border-transparent"
       )}
     >
       <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 flex items-center justify-between h-16">

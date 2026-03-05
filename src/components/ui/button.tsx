@@ -10,19 +10,21 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-m3-primary text-m3-on-primary shadow-m3-1 hover:shadow-m3-2 hover:bg-m3-primary/90 active:bg-m3-primary/85",
+          "bg-blue-600 text-white shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:bg-blue-700 hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 active:bg-blue-800",
         destructive:
-          "bg-m3-error text-m3-on-error shadow-m3-1 hover:shadow-m3-2 hover:bg-m3-error/90 active:bg-m3-error/85",
+          "bg-red-500 text-white shadow-[0_4px_14px_rgba(239,68,68,0.4)] hover:bg-red-600 hover:shadow-[0_6px_20px_rgba(239,68,68,0.6)] hover:-translate-y-0.5 active:bg-red-700",
         outline:
-          "border border-m3-outline text-m3-primary bg-transparent hover:bg-m3-primary/8 active:bg-m3-primary/12",
+          "border-[1.5px] border-blue-600/30 text-blue-600 dark:text-blue-400 bg-transparent hover:border-blue-600 hover:shadow-[0_0_15px_rgba(37,99,235,0.2)] active:bg-blue-600/10",
         secondary:
-          "bg-m3-secondary-container text-m3-on-secondary-container shadow-m3-1 hover:shadow-m3-2 hover:bg-m3-secondary-container/90",
+          "bg-[rgb(18,33,61)] text-white shadow-[0_4px_14px_rgba(18,33,61,0.4)] hover:bg-[#1A2D52] hover:shadow-[0_6px_20px_rgba(18,33,61,0.6)] hover:-translate-y-0.5 active:bg-[#0D182E]",
         tonal:
-          "bg-m3-tertiary-container text-m3-on-tertiary-container shadow-m3-1 hover:shadow-m3-2 hover:bg-m3-tertiary-container/90",
+          "bg-[rgb(18,33,61)]/5 dark:bg-[rgb(18,33,61)]/40 text-[rgb(18,33,61)] dark:text-white hover:bg-[rgb(18,33,61)]/10 dark:hover:bg-[rgb(18,33,61)]/60 active:bg-[rgb(18,33,61)]/20",
         ghost:
-          "text-m3-on-surface hover:bg-m3-on-surface/8 active:bg-m3-on-surface/12",
+          "text-[rgb(18,33,61)] dark:text-white hover:bg-[rgb(18,33,61)]/5 dark:hover:bg-[rgb(18,33,61)]/20 active:bg-[rgb(18,33,61)]/10 font-bold",
         link:
-          "text-m3-primary underline-offset-4 hover:underline transition-colors",
+          "text-blue-600 dark:text-blue-400 underline-offset-4 hover:underline transition-colors",
+        premium:
+          "bg-orange-500 text-white shadow-[0_4px_20px_rgba(249,115,22,0.4)] hover:bg-orange-600 hover:shadow-[0_8px_30px_rgba(249,115,22,0.6)] hover:-translate-y-0.5 border border-white/20",
       },
       size: {
         default: "h-10 px-6 py-2",

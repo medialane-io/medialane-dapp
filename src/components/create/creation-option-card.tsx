@@ -61,9 +61,9 @@ export function CreationOptionCard({ option, viewMode, isSelected, onSelect }: C
   return (
     <Card
       className={cn(
-        "glass-panel overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,255,255,0.12)] hover:-translate-y-2 group relative",
-        "border-border/50 hover:border-outrun-cyan/30",
-        isSelected ? "ring-2 ring-outrun-cyan ring-offset-2 ring-offset-background shadow-lg shadow-outrun-cyan/20" : "",
+        "bg-m3-surface-container overflow-hidden cursor-pointer transition-all duration-m3-medium ease-m3-standard hover:shadow-m3-3 hover:-translate-y-1 relative group",
+        "border-m3-outline-variant/15 hover:border-blue-500/30",
+        isSelected ? "ring-2 ring-m3-primary ring-offset-2 ring-offset-background shadow-m3-4" : "",
       )}
       onClick={onSelect}
     >
@@ -73,15 +73,13 @@ export function CreationOptionCard({ option, viewMode, isSelected, onSelect }: C
       {/* Badges */}
       <div className="absolute top-3 right-3 flex flex-col gap-1 z-10">
         {option.popular && (
-          <Badge className="gap-1 bg-outrun-yellow/20 text-outrun-yellow border-outrun-yellow/30 shadow-[0_0_10px_rgba(255,255,0,0.2)]">
+          <Badge className="gap-1 bg-m3-tertiary-container text-m3-on-tertiary-container border-0">
             <Star className="h-3 w-3" />
             Popular
           </Badge>
         )}
         {option.trending && (
-          <Badge
-            className="gap-1 bg-outrun-magenta/20 text-outrun-magenta border-outrun-magenta/30 shadow-[0_0_10px_rgba(255,0,255,0.2)]"
-          >
+          <Badge className="gap-1 bg-m3-secondary-container text-m3-on-secondary-container border-0">
             <TrendingUp className="h-3 w-3" />
             Trending
           </Badge>
@@ -93,7 +91,7 @@ export function CreationOptionCard({ option, viewMode, isSelected, onSelect }: C
         <div className="flex items-start gap-4">
           <div
             className={cn(
-              "p-3 rounded-xl transition-transform group-hover:scale-110",
+              "p-3 rounded-m3-xl transition-transform duration-m3-short group-hover:scale-110",
               getColorClasses(option.gradient).bgLight,
             )}
           >
@@ -102,8 +100,8 @@ export function CreationOptionCard({ option, viewMode, isSelected, onSelect }: C
           <div className="flex-1 min-w-0">
             {isSelected && (
               <div className="mb-2">
-                <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
-                  <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
+                <div className="h-6 w-6 rounded-m3-full bg-m3-primary flex items-center justify-center">
+                  <CheckCircle2 className="h-4 w-4 text-m3-on-primary" />
                 </div>
               </div>
             )}
@@ -112,25 +110,25 @@ export function CreationOptionCard({ option, viewMode, isSelected, onSelect }: C
 
         {/* Content */}
         <div className="space-y-3">
-          <h3 className="text-xl font-bold group-hover:text-primary transition-colors">{option.title}</h3>
-          <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">{option.description}</p>
+          <h3 className="text-xl font-bold group-hover:text-m3-primary transition-colors">{option.title}</h3>
+          <p className="text-sm text-m3-on-surface-variant line-clamp-3 leading-relaxed">{option.description}</p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3 text-xs">
-          <div className="flex items-center gap-1.5 text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-m3-on-surface-variant">
             <Clock className="h-3.5 w-3.5" />
             <span>{option.timeEstimate}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-m3-on-surface-variant">
             <Coins className="h-3.5 w-3.5" />
             <span>Zero Fee</span>
           </div>
-          <div className="flex items-center gap-1.5 text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-m3-on-surface-variant">
             <Shield className="h-3.5 w-3.5" />
             <span>100% Ownership</span>
           </div>
-          <Badge variant="outline" className="text-xs justify-self-end">
+          <Badge variant="outline" className="text-xs justify-self-end text-m3-on-surface-variant border-m3-outline-variant/20 bg-m3-surface-variant">
             {option.complexity}
           </Badge>
         </div>
@@ -138,7 +136,8 @@ export function CreationOptionCard({ option, viewMode, isSelected, onSelect }: C
         {/* Action Button */}
         <Link href={option.href} className="block mt-2">
           <Button
-            className="w-full gap-2 transition-all duration-300 gradient-vivid shadow-glow-sm shadow-neon-cyan/20 hover:scale-[1.02] text-white font-bold tracking-wider"
+            variant="premium"
+            className="w-full gap-2 transition-all duration-m3-medium"
             size="lg"
           >
             Get Started

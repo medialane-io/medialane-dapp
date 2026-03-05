@@ -56,7 +56,7 @@ export function BottomNavBar() {
                                 {isActive && (
                                     <motion.div
                                         layoutId="nav-pill"
-                                        className="absolute inset-0 -inset-x-4 rounded-m3-full bg-m3-secondary-container"
+                                        className="absolute inset-0 -inset-x-4 rounded-m3-full bg-blue-500/15"
                                         style={{ height: 32, top: -4 }}
                                         transition={M3_SPRING}
                                     />
@@ -66,7 +66,7 @@ export function BottomNavBar() {
                                     className={cn(
                                         "relative z-10 w-6 h-6 transition-colors duration-m3-short",
                                         isActive
-                                            ? "text-m3-on-secondary-container"
+                                            ? "text-m3-primary"
                                             : "text-m3-on-surface-variant"
                                     )}
                                 />
@@ -74,10 +74,10 @@ export function BottomNavBar() {
 
                             <span
                                 className={cn(
-                                    "text-[11px] font-medium leading-tight transition-colors duration-m3-short",
+                                    "text-[11px] leading-tight transition-colors duration-m3-short",
                                     isActive
-                                        ? "text-m3-on-surface font-semibold"
-                                        : "text-m3-on-surface-variant"
+                                        ? "text-m3-primary font-bold"
+                                        : "text-m3-on-surface-variant font-medium"
                                 )}
                             >
                                 {item.name}
