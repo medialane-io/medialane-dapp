@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { TokenData } from "@/hooks/use-portfolio";
 import AssetCardGlobal from "@/components/asset-card";
+import { useMarketplaceListings, findListingForToken } from "@/hooks/use-marketplace-events";
 
 interface PortfolioAssetsProps {
     tokens: Record<string, TokenData[]>;
@@ -27,6 +28,9 @@ interface PortfolioAssetsProps {
 
 export function PortfolioAssets({ tokens, loading, collections = [] }: PortfolioAssetsProps) {
     const [visibleCount, setVisibleCount] = useState(12);
+
+    // Fetch active marketplace listings to display status/price
+    const { listings } = useMarketplaceListings();
 
     // Flatten tokens from all collections
     const allAssets = Object.values(tokens).flat();
@@ -67,8 +71,8 @@ export function PortfolioAssets({ tokens, loading, collections = [] }: Portfolio
                     description="No assets found to display."
                 />
             ) : (
-                <div className="space-y-8">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6 gap-4 sm:gap-6">
+                <div className="space-y-8 max-w-[100vw] overflow-x-hidden">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 sm:gap-6">
                         {visibleAssets.map((asset) => {
                             // Try to match collection to get NFT address for link
                             const collection = collections.find(c => c.id.toString() === asset.collection_id);
@@ -89,10 +93,12 @@ export function PortfolioAssets({ tokens, loading, collections = [] }: Portfolio
                             // The user said: "The My Assets tab showing the user assets...".
 
                             const nftAddress = collection?.nftAddress || asset.collection_id;
+                            const activeListing = findListingForToken(listings, nftAddress, asset.token_id);
 
                             return (
                                 <AssetCardGlobal
                                     key={`${asset.collection_id}-${asset.token_id}`}
+                                    listing={activeListing || undefined}
                                     asset={{
                                         id: `${nftAddress}-${asset.token_id}`,
                                         name: asset.name || `Token #${asset.token_id}`,

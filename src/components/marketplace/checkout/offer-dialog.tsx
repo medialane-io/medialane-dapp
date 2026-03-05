@@ -41,6 +41,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
+import { useRouter } from "next/navigation"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import { cn } from "@/lib/utils"
 
@@ -95,6 +96,7 @@ export function OfferDialog({ trigger, asset, isOpen: controlledOpen, onOpenChan
     const { makeOffer, isProcessing, txHash, error, resetState } = useMarketplace()
     const { metadata: metadataRaw } = { metadata: useTokenMetadata(asset.tokenId, asset.nftAddress) }
     const { name: mName, image: mImage, loading: isLoadingMetadata } = metadataRaw
+    const router = useRouter()
 
     const [internalOpen, setInternalOpen] = useState(false)
     const isOpen = controlledOpen ?? internalOpen
@@ -138,7 +140,13 @@ export function OfferDialog({ trigger, asset, isOpen: controlledOpen, onOpenChan
         <Dialog open={isOpen} onOpenChange={(open) => {
             setIsOpen(open)
             if (!open) {
-                setTimeout(reset, 300)
+                const hadTxHash = !!txHash
+                setTimeout(() => {
+                    reset()
+                    if (hadTxHash) {
+                        router.refresh()
+                    }
+                }, 300)
             }
         }}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}

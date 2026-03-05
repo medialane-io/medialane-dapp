@@ -191,10 +191,10 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
             <Link href={assetUrl} className="w-full">
               <Button
                 variant="default"
-                className="w-full h-9 gap-2 font-medium active:scale-[0.98] transition-transform"
+                className="w-full h-9 gap-1.5 px-2 font-medium active:scale-[0.98] transition-transform"
               >
-                <Eye className="h-3.5 w-3.5" />
-                View
+                <Eye className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">View</span>
               </Button>
             </Link>
           ) : (
@@ -202,20 +202,20 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
               variant={isInCart ? "secondary" : "premium"}
               onTouchStart={handleCartAction}
               onClick={handleCartAction}
-              className="w-full h-9 gap-2 font-bold active:scale-[0.98] transition-transform"
+              className="w-full h-9 gap-1.5 px-2 font-bold active:scale-[0.98] transition-transform"
             >
-              <ShoppingBag className="h-3.5 w-3.5" />
-              {isInCart ? "In Cart" : "Add to Cart"}
+              <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">{isInCart ? "In Cart" : "Add to Cart"}</span>
             </Button>
           )
         ) : (
           <Link href={assetUrl} className="w-full">
             <Button
               variant="default"
-              className="w-full h-9 gap-2 font-medium active:scale-[0.98] transition-transform"
+              className="w-full h-9 gap-1.5 px-2 font-medium active:scale-[0.98] transition-transform"
             >
-              <Eye className="h-3.5 w-3.5 mr-1" />
-              View
+              <Eye className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">View</span>
             </Button>
           </Link>
         )}
@@ -223,10 +223,10 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
         <Link href={`/create/remix/${offerToken}-${offerIdentifier}`} className="w-full">
           <Button
             variant="tonal"
-            className="w-full h-9 gap-2 font-medium active:scale-[0.98] transition-transform"
+            className="w-full h-9 gap-1.5 px-2 font-medium active:scale-[0.98] transition-transform"
           >
-            <RefreshCw className="h-3.5 w-3.5" />
-            Remix
+            <RefreshCw className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">Remix</span>
           </Button>
         </Link>
 

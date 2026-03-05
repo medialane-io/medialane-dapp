@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils"
 import { useMarketplace } from "@/hooks/use-marketplace"
 import { EXPLORER_URL } from "@/lib/constants"
 import { useTokenMetadata } from "@/hooks/use-token-metadata"
+import { useRouter } from "next/navigation"
 
 
 interface ListingDialogProps {
@@ -90,6 +91,7 @@ export function ListingDialog({ trigger, asset }: ListingDialogProps) {
     const { createListing, isProcessing, txHash, error, resetState } = useMarketplace()
     const metadata = useTokenMetadata(asset.tokenId, asset.collectionAddress)
     const { name: mName, image: mImage, loading: isLoadingMetadata } = metadata
+    const router = useRouter()
 
     const displayName = mName || asset.name
     const displayImage = mImage || asset.image
@@ -122,10 +124,14 @@ export function ListingDialog({ trigger, asset }: ListingDialogProps) {
     const handleOpenChange = (isOpen: boolean) => {
         setOpen(isOpen);
         if (!isOpen) {
+            const hadTxHash = !!txHash
             // Delay reset to avoid UI flicker during close animation
             setTimeout(() => {
                 resetState()
                 form.reset()
+                if (hadTxHash) {
+                    router.refresh()
+                }
             }, 300)
         }
     }
