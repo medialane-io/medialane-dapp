@@ -289,7 +289,7 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center justify-center py-20 px-8 rounded-[2.5rem] bg-card/30 border border-border border-dashed relative overflow-hidden text-center"
           >
-            <div className="w-20 h-20 rounded-xl bg-white/5 flex items-center justify-center mb-6">
+            <div className="w-20 h-20 rounded-xl bg-foreground/5 flex items-center justify-center mb-6">
               <Clock className="h-10 w-10 text-muted-foreground/50 animate-pulse" />
             </div>
             <h3 className="text-2xl font-bold text-foreground/80">History in the making...</h3>
@@ -364,7 +364,7 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
                     {/* From → To */}
                     <div className="flex items-center gap-3 text-sm flex-wrap">
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-7 h-7 rounded-xl bg-white/5 flex items-center justify-center text-[10px] font-medium text-muted-foreground shrink-0">
+                        <div className="w-7 h-7 rounded-xl bg-foreground/5 flex items-center justify-center text-[10px] font-medium text-muted-foreground shrink-0">
                           {event.from && event.from !== "0x0" ? event.from.substring(2, 4).toUpperCase() : "Ø"}
                         </div>
                         <span className="font-mono text-xs text-muted-foreground truncate">

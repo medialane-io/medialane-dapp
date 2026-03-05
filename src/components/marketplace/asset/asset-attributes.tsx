@@ -13,7 +13,7 @@ export function AssetAttributes({ attributes }: { attributes: Attribute[] }) {
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {attributes.map((attr, i) => (
-                <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-sm">
+                <Card key={i} className="bg-foreground/5 border-foreground/10 backdrop-blur-sm">
                     <CardContent className="p-3 text-center">
                         <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{attr.trait}</p>
                         <p className="font-semibold text-foreground truncate" title={attr.value}>{attr.value}</p>

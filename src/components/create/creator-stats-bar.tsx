@@ -19,8 +19,8 @@ export function CreatorStatsBar() {
     const hasActivity = stats.totalNFTs > 0
 
     return (
-        <Card className="glass-panel mt-20 p-4 bg-gradient-to-r from-outrun-magenta/5 via-outrun-cyan/5 to-outrun-orange/5 border-white/10 relative overflow-hidden">
-            <div className="absolute inset-0 bg-white/5 dark:bg-black/5 backdrop-blur-xl -z-10" />
+        <Card className="glass-panel mt-20 p-4 bg-gradient-to-r from-outrun-magenta/5 via-outrun-cyan/5 to-outrun-orange/5 border-foreground/10 relative overflow-hidden">
+            <div className="absolute inset-0 bg-foreground/5 dark:bg-black/5 backdrop-blur-xl -z-10" />
             <div className="flex flex-wrap items-center gap-6 relative z-10">
 
                 {/* Welcome Message */}

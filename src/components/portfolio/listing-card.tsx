@@ -80,15 +80,15 @@ export function ListingCard({ listing, onCancel }: ListingCardProps) {
                         className="object-cover group-hover:scale-110 transition-transform duration-700"
                     />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                    <span className="text-white text-xs font-semibold flex items-center gap-1.5 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-100 transition-opacity duration-300 flex items-end p-4">
+                    <span className="text-white text-xs font-semibold flex items-center gap-1.5 translate-y-2 transition-transform duration-300">
                         View Item <ExternalLink className="w-3.5 h-3.5" />
                     </span>
                 </div>
                 <div className="absolute top-3 right-3 flex gap-2">
                     <div className={`${listing.status === 'active' ? 'bg-green-500/20 text-green-400 border-green-500/50 shadow-[0_0_10px_rgba(34,197,94,0.2)]' :
                         listing.status === 'fulfilled' ? 'bg-blue-500/20 text-blue-400 border-blue-500/50' :
-                            'bg-muted/50 text-muted-foreground border-white/10'
+                            'bg-muted/50 text-muted-foreground border-foreground/10'
                         } backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border`}>
                         {listing.status}
                     </div>

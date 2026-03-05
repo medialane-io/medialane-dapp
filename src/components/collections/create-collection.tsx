@@ -350,7 +350,7 @@ export default function CreateCollectionView({
             <form onSubmit={handleSubmit}>
               {/* HIDDEN INPUT for implicit submission if needed, but Button type=submit handles it */}
 
-              <Card className="glass-card">
+              <Card className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short">
                 <CardHeader>
                   <CardTitle>Collection Details</CardTitle>
                   <CardDescription>
@@ -466,9 +466,9 @@ export default function CreateCollectionView({
 
           {/* Live Preview Sidebar */}
           <div className="lg:col-span-1">
-            <div className="space-y-6 sticky top-8">
+            <div className="space-y-6">
               {/* Live Preview Card */}
-              <Card className="glass-card overflow-hidden">
+              <Card className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short overflow-hidden">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">Live Preview</CardTitle>
                   <CardDescription>
@@ -525,7 +525,7 @@ export default function CreateCollectionView({
               </Card>
 
               {/* Collection Guide */}
-              <Card className="glass-card">
+              <Card className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">Quick Guide</CardTitle>
                 </CardHeader>

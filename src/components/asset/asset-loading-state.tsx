@@ -37,7 +37,7 @@ export function AssetLoadingState({ loadingState, error }: AssetLoadingStateProp
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
         {/* Left: Image */}
         <div className="w-full max-w-md lg:max-w-none mx-auto">
-          <div className="relative aspect-square rounded-2xl overflow-hidden border border-white/10 bg-muted/10">
+          <div className="relative aspect-square rounded-2xl overflow-hidden border border-foreground/10 bg-muted/10">
             <Skeleton className="h-full w-full" />
 
             {/* Loading Overlay */}
@@ -70,7 +70,7 @@ export function AssetLoadingState({ loadingState, error }: AssetLoadingStateProp
       {/* Stats Grid Skeleton */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="glass-card p-4 rounded-xl border border-white/10 bg-muted/5 h-24 flex flex-col justify-center space-y-2">
+          <div key={i} className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short p-4 rounded-xl border border-foreground/10 bg-muted/5 h-24 flex flex-col justify-center space-y-2">
             <Skeleton className="h-3 w-16" />
             <Skeleton className="h-6 w-24" />
           </div>
@@ -112,7 +112,7 @@ export function AssetLoadingSkeleton() {
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="glass-card p-4 rounded-xl border border-white/10 h-24 flex flex-col justify-center space-y-2">
+          <div key={i} className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short p-4 rounded-xl border border-foreground/10 h-24 flex flex-col justify-center space-y-2">
             <Skeleton className="h-3 w-16" />
             <Skeleton className="h-6 w-24" />
           </div>

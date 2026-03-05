@@ -12,7 +12,7 @@ export default function LicensingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="relative overflow-hidden rounded-3xl glass border border-white/10 p-8 md:p-12 mb-10 bg-gradient-to-br from-primary/10 via-background to-background"
+                className="relative overflow-hidden rounded-3xl glass border border-foreground/10 p-8 md:p-12 mb-10 bg-gradient-to-br from-primary/10 via-background to-background"
             >
                 <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none">
                     <ShieldCheck className="w-64 h-64" />

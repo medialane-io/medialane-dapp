@@ -9,21 +9,11 @@ import { EXPLORER_URL } from "@/lib/constants"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import {
-  ExternalLink,
-  Loader2,
-  ShoppingBag,
-  RefreshCw,
-  MoreHorizontal,
-  Eye,
-  Share2,
-  FileText,
-  Flag,
-  Shield
-} from "lucide-react"
+import { Eye, Share2, FileText, Flag, Shield, MoreHorizontal, RefreshCw, ShoppingBag, Loader2, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
+import { motion } from "framer-motion"
 import { useCart } from "@/store/use-cart"
 import { useTokenMetadata } from "@/hooks/use-token-metadata"
 import { cn } from "@/lib/utils"
@@ -103,23 +93,25 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
 
   return (
     <Card className="overflow-hidden bg-m3-surface-container-lowest rounded-m3-xl shadow-m3-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-m3-outline-variant hover:border-blue-600/40 transition-all duration-m3-medium ease-m3-standard group flex flex-col h-full relative">
-      <Link href={assetUrl} className="block relative aspect-square overflow-hidden bg-m3-surface-variant/30 rounded-t-m3-xl">
-        {isLoading ? (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-m3-on-surface-variant/30" />
-          </div>
-        ) : (
-          <Image
-            src={displayImage}
-            alt={name}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition-transform duration-m3-long ease-m3-standard group-hover:scale-105"
-            onError={() => setImageError(true)}
-            unoptimized={displayImage.startsWith("htt")}
-          />
-        )}
-      </Link>
+      <motion.div layoutId={`asset-card-${offerToken}-${offerIdentifier}`} className="block relative aspect-square overflow-hidden bg-m3-surface-variant/30 rounded-t-m3-xl">
+        <Link href={assetUrl} className="block w-full h-full">
+          {isLoading ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 className="w-8 h-8 animate-spin text-m3-on-surface-variant/30" />
+            </div>
+          ) : (
+            <Image
+              src={displayImage}
+              alt={name}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover transition-transform duration-m3-long ease-m3-standard group-hover:scale-105"
+              onError={() => setImageError(true)}
+              unoptimized={displayImage.startsWith("htt")}
+            />
+          )}
+        </Link>
+      </motion.div>
 
       <CardContent className="p-4 flex-1 flex flex-col">
         <div className="pb-3 mb-3 border-b border-m3-outline-variant/15">

@@ -93,7 +93,7 @@ export function AssetTimelineTab({ tokenId }: { tokenId: string }) {
                 </div>
 
                 {/* Event content */}
-                <Card className="flex-1 glass-card">
+                <Card className="flex-1 bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="space-y-2">

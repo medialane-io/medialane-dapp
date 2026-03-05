@@ -67,7 +67,7 @@ export function LicensingExplorer() {
 
     if (!isConnected) {
         return (
-            <div className="flex flex-col items-center justify-center p-12 text-center rounded-3xl glass border border-white/10 bg-black/20">
+            <div className="flex flex-col items-center justify-center p-12 text-center rounded-3xl glass border border-foreground/10 bg-black/20">
                 <ShieldCheck className="h-16 w-16 text-muted-foreground mb-6 opacity-50" />
                 <h3 className="text-2xl font-bold mb-2">Connect Your Wallet</h3>
                 <p className="text-muted-foreground max-w-md mb-8">
@@ -162,10 +162,10 @@ export function LicensingExplorer() {
                                     animate={{ opacity: 1, y: 0 }}
                                     className="flex items-center gap-4 glass p-6 rounded-2xl mb-8"
                                 >
-                                    <Button variant="ghost" size="icon" onClick={handleBackToCollections} className="shrink-0 rounded-full hover:bg-white/10">
+                                    <Button variant="ghost" size="icon" onClick={handleBackToCollections} className="shrink-0 rounded-full hover:bg-foreground/10">
                                         <ArrowLeft className="h-5 w-5" />
                                     </Button>
-                                    <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-white/10 shadow-lg">
+                                    <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-foreground/10 shadow-lg">
                                         <Image
                                             src={selectedCollection.image || "/placeholder.svg"}
                                             alt={selectedCollection.name}
@@ -181,7 +181,7 @@ export function LicensingExplorer() {
                                                 <Users className="h-3.5 w-3.5" />
                                                 <span>{selectedCollection.itemCount} Items</span>
                                             </div>
-                                            <Badge variant="outline" className="text-xs h-6 px-2 bg-transparent border-white/20">
+                                            <Badge variant="outline" className="text-xs h-6 px-2 bg-transparent border-foreground/20">
                                                 {selectedCollection.type || "Collection"}
                                             </Badge>
                                         </div>
@@ -241,7 +241,7 @@ export function LicensingExplorer() {
 
 function LicensableAssetCard({ asset, onLicense }: { asset: any, nftAddress: string, onLicense: () => void }) {
     return (
-        <Card className="overflow-hidden group hover:shadow-2xl transition-all duration-500 glass-card border-white/5 dark:border-white/5 bg-white/5 dark:bg-black/20 hover:border-primary/30 dark:hover:border-primary/30 flex flex-col h-full">
+        <Card className="overflow-hidden group hover:shadow-2xl transition-all duration-500 bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short border-foreground/5 dark:border-foreground/5 bg-foreground/5 dark:bg-black/20 hover:border-primary/30 dark:hover:border-primary/30 flex flex-col h-full">
             <div className="aspect-square relative bg-muted/20 overflow-hidden shrink-0">
                 <Image
                     src={asset.image || "/placeholder.svg"}
@@ -253,7 +253,7 @@ function LicensableAssetCard({ asset, onLicense }: { asset: any, nftAddress: str
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 transition-opacity duration-300 pointer-events-none" />
 
                 <div className="absolute top-3 left-3">
-                    <Badge variant="secondary" className="bg-black/50 hover:bg-black/60 backdrop-blur-md text-white border-white/10 text-[10px] uppercase tracking-wider font-semibold">
+                    <Badge variant="secondary" className="bg-black/50 hover:bg-black/60 backdrop-blur-md text-white border-foreground/10 text-[10px] uppercase tracking-wider font-semibold">
                         IP Asset
                     </Badge>
                 </div>
@@ -269,7 +269,7 @@ function LicensableAssetCard({ asset, onLicense }: { asset: any, nftAddress: str
                     </div>
                 </div>
 
-                <div className="space-y-3 pt-2 border-t border-white/5">
+                <div className="space-y-3 pt-2 border-t border-foreground/5">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <CheckCircle2 className="h-3.5 w-3.5 text-primary/70" />
                         <span>Standard terms available</span>
@@ -291,11 +291,11 @@ function LicensableAssetCard({ asset, onLicense }: { asset: any, nftAddress: str
 
 function AssetCardSkeleton() {
     return (
-        <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
-            <Skeleton className="aspect-square w-full bg-white/5" />
+        <div className="rounded-xl border border-foreground/10 bg-foreground/5 overflow-hidden">
+            <Skeleton className="aspect-square w-full bg-foreground/5" />
             <div className="p-4 space-y-3">
-                <Skeleton className="h-4 w-3/4 bg-white/5" />
-                <Skeleton className="h-3 w-1/2 bg-white/5" />
+                <Skeleton className="h-4 w-3/4 bg-foreground/5" />
+                <Skeleton className="h-3 w-1/2 bg-foreground/5" />
             </div>
         </div>
     )
@@ -303,11 +303,11 @@ function AssetCardSkeleton() {
 
 function CollectionCardSkeleton() {
     return (
-        <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
-            <Skeleton className="h-56 w-full bg-white/5" />
+        <div className="rounded-xl border border-foreground/10 bg-foreground/5 overflow-hidden">
+            <Skeleton className="h-56 w-full bg-foreground/5" />
             <div className="p-4 flex justify-between">
-                <Skeleton className="h-5 w-32 bg-white/5" />
-                <Skeleton className="h-5 w-16 bg-white/5" />
+                <Skeleton className="h-5 w-32 bg-foreground/5" />
+                <Skeleton className="h-5 w-16 bg-foreground/5" />
             </div>
         </div>
     )
@@ -316,7 +316,7 @@ function CollectionCardSkeleton() {
 function EmptyState({ title, description }: { title: string, description: string }) {
     return (
         <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-500">
-            <div className="w-20 h-20 bg-muted/20 rounded-full flex items-center justify-center mb-6 glass border-white/10">
+            <div className="w-20 h-20 bg-muted/20 rounded-full flex items-center justify-center mb-6 glass border-foreground/10">
                 <Box className="h-10 w-10 text-muted-foreground/50" />
             </div>
             <h3 className="text-xl font-medium mb-2">{title}</h3>

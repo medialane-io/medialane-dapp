@@ -50,7 +50,7 @@ export function AssetGrid({ sortOrder = "recent" }: AssetGridProps) {
                 <AlertCircle className="h-10 w-10 mb-4 text-red-500" />
                 <p>Failed to load assets from the marketplace.</p>
                 <p className="text-sm mt-2">{error}</p>
-                <Button variant="outline" onClick={() => refetch()} className="mt-4 border-white/10">
+                <Button variant="outline" onClick={() => refetch()} className="mt-4 border-foreground/10">
                     <RefreshCw className="mr-2 h-4 w-4" /> Try Again
                 </Button>
             </div>

@@ -43,15 +43,15 @@ const NavLink = ({
       href={href}
       className={cn(
         "group flex items-start gap-3 rounded-xl p-3 transition-all duration-200",
-        "hover:bg-white/10 dark:hover:bg-white/5",
-        featured && "bg-gradient-to-br from-outrun-magenta/10 via-outrun-cyan/10 to-outrun-orange/10 border border-white/10 hover:shadow-[0_0_20px_rgba(0,255,255,0.15)]"
+        "hover:bg-foreground/10 dark:hover:bg-foreground/5",
+        featured && "bg-gradient-to-br from-outrun-magenta/10 via-outrun-cyan/10 to-outrun-orange/10 border border-foreground/10 hover:shadow-[0_0_20px_rgba(0,255,255,0.15)]"
       )}
     >
       <div className={cn(
         "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
         featured
           ? "bg-gradient-to-br from-outrun-magenta to-outrun-cyan text-white shadow-[0_0_15px_rgba(0,255,255,0.3)]"
-          : "bg-white/10 dark:bg-white/0 text-foreground/70 group-hover:text-foreground group-hover:bg-white/20 dark:group-hover:bg-white/10"
+          : "bg-foreground/10 dark:bg-foreground/0 text-foreground/70 group-hover:text-foreground group-hover:bg-foreground/20 dark:group-hover:bg-foreground/10"
       )}>
         <Icon className="h-4 w-4" />
       </div>
@@ -73,7 +73,7 @@ export function MainNav() {
 
         {/* MARKETPLACE */}
         <NavigationMenuItem>
-          <NavigationMenuTrigger className="h-9 px-4 rounded-full bg-white/5 dark:bg-white/0 hover:bg-white/15 dark:hover:bg-white/10 border border-white/10 dark:border-white/5 text-foreground/80 hover:text-foreground data-[state=open]:bg-white/15 dark:data-[state=open]:bg-white/10 transition-all duration-200">
+          <NavigationMenuTrigger className="h-9 px-4 rounded-full bg-foreground/5 dark:bg-foreground/0 hover:bg-foreground/15 dark:hover:bg-foreground/10 border border-foreground/10 dark:border-foreground/5 text-foreground/80 hover:text-foreground data-[state=open]:bg-foreground/15 dark:data-[state=open]:bg-foreground/10 transition-all duration-200">
             <ShoppingBag className="mr-2 h-4 w-4" />
             Marketplace
           </NavigationMenuTrigger>
@@ -110,7 +110,7 @@ export function MainNav() {
 
         {/* LAUNCHPAD */}
         <NavigationMenuItem>
-          <NavigationMenuTrigger className="h-9 px-4 rounded-full bg-white/5 dark:bg-white/0 hover:bg-white/15 dark:hover:bg-white/10 border border-white/10 dark:border-white/5 text-foreground/80 hover:text-foreground data-[state=open]:bg-white/15 dark:data-[state=open]:bg-white/10 transition-all duration-200">
+          <NavigationMenuTrigger className="h-9 px-4 rounded-full bg-foreground/5 dark:bg-foreground/0 hover:bg-foreground/15 dark:hover:bg-foreground/10 border border-foreground/10 dark:border-foreground/5 text-foreground/80 hover:text-foreground data-[state=open]:bg-foreground/15 dark:data-[state=open]:bg-foreground/10 transition-all duration-200">
             <Rocket className="mr-2 h-4 w-4" />
             Launchpad
           </NavigationMenuTrigger>
@@ -153,7 +153,7 @@ export function MainNav() {
 
         {/* PORTFOLIO */}
         <NavigationMenuItem>
-          <NavigationMenuTrigger className="h-9 px-4 rounded-full bg-white/5 dark:bg-white/0 hover:bg-white/15 dark:hover:bg-white/10 border border-white/10 dark:border-white/5 text-foreground/80 hover:text-foreground data-[state=open]:bg-white/15 dark:data-[state=open]:bg-white/10 transition-all duration-200">
+          <NavigationMenuTrigger className="h-9 px-4 rounded-full bg-foreground/5 dark:bg-foreground/0 hover:bg-foreground/15 dark:hover:bg-foreground/10 border border-foreground/10 dark:border-foreground/5 text-foreground/80 hover:text-foreground data-[state=open]:bg-foreground/15 dark:data-[state=open]:bg-foreground/10 transition-all duration-200">
             <Boxes className="mr-2 h-4 w-4" />
             Portfolio
           </NavigationMenuTrigger>
@@ -205,7 +205,7 @@ export function MainNav() {
           <NavigationMenuLink asChild>
             <Link
               href="/docs"
-              className="h-9 px-4 rounded-full inline-flex items-center justify-center text-sm font-medium bg-white/5 dark:bg-white/0 hover:bg-white/15 dark:hover:bg-white/10 border border-white/10 dark:border-white/5 text-foreground/80 hover:text-foreground transition-all duration-200"
+              className="h-9 px-4 rounded-full inline-flex items-center justify-center text-sm font-medium bg-foreground/5 dark:bg-foreground/0 hover:bg-foreground/15 dark:hover:bg-foreground/10 border border-foreground/10 dark:border-foreground/5 text-foreground/80 hover:text-foreground transition-all duration-200"
             >
               <BookOpen className="mr-2 h-4 w-4" />
               Docs

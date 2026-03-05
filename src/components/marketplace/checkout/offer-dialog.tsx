@@ -142,40 +142,39 @@ export function OfferDialog({ trigger, asset, isOpen: controlledOpen, onOpenChan
             }
         }}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-            <DialogContent className="sm:max-w-[420px] bg-card/90 backdrop-blur-3xl border-white/10 shadow-2xl p-0 overflow-hidden">
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-outrun-magenta via-outrun-purple to-neon-cyan" />
+            <DialogContent className="sm:max-w-[420px] bg-m3-surface text-m3-on-surface border-none shadow-m3-5 p-0 overflow-hidden sm:rounded-m3-2xl">
                 <div className="p-6 space-y-6 relative">
-                    <DialogHeader>
-                        <DialogTitle className="text-xl font-bold tracking-tight">Make an Offer</DialogTitle>
-                        <DialogDescription className="text-muted-foreground/80">
+                    <DialogHeader className="px-1 text-left">
+                        <DialogTitle className="text-2xl font-black tracking-tight text-m3-on-surface">Make an Offer</DialogTitle>
+                        <DialogDescription className="text-sm font-medium text-m3-on-surface-variant">
                             Create a binding offer for this digital asset.
                         </DialogDescription>
                     </DialogHeader>
 
                     {stage === "success" ? (
                         <div className="py-2 flex flex-col items-center text-center space-y-6 animate-in fade-in zoom-in duration-300">
-                            <div className="h-20 w-20 bg-neon-cyan/20 rounded-full flex items-center justify-center shadow-glow shadow-neon-cyan/30">
-                                <CheckCircle2 className="h-10 w-10 text-neon-cyan drop-shadow-lg" />
+                            <div className="h-20 w-20 bg-m3-primary-container rounded-full flex items-center justify-center shadow-m3-1">
+                                <CheckCircle2 className="h-10 w-10 text-m3-primary" />
                             </div>
                             <div className="space-y-2">
-                                <h2 className="text-2xl font-bold tracking-tight text-foreground">Offer Live!</h2>
-                                <p className="text-sm text-muted-foreground max-w-[280px]">
-                                    Your offer of <span className="font-semibold text-foreground">{form.getValues().price} {form.getValues().currency}</span> has been broadcast to the network.
+                                <h2 className="text-2xl font-bold tracking-tight text-m3-on-surface">Offer Live!</h2>
+                                <p className="text-sm font-medium text-m3-on-surface-variant max-w-[280px]">
+                                    Your offer of <span className="font-bold text-m3-on-surface">{form.getValues().price} {form.getValues().currency}</span> has been broadcast to the network.
                                 </p>
                             </div>
 
-                            <div className="w-full bg-muted/30 rounded-xl p-4 border border-border/50 space-y-3 text-sm">
+                            <div className="w-full bg-m3-surface-container rounded-m3-xl p-4 space-y-3 text-sm shadow-m3-1">
                                 <div className="flex justify-between items-center text-xs">
-                                    <span className="text-muted-foreground uppercase font-semibold">Expires In</span>
-                                    <span className="font-medium text-foreground">{DURATION_OPTIONS.find(o => o.seconds === form.getValues().durationSeconds)?.label}</span>
+                                    <span className="text-m3-on-surface-variant uppercase font-bold tracking-wider">Expires In</span>
+                                    <span className="font-bold text-m3-on-surface">{DURATION_OPTIONS.find(o => o.seconds === form.getValues().durationSeconds)?.label}</span>
                                 </div>
-                                <Separator className="bg-border/30" />
+                                <Separator className="bg-m3-outline-variant/30" />
                                 <div className="flex justify-between items-center text-xs">
-                                    <span className="text-muted-foreground uppercase font-semibold">Transaction</span>
+                                    <span className="text-m3-on-surface-variant uppercase font-bold tracking-wider">Transaction</span>
                                     <Link
                                         href={`${EXPLORER_URL}/tx/${txHash}`}
                                         target="_blank"
-                                        className="flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors"
+                                        className="flex items-center gap-1.5 text-m3-primary hover:text-m3-primary/80 transition-colors font-bold"
                                     >
                                         <span className="font-mono">{txHash ? `${txHash.slice(0, 10)}...` : ""}</span>
                                         <ExternalLink className="w-3.5 h-3.5" />
@@ -185,7 +184,8 @@ export function OfferDialog({ trigger, asset, isOpen: controlledOpen, onOpenChan
 
                             <div className="flex flex-col gap-2 w-full pt-2">
                                 <Button
-                                    className="w-full font-semibold"
+                                    className="w-full font-bold shadow-m3-1 rounded-m3-full h-11"
+                                    variant="default"
                                     asChild
                                 >
                                     <Link href="/portfolio/assets">
@@ -195,7 +195,7 @@ export function OfferDialog({ trigger, asset, isOpen: controlledOpen, onOpenChan
                                 <Button
                                     variant="ghost"
                                     onClick={() => setIsOpen(false)}
-                                    className="w-full text-muted-foreground"
+                                    className="w-full h-11 rounded-m3-full font-bold text-m3-on-surface-variant"
                                 >
                                     Dismiss
                                 </Button>
@@ -203,28 +203,27 @@ export function OfferDialog({ trigger, asset, isOpen: controlledOpen, onOpenChan
                         </div>
                     ) : stage === "processing" ? (
                         <div className="py-12 flex flex-col items-center text-center space-y-6 animate-in fade-in duration-300">
-                            <div className="relative">
-                                <div className="absolute inset-0 bg-outrun-magenta/20 blur-2xl rounded-full" />
-                                <Loader2 className="h-12 w-12 animate-spin text-outrun-magenta relative z-10" />
+                            <div className="h-20 w-20 bg-m3-surface-container-high rounded-full flex items-center justify-center shadow-m3-1 mb-2">
+                                <Loader2 className="h-8 w-8 animate-spin text-m3-primary" />
                             </div>
                             <div className="space-y-2">
-                                <h2 className="text-xl font-bold tracking-tight">Processing Offer</h2>
-                                <p className="text-sm text-muted-foreground max-w-[260px] mx-auto">
+                                <h2 className="text-xl font-bold tracking-tight text-m3-on-surface">Processing Offer</h2>
+                                <p className="text-sm font-medium text-m3-on-surface-variant max-w-[260px] mx-auto">
                                     Approving & registering your offer on-chain. Please confirm the transaction in your wallet.
                                 </p>
                             </div>
                         </div>
                     ) : (
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                            <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 border border-border/50 group hover:bg-muted/40 transition-colors">
-                                <div className="h-16 w-16 rounded-lg overflow-hidden border border-border/50 bg-background shrink-0 shadow-sm relative">
+                            <div className="flex items-center gap-4 p-4 rounded-m3-xl bg-m3-surface-container shadow-m3-1 transition-colors">
+                                <div className="h-16 w-16 rounded-m3-md overflow-hidden bg-m3-surface-container-high shrink-0 relative">
                                     {isLoadingMetadata ? (
-                                        <div className="absolute inset-0 bg-muted animate-pulse" />
+                                        <div className="absolute inset-0 bg-m3-surface-container-highest animate-pulse" />
                                     ) : (
                                         <img
                                             src={displayImage}
                                             alt={displayName}
-                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                             onError={(e) => {
                                                 (e.target as HTMLImageElement).src = "/placeholder.svg"
                                             }}
@@ -233,15 +232,15 @@ export function OfferDialog({ trigger, asset, isOpen: controlledOpen, onOpenChan
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center justify-between mb-0.5">
-                                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{displayCollection}</p>
+                                        <p className="text-[10px] text-m3-on-surface-variant uppercase font-bold tracking-widest">{displayCollection}</p>
                                         {floorPrice && (
-                                            <p className="text-[10px] font-bold text-primary/80">FLOOR: {floorPrice} {asset.currency}</p>
+                                            <p className="text-[10px] font-bold text-m3-primary">FLOOR: {floorPrice} {asset.currency}</p>
                                         )}
                                     </div>
-                                    <h3 className="font-bold text-foreground truncate">{displayName}</h3>
+                                    <h3 className="font-bold text-m3-on-surface truncate">{displayName}</h3>
                                     <div className="flex items-center gap-1.5 mt-1">
-                                        <Badge variant="outline" className="text-[9px] h-4 py-0 font-medium bg-background/50">#{asset.tokenId}</Badge>
-                                        <span className="text-[10px] text-muted-foreground/60 font-medium">Verified IP</span>
+                                        <Badge variant="secondary" className="text-[10px] h-5 px-2 font-medium bg-m3-surface-container-highest text-m3-on-surface hover:bg-m3-surface-container-highest">#{asset.tokenId}</Badge>
+                                        <span className="text-[10px] text-m3-on-surface-variant font-medium">Verified IP</span>
                                     </div>
                                 </div>
                             </div>
@@ -253,10 +252,10 @@ export function OfferDialog({ trigger, asset, isOpen: controlledOpen, onOpenChan
                                         name="price"
                                         render={({ field }) => (
                                             <FormItem className="space-y-2.5">
-                                                <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex justify-between">
+                                                <FormLabel className="text-xs font-bold uppercase tracking-wider text-m3-on-surface-variant flex justify-between ml-1">
                                                     Amount
                                                     {field.value && floorPrice && parseFloat(field.value) < parseFloat(floorPrice) && (
-                                                        <span className="text-amber-500 font-bold lowercase flex items-center gap-1">
+                                                        <span className="text-m3-error font-bold lowercase flex items-center gap-1">
                                                             <Info className="h-3 w-3" />
                                                             below floor
                                                         </span>
@@ -268,12 +267,12 @@ export function OfferDialog({ trigger, asset, isOpen: controlledOpen, onOpenChan
                                                             type="number"
                                                             step="any"
                                                             placeholder="0.00"
-                                                            className="h-14 pl-4 pr-16 text-xl font-bold bg-muted/20 border-border/50 focus:border-outrun-magenta/50 focus:ring-1 focus:ring-outrun-magenta/20 transition-all rounded-xl shadow-inner shadow-black/20"
+                                                            className="h-16 pl-5 pr-20 text-2xl font-black bg-m3-surface-container-high border-none focus-visible:ring-2 focus-visible:ring-m3-primary transition-all rounded-m3-xl shadow-inner text-m3-on-surface"
                                                             {...field}
                                                         />
                                                     </FormControl>
-                                                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                                                        <span className="text-sm font-black text-muted-foreground/60 select-none">
+                                                    <div className="absolute right-5 top-1/2 -translate-y-1/2">
+                                                        <span className="text-sm font-black text-m3-primary select-none">
                                                             {form.watch("currency")}
                                                         </span>
                                                     </div>
@@ -288,22 +287,22 @@ export function OfferDialog({ trigger, asset, isOpen: controlledOpen, onOpenChan
                                         name="durationSeconds"
                                         render={({ field }) => (
                                             <FormItem className="space-y-2.5">
-                                                <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
+                                                <FormLabel className="text-xs font-bold uppercase tracking-wider text-m3-on-surface-variant flex items-center gap-2 ml-1">
                                                     <Clock className="w-3.5 h-3.5" />
                                                     Expiration
                                                 </FormLabel>
                                                 <FormControl>
-                                                    <div className="grid grid-cols-5 gap-1.5">
+                                                    <div className="grid grid-cols-5 gap-2">
                                                         {DURATION_OPTIONS.map((option) => (
                                                             <Button
                                                                 key={option.value}
                                                                 type="button"
-                                                                variant={field.value === option.seconds ? "default" : "outline"}
+                                                                variant={field.value === option.seconds ? "default" : "tonal"}
                                                                 size="sm"
                                                                 onClick={() => field.onChange(option.seconds)}
                                                                 className={cn(
-                                                                    "h-9 text-[10px] font-bold uppercase tracking-tight rounded-lg transition-all",
-                                                                    field.value === option.seconds ? "shadow-glow-sm shadow-outrun-purple/30 bg-outrun-purple text-white border-transparent" : "bg-muted/30 border-border/50 hover:bg-muted/50"
+                                                                    "h-10 text-[10px] font-bold uppercase tracking-tight rounded-m3-full transition-all",
+                                                                    field.value === option.seconds ? "shadow-m3-1" : "hover:bg-m3-surface-container-highest"
                                                                 )}
                                                             >
                                                                 {option.label}
@@ -316,46 +315,47 @@ export function OfferDialog({ trigger, asset, isOpen: controlledOpen, onOpenChan
                                         )}
                                     />
 
-                                    <div className="bg-outrun-magenta/5 border border-outrun-magenta/20 rounded-xl p-4 flex gap-3 shadow-inner shadow-outrun-magenta/5 mt-4">
-                                        <Shield className="w-4 h-4 text-outrun-magenta shrink-0 mt-0.5 opacity-80" />
-                                        <div className="space-y-1">
-                                            <p className="text-[11px] font-bold text-foreground/80">On-Chain Binding</p>
-                                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                    <div className="bg-m3-secondary-container rounded-m3-xl p-4 flex gap-3 shadow-m3-1 mt-6">
+                                        <Shield className="w-5 h-5 text-m3-on-secondary-container shrink-0" />
+                                        <div className="space-y-1 text-m3-on-secondary-container">
+                                            <p className="text-xs font-bold">On-Chain Binding</p>
+                                            <p className="text-[11px] font-medium leading-relaxed opacity-90">
                                                 Your offer remains valid until it expires or is cancelled. Only the amount specified will be transferable from your wallet.
                                             </p>
                                         </div>
                                     </div>
 
                                     {error && (
-                                        <Alert className="bg-destructive/10 border-destructive/20 text-destructive animate-in shake-in-1 duration-300">
-                                            <AlertCircle className="h-4 w-4" />
+                                        <Alert className="bg-m3-error-container text-m3-on-error-container border-none animate-in shake-in-1 duration-300 rounded-m3-lg p-3">
+                                            <AlertCircle className="h-4 w-4 text-m3-error" />
                                             <AlertDescription className="text-xs font-medium ml-2">{error}</AlertDescription>
                                         </Alert>
                                     )}
 
-                                    <div className="flex items-center gap-3 pt-2">
+                                    <div className="flex items-center gap-3 pt-6 pb-2">
                                         <Button
                                             type="button"
                                             variant="ghost"
                                             onClick={() => setIsOpen(false)}
                                             disabled={isProcessing}
-                                            className="flex-1 font-semibold text-muted-foreground"
+                                            className="flex-1 h-12 font-bold text-m3-on-surface rounded-m3-full"
                                         >
                                             Cancel
                                         </Button>
                                         <Button
                                             type="submit"
+                                            variant="default"
                                             disabled={!form.watch("price") || isProcessing}
-                                            className="flex-[2] h-12 font-bold shadow-glow-sm shadow-neon-cyan/30 text-white bg-outrun-purple hover:bg-outrun-purple/90 transition-all active:scale-[0.98]"
+                                            className="flex-[2] h-12 font-bold shadow-m3-2 rounded-m3-full text-base"
                                         >
                                             {isProcessing ? (
                                                 <>
                                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                                    Confirming...
+                                                    Processing
                                                 </>
                                             ) : (
                                                 <>
-                                                    <HandCoins className="w-4 h-4 mr-2" />
+                                                    <HandCoins className="w-5 h-5 mr-2" />
                                                     Place Offer
                                                 </>
                                             )}

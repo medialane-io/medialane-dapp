@@ -148,11 +148,11 @@ export function LaunchpadContent() {
                                 <div className="flex flex-col gap-2">
                                     <Link href="#" className="flex items-center justify-between group p-1.5">
                                         <span className="text-sm font-medium text-muted-foreground group-hover:text-m3-primary transition-colors">Documentation</span>
-                                        <ArrowUpRight className="h-3.5 w-3.5 opacity-30 group-hover:opacity-100 transition-opacity" />
+                                        <ArrowUpRight className="h-3.5 w-3.5 opacity-30 transition-opacity" />
                                     </Link>
                                     <Link href="#" className="flex items-center justify-between group p-1.5">
                                         <span className="text-sm font-medium text-muted-foreground group-hover:text-m3-primary transition-colors">Creator Grants</span>
-                                        <ArrowUpRight className="h-3.5 w-3.5 opacity-30 group-hover:opacity-100 transition-opacity" />
+                                        <ArrowUpRight className="h-3.5 w-3.5 opacity-30 transition-opacity" />
                                     </Link>
                                 </div>
                             </div>
@@ -258,7 +258,7 @@ function QuickActionItem({ title, description, icon: Icon, href, highlight }: an
                         <h4 className="text-sm font-bold text-m3-on-surface">{title}</h4>
                         <p className="text-[11px] text-muted-foreground font-medium">{description}</p>
                     </div>
-                    <ChevronRight className="h-3.5 w-3.5 ml-auto opacity-20 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all text-muted-foreground" />
+                    <ChevronRight className="h-3.5 w-3.5 ml-auto opacity-20 group-hover:translate-x-0.5 transition-all text-muted-foreground" />
                 </div>
             </motion.div>
         </Link>

@@ -152,7 +152,7 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
     if (assetError || !originalAsset) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center">
-                <div className="text-center space-y-6 p-8 glass-card max-w-md mx-auto border-red-500/20">
+                <div className="text-center space-y-6 p-8 bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short max-w-md mx-auto border-red-500/20">
                     <div className="h-20 w-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto">
                         <AlertCircle className="h-10 w-10 text-red-500" />
                     </div>
@@ -180,7 +180,7 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4 }}
             >
-                <div className="glass-card overflow-hidden border-primary/20 shadow-2xl shadow-primary/5">
+                <div className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short overflow-hidden border-primary/20 shadow-2xl shadow-primary/5">
                     <div className="aspect-square relative bg-black/20 group">
                         <Image
                             src={originalAsset.image || "/placeholder.svg"}
@@ -191,9 +191,9 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
 
-                        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                        <div className="absolute bottom-0 left-0 right-0 p-6 text-foreground">
                             <div className="flex items-center gap-2 text-sm opacity-80 mb-1">
-                                <Badge variant="outline" className="bg-black/40 border-white/20 text-white backdrop-blur-md">
+                                <Badge variant="outline" className="bg-black/40 border-border text-foreground backdrop-blur-md">
                                     {/* @ts-ignore - Collection name might be missing on some types */}
                                     {originalAsset.collectionName || originalAsset.collection?.name || "Collection"}
                                 </Badge>
@@ -204,7 +204,7 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                     </div>
 
                     <div className="p-6 space-y-4 bg-card/20 backdrop-blur-sm">
-                        <div className="flex items-center justify-between text-sm border-b border-white/10 pb-4">
+                        <div className="flex items-center justify-between text-sm border-b border-border/50 pb-4">
                             <span className="text-muted-foreground">Owner</span>
                             <div className="flex items-center gap-2">
                                 <div className="h-5 w-5 rounded-full bg-gradient-to-br from-purple-500 to-blue-500" />
@@ -215,7 +215,7 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
 
                         <div className="space-y-2">
                             <span className="text-sm text-muted-foreground">Original License</span>
-                            <div className="flex items-center gap-2 p-3 rounded-lg bg-white/5 border border-white/10">
+                            <div className="flex items-center gap-2 p-3 rounded-lg bg-foreground/5 border border-border/50">
                                 <FileText className="h-4 w-4 text-primary" />
                                 <span className="font-medium text-sm">
                                     {originalAsset.attributes?.find(a => a.trait_type === "License Type")?.value || originalAsset.licenseType || 'Standard'}
@@ -235,7 +235,7 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                 </div>
 
                 {/* Trust/Info Card */}
-                <Card className="glass-card bg-primary/5 border-primary/10">
+                <Card className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short bg-primary/5 border-primary/10">
                     <CardContent className="p-4 flex gap-4 items-start">
                         <ShieldCheck className="h-6 w-6 text-primary shrink-0 mt-1" />
                         <div className="space-y-1">
@@ -266,7 +266,7 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                     </p>
                 </div>
 
-                <div className="glass-card p-8 space-y-8 relative overflow-hidden">
+                <div className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short p-8 space-y-8 relative overflow-hidden">
                     {/* Background decoration */}
                     <div className="absolute top-0 right-0 p-32 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
@@ -285,7 +285,7 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                                         value={formData.license}
                                         onValueChange={(value) => setFormData((prev) => ({ ...prev, license: value }))}
                                     >
-                                        <SelectTrigger className="bg-white/5 border-white/10 focus:ring-primary/50 h-11">
+                                        <SelectTrigger className="bg-foreground/5 border-border/50 focus:ring-primary/50 h-11">
                                             <SelectValue placeholder="Select license" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -304,7 +304,7 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                                         value={formData.geographicScope}
                                         onValueChange={(value) => setFormData((prev) => ({ ...prev, geographicScope: value }))}
                                     >
-                                        <SelectTrigger className="bg-white/5 border-white/10 focus:ring-primary/50 h-11">
+                                        <SelectTrigger className="bg-foreground/5 border-border/50 focus:ring-primary/50 h-11">
                                             <SelectValue placeholder="Select scope" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -326,7 +326,7 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                                         placeholder="e.g. Germany, France, Japan..."
                                         value={formData.territory}
                                         onChange={(e) => setFormData((prev) => ({ ...prev, territory: e.target.value }))}
-                                        className="bg-white/5 border-white/10 focus:ring-primary/50"
+                                        className="bg-foreground/5 border-border/50 focus:ring-primary/50"
                                     />
                                 </div>
                             )}
@@ -339,7 +339,7 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                                         placeholder="e.g. Medical, Gaming..."
                                         value={formData.fieldOfUse}
                                         onChange={(e) => setFormData((prev) => ({ ...prev, fieldOfUse: e.target.value }))}
-                                        className="bg-white/5 border-white/10 focus:ring-primary/50 h-11"
+                                        className="bg-foreground/5 border-border/50 focus:ring-primary/50 h-11"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -349,13 +349,13 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                                         placeholder="e.g. Perpetual, 5 years..."
                                         value={formData.licenseDuration}
                                         onChange={(e) => setFormData((prev) => ({ ...prev, licenseDuration: e.target.value }))}
-                                        className="bg-white/5 border-white/10 focus:ring-primary/50 h-11"
+                                        className="bg-foreground/5 border-border/50 focus:ring-primary/50 h-11"
                                     />
                                 </div>
                             </div>
 
                             {/* Advanced */}
-                            <div className="pt-4 border-t border-white/5 space-y-4">
+                            <div className="pt-4 border-t border-border/25 space-y-4">
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="grantBack" className="text-xs uppercase tracking-wider text-muted-foreground">Grant-back Clause</Label>
@@ -364,7 +364,7 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                                             placeholder="Conditions for improvements..."
                                             value={formData.grantBack}
                                             onChange={(e) => setFormData((prev) => ({ ...prev, grantBack: e.target.value }))}
-                                            className="bg-white/5 border-white/10 focus:ring-primary/50"
+                                            className="bg-foreground/5 border-border/50 focus:ring-primary/50"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -374,7 +374,7 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                                             placeholder="AI Training allowed/prohibited..."
                                             value={formData.aiRights}
                                             onChange={(e) => setFormData((prev) => ({ ...prev, aiRights: e.target.value }))}
-                                            className="bg-white/5 border-white/10 focus:ring-primary/50"
+                                            className="bg-foreground/5 border-border/50 focus:ring-primary/50"
                                         />
                                     </div>
                                 </div>
@@ -397,7 +397,7 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                                         id="price"
                                         type="number"
                                         placeholder="0.00"
-                                        className="pl-10 h-12 bg-white/5 border-white/10 focus:ring-primary/50 text-lg font-medium"
+                                        className="pl-10 h-12 bg-foreground/5 border-border/50 focus:ring-primary/50 text-lg font-medium"
                                         value={formData.price}
                                         onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
                                     />
@@ -413,7 +413,7 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                                         id="royalty"
                                         type="number"
                                         placeholder="5"
-                                        className="pr-10 h-12 bg-white/5 border-white/10 focus:ring-primary/50 text-lg font-medium"
+                                        className="pr-10 h-12 bg-foreground/5 border-border/50 focus:ring-primary/50 text-lg font-medium"
                                         value={formData.royalty}
                                         onChange={(e) => setFormData(prev => ({ ...prev, royalty: e.target.value }))}
                                     />
@@ -436,14 +436,14 @@ export function LicensingAssetForm({ nftAddress, tokenId }: LicensingAssetFormPr
                             <Textarea
                                 id="terms"
                                 placeholder="Any additional context for the offer..."
-                                className="bg-white/5 border-white/10 focus:ring-primary/50 resize-none min-h-[100px]"
+                                className="bg-foreground/5 border-border/50 focus:ring-primary/50 resize-none min-h-[100px]"
                                 value={formData.additionalTerms}
                                 onChange={(e) => setFormData(prev => ({ ...prev, additionalTerms: e.target.value }))}
                             />
                         </div>
                     </section>
 
-                    <Separator className="bg-white/10" />
+                    <Separator className="bg-foreground/10" />
 
                     <div className="pt-2">
                         <Button

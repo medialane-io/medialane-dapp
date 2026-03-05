@@ -152,7 +152,7 @@ export default function TemplatesPage() {
               ) : (
                 <Card className="glass-panel overflow-hidden">
                   <CardContent className="p-6 text-center">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-outrun-magenta/20 to-outrun-cyan/20 border border-white/10">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-outrun-magenta/20 to-outrun-cyan/20 border border-foreground/10">
                       <Sparkles className="h-8 w-8 text-primary" />
                     </div>
                     <h3 className="mb-2 text-xl font-medium">Select a Template</h3>

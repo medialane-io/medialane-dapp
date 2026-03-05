@@ -90,7 +90,7 @@ export function PurchaseDialog({ trigger, asset }: PurchaseDialogProps) {
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-            <DialogContent className="sm:max-w-[420px] bg-card/90 backdrop-blur-3xl border-white/10 shadow-2xl overflow-hidden p-0">
+            <DialogContent className="sm:max-w-[420px] bg-card/90 backdrop-blur-3xl border-foreground/10 shadow-2xl overflow-hidden p-0">
                 <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-outrun-magenta via-outrun-purple to-neon-cyan" />
                 <div className="p-6">
                     <DialogHeader>

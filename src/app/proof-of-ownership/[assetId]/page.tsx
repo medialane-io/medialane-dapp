@@ -52,7 +52,7 @@ export default function ProofOfOwnershipPage({ params }: ProofOfOwnershipPagePro
   if (assetError || !asset) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center space-y-6 glass-card p-8 rounded-2xl">
+        <div className="max-w-md w-full text-center space-y-6 bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short p-8 rounded-2xl">
           <div className="w-16 h-16 mx-auto rounded-2xl bg-muted/50 flex items-center justify-center backdrop-blur-sm">
             <ShieldCheck className="h-8 w-8 text-muted-foreground" />
           </div>

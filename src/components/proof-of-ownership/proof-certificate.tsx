@@ -89,7 +89,7 @@ export function ProofCertificate({ asset }: ProofCertificateProps) {
 
             {/* Overlay Badges */}
             <div className="absolute top-4 left-4 z-10">
-              <Badge variant="secondary" className="bg-background/80 backdrop-blur shadow-sm border-white/10 text-xs font-medium">
+              <Badge variant="secondary" className="bg-background/80 backdrop-blur shadow-sm border-foreground/10 text-xs font-medium">
                 {asset.type}
               </Badge>
             </div>

@@ -57,7 +57,7 @@ export function AssetActionPanel({
     const actionButtonClass = "h-10 justify-start w-full text-foreground hover:bg-accent hover:text-accent-foreground rounded-lg text-sm font-medium transition-colors"
 
     return (
-        <div className="sticky top-24 space-y-4">
+        <div className="space-y-4">
             {/* Actions Card */}
             <div className="glass-panel p-4 space-y-2 rounded-2xl">
                 <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 px-1">Actions</h3>

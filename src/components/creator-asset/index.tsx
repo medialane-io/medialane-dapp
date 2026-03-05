@@ -2,6 +2,8 @@
 
 import { use, useMemo, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { extractImageColor, generateM3TonalPalette } from "@/lib/color-utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRightLeft } from "lucide-react";
@@ -84,6 +86,7 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isTransferOpen, setIsTransferOpen] = useState(false);
   const [imageRatio, setImageRatio] = useState<number | null>(null)
+  const [m3Palette, setM3Palette] = useState<Record<string, string> | undefined>(undefined);
 
   const tokenId = Number(tokenIdStr?.trim());
 
@@ -95,6 +98,17 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
     nftAddress as `0x${string}`,
     Number.isFinite(tokenId) ? tokenId : undefined
   );
+
+  useEffect(() => {
+    if (asset?.image) {
+      extractImageColor(asset.image).then(hsl => {
+        if (hsl) {
+          const isDark = document.documentElement.classList.contains('dark') || true;
+          setM3Palette(generateM3TonalPalette(hsl.h, hsl.s, hsl.l, isDark));
+        }
+      });
+    }
+  }, [asset?.image]);
 
   const { events: provenanceEventsData, isLoading: isLoadingProvenance } = useAssetProvenanceEvents(nftAddress || "", tokenIdStr || "");
   const { allOrders } = useMarketplaceListings();
@@ -254,7 +268,7 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
 
   return (
     <AssetErrorBoundary onRetry={reload}>
-      <div className="min-h-screen text-foreground bg-background py-20">
+      <div className="min-h-screen text-foreground bg-background py-20 transition-colors duration-m3-long" style={m3Palette as any}>
 
         {/* Loading / Error States - Keep existing logic if possible, or wrap them */}
         {showSkeleton || uiState === 'loading' ? (
@@ -324,8 +338,9 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
                 <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 lg:gap-12">
                   {/* Asset Image - Large, Half-Screen on Desktop */}
                   <div className="flex-shrink-0 relative group w-full lg:w-1/2 mx-auto lg:mx-0">
-                    <div
-                      className="relative w-full rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-black/20 backdrop-blur-sm"
+                    <motion.div
+                      layoutId={`asset-card-${nftAddress}-${tokenIdStr}`}
+                      className="relative w-full rounded-2xl overflow-hidden shadow-2xl border border-foreground/10 bg-m3-surface-container-high backdrop-blur-sm"
                       style={{ aspectRatio: imageRatio || "1/1" }}
                     >
                       <LazyImage
@@ -342,7 +357,7 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
                           }
                         }}
                       />
-                    </div>
+                    </motion.div>
                   </div>
 
                   {/* Asset Info */}
@@ -456,7 +471,7 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
 
                 {/* Right Column: Ownership & CTA (Spans 1 col) */}
                 <div className="space-y-6 lg:pt-4">
-                  <div className="sticky top-24 space-y-6">
+                  <div className="space-y-6">
                     {/* Marketplace Actions / Utility Panel */}
                     <AssetActionPanel
                       assetId={asset!.id}
@@ -486,7 +501,7 @@ export default function CreatorAssetPage({ params }: AssetPageProps) {
                               style={{ backgroundClip: 'padding-box, border-box', backgroundOrigin: 'border-box' }}
                             >
                               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400 font-semibold">View Proof of Ownership</span>
-                              <ArrowRightLeft className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity -rotate-45 text-purple-600 dark:text-purple-400" />
+                              <ArrowRightLeft className="h-4 w-4 opacity-100 transition-opacity -rotate-45 text-purple-600 dark:text-purple-400" />
                             </Button>
                           </Link>
                         </div>

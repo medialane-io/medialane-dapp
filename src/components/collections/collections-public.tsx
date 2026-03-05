@@ -247,7 +247,7 @@ function CollectionCard({ collection, nftCount, onReportClick, onCollectionClick
   return (
     <Card
       className={cn(
-        "glass-card overflow-hidden transition-all duration-300 cursor-pointer group",
+        "bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short overflow-hidden transition-all duration-300 cursor-pointer group",
         "hover:shadow-[0_0_25px_rgba(0,255,255,0.15)] hover:border-outrun-cyan/30",
         onCollectionClick && "hover:ring-2 hover:ring-outrun-cyan/50"
       )}

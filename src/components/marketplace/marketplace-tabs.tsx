@@ -24,12 +24,12 @@ export function MarketplaceTabs({ activeTab, onTabChange }: MarketplaceTabsProps
             transition={{ duration: 0.4, delay: 0.2 }}
         >
             <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-                <TabsList className="w-full justify-start h-auto p-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl gap-1">
+                <TabsList className="w-full justify-start h-auto p-1 bg-foreground/5 backdrop-blur-xl border border-foreground/10 rounded-xl gap-1">
                     {tabs.map((tab) => (
                         <TabsTrigger
                             key={tab.id}
                             value={tab.id}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-white/5 text-muted-foreground hover:text-foreground transition-all duration-200"
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-lg data-[state=active]:bg-foreground/10 data-[state=active]:text-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-foreground/5 text-muted-foreground hover:text-foreground transition-all duration-200"
                         >
                             <tab.icon className="h-4 w-4" />
                             <span className="hidden sm:inline">{tab.label}</span>

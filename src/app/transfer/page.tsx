@@ -251,7 +251,7 @@ export default function TransferPage() {
               <Button onClick={() => setTransferDialogOpen(true)} className="gap-2 gradient-vivid-outrun hover:shadow-[0_0_20px_rgba(0,255,255,0.3)] transition-all duration-200">
                 <Send className="h-4 w-4" />
                 Transfer Selected
-                <Badge variant="secondary" className="ml-1 bg-white/20 text-white">
+                <Badge variant="secondary" className="ml-1 bg-foreground/20 text-white">
                   {selectedAssets.length}
                 </Badge>
               </Button>
@@ -409,7 +409,7 @@ export default function TransferPage() {
             ) : sortedAssets.length > 0 ? (
               <>
                 {/* Selection Header */}
-                <Card className="glass-card">
+                <Card className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short">
                   <CardContent className="p-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
@@ -467,7 +467,7 @@ export default function TransferPage() {
                       return (
                         <Card
                           key={asset.id}
-                          className={`transition-all duration-200 hover:shadow-md cursor-pointer glass-card ${isSelected ? "ring-2 ring-primary ring-offset-2 border-primary/20" : "hover:bg-white/5"
+                          className={`transition-all duration-200 hover:shadow-md cursor-pointer bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short ${isSelected ? "ring-2 ring-primary ring-offset-2 border-primary/20" : "hover:bg-foreground/5"
                             }`}
                           onClick={() => toggleAssetSelection(asset.id)}
                         >
@@ -571,7 +571,7 @@ export default function TransferPage() {
                       return (
                         <Card
                           key={asset.id}
-                          className={`overflow-hidden transition-all hover:shadow-md cursor-pointer group glass-card ${isSelected ? "ring-2 ring-primary ring-offset-2" : ""
+                          className={`overflow-hidden transition-all hover:shadow-md cursor-pointer group bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short ${isSelected ? "ring-2 ring-primary ring-offset-2" : ""
                             }`}
                           onClick={() => toggleAssetSelection(asset.id)}
                         >
@@ -651,7 +651,7 @@ export default function TransferPage() {
                   const TypeIcon = typeIcons[asset.type] || Box
 
                   return (
-                    <Card key={asset.id} className="overflow-hidden hover:shadow-md transition-shadow glass-card">
+                    <Card key={asset.id} className="overflow-hidden hover:shadow-md transition-shadow bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short">
                       <div className="aspect-square relative">
                         <Image src={asset.image || "/placeholder.svg"} alt={asset.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
                         <div className="absolute top-3 left-3">
@@ -716,7 +716,7 @@ export default function TransferPage() {
           <Button onClick={() => setTransferDialogOpen(true)} size="lg" className="shadow-lg gap-2 w-full max-w-sm gradient-vivid-outrun hover:shadow-[0_0_25px_rgba(0,255,255,0.4)] transition-all duration-200">
             <Send className="h-4 w-4" />
             Transfer Selected
-            <Badge variant="secondary" className="ml-1 bg-white/20 text-white">
+            <Badge variant="secondary" className="ml-1 bg-foreground/20 text-white">
               {selectedAssets.length}
             </Badge>
           </Button>
@@ -726,7 +726,7 @@ export default function TransferPage() {
       {/* Mobile Selection Summary */}
       {selectedAssets.length > 0 && (
         <div className="fixed bottom-20 left-4 right-4 md:hidden z-10">
-          <Card className="glass-card border-outrun-cyan/30 shadow-[0_0_15px_rgba(0,255,255,0.15)]">
+          <Card className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short border-outrun-cyan/30 shadow-[0_0_15px_rgba(0,255,255,0.15)]">
             <CardContent className="p-3">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">

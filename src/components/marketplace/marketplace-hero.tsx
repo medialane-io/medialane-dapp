@@ -83,7 +83,7 @@ export function MarketplaceHero() {
                         <Button
                             variant="outline"
                             size="lg"
-                            className="rounded-full px-6 glass hover:bg-white/10 border-white/20"
+                            className="rounded-full px-6 glass hover:bg-foreground/10 border-foreground/20"
                             asChild
                         >
                             <Link href="/create">

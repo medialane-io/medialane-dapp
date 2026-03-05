@@ -7,7 +7,7 @@ import { StarknetProvider } from "@/components/starknet-provider";
 import { CommandMenu } from "@/components/command-menu"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { BottomNavBar } from "@/components/layout/dock"
+import { NavigationBar } from "@/components/navigation-bar"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -74,7 +74,7 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
-            <BottomNavBar />
+            <NavigationBar />
             <CommandMenu />
             <Toaster />
           </StarknetProvider>

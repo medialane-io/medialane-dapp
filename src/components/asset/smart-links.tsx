@@ -67,7 +67,7 @@ export function SmartLinks({ links }: SmartLinksProps) {
                     >
                         <Card className={`h-full border transition-all hover:scale-[1.02] hover:shadow-md ${colors}`}>
                             <div className="p-4 flex items-center gap-3">
-                                <div className={`p-2 rounded-full bg-white/50 dark:bg-black/20 backdrop-blur-sm`}>
+                                <div className={`p-2 rounded-full bg-foreground/50 dark:bg-black/20 backdrop-blur-sm`}>
                                     <Icon className="h-5 w-5" />
                                 </div>
                                 <div className="min-w-0 flex-1">

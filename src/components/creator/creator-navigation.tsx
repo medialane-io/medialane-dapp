@@ -35,7 +35,7 @@ export function CreatorNavigation() {
     ]
 
     return (
-        <div className="sticky top-0 z-30">
+        <div className="z-30">
             <div className="bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
                 <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto">
                     <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar pt-2 pb-0" aria-label="Creator sections">
@@ -78,7 +78,7 @@ export function CreatorNavigation() {
                                     {/* Hover background */}
                                     <div className={cn(
                                         "absolute inset-0 rounded-lg transition-colors -z-10",
-                                        !tab.isActive && "group-hover:bg-white/5"
+                                        !tab.isActive && "group-hover:bg-foreground/5"
                                     )} />
                                 </Link>
                             )

@@ -308,7 +308,7 @@ export default function CreateAssetPage() {
         {showMobilePreview && (
           <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm lg:hidden">
             <div className="fixed inset-x-4 top-4 bottom-4 bg-background border rounded-lg shadow-lg overflow-auto">
-              <div className="sticky top-0 bg-background border-b p-4 flex items-center justify-between">
+              <div className="bg-background border-b p-4 flex items-center justify-between">
                 <h2 className="font-semibold">Preview</h2>
                 <Button
                   variant="ghost"
@@ -342,11 +342,11 @@ export default function CreateAssetPage() {
 
                 {/* 1. Basic Information (Top Priority) */}
                 <AccordionItem value="basic-info" className="relative group rounded-xl border border-border/50 bg-card/40 backdrop-blur-xl shadow-sm overflow-hidden transition-all hover:border-outrun-cyan/40">
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-outrun-cyan/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-outrun-cyan/30 to-transparent opacity-100 transition-opacity" />
                   <AccordionTrigger className="hover:no-underline px-6 py-5 text-lg font-medium transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 text-primary shadow-[0_2px_10px_rgba(0,0,0,0.05)] text-primary">
-                        <FileText className="h-5 w-5 " />
+                        <FileText className="h-5 w-5" />
                       </div>
                       <span className="text-foreground/90">Asset Info</span>
                     </div>
@@ -367,11 +367,11 @@ export default function CreateAssetPage() {
 
                 {/* 2. Asset Type Selection */}
                 <AccordionItem value="ip-type" className="relative group rounded-xl border border-border/50 bg-card/40 backdrop-blur-xl shadow-sm overflow-hidden transition-all hover:border-outrun-magenta/40">
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-outrun-magenta/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-outrun-magenta/30 to-transparent opacity-100 transition-opacity" />
                   <AccordionTrigger className="hover:no-underline px-6 py-5 text-lg font-medium transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 text-primary shadow-[0_2px_10px_rgba(0,0,0,0.05)] text-primary">
-                        <Settings2 className="h-5 w-5 " />
+                        <Settings2 className="h-5 w-5" />
                       </div>
                       <span className="text-foreground/90">IP Type</span>
                     </div>
@@ -399,11 +399,11 @@ export default function CreateAssetPage() {
 
                 {/* 3. Advanced Configuration */}
                 <AccordionItem value="advanced-info" className="relative group rounded-xl border border-border/50 bg-card/40 backdrop-blur-xl shadow-sm overflow-hidden transition-all hover:border-outrun-yellow/40">
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-outrun-yellow/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-outrun-yellow/30 to-transparent opacity-100 transition-opacity" />
                   <AccordionTrigger className="hover:no-underline px-6 py-5 text-lg font-medium transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 text-primary shadow-[0_2px_10px_rgba(0,0,0,0.05)] text-primary">
-                        <Settings2 className="h-5 w-5 " />
+                        <Settings2 className="h-5 w-5" />
                       </div>
                       <span className="text-foreground/90">Advanced Information</span>
                     </div>
@@ -426,11 +426,11 @@ export default function CreateAssetPage() {
 
                 {/* 4. Licensing Options */}
                 <AccordionItem value="licensing" className="relative group rounded-xl border border-border/50 bg-card/40 backdrop-blur-xl shadow-sm overflow-hidden transition-all hover:border-neon-cyan/40">
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neon-cyan/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neon-cyan/30 to-transparent opacity-100 transition-opacity" />
                   <AccordionTrigger className="hover:no-underline px-6 py-5 text-lg font-medium transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 text-primary shadow-[0_2px_10px_rgba(0,0,0,0.05)] text-primary">
-                        <Settings2 className="h-5 w-5 " />
+                        <Settings2 className="h-5 w-5" />
                       </div>
                       <span className="text-foreground/90">Programmable Licensing</span>
                     </div>
@@ -458,7 +458,7 @@ export default function CreateAssetPage() {
                     loading
                   }
                   size="lg"
-                  className="px-10 h-14 text-lg font-bold tracking-wider bg-gradient-to-r from-outrun-cyan to-outrun-magenta hover:from-outrun-cyan/90 hover:to-outrun-magenta/90 text-white shadow-lg shadow-outrun-magenta/20 transition-all rounded-xl hover:-translate-y-0.5 border border-white/10 w-full sm:w-auto"
+                  className="px-10 h-14 text-lg font-bold tracking-wider bg-gradient-to-r from-outrun-cyan to-outrun-magenta hover:from-outrun-cyan/90 hover:to-outrun-magenta/90 text-white shadow-lg shadow-outrun-magenta/20 transition-all rounded-xl hover:-translate-y-0.5 border border-foreground/10 w-full sm:w-auto"
                 >
                   {loading && <Loader className="animate-spin h-5 w-5 mr-3" />}
                   {loading ? (upload_loading ? "Uploading..." : isCreating ? "Minting..." : "Processing") : "Create Asset"}
@@ -468,7 +468,7 @@ export default function CreateAssetPage() {
 
             {/* Desktop Sidebar */}
             <div className="hidden lg:block lg:col-span-1">
-              <div className="sticky top-24 space-y-6">
+              <div className="space-y-6">
                 {/* Template Info */}
                 {selectedTemplate && (
                   <TemplateInfoCard template={selectedTemplate} />
@@ -485,7 +485,7 @@ export default function CreateAssetPage() {
                   <CardContent className="p-5">
                     <h4 className="font-bold mb-3 flex items-center gap-2 text-primary">
                       <div className="p-1.5 rounded-md bg-outrun-cyan/10 ring-1 ring-outrun-cyan/30 shadow-glow-sm shadow-neon-cyan/20">
-                        <FileText className="h-4 w-4 " />
+                        <FileText className="h-4 w-4" />
                       </div>
                       Need Help?
                     </h4>

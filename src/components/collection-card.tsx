@@ -51,7 +51,7 @@ export function CollectionCard({ collection, index }: CollectionCardProps) {
                 </h3>
 
                 {collection.description && (
-                  <p className="text-xs text-white/70 mt-1.5 line-clamp-2 opacity-0 -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-m3-medium ease-m3-standard">
+                  <p className="text-xs text-white/70 mt-1.5 line-clamp-2 transition-all duration-m3-medium ease-m3-standard">
                     {collection.description}
                   </p>
                 )}
@@ -61,7 +61,7 @@ export function CollectionCard({ collection, index }: CollectionCardProps) {
         </Link>
 
         {/* Actions Dropdown */}
-        <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-m3-short">
+        <div className="absolute top-2 right-2 z-20 opacity-100 transition-opacity duration-m3-short">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

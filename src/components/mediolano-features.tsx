@@ -64,16 +64,16 @@ export function MediolanoFeatures() {
 
                 {/* Content layer above background */}
                 <div className="relative z-10 flex justify-center">
-                  <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 inline-flex shadow-xl">
-                    <Icon className="w-16 h-16 text-white" strokeWidth={1.5} />
+                  <div className="bg-foreground/20 backdrop-blur-sm rounded-2xl p-6 inline-flex shadow-xl">
+                    <Icon className="w-16 h-16 text-foreground" strokeWidth={1.5} />
                   </div>
                 </div>
 
                 <div className="relative z-10 space-y-3">
-                  <h2 className="text-3xl md:text-4xl font-bold text-white text-balance leading-tight">
+                  <h2 className="text-3xl md:text-4xl font-bold text-foreground text-balance leading-tight">
                     {feature.title}
                   </h2>
-                  <p className="text-xs md:text-sm text-white/90 text-pretty leading-relaxed">{feature.description}</p>
+                  <p className="text-xs md:text-sm text-foreground/90 text-pretty leading-relaxed">{feature.description}</p>
                 </div>
               </div>
             </div>

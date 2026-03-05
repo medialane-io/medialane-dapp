@@ -39,7 +39,7 @@ export function ActivityFilters({
                     placeholder={searchPlaceholder}
                     value={searchQuery}
                     onChange={(e) => onSearchChange(e.target.value)}
-                    className="pl-10 pr-10 bg-background/50 border-white/10 focus:border-primary/50 transition-colors"
+                    className="pl-10 pr-10 bg-background/50 border-foreground/10 focus:border-primary/50 transition-colors"
                 />
                 {searchQuery && (
                     <button
@@ -54,7 +54,7 @@ export function ActivityFilters({
             {/* Filter Controls */}
             <div className="flex flex-wrap gap-2">
                 <Select value={typeFilter} onValueChange={onTypeChange}>
-                    <SelectTrigger className="w-full sm:w-[160px] bg-background/50 border-white/10 focus:border-primary/50">
+                    <SelectTrigger className="w-full sm:w-[160px] bg-background/50 border-foreground/10 focus:border-primary/50">
                         <Filter className="h-4 w-4 mr-2" />
                         <SelectValue placeholder="Type" />
                     </SelectTrigger>
@@ -78,7 +78,7 @@ export function ActivityFilters({
                         aria-label="Refresh"
                         onClick={onRefresh}
                         disabled={isRefreshing}
-                        className="flex-1 sm:flex-initial bg-background/50 border-white/10 hover:bg-white/10 hover:border-white/20 transition-all"
+                        className="flex-1 sm:flex-initial bg-background/50 border-foreground/10 hover:bg-foreground/10 hover:border-foreground/20 transition-all"
                     >
                         <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
                     </Button>

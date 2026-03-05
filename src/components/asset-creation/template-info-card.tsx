@@ -63,7 +63,7 @@ export function TemplateInfoCard({ template }: TemplateInfoCardProps) {
           </div>
 
           <CardTitle className="text-lg mb-2">{template.name}</CardTitle>
-          <Badge variant="outline" className="text-[10px] bg-black/5 dark:bg-black/20 border border-white/10 dark:border-white/5 uppercase tracking-wider text-foreground/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+          <Badge variant="outline" className="text-[10px] bg-black/5 dark:bg-black/20 border border-foreground/10 dark:border-foreground/5 uppercase tracking-wider text-foreground/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
             {template.category}
           </Badge>
         </div>

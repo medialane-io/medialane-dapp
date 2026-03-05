@@ -423,7 +423,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
     if (assetError || !originalAsset) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center">
-                <div className="text-center space-y-4 p-8 glass-card max-w-md mx-auto">
+                <div className="text-center space-y-4 p-8 bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short max-w-md mx-auto">
                     <div className="h-16 w-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
                         <AlertDescription className="h-8 w-8 text-red-500" />
                     </div>
@@ -448,15 +448,15 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                 >
-                    <div className="glass-card overflow-hidden">
-                        <div className="p-6 border-b border-white/5 space-y-2">
+                    <div className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short overflow-hidden">
+                        <div className="p-6 border-b border-foreground/5 space-y-2">
                             <div className="flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                                     <GitBranch className="h-4 w-4" />
                                     Original Asset
                                 </div>
                                 <Link href={`/asset/${nftAddress}-${tokenId}`} target="_blank">
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-white/10 rounded-full">
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-foreground/10 rounded-full">
                                         <ExternalLink className="h-4 w-4" />
                                         <span className="sr-only">View Original</span>
                                     </Button>
@@ -465,7 +465,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                             <h2 className="font-bold text-xl line-clamp-1">{originalAsset.name}</h2>
                         </div>
 
-                        <div className="aspect-square relative bg-white/5">
+                        <div className="aspect-square relative bg-foreground/5">
                             <Image
                                 src={originalAsset.image || "/placeholder.svg"}
                                 alt={originalAsset.name || "Asset"}
@@ -478,7 +478,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                         <div className="p-6 space-y-4">
                             <div className="space-y-1">
                                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">License Model</span>
-                                <div className="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/10">
+                                <div className="flex items-center gap-2 p-2 rounded-lg bg-foreground/5 border border-foreground/10">
                                     <FileText className="h-4 w-4 text-primary" />
                                     <span className="text-sm font-medium">
                                         {/* Correctly traversing attributes for license type */}
@@ -507,7 +507,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
             >
 
                 {/* Collection Selection */}
-                <div className="glass-card p-6 md:p-8 space-y-6">
+                <div className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short p-6 md:p-8 space-y-6">
                     <div className="space-y-1">
                         <h3 className="text-lg font-bold flex items-center gap-2">
                             <Layers className="h-5 w-5 text-primary" />
@@ -555,7 +555,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                 </div>
 
                 {/* Remix Type Selection */}
-                <div className="glass-card p-6 md:p-8 space-y-6">
+                <div className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short p-6 md:p-8 space-y-6">
                     <div className="space-y-1">
                         <h3 className="text-lg font-bold flex items-center gap-2">
                             <GitBranch className="h-5 w-5 text-primary" />
@@ -574,17 +574,17 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                                 key={type.id}
                                 htmlFor={type.id}
                                 className={cn(
-                                    "cursor-pointer relative overflow-hidden rounded-xl border-2 p-4 transition-all hover:bg-white/5",
+                                    "cursor-pointer relative overflow-hidden rounded-xl border-2 p-4 transition-all hover:bg-foreground/5",
                                     formData.remixType === type.id
                                         ? "border-primary bg-primary/5 text-primary shadow-sm"
-                                        : "border-transparent bg-white/5 hover:border-white/20"
+                                        : "border-transparent bg-foreground/5 hover:border-foreground/20"
                                 )}
                             >
                                 <RadioGroupItem value={type.id} id={type.id} className="sr-only" />
                                 <div className="space-y-3">
                                     <div className={cn(
                                         "h-10 w-10 rounded-full flex items-center justify-center transition-colors",
-                                        formData.remixType === type.id ? "bg-primary text-primary-foreground" : "bg-white/10"
+                                        formData.remixType === type.id ? "bg-primary text-primary-foreground" : "bg-foreground/10"
                                     )}>
                                         <type.icon className="h-5 w-5" />
                                     </div>
@@ -599,14 +599,14 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                 </div>
 
                 {/* File Upload */}
-                <div className="glass-card p-6 md:p-8 space-y-6">
+                <div className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short p-6 md:p-8 space-y-6">
                     <div className="space-y-1">
                         <div className="flex items-center justify-between">
                             <h3 className="text-lg font-bold flex items-center gap-2">
                                 <Upload className="h-5 w-5 text-primary" />
                                 Upload Your Remix
                             </h3>
-                            <Badge variant="secondary" className="font-normal text-xs bg-white/10 text-muted-foreground">Optional</Badge>
+                            <Badge variant="secondary" className="font-normal text-xs bg-foreground/10 text-muted-foreground">Optional</Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">If skipped, we&apos;ll use the original asset image.</p>
                     </div>
@@ -614,7 +614,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                     <div
                         className={cn(
                             "border-2 border-dashed rounded-xl p-10 text-center transition-all duration-300 ease-in-out",
-                            dragActive ? "border-primary bg-primary/10 scale-[1.01]" : "border-white/10 bg-white/5 hover:border-white/20",
+                            dragActive ? "border-primary bg-primary/10 scale-[1.01]" : "border-foreground/10 bg-foreground/5 hover:border-foreground/20",
                             uploadedFile ? "border-green-500/50 bg-green-500/5" : ""
                         )}
                         onDragEnter={handleDrag}
@@ -625,7 +625,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                         {uploadedFile ? (
                             <div className="space-y-4 animate-in fade-in zoom-in-95 duration-300">
                                 {uploadedFile.type.startsWith("image/") || uploadedFile.type.startsWith("img") ? (
-                                    <div className="relative h-48 w-full max-w-[300px] mx-auto rounded-lg overflow-hidden border border-white/10 shadow-lg mb-4">
+                                    <div className="relative h-48 w-full max-w-[300px] mx-auto rounded-lg overflow-hidden border border-foreground/10 shadow-lg mb-4">
                                         <Image
                                             src={uploadedFile.previewUrl}
                                             alt={uploadedFile.name}
@@ -650,7 +650,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                <div className="h-16 w-16 bg-white/10 rounded-full flex items-center justify-center mx-auto text-muted-foreground">
+                                <div className="h-16 w-16 bg-foreground/10 rounded-full flex items-center justify-center mx-auto text-muted-foreground">
                                     <Upload className="h-8 w-8" />
                                 </div>
                                 <div>
@@ -675,7 +675,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                 </div>
 
                 {/* Remix Details */}
-                <div className="glass-card p-6 md:p-8 space-y-6">
+                <div className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short p-6 md:p-8 space-y-6">
                     <div className="space-y-1">
                         <h3 className="text-lg font-bold flex items-center gap-2">
                             <Sparkles className="h-5 w-5 text-primary" />
@@ -721,7 +721,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                 </div>
 
                 {/* License Configuration */}
-                <div className="glass-card p-6 md:p-8 space-y-6">
+                <div className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short p-6 md:p-8 space-y-6">
                     <div className="space-y-1">
                         <h3 className="text-lg font-bold flex items-center gap-2">
                             <Globe className="h-5 w-5 text-primary" />
@@ -808,7 +808,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
                         </div>
 
                         {/* Collapsible Advanced Section or simple divider */}
-                        <div className="pt-4 border-t border-white/5 space-y-4">
+                        <div className="pt-4 border-t border-foreground/5 space-y-4">
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="grantBack" className="text-xs uppercase tracking-wider text-muted-foreground">Grant-back Clause</Label>
@@ -843,7 +843,7 @@ export function RemixAssetForm({ nftAddress, tokenId }: RemixAssetFormProps) {
 
                 {/* Submit Section */}
                 {/* Submit Section */}
-                <div className="glass-card p-6 flex flex-col sm:flex-row gap-6 items-center justify-between z-20 backdrop-blur-xl border-primary/20 shadow-2xl">
+                <div className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short p-6 flex flex-col sm:flex-row gap-6 items-center justify-between z-20 backdrop-blur-xl border-primary/20 shadow-2xl">
                     <div className="text-sm">
                         <p className="text-muted-foreground">
                             <span className="text-green-500">Mediolano Protocol + Medialane = Zero fees</span>

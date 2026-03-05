@@ -57,7 +57,7 @@ export function MarketplaceStats() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 + index * 0.05 }}
                 >
-                    <Card className="glass-card group cursor-default">
+                    <Card className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short group cursor-default">
                         <CardContent className="p-4 md:p-5">
                             <div className="flex justify-between items-start gap-2">
                                 <div className="min-w-0">

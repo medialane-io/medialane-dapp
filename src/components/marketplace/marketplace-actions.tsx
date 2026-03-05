@@ -110,7 +110,7 @@ export function MarketplaceActions({
 
             {/* ── Main listing / buy panel ─────────────────────────────── */}
             <div className="rounded-xl glass-panel p-5 shadow-sm space-y-4">
-                {listing ? (
+                {listing && (
                     <div className="flex flex-col gap-1">
                         <p className="text-xs text-muted-foreground">Current Price</p>
                         <div className="flex items-baseline gap-2">
@@ -118,12 +118,6 @@ export function MarketplaceActions({
                                 {listing.formattedPrice} {listing.currencySymbol || "USDC"}
                             </span>
                         </div>
-                    </div>
-                ) : (
-                    <div className="flex justify-between items-center py-2">
-                        <p className="text-sm font-medium text-muted-foreground">
-                            {isOwner ? "Not listed for sale" : "Not listed yet"}
-                        </p>
                     </div>
                 )}
 
@@ -153,7 +147,7 @@ export function MarketplaceActions({
                                     tokenId: tokenId
                                 }}
                                 trigger={
-                                    <Button className="flex-1 h-11 bg-outrun-magenta hover:bg-outrun-magenta/90 text-white shadow-glow-sm shadow-neon-magenta/20">
+                                    <Button className="flex-1 h-11 font-bold" variant="default">
                                         <Tag className="mr-2 h-4 w-4" />
                                         List for Sale
                                     </Button>
@@ -175,7 +169,7 @@ export function MarketplaceActions({
                                             listing: listing
                                         }}
                                         trigger={
-                                            <Button className="flex-1 h-11 gradient-vivid shadow-glow-sm shadow-neon-cyan/20 border-none font-bold">
+                                            <Button className="flex-1 h-11 font-bold shadow-m3-2" variant="default">
                                                 <ShoppingBag className="mr-2 h-4 w-4" />
                                                 Buy Now
                                             </Button>
@@ -207,8 +201,9 @@ export function MarketplaceActions({
                                     </Button>
                                 </>
                             ) : (
-                                <Button className="flex-1 h-11" variant="secondary" disabled>
-                                    Buy Now
+                                <Button className="flex-1 h-11 font-bold" variant="default" disabled>
+                                    <ShoppingBag className="mr-2 h-4 w-4" />
+                                    Not Listed
                                 </Button>
                             )}
 
@@ -224,7 +219,7 @@ export function MarketplaceActions({
                                     tokenId: tokenId
                                 }}
                                 trigger={
-                                    <Button className="flex-1 h-11 font-medium bg-outrun-purple hover:bg-outrun-purple/90 text-white shadow-glow-sm shadow-outrun-purple/20 border-none" variant={userOffer ? "secondary" : "default"}>
+                                    <Button className="flex-1 h-11 font-bold shadow-m3-2" variant={userOffer ? "secondary" : "default"}>
                                         <HandCoins className="mr-2 h-4 w-4" />
                                         {userOffer ? "Update Offer" : "Make Offer"}
                                     </Button>

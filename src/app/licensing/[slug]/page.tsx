@@ -37,7 +37,7 @@ export default function LicensingOfferPage({ params }: LicensingPageProps) {
     if (!decodedSlug || !nftAddress || isNaN(tokenId)) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center space-y-4 glass-card p-12 max-w-lg mx-auto">
+                <div className="text-center space-y-4 bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short p-12 max-w-lg mx-auto">
                     <h1 className="text-3xl font-bold text-red-500">Invalid Asset Link</h1>
                     <p className="text-muted-foreground">The licensing link you are trying to access is malformed or invalid.</p>
                     <Link href="/licensing">

@@ -114,7 +114,7 @@ export default function RemixDiscoveryPage() {
           transition={{ delay: 0.1 }}
           className="space-y-8"
         >
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-1.5 rounded-2xl glass border border-white/20 dark:border-white/10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-1.5 rounded-2xl glass border border-foreground/20 dark:border-foreground/10">
             <Tabs
               value={activeTab}
               onValueChange={(val) => {
@@ -296,10 +296,10 @@ export default function RemixDiscoveryPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex items-center gap-4 glass p-6 rounded-2xl mb-8"
                       >
-                        <Button variant="ghost" size="icon" onClick={handleBackToCollections} className="shrink-0 rounded-full hover:bg-white/10">
+                        <Button variant="ghost" size="icon" onClick={handleBackToCollections} className="shrink-0 rounded-full hover:bg-foreground/10">
                           <ArrowLeft className="h-5 w-5" />
                         </Button>
-                        <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-white/10 shadow-lg">
+                        <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-foreground/10 shadow-lg">
                           <Image
                             src={selectedCollection.image || "/placeholder.svg"}
                             alt={selectedCollection.name}
@@ -315,7 +315,7 @@ export default function RemixDiscoveryPage() {
                               <Users className="h-3.5 w-3.5" />
                               <span>{selectedCollection.itemCount} Items</span>
                             </div>
-                            <Badge variant="outline" className="text-xs h-6 px-2 bg-transparent border-white/20">
+                            <Badge variant="outline" className="text-xs h-6 px-2 bg-transparent border-foreground/20">
                               {selectedCollection.type || "Collection"}
                             </Badge>
                           </div>
@@ -380,7 +380,7 @@ export default function RemixDiscoveryPage() {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function RemixAssetCard({ asset, onRemix }: { asset: any, nftAddress: string, onRemix: () => void }) {
   return (
-    <Card className="overflow-hidden group hover:shadow-2xl transition-all duration-500 glass-card border-white/5 dark:border-white/5 bg-white/5 dark:bg-black/20 hover:border-primary/30 dark:hover:border-primary/30">
+    <Card className="overflow-hidden group hover:shadow-2xl transition-all duration-500 bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short border-foreground/5 dark:border-foreground/5 bg-foreground/5 dark:bg-black/20 hover:border-primary/30 dark:hover:border-primary/30">
       <div className="aspect-square relative bg-muted/20 overflow-hidden">
         <Image
           src={asset.image || "/placeholder.svg"}
@@ -416,11 +416,11 @@ function RemixAssetCard({ asset, onRemix }: { asset: any, nftAddress: string, on
 
 function AssetCardSkeleton() {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
-      <Skeleton className="aspect-square w-full bg-white/5" />
+    <div className="rounded-xl border border-foreground/10 bg-foreground/5 overflow-hidden">
+      <Skeleton className="aspect-square w-full bg-foreground/5" />
       <div className="p-4 space-y-3">
-        <Skeleton className="h-4 w-3/4 bg-white/5" />
-        <Skeleton className="h-3 w-1/2 bg-white/5" />
+        <Skeleton className="h-4 w-3/4 bg-foreground/5" />
+        <Skeleton className="h-3 w-1/2 bg-foreground/5" />
       </div>
     </div>
   )
@@ -428,11 +428,11 @@ function AssetCardSkeleton() {
 
 function CollectionCardSkeleton() {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
-      <Skeleton className="h-56 w-full bg-white/5" />
+    <div className="rounded-xl border border-foreground/10 bg-foreground/5 overflow-hidden">
+      <Skeleton className="h-56 w-full bg-foreground/5" />
       <div className="p-4 flex justify-between">
-        <Skeleton className="h-5 w-32 bg-white/5" />
-        <Skeleton className="h-5 w-16 bg-white/5" />
+        <Skeleton className="h-5 w-32 bg-foreground/5" />
+        <Skeleton className="h-5 w-16 bg-foreground/5" />
       </div>
     </div>
   )
@@ -441,7 +441,7 @@ function CollectionCardSkeleton() {
 function EmptyState({ title, description }: { title: string, description: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-500">
-      <div className="w-20 h-20 bg-muted/20 rounded-full flex items-center justify-center mb-6 glass border-white/10">
+      <div className="w-20 h-20 bg-muted/20 rounded-full flex items-center justify-center mb-6 glass border-foreground/10">
         <Box className="h-10 w-10 text-muted-foreground/50" />
       </div>
       <h3 className="text-xl font-medium mb-2">{title}</h3>

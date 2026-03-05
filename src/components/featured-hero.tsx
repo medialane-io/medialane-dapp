@@ -143,30 +143,30 @@ export function FeaturedHero() {
                                         }`}
                                 >
                                     <div className="flex items-center justify-center gap-3 mb-6">
-                                        <Badge variant="secondary" className="bg-white/15 text-white border-0 rounded-m3-full px-3 py-1">
+                                        <Badge variant="secondary" className="bg-foreground/15 text-foreground border-0 rounded-m3-full px-3 py-1">
                                             IP
                                         </Badge>
-                                        <Badge variant="secondary" className="bg-white/15 text-white border-0 rounded-m3-full px-3 py-1">
+                                        <Badge variant="secondary" className="bg-foreground/15 text-foreground border-0 rounded-m3-full px-3 py-1">
                                             {currentCollection.type || "Mixed Media"}
                                         </Badge>
                                     </div>
 
-                                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-white leading-tight tracking-tight">
+                                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-foreground leading-tight tracking-tight">
                                         {currentCollection.name}
                                     </h2>
 
-                                    <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed max-w-2xl mx-auto line-clamp-3 font-light">
+                                    <p className="text-lg md:text-xl text-foreground/90 mb-8 leading-relaxed max-w-2xl mx-auto line-clamp-3 font-light">
                                         {currentCollection.description || "Discover this amazing collection on Medialane."}
                                     </p>
 
                                     {/* Stats */}
                                     <div className="flex items-center justify-center gap-8 mb-10">
-                                        <div className="flex items-center gap-3 text-white">
-                                            <div className="p-3 bg-white/15 rounded-m3-full">
+                                        <div className="flex items-center gap-3 text-foreground">
+                                            <div className="p-3 bg-foreground/15 rounded-m3-full">
                                                 <TrendingUp className="w-5 h-5" />
                                             </div>
                                             <div>
-                                                <p className="text-xs text-white/60 uppercase tracking-wider font-semibold">Total Assets</p>
+                                                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Assets</p>
                                                 <span className="text-xl font-bold">{currentCollection.itemCount}</span>
                                             </div>
                                         </div>
@@ -177,7 +177,7 @@ export function FeaturedHero() {
                                         <Button
                                             asChild
                                             size="lg"
-                                            className="bg-white text-black hover:bg-white/90 font-semibold px-8 h-12 text-base"
+                                            className="bg-white text-black hover:bg-foreground/90 font-semibold px-8 h-12 text-base"
                                         >
                                             <Link href={`/collections/${currentCollection.nftAddress || currentCollection.id}`}>View Collection</Link>
                                         </Button>
@@ -195,7 +195,7 @@ export function FeaturedHero() {
                                     size="icon"
                                     onClick={prevSlide}
                                     disabled={isTransitioning}
-                                    className="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 bg-m3-inverse-surface/30 text-white hover:bg-m3-inverse-surface/50 h-14 w-14 rounded-m3-full border-0 transition-all duration-m3-short disabled:opacity-50"
+                                    className="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 bg-m3-inverse-surface/30 text-foreground hover:bg-m3-inverse-surface/50 h-14 w-14 rounded-m3-full border-0 transition-all duration-m3-short disabled:opacity-50"
                                 >
                                     <ChevronLeft className="w-8 h-8" />
                                 </Button>
@@ -204,7 +204,7 @@ export function FeaturedHero() {
                                     size="icon"
                                     onClick={nextSlide}
                                     disabled={isTransitioning}
-                                    className="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 bg-m3-inverse-surface/30 text-white hover:bg-m3-inverse-surface/50 h-14 w-14 rounded-m3-full border-0 transition-all duration-m3-short disabled:opacity-50"
+                                    className="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 bg-m3-inverse-surface/30 text-foreground hover:bg-m3-inverse-surface/50 h-14 w-14 rounded-m3-full border-0 transition-all duration-m3-short disabled:opacity-50"
                                 >
                                     <ChevronRight className="w-8 h-8" />
                                 </Button>
@@ -219,7 +219,7 @@ export function FeaturedHero() {
                                         key={index}
                                         onClick={() => goToSlide(index)}
                                         disabled={isTransitioning}
-                                        className={`transition-all duration-m3-medium ease-m3-standard rounded-m3-full ${index === currentSlide ? "w-12 h-3 bg-white" : "w-3 h-3 bg-white/40 hover:bg-white/60"}`}
+                                        className={`transition-all duration-m3-medium ease-m3-standard rounded-m3-full ${index === currentSlide ? "w-12 h-3 bg-white" : "w-3 h-3 bg-foreground/40 hover:bg-foreground/60"}`}
                                         aria-label={`Go to slide ${index + 1}`}
                                     />
                                 ))}

@@ -54,7 +54,7 @@ export function Header() {
             variant="ghost"
             size="sm"
             onClick={() => openCommandMenu("marketplace")}
-            className="gap-2 px-4 text-m3-on-surface-variant hover:text-m3-on-surface"
+            className="gap-2 px-4  hover:text-m3-on-surface"
           >
             <Boxes className="w-4 h-4" />
             <span>Explore</span>
@@ -64,7 +64,7 @@ export function Header() {
             variant="ghost"
             size="sm"
             onClick={() => openCommandMenu("launchpad")}
-            className="gap-2 px-4 text-m3-on-surface-variant hover:text-m3-on-surface"
+            className="gap-2 px-4  hover:text-m3-on-surface"
           >
             <Rocket className="w-4 h-4" />
             <span>Launchpad</span>
@@ -74,7 +74,7 @@ export function Header() {
             variant="ghost"
             size="sm"
             onClick={() => openCommandMenu("portfolio")}
-            className="gap-2 px-4 text-m3-on-surface-variant hover:text-m3-on-surface"
+            className="gap-2 px-4  hover:text-m3-on-surface"
           >
             <User className="w-4 h-4" />
             <span>Portfolio</span>
@@ -91,7 +91,7 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen(true)}
-              className="relative text-m3-on-surface-variant hover:text-m3-on-surface"
+              className="relative  hover:text-m3-on-surface"
             >
               <ShoppingBag className="w-4 h-4" />
               {mounted && items.length > 0 && (
@@ -109,7 +109,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="sm"
-            className="hidden sm:flex gap-2 px-3 text-m3-on-surface-variant"
+            className="hidden sm:flex gap-2 px-3 "
             onClick={() => document.dispatchEvent(new CustomEvent("openCommandMenu"))}
           >
             <Command className="h-4 w-4" />
@@ -124,7 +124,7 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen(true)}
-              className="relative text-m3-on-surface-variant"
+              className="relative "
             >
               <ShoppingBag className="w-4 h-4" />
               {mounted && items.length > 0 && (
@@ -136,7 +136,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-m3-on-surface-variant"
+              className=""
               onClick={() => document.dispatchEvent(new CustomEvent("openCommandMenu"))}
             >
               <Command className="h-4 w-4" />

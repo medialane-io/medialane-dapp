@@ -72,7 +72,7 @@ export function WalletConnect() {
           <Button
             variant="ghost"
             size="icon"
-            className={`relative rounded-full h-8 w-8 transition-all duration-300 hover:bg-white/10 dark:hover:bg-white/10
+            className={`relative rounded-full h-8 w-8 transition-all duration-300 hover:bg-foreground/10 dark:hover:bg-foreground/10
               ${isWrongNetwork
                 ? "bg-red-500/10 text-red-500"
                 : "text-foreground"}`}
@@ -216,7 +216,7 @@ export function WalletConnect() {
     <Button
       variant="ghost"
       size="icon"
-      className="rounded-full h-9 w-9 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/5 dark:border-white/5 transition-all text-foreground"
+      className="rounded-full h-9 w-9 bg-black/5 dark:bg-foreground/5 hover:bg-black/10 dark:hover:bg-foreground/10 border border-black/5 dark:border-foreground/5 transition-all text-foreground"
       onClick={handleConnect}
     >
       <Wallet className="h-4 w-4" />

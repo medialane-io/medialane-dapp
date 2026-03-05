@@ -118,7 +118,7 @@ export function AssetHistory({ nftAddress, tokenId }: AssetHistoryProps) {
 
     if (activityRows.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-white/10 rounded-xl">
+            <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-foreground/10 rounded-xl">
                 <Activity className="h-8 w-8 text-muted-foreground/30 mb-3" />
                 <p className="text-sm text-muted-foreground">No activity yet</p>
                 <p className="text-xs text-muted-foreground/60 mt-1">Listings, offers, and sales will appear here</p>
@@ -127,10 +127,10 @@ export function AssetHistory({ nftAddress, tokenId }: AssetHistoryProps) {
     }
 
     return (
-        <div className="rounded-md border border-white/10 overflow-hidden">
+        <div className="rounded-md border border-foreground/10 overflow-hidden">
             <Table>
-                <TableHeader className="bg-white/5">
-                    <TableRow className="border-white/10 hover:bg-white/5">
+                <TableHeader className="bg-foreground/5">
+                    <TableRow className="border-foreground/10 hover:bg-foreground/5">
                         <TableHead>Event</TableHead>
                         <TableHead>Price</TableHead>
                         <TableHead>From</TableHead>
@@ -140,7 +140,7 @@ export function AssetHistory({ nftAddress, tokenId }: AssetHistoryProps) {
                 </TableHeader>
                 <TableBody>
                     {activityRows.map(row => (
-                        <TableRow key={row.key} className="border-white/10 hover:bg-white/5">
+                        <TableRow key={row.key} className="border-foreground/10 hover:bg-foreground/5">
                             <TableCell className="font-medium">
                                 <div className="flex items-center gap-2">
                                     <HistoryIcon type={row.iconType} color={row.iconColor} />

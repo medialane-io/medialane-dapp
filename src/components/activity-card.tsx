@@ -27,7 +27,7 @@ export const ActivityCard = React.memo(function ActivityCard({ activity }: Activ
   const showGradient = shouldShowGradient(activity.type, activity.assetImage)
 
   return (
-    <Card className="glass-card flex flex-col h-full overflow-hidden hover:shadow-[0_0_25px_rgba(0,255,255,0.1)] hover:scale-[1.02] transition-all duration-300 group">
+    <Card className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short flex flex-col h-full overflow-hidden hover:shadow-[0_0_25px_rgba(0,255,255,0.1)] hover:scale-[1.02] transition-all duration-300 group">
 
       {/* Header: User & Action - Timeline Feel */}
       <div className="flex items-center gap-3 p-4 pb-3 border-b border-border/10">

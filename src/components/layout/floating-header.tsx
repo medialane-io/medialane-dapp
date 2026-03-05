@@ -24,7 +24,7 @@ export function FloatingHeader() {
         <motion.header
             className={cn(
                 "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-                isScrolled ? "bg-black/50 backdrop-blur-xl border-b border-white/5 py-4" : "bg-transparent py-6"
+                isScrolled ? "bg-black/50 backdrop-blur-xl border-b border-foreground/5 py-4" : "bg-transparent py-6"
             )}
         >
             <div className="container mx-auto px-6 flex items-center justify-between">
@@ -61,11 +61,11 @@ export function FloatingHeader() {
                         <Search className="w-5 h-5" />
                     </button>
                     <Link href="/create">
-                        <Button size="sm" className="bg-white text-black hover:bg-white/90 font-medium rounded-full px-6">
+                        <Button size="sm" className="bg-white text-black hover:bg-foreground/90 font-medium rounded-full px-6">
                             + Create
                         </Button>
                     </Link>
-                    <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 rounded-full gap-2">
+                    <Button variant="ghost" size="sm" className="text-white hover:bg-foreground/10 rounded-full gap-2">
                         <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500" />
                         Sign In
                     </Button>

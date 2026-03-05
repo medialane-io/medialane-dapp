@@ -32,7 +32,7 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="h-8 w-8 rounded-full hover:bg-white/10 dark:hover:bg-white/10 transition-all duration-200"
+      className="h-8 w-8 rounded-full hover:bg-foreground/10 dark:hover:bg-foreground/10 transition-all duration-200"
       title={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
     >
       <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-foreground" />

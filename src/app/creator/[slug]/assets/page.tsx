@@ -61,7 +61,7 @@ export default function CreatorAssetsPage() {
                             placeholder="Search assets..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 pr-10 bg-background/80 backdrop-blur-sm border-white/10 focus:border-primary/50 transition-colors"
+                            className="pl-10 pr-10 bg-background/80 backdrop-blur-sm border-foreground/10 focus:border-primary/50 transition-colors"
                         />
                         {searchQuery && (
                             <button

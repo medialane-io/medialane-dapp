@@ -266,7 +266,7 @@ export default function CreateDropPage() {
                     {/* Left Column: Unified Form */}
                     <div className="lg:col-span-2 space-y-8">
 
-                        <Card className="glass-card">
+                        <Card className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short">
                             <CardContent className="p-8 space-y-12">
 
                                 {/* Section 1: Collection Identity */}
@@ -797,7 +797,7 @@ export default function CreateDropPage() {
 
                     {/* Right Column: Sticky Sidebar / Preview */}
                     <div className="lg:col-span-1">
-                        <div className="sticky top-24 space-y-6">
+                        <div className="space-y-6">
 
                             {/* Live Preview Card */}
                             <div className="rounded-2xl overflow-hidden border border-border/50 bg-card shadow-2xl">
@@ -828,12 +828,12 @@ export default function CreateDropPage() {
 
                                     {/* Floating Details */}
                                     <div className="absolute bottom-6 left-6 right-6 text-white space-y-2">
-                                        <Badge className={cn("mb-2 backdrop-blur-md border-white/20 text-white gap-1.5 pl-1.5",
+                                        <Badge className={cn("mb-2 backdrop-blur-md border-foreground/20 text-white gap-1.5 pl-1.5",
                                             licenseType === 'personal' ? 'bg-blue-500/80' :
                                                 licenseType === 'commercial' ? 'bg-green-500/80' :
                                                     'bg-amber-500/80'
                                         )}>
-                                            <div className="bg-white/20 p-0.5 rounded-full">
+                                            <div className="bg-foreground/20 p-0.5 rounded-full">
                                                 {getLicenseIcon()}
                                             </div>
                                             {getLicenseLabel()}
@@ -863,7 +863,7 @@ export default function CreateDropPage() {
                             </div>
 
                             {/* Quick Guide */}
-                            <Card className="glass-card">
+                            <Card className="bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short">
                                 <CardHeader className="pb-3">
                                     <CardTitle className="text-lg">Quick Guide</CardTitle>
                                 </CardHeader>

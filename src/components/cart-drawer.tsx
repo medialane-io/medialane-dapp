@@ -33,7 +33,7 @@ export function CartDrawer() {
     return (
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetContent className="w-full sm:max-w-md flex flex-col glass-heavy text-foreground p-0">
-                <SheetHeader className="p-6 border-b border-white/10">
+                <SheetHeader className="p-6 border-b border-foreground/10">
                     <div className="flex items-center justify-between">
                         <SheetTitle className="flex items-center gap-2 text-xl">
                             <ShoppingBag className="w-5 h-5 text-outrun-cyan" />

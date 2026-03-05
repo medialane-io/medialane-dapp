@@ -67,7 +67,7 @@ export function CreatorHeader() {
                     {/* Avatar Group */}
                     <div className="relative group shrink-0">
                         <div className={`absolute -inset-4 rounded-full blur-2xl opacity-60 transition-opacity duration-1000 ${avatarImage ? "bg-outrun-magenta/50" : "bg-gradient-to-r from-outrun-magenta via-outrun-purple to-neon-cyan"}`} />
-                        <div className="relative h-48 w-48 md:h-56 md:w-56 rounded-full overflow-hidden shadow-2xl backdrop-blur-xl bg-background/50 border-4 border-white/20 dark:border-white/10 ring-2 ring-background">
+                        <div className="relative h-48 w-48 md:h-56 md:w-56 rounded-full overflow-hidden shadow-2xl backdrop-blur-xl bg-background/50 border-4 border-foreground/20 dark:border-foreground/10 ring-2 ring-background">
                             {avatarImage ? (
                                 <Image
                                     src={avatarImage}
@@ -111,8 +111,8 @@ export function CreatorHeader() {
                         {/* Action Bar (Stats + Social + Share) */}
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-2">
                             {/* Glass Stats */}
-                            <div className="flex flex-wrap items-center gap-2 glass-panel px-4 py-2 rounded-2xl border border-white/5 bg-background/40 backdrop-blur-md">
-                                <div className="flex items-center gap-2 px-2 border-r border-white/10">
+                            <div className="flex flex-wrap items-center gap-2 glass-panel px-4 py-2 rounded-2xl border border-foreground/5 bg-background/40 backdrop-blur-md">
+                                <div className="flex items-center gap-2 px-2 border-r border-foreground/10">
                                     <span className="font-black text-foreground text-xl leading-none">{collectionsLoading ? "—" : collections.length}</span>
                                     <span className="text-muted-foreground uppercase tracking-widest text-[10px] font-bold">Collections</span>
                                 </div>
@@ -124,7 +124,7 @@ export function CreatorHeader() {
 
                             {/* Social Loop */}
                             {(creatorInfo.twitter || creatorInfo.instagram || creatorInfo.website) && (
-                                <div className="flex items-center gap-2 glass-panel px-3 py-2 rounded-2xl border border-white/5 bg-background/40 backdrop-blur-md">
+                                <div className="flex items-center gap-2 glass-panel px-3 py-2 rounded-2xl border border-foreground/5 bg-background/40 backdrop-blur-md">
                                     {creatorInfo.twitter && (
                                         <a href={creatorInfo.twitter} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-full hover:bg-outrun-cyan/20 text-muted-foreground hover:text-outrun-cyan transition-all duration-300">
                                             <Twitter className="h-4 w-4" />
@@ -148,7 +148,7 @@ export function CreatorHeader() {
                                 variant="outline"
                                 size="sm"
                                 onClick={handleShare}
-                                className="h-10 rounded-2xl glass-panel border-white/10 hover:bg-white/10 hover:text-outrun-magenta transition-all active:scale-95"
+                                className="h-10 rounded-2xl glass-panel border-foreground/10 hover:bg-foreground/10 hover:text-outrun-magenta transition-all active:scale-95"
                             >
                                 <Share2 className="h-4 w-4 mr-2" />
                                 Share
