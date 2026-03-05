@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { motion } from "framer-motion"
 
 const iconMap: Record<string, LucideIcon> = {
     Shield, Grid3X3, RefreshCw, BookOpen, Sparkles, Layers,
@@ -37,12 +38,13 @@ export interface LaunchpadFeatureData {
     active: boolean
 }
 
-interface LaunchpadCardProps {
+export interface LaunchpadCardProps {
     feature: LaunchpadFeatureData
     index: number
+    className?: string
 }
 
-export function LaunchpadCard({ feature, index }: LaunchpadCardProps) {
+export function LaunchpadCard({ feature, index, className }: LaunchpadCardProps) {
     const cardRef = useRef<HTMLDivElement>(null)
     const Icon = iconMap[feature.icon] || Shield
     const isActive = feature.active
@@ -52,71 +54,66 @@ export function LaunchpadCard({ feature, index }: LaunchpadCardProps) {
         if (!cardRef.current || !isActive) return
         cardRef.current.style.transform = "scale(0.97)"
     }, [isActive])
-
-    const handleTouchEnd = useCallback(() => {
-        if (!cardRef.current) return
-        cardRef.current.style.transform = "scale(1)"
-    }, [])
-
+    // M3 Expressive eliminates hover scale/color changes. Interaction is purely physics-based touch/press.
     const card = (
-        <div
-            ref={cardRef}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-            onTouchCancel={handleTouchEnd}
+        <motion.div
+            whileTap={isActive ? { scale: 0.94 } : {}}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
             className={cn(
-                "h-full rounded-m3-2xl border transition-all duration-m3-medium ease-m3-standard",
+                "h-full rounded-[32px] overflow-hidden", // M3 massive organic curve
                 isActive
-                    ? "bg-m3-surface-container-lowest shadow-m3-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border-m3-outline-variant hover:border-blue-500/40 cursor-pointer"
-                    : "bg-m3-surface-variant/30 shadow-none border-transparent opacity-60 cursor-default",
+                    ? "bg-m3-surface-container-lowest shadow-m3-1 dark:shadow-m3-2 border border-m3-outline-variant cursor-pointer"
+                    : "bg-m3-surface-variant/30 border border-transparent opacity-60 cursor-default"
             )}
         >
-            <div className="relative z-[2] p-5 flex flex-col h-full">
+            <div className="relative p-6 sm:p-8 flex flex-col h-full">
                 {/* Row 1: icon + status */}
-                <div className="flex items-start justify-between mb-3">
+                <div className="flex items-start justify-between mb-6">
                     <div
                         className={cn(
-                            "w-10 h-10 rounded-m3-lg flex items-center justify-center border",
+                            "w-14 h-14 rounded-[20px] flex items-center justify-center", // Extremely rounded internal block
                             isActive
-                                ? "bg-blue-600 border-blue-600 shadow-[0_4px_14px_rgba(37,99,235,0.4)]"
-                                : "bg-m3-surface-variant border-transparent",
+                                ? "bg-blue-600 text-white" // Solid vibrant M3 fill, no glows
+                                : "bg-m3-surface-variant text-m3-on-surface-variant/50",
                         )}
                     >
-                        <Icon className={cn(
-                            "h-[18px] w-[18px]",
-                            isActive ? "text-white" : "text-m3-on-surface-variant/50"
-                        )} />
+                        <Icon className="h-6 w-6" />
                     </div>
 
                     {isActive ? (
-                        <ArrowUpRight className="h-4 w-4 text-m3-on-surface-variant transition-transform duration-m3-short group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                            <ArrowUpRight className="h-5 w-5" />
+                        </div>
                     ) : (
-                        <Lock className="h-3 w-3 text-m3-on-surface-variant/30" />
+                        <Lock className="h-5 w-5 text-m3-on-surface-variant/30" />
                     )}
                 </div>
 
                 {/* Title */}
                 <h3 className={cn(
-                    "text-sm font-semibold mb-1 leading-tight",
+                    "text-xl sm:text-2xl font-semibold mb-2 leading-tight tracking-tight",
                     isActive ? "text-m3-on-surface" : "text-m3-on-surface-variant/50"
                 )}>
                     {feature.title}
                 </h3>
 
                 {/* Description */}
-                <p className="text-xs text-m3-on-surface-variant/60 leading-relaxed flex-1 line-clamp-2">
+                <p className={cn(
+                    "text-base leading-relaxed flex-1 max-w-[90%]",
+                    isActive ? "text-m3-on-surface-variant" : "text-m3-on-surface-variant/40"
+                )}>
                     {feature.description}
                 </p>
 
                 {/* Tags */}
-                <div className="flex flex-wrap gap-1 mt-3">
+                <div className="flex flex-wrap gap-2 mt-6">
                     {feature.tags.map((tag) => (
                         <span
                             key={tag}
                             className={cn(
-                                "text-[9px] px-1.5 py-px rounded-m3-xs font-medium tracking-wide",
+                                "text-xs px-3 py-1 rounded-full font-medium tracking-wide",
                                 isActive
-                                    ? "bg-m3-surface-container-highest text-m3-on-surface-variant"
+                                    ? "bg-m3-surface-variant text-m3-on-surface-variant"
                                     : "bg-m3-surface-variant/30 text-m3-on-surface-variant/30"
                             )}
                         >
@@ -125,18 +122,27 @@ export function LaunchpadCard({ feature, index }: LaunchpadCardProps) {
                     ))}
                 </div>
             </div>
-        </div>
+        </motion.div>
     )
 
     const wrapper = (
-        <div className="stagger-in h-full group" style={{ animationDelay: `${index * 40}ms` }}>
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+                delay: index * 0.05,
+                duration: 0.4,
+                ease: [0.2, 0, 0, 1] // M3 easing
+            }}
+            className={cn("h-full", className)}
+        >
             {card}
-        </div>
+        </motion.div>
     )
 
     if (isActive) {
         return (
-            <Link href={feature.href} className="block h-full">
+            <Link href={feature.href} className="block h-full outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-[32px]">
                 {wrapper}
             </Link>
         )
