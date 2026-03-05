@@ -5,26 +5,30 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-m3-full text-sm font-medium transition-all duration-m3-medium ease-m3-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-m3-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90 hover:shadow-neon-cyan",
+          "bg-m3-primary text-m3-on-primary shadow-m3-1 hover:shadow-m3-2 hover:bg-m3-primary/90 active:bg-m3-primary/85",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 hover:shadow-neon-pink",
+          "bg-m3-error text-m3-on-error shadow-m3-1 hover:shadow-m3-2 hover:bg-m3-error/90 active:bg-m3-error/85",
         outline:
-          "border border-input bg-background/50 backdrop-blur-md shadow-sm hover:bg-accent hover:text-accent-foreground hover:border-neon-cyan/50 hover:shadow-neon-cyan",
+          "border border-m3-outline text-m3-primary bg-transparent hover:bg-m3-primary/8 active:bg-m3-primary/12",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground hover:shadow-glass-hover",
-        link: "text-primary underline-offset-4 hover:underline hover:text-neon-cyan transition-colors",
+          "bg-m3-secondary-container text-m3-on-secondary-container shadow-m3-1 hover:shadow-m3-2 hover:bg-m3-secondary-container/90",
+        tonal:
+          "bg-m3-tertiary-container text-m3-on-tertiary-container shadow-m3-1 hover:shadow-m3-2 hover:bg-m3-tertiary-container/90",
+        ghost:
+          "text-m3-on-surface hover:bg-m3-on-surface/8 active:bg-m3-on-surface/12",
+        link:
+          "text-m3-primary underline-offset-4 hover:underline transition-colors",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8",
-        icon: "h-9 w-9",
+        default: "h-10 px-6 py-2",
+        sm: "h-8 px-4 text-xs",
+        lg: "h-12 px-8 text-base",
+        icon: "h-10 w-10",
       },
     },
     defaultVariants: {

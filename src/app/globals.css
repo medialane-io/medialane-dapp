@@ -1,110 +1,147 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════
+   Material 3 Expressive — Tonal Palette
+   Derived from Medialane brand: Blue, Navy Blue, Orange, Mauve
+   ═══════════════════════════════════════════════════════ */
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* ── Primary (Blue #2563EB) ── */
+    --m3-primary: 221 83% 53%;
+    --m3-on-primary: 0 0% 100%;
+    --m3-primary-container: 214 95% 93%;
+    --m3-on-primary-container: 221 83% 25%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* ── Secondary (Navy Blue #1E3A5F) ── */
+    --m3-secondary: 213 52% 24%;
+    --m3-on-secondary: 0 0% 100%;
+    --m3-secondary-container: 214 45% 90%;
+    --m3-on-secondary-container: 213 52% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* ── Tertiary (Orange #F97316) ── */
+    --m3-tertiary: 25 95% 53%;
+    --m3-on-tertiary: 0 0% 100%;
+    --m3-tertiary-container: 30 100% 92%;
+    --m3-on-tertiary-container: 25 95% 25%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* ── Error ── */
+    --m3-error: 0 75% 42%;
+    --m3-on-error: 0 0% 100%;
+    --m3-error-container: 0 100% 93%;
+    --m3-on-error-container: 0 75% 22%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* ── Surfaces (Mauve undertone — warm neutral) ── */
+    --m3-surface: 270 10% 99%;
+    --m3-on-surface: 270 15% 10%;
+    --m3-surface-variant: 270 12% 92%;
+    --m3-on-surface-variant: 270 10% 35%;
+    --m3-surface-container-lowest: 0 0% 100%;
+    --m3-surface-container-low: 270 15% 97%;
+    --m3-surface-container: 270 12% 94%;
+    --m3-surface-container-high: 270 10% 91%;
+    --m3-surface-container-highest: 270 8% 88%;
+    --m3-surface-dim: 270 10% 87%;
+    --m3-surface-bright: 270 15% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 40%;
+    /* ── Outline ── */
+    --m3-outline: 270 5% 50%;
+    --m3-outline-variant: 270 10% 80%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* ── Inverse ── */
+    --m3-inverse-surface: 270 15% 15%;
+    --m3-inverse-on-surface: 270 10% 95%;
+    --m3-inverse-primary: 217 90% 72%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* ── Scrim / Shadow ── */
+    --m3-scrim: 0 0% 0%;
+    --m3-shadow: 0 0% 0%;
 
-    --border: 214.3 31.8% 85%;
-    --input: 214.3 31.8% 85%;
-    --ring: 222.2 84% 4.9%;
+    /* ── Legacy mappings (shadcn/ui compat) ── */
+    --background: var(--m3-surface);
+    --foreground: var(--m3-on-surface);
+    --card: var(--m3-surface-container-low);
+    --card-foreground: var(--m3-on-surface);
+    --popover: var(--m3-surface-container);
+    --popover-foreground: var(--m3-on-surface);
+    --primary: var(--m3-primary);
+    --primary-foreground: var(--m3-on-primary);
+    --secondary: var(--m3-secondary-container);
+    --secondary-foreground: var(--m3-on-secondary-container);
+    --muted: var(--m3-surface-variant);
+    --muted-foreground: var(--m3-on-surface-variant);
+    --accent: var(--m3-secondary-container);
+    --accent-foreground: var(--m3-on-secondary-container);
+    --destructive: var(--m3-error);
+    --destructive-foreground: var(--m3-on-error);
+    --border: var(--m3-outline-variant);
+    --input: var(--m3-outline-variant);
+    --ring: var(--m3-primary);
+    --radius: 0.75rem;
 
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-
-    /* Neon & Outrun Variables (Light Theme - Darkened for visibility) */
-    --neon-cyan: 183 100% 35%;
-    --neon-pink: 300 100% 40%;
-    --neon-purple: 284 100% 45%;
-    --outrun-magenta: 300 100% 40%;
-    --outrun-cyan: 180 100% 35%;
-    --outrun-orange: 36 100% 45%;
-    --outrun-purple: 273 100% 45%;
-    --outrun-pink: 328 100% 45%;
-    --outrun-yellow: 60 100% 35%;
+    --sidebar-background: var(--m3-surface-container-low);
+    --sidebar-foreground: var(--m3-on-surface);
+    --sidebar-primary: var(--m3-primary);
+    --sidebar-primary-foreground: var(--m3-on-primary);
+    --sidebar-accent: var(--m3-secondary-container);
+    --sidebar-accent-foreground: var(--m3-on-secondary-container);
+    --sidebar-border: var(--m3-outline-variant);
+    --sidebar-ring: var(--m3-primary);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* ── Primary (Blue — dark scheme) ── */
+    --m3-primary: 217 90% 72%;
+    --m3-on-primary: 221 83% 20%;
+    --m3-primary-container: 221 65% 28%;
+    --m3-on-primary-container: 214 95% 90%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    /* ── Secondary (Navy — dark scheme) ── */
+    --m3-secondary: 214 40% 72%;
+    --m3-on-secondary: 213 52% 12%;
+    --m3-secondary-container: 213 45% 22%;
+    --m3-on-secondary-container: 214 45% 88%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    /* ── Tertiary (Orange — dark scheme) ── */
+    --m3-tertiary: 25 100% 70%;
+    --m3-on-tertiary: 25 95% 18%;
+    --m3-tertiary-container: 25 70% 28%;
+    --m3-on-tertiary-container: 30 100% 90%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* ── Error (dark scheme) ── */
+    --m3-error: 0 100% 80%;
+    --m3-on-error: 0 75% 18%;
+    --m3-error-container: 0 50% 25%;
+    --m3-on-error-container: 0 100% 90%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    /* ── Surfaces (dark — Mauve undertone) ── */
+    --m3-surface: 260 15% 8%;
+    --m3-on-surface: 270 10% 90%;
+    --m3-surface-variant: 260 10% 18%;
+    --m3-on-surface-variant: 270 8% 65%;
+    --m3-surface-container-lowest: 260 20% 5%;
+    --m3-surface-container-low: 260 15% 10%;
+    --m3-surface-container: 260 12% 13%;
+    --m3-surface-container-high: 260 10% 17%;
+    --m3-surface-container-highest: 260 8% 22%;
+    --m3-surface-dim: 260 12% 6%;
+    --m3-surface-bright: 260 10% 18%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    /* ── Outline (dark) ── */
+    --m3-outline: 260 5% 45%;
+    --m3-outline-variant: 260 8% 25%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* ── Inverse (dark) ── */
+    --m3-inverse-surface: 270 10% 90%;
+    --m3-inverse-on-surface: 270 15% 15%;
+    --m3-inverse-primary: 221 83% 53%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-
-    /* Neon & Outrun Variables (Dark Theme - Maximum brightness) */
-    --neon-cyan: 183 100% 50%;
-    --neon-pink: 300 100% 50%;
-    --neon-purple: 284 100% 50%;
-    --outrun-magenta: 300 100% 50%;
-    --outrun-cyan: 180 100% 50%;
-    --outrun-orange: 36 100% 50%;
-    --outrun-purple: 273 100% 50%;
-    --outrun-pink: 328 100% 54%;
-    --outrun-yellow: 60 100% 50%;
+    /* ── Scrim / Shadow (dark) ── */
+    --m3-scrim: 0 0% 0%;
+    --m3-shadow: 0 0% 0%;
   }
 }
 
@@ -119,49 +156,32 @@
 }
 
 @layer components {
-  .glass-panel {
-    @apply bg-black/5 dark:bg-white/5 backdrop-blur-xl border border-border/50 transition-all duration-300;
+  /* ── M3 Surface Tint ──
+     Used on elevated surfaces: the higher the elevation,
+     the more primary-tint is blended into the surface. */
+  .m3-surface-tint-1 {
+    @apply bg-m3-surface-container-low;
+  }
+  .m3-surface-tint-2 {
+    @apply bg-m3-surface-container;
+  }
+  .m3-surface-tint-3 {
+    @apply bg-m3-surface-container-high;
+  }
+  .m3-surface-tint-4 {
+    @apply bg-m3-surface-container-highest;
   }
 
-  .glass-pill {
-    @apply bg-black/10 dark:bg-white/10 backdrop-blur-md border border-border/50 transition-all duration-300;
+  /* ── M3 State Layers ──
+     Transparent overlays for hover / pressed / focus states.
+     Use on-surface color at varying opacities. */
+  .m3-state-hover {
+    @apply hover:bg-m3-on-surface/8;
   }
-
-  .glass-heavy {
-    @apply bg-background/95 backdrop-blur-2xl border border-border/50 transition-all duration-300 supports-[backdrop-filter]:bg-background/75;
+  .m3-state-pressed {
+    @apply active:bg-m3-on-surface/12;
   }
-
-  .border-outrun-gradient {
-    position: relative;
-    border: 1px solid transparent;
-    background-clip: padding-box;
-  }
-
-  .border-outrun-gradient::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(135deg, #FF00FF, #00FFFF, #FF9900);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-
-  .border-b-outrun-gradient {
-    position: relative;
-    border-bottom: 1px solid transparent;
-  }
-
-  .border-b-outrun-gradient::before {
-    content: "";
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 1px;
-    background: linear-gradient(90deg, #FF00FF, #00FFFF, #FF9900);
-    pointer-events: none;
+  .m3-state-focus {
+    @apply focus-visible:bg-m3-on-surface/12;
   }
 }

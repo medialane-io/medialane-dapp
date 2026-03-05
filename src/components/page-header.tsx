@@ -16,7 +16,7 @@ export function PageHeader({
     ...props
 }: PageHeaderProps) {
     return (
-        <div className={cn("pt-24 pb-8 mb-8 border-b border-border/10", className)} {...props}>
+        <div className={cn("pt-24 pb-8 mb-8 border-b border-m3-outline-variant/15", className)} {...props}>
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                 <div className="flex flex-col space-y-3 max-w-3xl">
                     <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground/90">
