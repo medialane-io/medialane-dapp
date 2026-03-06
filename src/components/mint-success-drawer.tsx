@@ -90,7 +90,7 @@ export function MintSuccessDrawer({
 
   return (
     <Drawer open={isOpen} onOpenChange={handleOpenChange}>
-      <DrawerContent className="w-full max-w-lg mx-auto rounded-t-xl mobile-padding max-h-[90vh] bg-card">
+      <DrawerContent className="w-full max-w-lg mx-auto rounded-t-m3-2xl p-4 sm:p-6 bg-m3-surface-container-high border-x border-t border-m3-outline-variant/20 shadow-m3-3">
         <DrawerHeader className="text-center">
           <DrawerTitle className="text-xl flex items-center justify-center gap-2">
             {step === "idle" && "Review Asset Details"}
@@ -135,7 +135,7 @@ export function MintSuccessDrawer({
           {step === "idle" && (
             <div className="space-y-6">
               {/* Preview Card */}
-              <div className="bg-muted/30 rounded-lg p-4 border space-y-4">
+              <div className="bg-m3-surface rounded-m3-xl p-5 border border-m3-outline-variant/30 space-y-4 shadow-m3-1">
                 <div className="flex gap-4">
                   {/* Image Preview */}
                   <div className="relative w-20 h-20 rounded-md overflow-hidden bg-background border flex-shrink-0">
@@ -179,18 +179,18 @@ export function MintSuccessDrawer({
 
               {/* Cost & Listing Estimation */}
               <div className="space-y-3">
-                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 px-4 flex justify-between items-center text-sm border border-blue-100 dark:border-blue-800">
-                  <span className="text-blue-700 dark:text-blue-300 font-medium">Network Fee</span>
-                  <span className="font-bold text-blue-700 dark:text-blue-300 font-mono italic">{cost}</span>
+                <div className="bg-m3-secondary-container/50 rounded-m3-lg p-3 px-4 flex justify-between items-center text-sm border border-m3-secondary/20">
+                  <span className="text-m3-on-secondary-container font-medium">Network Fee</span>
+                  <span className="font-bold text-m3-on-secondary-container font-mono italic">{cost}</span>
                 </div>
 
                 {data?.["Listing Price"] && (
-                  <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 px-4 flex justify-between items-center text-sm border border-green-100 dark:border-green-800">
-                    <span className="text-green-700 dark:text-green-300 font-medium flex items-center gap-1.5">
+                  <div className="bg-m3-primary-container/50 rounded-m3-lg p-3 px-4 flex justify-between items-center text-sm border border-m3-primary/20">
+                    <span className="text-m3-on-primary-container font-medium flex items-center gap-1.5">
                       <Zap className="h-3 w-3" />
                       Marketplace Price
                     </span>
-                    <span className="font-bold text-green-700 dark:text-green-300 font-mono">{data["Listing Price"]}</span>
+                    <span className="font-bold text-m3-on-primary-container font-mono">{data["Listing Price"]}</span>
                   </div>
                 )}
               </div>
@@ -240,7 +240,7 @@ export function MintSuccessDrawer({
                 {/* Asset Preview */}
                 <div className="mx-auto relative mb-6">
                   {previewImage ? (
-                    <div className="relative w-48 h-48 mx-auto rounded-xl overflow-hidden shadow-2xl shadow-green-900/10 border-4 border-background ring-1 ring-border/50">
+                    <div className="relative w-48 h-48 mx-auto rounded-m3-2xl overflow-hidden shadow-m3-5 border-4 border-m3-surface ring-1 ring-m3-outline-variant/30">
                       <Image
                         src={previewImage}
                         alt="Minted Asset"
@@ -278,17 +278,17 @@ export function MintSuccessDrawer({
               </div>
 
               {/* Asset Details Card */}
-              <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
+              <div className="bg-m3-surface rounded-m3-xl border border-m3-outline-variant/30 shadow-m3-1 overflow-hidden">
                 {/* Blockchain Info */}
-                <div className="p-4 space-y-3 bg-muted/20">
+                <div className="p-4 space-y-3 bg-m3-surface-container-low">
 
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Transaction</span>
+                    <span className="text-m3-on-surface-variant">Transaction</span>
                     <a
                       href={`${EXPLORER_URL}/tx/${mintResult.transactionHash}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-mono text-xs hover:underline flex items-center text-foreground bg-primary/10 px-2 py-1 rounded hover:bg-primary/20 transition-colors"
+                      className="font-mono text-xs hover:underline flex items-center text-m3-primary bg-m3-primary/10 px-2 py-1 rounded-m3-sm hover:bg-m3-primary/20 transition-colors"
                     >
                       {shortenAddress(mintResult.transactionHash)}
                       <ExternalLink className="h-3 w-3 ml-1" />
@@ -324,7 +324,7 @@ export function MintSuccessDrawer({
               <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button className="flex-[2] btn-primary-gradient" onClick={onConfirm}>
+              <Button className="flex-[2] text-base" variant="premium" onClick={onConfirm}>
                 Confirm & Mint
               </Button>
             </div>

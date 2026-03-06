@@ -71,18 +71,18 @@ export function PortfolioListings({ searchQuery = "" }: PortfolioListingsProps) 
 
     if (filteredListings.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-outrun-magenta/30 rounded-3xl bg-card/5 backdrop-blur-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.2)]">
-                <div className="p-4 rounded-full bg-gradient-to-br from-outrun-magenta/20 to-transparent flex items-center justify-center mb-6 shadow-glow-sm shadow-neon-magenta/20 ring-1 ring-outrun-magenta/30">
-                    <Tag className="h-8 w-8 text-outrun-magenta drop-shadow-[0_0_8px_rgba(255,0,255,0.8)]" />
+            <div className="flex flex-col items-center justify-center py-20 text-center border border-m3-outline-variant/10 rounded-3xl bg-m3-surface-container-low shadow-m3-1">
+                <div className="p-5 rounded-full bg-m3-primary/10 flex items-center justify-center mb-6 ring-1 ring-m3-primary/20">
+                    <Tag className="h-8 w-8 text-m3-primary" />
                 </div>
-                <h3 className="text-xl font-bold tracking-tight mb-2">No listings found</h3>
-                <p className="text-muted-foreground mt-2 max-w-sm mb-8 px-4">
+                <h3 className="text-xl font-bold tracking-tight mb-2 text-m3-on-surface">No listings found</h3>
+                <p className="text-m3-on-surface-variant mt-2 max-w-sm mb-8 px-4 font-medium">
                     {searchQuery
                         ? `No items match your search "${searchQuery}".`
                         : "You don't have any active marketplace listings yet. List an asset to see it here."}
                 </p>
                 {!searchQuery && (
-                    <Button asChild className="rounded-full px-8 gradient-vivid shadow-glow-sm shadow-neon-cyan/30 text-white font-bold tracking-wide hover:scale-105 transition-transform duration-300">
+                    <Button asChild className="px-8 h-12 text-sm font-black tracking-wide rounded-full">
                         <Link href="/portfolio/assets">
                             Go to My Assets
                         </Link>
@@ -93,8 +93,8 @@ export function PortfolioListings({ searchQuery = "" }: PortfolioListingsProps) 
     }
 
     return (
-        <div className="space-y-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6 gap-4 sm:gap-6">
+        <div className="space-y-8 w-full">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6 gap-6">
                 {filteredListings.map((listing) => (
                     <ListingCard
                         key={listing.orderHash}

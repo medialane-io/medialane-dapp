@@ -1,7 +1,7 @@
 "use client";
 
 import { MarketplaceOrder } from "@/hooks/use-marketplace-events";
-import { normalizeStarknetAddress } from "@/lib/utils";
+import { normalizeStarknetAddress, cn } from "@/lib/utils";
 import { SUPPORTED_TOKENS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -66,11 +66,11 @@ export function ListingCard({ listing, onCancel }: ListingCardProps) {
     const assetUrl = `/asset/${displayToken}-${displayIdentifier}`;
 
     return (
-        <Card className="overflow-hidden border-border/50 bg-card/10 backdrop-blur-sm hover:bg-card/20 transition-all duration-300 group shadow-sm hover:shadow-md rounded-xl border">
-            <Link href={assetUrl} className="block relative aspect-square overflow-hidden bg-muted/30">
+        <Card className="overflow-hidden bg-m3-surface-container-low border-m3-outline-variant/10 hover:bg-m3-surface-container transition-all duration-300 group shadow-m3-1 hover:shadow-m3-2 rounded-2xl border">
+            <Link href={assetUrl} className="block relative aspect-square overflow-hidden bg-m3-surface-container-highest">
                 {metadataLoading ? (
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground/30" />
+                        <Loader2 className="w-8 h-8 animate-spin text-m3-on-surface-variant/30" />
                     </div>
                 ) : (
                     <Image
@@ -80,48 +80,57 @@ export function ListingCard({ listing, onCancel }: ListingCardProps) {
                         className="object-cover group-hover:scale-110 transition-transform duration-700"
                     />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-100 transition-opacity duration-300 flex items-end p-4">
-                    <span className="text-white text-xs font-semibold flex items-center gap-1.5 translate-y-2 transition-transform duration-300">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                    <span className="text-white text-xs font-bold flex items-center gap-1.5 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
                         View Item <ExternalLink className="w-3.5 h-3.5" />
                     </span>
                 </div>
                 <div className="absolute top-3 right-3 flex gap-2">
-                    <div className={`${listing.status === 'active' ? 'bg-green-500/20 text-green-400 border-green-500/50 shadow-[0_0_10px_rgba(34,197,94,0.2)]' :
-                        listing.status === 'fulfilled' ? 'bg-blue-500/20 text-blue-400 border-blue-500/50' :
-                            'bg-muted/50 text-muted-foreground border-foreground/10'
-                        } backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border`}>
+                    <div className={cn(
+                        "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border backdrop-blur-md",
+                        listing.status === 'active' ? 'bg-m3-tertiary-container/80 text-m3-on-tertiary-container border-m3-tertiary/20' :
+                            listing.status === 'fulfilled' ? 'bg-m3-primary-container/80 text-m3-on-primary-container border-m3-primary/20' :
+                                'bg-m3-surface-variant/80 text-m3-on-surface-variant border-m3-outline/20'
+                    )}>
                         {listing.status}
                     </div>
-                    <div className={`${isListing ? 'bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50 shadow-[0_0_10px_rgba(0,255,255,0.2)]' : 'bg-outrun-magenta/20 text-outrun-magenta border-outrun-magenta/50 shadow-[0_0_10px_rgba(255,0,255,0.2)]'} backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border`}>
+                    <div className={cn(
+                        "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border backdrop-blur-md",
+                        isListing ? 'bg-m3-secondary-container/80 text-m3-on-secondary-container border-m3-secondary/20' :
+                            'bg-m3-error-container/80 text-m3-on-error-container border-m3-error/20'
+                    )}>
                         {isListing ? 'Sale' : 'Offer'}
                     </div>
                 </div>
             </Link>
 
-            <CardContent className="p-4 bg-gradient-to-b from-transparent to-card/30">
+            <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-3">
                     <div className="space-y-1 min-w-0 flex-1 pr-2">
-                        <h3 className="font-bold text-sm truncate text-foreground group-hover:text-primary transition-colors" title={name}>
+                        <h3 className="font-bold text-sm truncate text-m3-on-surface group-hover:text-m3-primary transition-colors" title={name}>
                             {name}
                         </h3>
-                        <p className="text-[10px] text-muted-foreground/70 font-mono truncate" title={displayToken}>
+                        <p className="text-[10px] text-m3-on-surface-variant font-medium truncate" title={displayToken}>
                             {displayToken.slice(0, 6)}...{displayToken.slice(-4)}
                         </p>
                     </div>
                     <div className="text-right shrink-0">
-                        <p className={`text-sm font-black tracking-tight drop-shadow-sm ${isListing ? 'text-neon-cyan' : 'text-outrun-magenta'}`}>
+                        <p className={cn(
+                            "text-sm font-black tracking-tight",
+                            isListing ? 'text-m3-primary' : 'text-m3-tertiary'
+                        )}>
                             {formattedPrice} <span className="text-[10px] font-bold ml-0.5">{currency.symbol}</span>
                         </p>
-                        <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest">{isListing ? 'List Price' : 'Offer Price'}</p>
+                        <p className="text-[9px] font-black text-m3-on-surface-variant/60 uppercase tracking-widest">{isListing ? 'List Price' : 'Offer Price'}</p>
                     </div>
                 </div>
             </CardContent>
 
             <CardFooter className="p-4 pt-0">
                 <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    className="w-full text-xs font-bold border border-destructive/30 text-destructive hover:bg-destructive/20 hover:text-red-400 hover:border-destructive/50 hover:shadow-glow-sm hover:shadow-destructive/20 transition-all duration-300 rounded-lg group/btn"
+                    className="w-full text-xs font-bold border-m3-error/30 text-m3-error hover:bg-m3-error/10 hover:text-m3-error hover:border-m3-error/50 transition-all duration-300 rounded-xl group/btn h-10"
                     onClick={() => onCancel?.(orderHash)}
                     disabled={(!isListing && !isBid) || listing.status !== 'active'}
                 >
@@ -131,7 +140,7 @@ export function ListingCard({ listing, onCancel }: ListingCardProps) {
                             Remove Listing
                         </>
                     ) : isBid ? (
-                        listing.offerer === normalizeStarknetAddress(normalizeStarknetAddress("0x0")) // Place holder check, will improve
+                        listing.offerer === normalizeStarknetAddress("0x0")
                             ? "Accept Offer"
                             : (
                                 <>

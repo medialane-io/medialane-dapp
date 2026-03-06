@@ -24,7 +24,7 @@ export default function CollectionsPage() {
   });
 
   return (
-    <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto py-10">
+    <main className="py-10">
 
       <PageHeader
         title="Collections"

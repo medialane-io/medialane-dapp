@@ -32,7 +32,7 @@ export default function PortfolioActivitiesPage() {
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-outrun-cyan/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-outrun-magenta/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
-            <main className="container relative mx-auto px-4 py-8 max-w-7xl">
+            <main className="relative py-8">
                 <PageHeader
                     title="My Activities"
                     description="Track your personal history on the Mediolano Protocol. View your mints, transfers, and remixes."

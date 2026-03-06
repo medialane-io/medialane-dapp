@@ -26,167 +26,162 @@ import { PageHeader } from "@/components/page-header"
 
 export function LaunchpadContent() {
     return (
-        <div className="min-h-screen py-6 relative overflow-hidden">
+        <div className="relative">
+            <CreatorStatsBar />
 
+            {/* Standard Page Header */}
+            <PageHeader
+                title="Creator Launchpad"
+                description="Your refined terminal for intellectual property. Launch, remix, and own every asset with professional grade tools."
+            />
 
-            <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mt-6">
+                {/* LEFT: Primary Feature Column */}
+                <div className="lg:col-span-8 space-y-8">
 
-                <CreatorStatsBar />
+                    {/* HERO: Collection Drop */}
+                    <motion.div
+                        whileTap={{ scale: 0.985 }}
+                        className="group relative overflow-hidden bg-m3-surface-container-lowest border border-m3-outline-variant rounded-[32px] p-8 sm:p-10 shadow-m3-1 hover:shadow-m3-2 transition-shadow"
+                    >
+                        {/* Gradient Accent Top */}
+                        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500" />
 
-                {/* Standard Page Header */}
-                <PageHeader
-                    title="Creator Launchpad"
-                    description="Your refined terminal for intellectual property. Launch, remix, and own every asset with professional grade tools."
-                />
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                    {/* LEFT: Primary Feature Column */}
-                    <div className="lg:col-span-8 space-y-8">
-
-                        {/* HERO: Collection Drop */}
-                        <motion.div
-                            whileTap={{ scale: 0.985 }}
-                            className="group relative overflow-hidden bg-m3-surface-container-lowest border border-m3-outline-variant rounded-[32px] p-8 sm:p-10 shadow-m3-1 hover:shadow-m3-2 transition-shadow"
-                        >
-                            {/* Gradient Accent Top */}
-                            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500" />
-
-                            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
-                                <div className="max-w-xl">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="p-3 rounded-xl bg-orange-500/10 ring-1 ring-orange-500/30 text-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.1)]">
-                                            <Layers className="h-6 w-6" />
-                                        </div>
-                                        <Badge className="bg-orange-500/10 text-orange-500 border-none font-semibold tracking-wider uppercase text-[10px] px-2.5">Featured Tool</Badge>
+                        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                            <div className="max-w-xl">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="p-3 rounded-xl bg-orange-500/10 ring-1 ring-orange-500/30 text-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.1)]">
+                                        <Layers className="h-6 w-6" />
                                     </div>
-
-                                    <h2 className="text-2xl sm:text-3xl font-bold text-m3-on-surface mb-4 tracking-tight">
-                                        Launch a Collection Drop
-                                    </h2>
-                                    <p className="text-base text-m3-on-surface-variant leading-relaxed mb-6 font-medium">
-                                        Build a premium NFT drop with dedicated minting mechanics and built-in community storytelling.
-                                    </p>
-
-                                    {/* Rich Metadata Pills */}
-                                    <div className="flex flex-wrap gap-3 mb-8">
-                                        <div className="flex items-center gap-2 text-xs font-bold text-m3-on-surface-variant bg-m3-surface-variant/40 px-3 py-1.5 rounded-full">
-                                            <Clock className="h-3.5 w-3.5" /> 2-5 min
-                                        </div>
-                                        <div className="flex items-center gap-2 text-xs font-bold text-m3-on-surface-variant bg-m3-surface-variant/40 px-3 py-1.5 rounded-full">
-                                            <Coins className="h-3.5 w-3.5" /> Zero Fee
-                                        </div>
-                                        <div className="flex items-center gap-2 text-xs font-bold text-m3-on-surface-variant bg-m3-surface-variant/40 px-3 py-1.5 rounded-full">
-                                            <Star className="h-3.5 w-3.5" /> Advanced
-                                        </div>
-                                    </div>
-
-                                    <Link href="/create/collection">
-                                        <Button variant="premium" className="rounded-full h-11 px-6 group">
-                                            Get Started
-                                            <ArrowUpRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                                        </Button>
-                                    </Link>
+                                    <Badge className="bg-orange-500/10 text-orange-500 border-none font-semibold tracking-wider uppercase text-[10px] px-2.5">Featured Tool</Badge>
                                 </div>
 
-                                <div className="hidden md:block pr-4">
-                                    <div className="w-32 h-32 rounded-full border-4 border-orange-500/10 flex items-center justify-center relative">
-                                        <Layers className="h-10 w-10 text-orange-500/30" />
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-
-                        {/* SECONDARY ROW: Single Mint & Standard Collection */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                            <FeatureCard
-                                title="Single NFT Asset"
-                                description="Quick-register individual assets directly into your studio."
-                                icon={FileText}
-                                color="cyan"
-                                href="/create/asset"
-                                time="1 min"
-                                difficulty="Simple"
-                            />
-                            <FeatureCard
-                                title="Standard Collection"
-                                description="Group related assets manually without a complex drop page."
-                                icon={FolderPlus}
-                                color="purple"
-                                href="/create/collection"
-                                time="2 min"
-                                difficulty="Moderate"
-                            />
-                        </div>
-                    </div>
-
-                    {/* RIGHT: Quick Action Column */}
-                    <div className="lg:col-span-4 space-y-8">
-                        <div className="bg-m3-surface-container-low border border-m3-outline-variant rounded-[32px] p-6 sm:p-8">
-                            <h3 className="text-base font-bold text-m3-on-surface mb-6 flex items-center gap-2">
-                                <Sparkles className="h-4 w-4 text-m3-primary" />
-                                Quick Actions
-                            </h3>
-
-                            <div className="space-y-3">
-                                <QuickActionItem
-                                    title="Start from Template"
-                                    description="Optimized blueprints for creators."
-                                    icon={Grid3X3}
-                                    href="/create/templates"
-                                />
-                                <QuickActionItem
-                                    title="Remix Existing IP"
-                                    description="Derivative works with split routing."
-                                    icon={RefreshCw}
-                                    href="/create/asset"
-                                    highlight
-                                />
-                            </div>
-
-                            <div className="mt-8 pt-8 border-t border-m3-outline-variant/30">
-                                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground mb-4">Resources</p>
-                                <div className="flex flex-col gap-2">
-                                    <Link href="#" className="flex items-center justify-between group p-1.5">
-                                        <span className="text-sm font-medium text-muted-foreground group-hover:text-m3-primary transition-colors">Documentation</span>
-                                        <ArrowUpRight className="h-3.5 w-3.5 opacity-30 transition-opacity" />
-                                    </Link>
-                                    <Link href="#" className="flex items-center justify-between group p-1.5">
-                                        <span className="text-sm font-medium text-muted-foreground group-hover:text-m3-primary transition-colors">Creator Grants</span>
-                                        <ArrowUpRight className="h-3.5 w-3.5 opacity-30 transition-opacity" />
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 3. Ecosystem Tools */}
-                <div className="mt-16">
-                    <div className="mb-8">
-                        <h3 className="text-xl font-bold text-foreground/90 tracking-tight mb-2">Ecosystem Tools</h3>
-                        <p className="text-sm text-muted-foreground font-medium">Modular extensions to expand your IP utility.</p>
-                    </div>
-
-                    <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide -mx-4 px-4 lg:-mx-0">
-                        {ecosystemTools.map((tool) => (
-                            <motion.div
-                                key={tool.id}
-                                whileTap={{ scale: 0.98 }}
-                                className="min-w-[280px] bg-m3-surface-container-low border border-m3-outline-variant rounded-[28px] p-8 group relative overflow-hidden"
-                            >
-                                <div className="w-12 h-12 rounded-xl bg-m3-surface-container-high flex items-center justify-center mb-6">
-                                    <tool.icon className="h-6 w-6 text-m3-on-surface-variant/70" />
-                                </div>
-                                <h4 className="text-lg font-bold text-m3-on-surface mb-2">{tool.title}</h4>
-                                <p className="text-sm text-m3-on-surface-variant leading-relaxed font-medium mb-6">
-                                    {tool.description}
+                                <h2 className="text-2xl sm:text-3xl font-bold text-m3-on-surface mb-4 tracking-tight">
+                                    Launch a Collection Drop
+                                </h2>
+                                <p className="text-base text-m3-on-surface-variant leading-relaxed mb-6 font-medium">
+                                    Build a premium NFT drop with dedicated minting mechanics and built-in community storytelling.
                                 </p>
-                                <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground border-m3-outline-variant/50 py-1">Coming Q2</Badge>
-                            </motion.div>
-                        ))}
+
+                                {/* Rich Metadata Pills */}
+                                <div className="flex flex-wrap gap-3 mb-8">
+                                    <div className="flex items-center gap-2 text-xs font-bold text-m3-on-surface-variant bg-m3-surface-variant/40 px-3 py-1.5 rounded-full">
+                                        <Clock className="h-3.5 w-3.5" /> 2-5 min
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs font-bold text-m3-on-surface-variant bg-m3-surface-variant/40 px-3 py-1.5 rounded-full">
+                                        <Coins className="h-3.5 w-3.5" /> Zero Fee
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs font-bold text-m3-on-surface-variant bg-m3-surface-variant/40 px-3 py-1.5 rounded-full">
+                                        <Star className="h-3.5 w-3.5" /> Advanced
+                                    </div>
+                                </div>
+
+                                <Link href="/create/collection">
+                                    <Button variant="premium" className="rounded-full h-11 px-6 group">
+                                        Get Started
+                                        <ArrowUpRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                                    </Button>
+                                </Link>
+                            </div>
+
+                            <div className="hidden md:block pr-4">
+                                <div className="w-32 h-32 rounded-full border-4 border-orange-500/10 flex items-center justify-center relative">
+                                    <Layers className="h-10 w-10 text-orange-500/30" />
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* SECONDARY ROW: Single Mint & Standard Collection */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <FeatureCard
+                            title="Single NFT Asset"
+                            description="Quick-register individual assets directly into your studio."
+                            icon={FileText}
+                            color="cyan"
+                            href="/create/asset"
+                            time="1 min"
+                            difficulty="Simple"
+                        />
+                        <FeatureCard
+                            title="Standard Collection"
+                            description="Group related assets manually without a complex drop page."
+                            icon={FolderPlus}
+                            color="purple"
+                            href="/create/collection"
+                            time="2 min"
+                            difficulty="Moderate"
+                        />
                     </div>
                 </div>
-            </main>
+
+                {/* RIGHT: Quick Action Column */}
+                <div className="lg:col-span-4 space-y-8">
+                    <div className="bg-m3-surface-container-low border border-m3-outline-variant rounded-[32px] p-6 sm:p-8">
+                        <h3 className="text-base font-bold text-m3-on-surface mb-6 flex items-center gap-2">
+                            <Sparkles className="h-4 w-4 text-m3-primary" />
+                            Quick Actions
+                        </h3>
+
+                        <div className="space-y-3">
+                            <QuickActionItem
+                                title="Start from Template"
+                                description="Optimized blueprints for creators."
+                                icon={Grid3X3}
+                                href="/create/templates"
+                            />
+                            <QuickActionItem
+                                title="Remix Existing IP"
+                                description="Derivative works with split routing."
+                                icon={RefreshCw}
+                                href="/create/asset"
+                                highlight
+                            />
+                        </div>
+
+                        <div className="mt-8 pt-8 border-t border-m3-outline-variant/30">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground mb-4">Resources</p>
+                            <div className="flex flex-col gap-2">
+                                <Link href="#" className="flex items-center justify-between group p-1.5">
+                                    <span className="text-sm font-medium text-muted-foreground group-hover:text-m3-primary transition-colors">Documentation</span>
+                                    <ArrowUpRight className="h-3.5 w-3.5 opacity-30 transition-opacity" />
+                                </Link>
+                                <Link href="#" className="flex items-center justify-between group p-1.5">
+                                    <span className="text-sm font-medium text-muted-foreground group-hover:text-m3-primary transition-colors">Creator Grants</span>
+                                    <ArrowUpRight className="h-3.5 w-3.5 opacity-30 transition-opacity" />
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* 3. Ecosystem Tools */}
+            <div className="mt-16">
+                <div className="mb-8">
+                    <h3 className="text-xl font-bold text-foreground/90 tracking-tight mb-2">Ecosystem Tools</h3>
+                    <p className="text-sm text-foreground/70 font-medium">Modular extensions to expand your IP utility.</p>
+                </div>
+
+                <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide -mx-4 px-4 lg:-mx-0">
+                    {ecosystemTools.map((tool) => (
+                        <motion.div
+                            key={tool.id}
+                            whileTap={{ scale: 0.98 }}
+                            className="min-w-[280px] bg-m3-surface-container-low border border-m3-outline-variant rounded-[28px] p-8 group relative overflow-hidden"
+                        >
+                            <div className="w-12 h-12 rounded-xl bg-m3-surface-container-high flex items-center justify-center mb-6">
+                                <tool.icon className="h-6 w-6 text-m3-on-surface-variant/70" />
+                            </div>
+                            <h4 className="text-lg font-bold text-m3-on-surface mb-2">{tool.title}</h4>
+                            <p className="text-sm text-m3-on-surface-variant leading-relaxed font-medium mb-6">
+                                {tool.description}
+                            </p>
+                            <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground border-m3-outline-variant/50 py-1">Coming Q2</Badge>
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
         </div>
     )
 }

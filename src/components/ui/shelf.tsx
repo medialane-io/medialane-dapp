@@ -15,35 +15,37 @@ export const Shelf = React.forwardRef<HTMLDivElement, ShelfProps>(
         return (
             <div className={cn("relative w-full overflow-hidden mb-8", className)} ref={ref} {...props}>
                 {title && (
-                    <div className="flex justify-between items-end px-4 sm:px-6 lg:px-12 xl:px-20 mb-4">
-                        <div className="flex items-center gap-3">
-                            <div className="h-4 w-1 bg-outrun-cyan rounded-full"></div>
-                            <h2 className="text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase text-foreground/80">
-                                {title}
-                            </h2>
-                        </div>
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl sm:text-2xl font-medium tracking-tight text-m3-on-surface">
+                            {title}
+                        </h2>
                         {href && (
                             <Link
                                 href={href}
-                                className="group flex items-center text-[10px] sm:text-xs font-semibold text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.15em]"
+                                className="group flex items-center text-sm font-medium text-m3-on-surface-variant hover:text-m3-primary transition-colors"
                             >
                                 Explore
-                                <ChevronRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
+                                <ChevronRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
                             </Link>
                         )}
                     </div>
                 )}
                 <div
                     className={cn(
-                        "flex w-full gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-8 px-4 sm:px-6 lg:px-12 xl:px-20 items-stretch",
+                        "flex w-[calc(100%+2rem)] sm:w-[calc(100%+3rem)] lg:w-[calc(100%+4rem)] xl:w-[calc(100%+5rem)] overflow-x-auto snap-x snap-mandatory scroll-smooth pb-8 items-stretch layout-bleed",
                         "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                     )}
                 >
-                    {React.Children.map(children, (child) => (
-                        <div className="snap-start shrink-0 w-[85vw] sm:w-[320px] md:w-[350px]">
+                    <div className="snap-start shrink-0 w-4 sm:w-6 lg:w-8 xl:w-10" />
+                    {React.Children.map(children, (child, index) => (
+                        <div className={cn(
+                            "snap-start shrink-0 w-[85vw] sm:w-[320px] md:w-[350px]",
+                            index !== 0 && "ml-4 md:ml-6"
+                        )}>
                             {child}
                         </div>
                     ))}
+                    <div className="snap-start shrink-0 w-4 sm:w-6 lg:w-8 xl:w-10" />
                 </div>
 
                 {/* Right edge fade for affordance */}

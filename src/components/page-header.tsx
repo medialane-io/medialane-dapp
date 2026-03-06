@@ -16,23 +16,28 @@ export function PageHeader({
     ...props
 }: PageHeaderProps) {
     return (
-        <div className={cn("pt-8 pb-8 mb-8 border-b border-m3-outline-variant/15", className)} {...props}>
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-                <div className="flex flex-col space-y-3 max-w-3xl">
-                    <h1 className="text-3xl font-semibold tracking-tight text-foreground/90">
+        <div className={cn("w-full pt-16 md:pt-20 pb-10 md:pb-14", className)} {...props}>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+                <div className="flex flex-col space-y-3.5 max-w-4xl">
+                    <h1 className="text-4xl sm:text-5xl lg:text-[56px] leading-[1.1] font-bold tracking-tight text-m3-on-surface">
                         {title}
                     </h1>
                     {description && (
-                        <p className="text-xs text-muted-foreground leading-relaxed">
+                        <p className="text-lg sm:text-xl text-m3-on-surface-variant leading-relaxed max-w-2xl font-medium">
                             {description}
                         </p>
                     )}
                 </div>
                 {children && (
-                    <div className="flex items-center gap-3 w-full lg:w-auto shrink-0 mt-2 lg:mt-0">
+                    <div className="flex flex-shrink-0 items-center justify-start md:justify-end gap-4 w-full md:w-auto mt-4 md:mt-0 pb-1">
                         {children}
                     </div>
                 )}
+            </div>
+
+            {/* Subtle separator or grounding if needed, but keeping it clean for now */}
+            <div className="mt-12">
+                <div className="h-px w-full bg-m3-outline-variant/10" />
             </div>
         </div>
     )

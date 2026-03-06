@@ -70,7 +70,7 @@ export default function RootLayout({
         >
           <StarknetProvider>
             <Header />
-            <main className="min-h-screen pb-20">
+            <main className="min-h-screen pb-20 layout-container">
               {children}
             </main>
             <Footer />

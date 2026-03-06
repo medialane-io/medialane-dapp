@@ -327,25 +327,17 @@ export default function CreateCollectionView({
 
   return (
     <div className="min-h-screen text-foreground py-10">
-      <main className="container mx-auto px-4 py-8">
-        {!isModalMode && (
-          <Link href="/create">
-            <Button variant="ghost" size="sm" className="mb-6">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to create dashboard
-            </Button>
-          </Link>
-        )}
+      <main className="w-full mx-auto pb-8">
 
-        <div className="mb-0">
+
+        <div className="w-full">
           <PageHeader
             title="Create New Collection"
             description="Mint a new collection to organize your intellectual property assets onchain"
-            className="mb-8"
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="px-4 sm:px-6 lg:px-8 xl:px-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <form onSubmit={handleSubmit}>
               {/* HIDDEN INPUT for implicit submission if needed, but Button type=submit handles it */}

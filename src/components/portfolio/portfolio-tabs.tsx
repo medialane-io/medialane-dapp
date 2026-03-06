@@ -14,7 +14,7 @@ export function PortfolioTabs({ activePath }: PortfolioTabsProps) {
     ];
 
     return (
-        <div className="flex gap-4 mb-8 border-b border-border/40 pb-px overflow-x-auto no-scrollbar">
+        <div className="flex gap-1 mb-8 border-b border-m3-outline-variant/10 overflow-x-auto no-scrollbar">
             {tabs.map((tab) => {
                 const isActive = activePath === tab.path;
                 return (
@@ -22,13 +22,19 @@ export function PortfolioTabs({ activePath }: PortfolioTabsProps) {
                         key={tab.path}
                         href={tab.path}
                         className={cn(
-                            "px-4 py-2 text-sm whitespace-nowrap transition-colors border-b-2",
+                            "px-6 py-4 text-sm font-bold whitespace-nowrap transition-all relative group",
                             isActive
-                                ? "font-bold text-primary border-primary"
-                                : "font-medium text-muted-foreground hover:text-foreground border-transparent"
+                                ? "text-m3-primary"
+                                : "text-m3-on-surface-variant hover:text-m3-on-surface"
                         )}
                     >
                         {tab.name}
+                        {isActive && (
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-m3-primary rounded-t-full shadow-[0_0_8px_rgba(var(--m3-primary-rgb),0.3)]" />
+                        )}
+                        {!isActive && (
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-m3-primary/0 group-hover:bg-m3-primary/10 transition-colors rounded-t-full" />
+                        )}
                     </Link>
                 );
             })}

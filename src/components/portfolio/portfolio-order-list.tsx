@@ -5,7 +5,7 @@ import { useAccount } from "@starknet-react/core";
 import { useMarketplaceListings } from "@/hooks/use-marketplace-events";
 import { useMarketplace } from "@/hooks/use-marketplace";
 import { usePortfolio } from "@/hooks/use-portfolio";
-import { normalizeStarknetAddress } from "@/lib/utils";
+import { normalizeStarknetAddress, cn } from "@/lib/utils";
 import { PortfolioOrderItem } from "./portfolio-order-item";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, Inbox, Gavel, History, Clock } from "lucide-react";
@@ -108,9 +108,11 @@ export function PortfolioOrderList({ searchQuery = "", mode }: PortfolioOrderLis
     };
 
     const getEmptyState = () => {
-        const icon = mode === "offers-received" ? <Inbox className="h-8 w-8 text-neon-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.8)]" /> :
-            mode === "offers-made" ? <Gavel className="h-8 w-8 text-outrun-magenta drop-shadow-[0_0_8px_rgba(255,0,255,0.8)]" /> :
-                <History className="h-8 w-8 text-outrun-yellow drop-shadow-[0_0_8px_rgba(255,255,0,0.8)]" />;
+        const icon = mode === "offers-received"
+            ? <Inbox className="h-8 w-8 text-m3-primary" /> :
+            mode === "offers-made"
+                ? <Gavel className="h-8 w-8 text-m3-tertiary" /> :
+                <History className="h-8 w-8 text-m3-secondary" />;
 
         const title = mode === "offers-received" ? "No offers received" :
             mode === "offers-made" ? "No offers made" :
@@ -121,23 +123,22 @@ export function PortfolioOrderList({ searchQuery = "", mode }: PortfolioOrderLis
                 mode === "offers-made" ? "You haven't made any buy offers yet." :
                     "Your historical bids will appear here.";
 
-        const borderColor = mode === "offers-received" ? "border-neon-cyan/30" :
-            mode === "offers-made" ? "border-outrun-magenta/30" : "border-outrun-yellow/30";
-
-        const gradientColor = mode === "offers-received" ? "from-neon-cyan/20" :
-            mode === "offers-made" ? "from-outrun-magenta/20" : "from-outrun-yellow/20";
-
-        const ringColor = mode === "offers-received" ? "ring-neon-cyan/30 shadow-neon-cyan/20" :
-            mode === "offers-made" ? "ring-outrun-magenta/30 shadow-neon-magenta/20" : "ring-outrun-yellow/30 shadow-outrun-yellow/20";
+        const highlightColor = mode === "offers-received" ? "m3-primary" :
+            mode === "offers-made" ? "m3-tertiary" : "m3-secondary";
 
         return (
-            <div className={`flex flex-col items-center justify-center py-20 text-center space-y-4 border-2 border-dashed rounded-3xl ${borderColor} bg-card/5 backdrop-blur-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.2)]`}>
-                <div className={`p-4 rounded-full bg-gradient-to-br ${gradientColor} to-transparent shadow-glow-sm ${ringColor} ring-1 mb-2`}>
+            <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 border border-m3-outline-variant/10 rounded-3xl bg-m3-surface-container-low shadow-m3-1">
+                <div className={cn(
+                    "p-5 rounded-full flex items-center justify-center mb-2 ring-1",
+                    mode === "offers-received" ? "bg-m3-primary/10 ring-m3-primary/20" :
+                        mode === "offers-made" ? "bg-m3-tertiary/10 ring-m3-tertiary/20" :
+                            "bg-m3-secondary/10 ring-m3-secondary/20"
+                )}>
                     {icon}
                 </div>
                 <div className="space-y-1">
-                    <h3 className="text-xl font-bold tracking-tight">{title}</h3>
-                    <p className="text-muted-foreground max-w-sm text-sm px-4">
+                    <h3 className="text-xl font-bold tracking-tight text-m3-on-surface">{title}</h3>
+                    <p className="text-m3-on-surface-variant max-w-sm text-sm px-4 font-medium">
                         {description}
                     </p>
                 </div>
@@ -165,7 +166,10 @@ export function PortfolioOrderList({ searchQuery = "", mode }: PortfolioOrderLis
             )}
 
             {/* Table Header - Desktop Only */}
-            <div className={`hidden md:grid grid-cols-[2.5fr_1fr_1.5fr_1.5fr_1fr_auto] gap-4 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] border-b border-border/20 ${mode === 'offers-received' ? 'text-neon-cyan' : mode === 'offers-made' ? 'text-outrun-magenta' : 'text-outrun-yellow'}`}>
+            <div className={cn(
+                "hidden md:grid grid-cols-[2.5fr_1fr_1.5fr_1.5fr_1fr_auto] gap-4 px-4 py-4 text-[10px] font-black uppercase tracking-[0.2em] border-b border-m3-outline-variant/10",
+                mode === 'offers-received' ? 'text-m3-primary' : mode === 'offers-made' ? 'text-m3-tertiary' : 'text-m3-secondary'
+            )}>
                 <div>Item</div>
                 <div>Type</div>
                 <div>Price</div>

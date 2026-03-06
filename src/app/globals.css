@@ -216,4 +216,18 @@
   .m3-state-focus {
     @apply focus-visible:bg-m3-on-surface/12;
   }
+
+  /* ═══════════════════════════════════════════════════════
+     Global Layout Architecture
+     Unified alignment system to prevent staggered edges.
+     ═══════════════════════════════════════════════════════ */
+
+  .layout-container {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 max-w-[1600px];
+  }
+
+  /* Allows child carousels to bleed to edge while content aligns to layout-container baseline */
+  .layout-bleed {
+    @apply -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10;
+  }
 }

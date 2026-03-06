@@ -49,7 +49,7 @@ export function MarketplacePricing({ formState, updateFormField }: MarketplacePr
                                 updateFormField("listOnMarketplace", false)
                             }
                         }}
-                        className="h-14 text-xl font-bold pl-10 pr-16 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
+                        className="h-14 text-xl font-bold pl-10 pr-16 bg-m3-surface-container-highest border border-m3-outline-variant/40 hover:border-m3-primary/50 focus:border-m3-primary focus:ring-1 focus:ring-m3-primary/30 transition-all duration-m3-medium ease-m3-standard rounded-m3-md shadow-m3-1"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
                         <span className="text-xs font-black text-primary/50 tracking-tighter">USDC</span>
@@ -73,8 +73,10 @@ export function MarketplacePricing({ formState, updateFormField }: MarketplacePr
                             size="sm"
                             onClick={() => updateFormField("listingDuration", opt.seconds)}
                             className={cn(
-                                "h-10 text-xs font-medium transition-all rounded-lg",
-                                formState.listingDuration === opt.seconds ? "shadow-glow-sm shadow-outrun-purple/30 bg-outrun-purple text-white border-transparent" : "bg-muted/30 border-border/50 hover:bg-muted/50"
+                                "h-10 text-xs font-bold transition-all duration-m3-medium ease-m3-standard rounded-m3-full border",
+                                formState.listingDuration === opt.seconds
+                                    ? "bg-m3-secondary-container text-m3-on-secondary-container border-transparent shadow-m3-1"
+                                    : "bg-m3-surface-container-low border-m3-outline-variant/40 text-m3-on-surface hover:bg-m3-surface-container"
                             )}
                         >
                             {opt.label}
@@ -87,9 +89,9 @@ export function MarketplacePricing({ formState, updateFormField }: MarketplacePr
             </div>
 
             {hasPrice && (
-                <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/20 animate-in fade-in slide-in-from-top-2 duration-500">
-                    <Zap className="h-4 w-4 text-green-500" />
-                    <span className="text-xs font-medium text-green-600 dark:text-green-400">
+                <div className="flex items-center justify-center gap-2 p-3 rounded-m3-md bg-m3-primary-container border border-m3-primary/20 animate-in fade-in slide-in-from-top-2 duration-m3-medium">
+                    <Zap className="h-4 w-4 text-m3-on-primary-container" />
+                    <span className="text-xs font-semibold text-m3-on-primary-container">
                         Ready to launch: Listed for {formState.listingPrice} USDC at mint
                     </span>
                 </div>

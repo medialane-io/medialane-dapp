@@ -54,8 +54,8 @@ export default function AssetsClientPage() {
     }, [tokens, searchQuery]);
 
     return (
-        <div className="min-h-screen py-6 md:py-10">
-            <main className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 mx-auto">
+        <div className="min-h-screen">
+            <main className="">
                 <PageHeader
                     title="My Assets"
                     description="View and manage your digital assets"
@@ -101,7 +101,7 @@ export default function AssetsClientPage() {
                 {/* Show content when wallet is connected */}
                 {address && (
                     <Suspense fallback={<AssetsSkeleton />}>
-                        <div className="space-y-8 w-full mt-6">
+                        <div className="space-y-8 w-full">
                             {/* Search bar moved to PageHeader */}
 
                             {loading ? (

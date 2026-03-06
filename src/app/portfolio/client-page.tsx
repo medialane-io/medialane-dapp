@@ -43,8 +43,8 @@ export default function PortfolioClientPage() {
     });
 
     return (
-        <div className="min-h-screen py-6 md:py-10">
-            <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto">
+        <div className="min-h-screen">
+            <main className="">
                 <PageHeader
                     title="IP Portfolio"
                     description={address

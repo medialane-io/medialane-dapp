@@ -90,7 +90,7 @@ export function AssetBasicInfo({
                     placeholder="e.g. Cosmic Dreams #01"
                     value={formState.title}
                     onChange={(e) => updateFormField("title", e.target.value)}
-                    className="h-12 text-base bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
+                    className="h-12 text-base bg-m3-surface-container-highest border border-m3-outline-variant/40 hover:border-m3-primary/50 focus:border-m3-primary focus:ring-1 focus:ring-m3-primary/30 transition-all duration-m3-medium ease-m3-standard rounded-m3-md shadow-m3-1"
                 />
             </div>
 
@@ -103,7 +103,7 @@ export function AssetBasicInfo({
                     value={formState.description}
                     onChange={(e) => updateFormField("description", e.target.value)}
                     rows={4}
-                    className="resize-none text-base bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
+                    className="resize-none text-base bg-m3-surface-container-highest border border-m3-outline-variant/40 hover:border-m3-primary/50 focus:border-m3-primary focus:ring-1 focus:ring-m3-primary/30 transition-all duration-m3-medium ease-m3-standard rounded-m3-md shadow-m3-1"
                 />
             </div>
 
@@ -112,7 +112,7 @@ export function AssetBasicInfo({
                 <Label className="text-base font-medium">Asset Image <span className="text-destructive">*</span></Label>
 
                 {formState.mediaFile ? (
-                    <div className="relative group overflow-hidden rounded-2xl border border-border/50 bg-card/40 dark:bg-card/20 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.1)]">
+                    <div className="relative group overflow-hidden rounded-m3-xl border border-m3-outline-variant/30 bg-m3-surface-container shadow-m3-1 hover:shadow-m3-2 transition-shadow duration-m3-medium">
                         {formState.mediaPreviewUrl && formState.mediaFile.type.startsWith("image/") ? (
                             <div className="relative aspect-video w-full">
                                 <Image
@@ -147,19 +147,19 @@ export function AssetBasicInfo({
                 ) : (
                     <div
                         className={cn(
-                            "border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer group hover:border-outrun-cyan/40 hover:bg-outrun-cyan/5",
-                            "border-border/60 bg-card/20 backdrop-blur-sm shadow-sm"
+                            "border-2 border-dashed rounded-m3-xl p-8 text-center transition-all duration-m3-medium ease-m3-standard cursor-pointer group",
+                            "border-m3-outline-variant/50 bg-m3-surface-container-low hover:bg-m3-surface-container hover:border-m3-primary/50 shadow-m3-1"
                         )}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
                         onClick={() => fileInputRef.current?.click()}
                     >
-                        <div className="h-14 w-14 bg-card rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform ring-1 ring-border/40 group-hover:ring-outrun-cyan/30 bg-background/50 shadow-sm">
-                            <Upload className="h-6 w-6 text-muted-foreground group-hover:text-neon-cyan  transition-colors" />
+                        <div className="h-14 w-14 bg-m3-surface rounded-m3-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-m3-long ring-1 ring-m3-outline-variant/30 shadow-m3-1">
+                            <Upload className="h-6 w-6 text-m3-on-surface-variant group-hover:text-m3-primary transition-colors duration-m3-short" />
                         </div>
-                        <h3 className="text-base font-medium mb-1">Drop your image here</h3>
-                        <p className="text-muted-foreground mb-4 text-xs">
+                        <h3 className="text-base font-semibold text-m3-on-surface mb-1">Drop your image here</h3>
+                        <p className="text-m3-on-surface-variant mb-4 text-xs font-medium">
                             Supports JPG, PNG, GIF, WEBP. Max 100MB.
                         </p>
                         <Button variant="outline" size="sm" className="rounded-full px-6">Browse Files</Button>
@@ -188,7 +188,7 @@ export function AssetBasicInfo({
                     }}
                     disabled={isLoadingCollections && !collections?.length}
                 >
-                    <SelectTrigger className="h-12 bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm">
+                    <SelectTrigger>
                         <SelectValue placeholder="Select Collection" />
                     </SelectTrigger>
                     <SelectContent>
@@ -231,7 +231,7 @@ export function AssetBasicInfo({
                     placeholder="https://yoursite.com/item/123"
                     value={formState.externalUrl || ""}
                     onChange={(e) => updateFormField("externalUrl", e.target.value)}
-                    className="h-12 text-base bg-background/50 backdrop-blur-md border border-border/50 hover:border-outrun-cyan/40 focus:border-outrun-cyan focus:ring-1 focus:ring-outrun-cyan/30 transition-all rounded-lg shadow-sm"
+                    className="h-12 text-base bg-m3-surface-container-highest border border-m3-outline-variant/40 hover:border-m3-primary/50 focus:border-m3-primary focus:ring-1 focus:ring-m3-primary/30 transition-all duration-m3-medium ease-m3-standard rounded-m3-md shadow-m3-1"
                 />
                 <p className="text-xs text-muted-foreground">
                     Link to your website or the detailed project page for this asset.

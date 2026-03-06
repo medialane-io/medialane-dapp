@@ -32,8 +32,8 @@ export default function MarketplacePage() {
     const { collections, loading: collectionsLoading } = usePaginatedCollections(8)
 
     return (
-        <div className="min-h-screen py-6 md:py-10">
-            <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto">
+        <div className="min-h-screen">
+            <main className="py-10">
                 <PageHeader title="Marketplace">
                     <Sheet>
                         <SheetTrigger asChild>
@@ -97,12 +97,12 @@ export default function MarketplacePage() {
                     </Sheet>
                 </PageHeader>
 
-                <div className="space-y-4">
+                <div className="space-y-4 mt-8">
                     <AssetGrid sortOrder={sortOrder} />
                 </div>
 
                 {!collectionsLoading && collections && collections.length > 0 && (
-                    <div className="mt-12 pb-10">
+                    <div className="mt-16 pb-10">
                         <Shelf title="Recent Collections" href="/collections">
                             {collections.map((collection, index) => (
                                 <CollectionCard key={collection.id} collection={collection} index={index} />

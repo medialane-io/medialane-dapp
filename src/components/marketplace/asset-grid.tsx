@@ -46,28 +46,32 @@ export function AssetGrid({ sortOrder = "recent" }: AssetGridProps) {
 
     if (error) {
         return (
-            <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground bg-muted/10 rounded-xl border border-dashed">
-                <AlertCircle className="h-10 w-10 mb-4 text-red-500" />
-                <p>Failed to load assets from the marketplace.</p>
-                <p className="text-sm mt-2">{error}</p>
-                <Button variant="outline" onClick={() => refetch()} className="mt-4 border-foreground/10">
-                    <RefreshCw className="mr-2 h-4 w-4" /> Try Again
-                </Button>
+            <div className="w-full">
+                <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground bg-muted/10 rounded-xl border border-dashed">
+                    <AlertCircle className="h-10 w-10 mb-4 text-red-500" />
+                    <p>Failed to load assets from the marketplace.</p>
+                    <p className="text-sm mt-2">{error}</p>
+                    <Button variant="outline" onClick={() => refetch()} className="mt-4 border-foreground/10">
+                        <RefreshCw className="mr-2 h-4 w-4" /> Try Again
+                    </Button>
+                </div>
             </div>
         )
     }
 
     if (activeListings.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground bg-muted/5 rounded-xl border border-dashed border-border/50 backdrop-blur-sm">
-                <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mb-6">
-                    <AlertCircle className="h-8 w-8 opacity-50" />
+            <div className="w-full">
+                <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground bg-muted/5 rounded-xl border border-dashed border-border/50 backdrop-blur-sm">
+                    <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mb-6">
+                        <AlertCircle className="h-8 w-8 opacity-50" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground mb-2">Marketplace is Quiet</h3>
+                    <p className="max-w-xs mx-auto">There are currently no active intellectual property assets listed for trading.</p>
+                    <Button variant="outline" onClick={() => refetch()} className="mt-6 border-border hover:bg-muted">
+                        <RefreshCw className="mr-2 h-4 w-4" /> Refresh Marketplace
+                    </Button>
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">Marketplace is Quiet</h3>
-                <p className="max-w-xs mx-auto">There are currently no active intellectual property assets listed for trading.</p>
-                <Button variant="outline" onClick={() => refetch()} className="mt-6 border-border hover:bg-muted">
-                    <RefreshCw className="mr-2 h-4 w-4" /> Refresh Marketplace
-                </Button>
             </div>
         )
     }
