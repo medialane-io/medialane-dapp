@@ -1,10 +1,15 @@
-# Medialane: Creators Capital Markets on the Integrity Web
+# Medialane Dapp
 
-Medialane is the monetization hub and financial infrastructure for the Creators Capital Markets — a Creator Launchpad and IP Marketplace engineered for the integrity web, enabling trustless, verifiable financial activity. Our vision is to ensure that creators, businesses, and AI can fully own, trade, and generate capital from intellectual property with sovereignty, control, and transparency.
+Medialane permissionless dapp for programmable IP monetization and financial infrastructure for the Creators Capital Markets. 
+
+Medialane Creator Launchpad and IP Marketplace is engineered for the integrity web, enabling trustless, verifiable financial activity. 
+
+Our vision is to ensure that creators, businesses, and AI can fully own, trade, and generate capital from intellectual property with sovereignty, control, and transparency.
 
 Our ecosystem is engineered to support the next generation of finance: a verifiable engine that allows humans and autonomous AI agents to generate value and revenue streams from creative work.
 
-**Live dApp (Starknet Mainnet):** https://medialane.io
+**Medialane Dapp (Starknet Mainnet):** https://dapp.medialane.io
+**Medialane App with Social Login (Starknet Mainnet):** https://medialane.io
 
 ---
 
@@ -33,7 +38,7 @@ The High-Integrity Exchange — the central secondary market for licensing and t
 
 | Service | Fee |
 |---|---|
-| Creator Launchpad revenue products | 2% |
+| Creator Launchpad revenue products | 1% |
 | NFT Marketplace trading, auctions, remix & licensing | 1% |
 
 Gas fees are sponsored for all users via the AVNU Paymaster — the protocol fee covers these costs, so users transact with zero friction.
@@ -208,6 +213,8 @@ Abstracts Cartridge Controller (session keys, gaming UX) and Privy (email/social
 
 ---
 
-## License
+## Medialane Dao
 
-Medialane Protocol. All rights reserved.
+
+[dao@medialane.org](mailto:dao@medialane.org)
+[@integrityweb](https://t.me/integrityweb)
