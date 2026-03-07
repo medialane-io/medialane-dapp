@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useConnect, useAccount, useDisconnect } from "@starknet-react/core";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +10,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Wallet,
   LogOut,
@@ -25,7 +32,11 @@ import {
   PlusCircle,
   Box,
   Rocket,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Gamepad2,
+  Mail,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { useNetwork } from "@/components/starknet-provider";
 import { StarknetkitConnector, useStarknetkitConnectModal } from "starknetkit";
@@ -33,27 +44,133 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import Link from "next/link";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function truncate(addr: string): string {
+  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+}
+
+type WalletBadgeInfo = {
+  label: string;
+  icon: React.ReactNode;
+  className: string;
+  hint?: string;
+};
+
+function getWalletBadge(
+  walletType: "injected" | "cartridge" | "privy" | null
+): WalletBadgeInfo | null {
+  if (walletType === "cartridge") {
+    return {
+      label: "Cartridge",
+      icon: <Gamepad2 className="h-3 w-3" />,
+      className: "border-purple-500/30 text-purple-400 bg-purple-500/5",
+      hint: "Auto-gasless",
+    };
+  }
+  if (walletType === "privy") {
+    return {
+      label: "Privy",
+      icon: <Mail className="h-3 w-3" />,
+      className: "border-blue-500/30 text-blue-400 bg-blue-500/5",
+      hint: "Managed keys",
+    };
+  }
+  if (walletType === "injected") {
+    return {
+      label: "Browser Wallet",
+      icon: <Wallet className="h-3 w-3" />,
+      className: "border-emerald-500/20 text-emerald-400 bg-emerald-500/5",
+    };
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
 
 export function WalletConnect() {
   const { connectAsync, connectors } = useConnect();
-  const { address, isConnected, chainId } = useAccount();
-  const { disconnect } = useDisconnect();
+  const { address: injectedAddress, isConnected: injectedConnected, chainId } = useAccount();
+  const { disconnect: injectedDisconnect } = useDisconnect();
   const [open, setOpen] = useState(false);
+  const [connectDialogOpen, setConnectDialogOpen] = useState(false);
   const { networkConfig } = useNetwork();
+
+  const {
+    address: szAddress,
+    walletType: szType,
+    isConnecting,
+    error: szError,
+    connectCartridge,
+    connectPrivy,
+    disconnect: szDisconnect,
+  } = useStarkZapWallet();
 
   const { starknetkitConnectModal } = useStarknetkitConnectModal({
     connectors: connectors as StarknetkitConnector[],
     modalTheme: "dark",
   });
 
-  const handleConnect = async () => {
+  // ---------------------------------------------------------------------------
+  // Unified state
+  // ---------------------------------------------------------------------------
+
+  const hasStarkZap = szAddress !== null;
+  const isConnected = hasStarkZap || injectedConnected;
+  const address = hasStarkZap ? szAddress : injectedAddress;
+  const activeWalletType = hasStarkZap
+    ? (szType as "cartridge" | "privy")
+    : injectedConnected
+      ? "injected"
+      : null;
+
+  const isWrongNetwork =
+    injectedConnected &&
+    !hasStarkZap &&
+    chainId &&
+    BigInt(chainId).toString() !== networkConfig.chainId;
+
+  const badge = getWalletBadge(activeWalletType);
+
+  // Auto-close connect dialog when wallet connects
+  useEffect(() => {
+    if (isConnected && address) {
+      setConnectDialogOpen(false);
+    }
+  }, [isConnected, address]);
+
+  // ---------------------------------------------------------------------------
+  // Handlers
+  // ---------------------------------------------------------------------------
+
+  const handleBrowserConnect = async () => {
     try {
       const { connector } = await starknetkitConnectModal();
       if (!connector) return;
       await connectAsync({ connector });
+      setConnectDialogOpen(false);
     } catch (err) {
-      console.error("Failed to connect wallet", err);
+      console.error("Failed to connect browser wallet", err);
     }
+  };
+
+  const handleCartridgeConnect = async () => {
+    try {
+      await connectCartridge();
+    } catch {
+      // error shown in context
+    }
+  };
+
+  const handlePrivyConnect = () => {
+    connectPrivy();
+    setConnectDialogOpen(false);
   };
 
   const copyAddress = () => {
@@ -63,9 +180,37 @@ export function WalletConnect() {
     }
   };
 
-  const isWrongNetwork = isConnected && chainId && BigInt(chainId).toString() !== networkConfig.chainId;
+  const handleDisconnect = () => {
+    if (hasStarkZap) {
+      szDisconnect();
+    } else {
+      injectedDisconnect();
+    }
+    setOpen(false);
+  };
 
-  if (isConnected) {
+  // ---------------------------------------------------------------------------
+  // Loading state (Privy authenticating)
+  // ---------------------------------------------------------------------------
+
+  if (isConnecting && !isConnected) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="rounded-full h-8 w-8"
+        disabled
+      >
+        <Loader2 className="h-4 w-4 animate-spin" />
+      </Button>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Connected state — Sheet with portfolio/creator links
+  // ---------------------------------------------------------------------------
+
+  if (isConnected && address) {
     return (
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
@@ -91,9 +236,26 @@ export function WalletConnect() {
                 <ShieldCheck className="w-5 h-5 text-outrun-cyan" />
                 Account
               </SheetTitle>
-              <Badge variant="outline" className={`text-[10px] font-normal ${isWrongNetwork ? "border-red-500/30 text-red-400 bg-red-500/5" : "border-emerald-500/20 text-emerald-400 bg-emerald-500/5 px-2 py-0.5"}`}>
-                {networkConfig.name}
-              </Badge>
+              <div className="flex items-center gap-2">
+                {badge && (
+                  <Badge
+                    variant="outline"
+                    className={`text-[10px] font-normal flex items-center gap-1 px-2 py-0.5 ${badge.className}`}
+                  >
+                    {badge.icon}
+                    {badge.label}
+                    {badge.hint && (
+                      <span className="opacity-70">· {badge.hint}</span>
+                    )}
+                  </Badge>
+                )}
+                <Badge
+                  variant="outline"
+                  className={`text-[10px] font-normal ${isWrongNetwork ? "border-red-500/30 text-red-400 bg-red-500/5" : "border-emerald-500/20 text-emerald-400 bg-emerald-500/5 px-2 py-0.5"}`}
+                >
+                  {networkConfig.name}
+                </Badge>
+              </div>
             </div>
 
             <div className="flex items-center gap-4">
@@ -103,7 +265,7 @@ export function WalletConnect() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold text-base truncate">
-                    {address?.slice(0, 6)}...{address?.slice(-4)}
+                    {truncate(address)}
                   </h3>
                   <button onClick={copyAddress} className="text-muted-foreground hover:text-foreground transition-colors">
                     <Copy className="h-3.5 w-3.5" />
@@ -130,7 +292,7 @@ export function WalletConnect() {
             <div className="p-6 space-y-8">
               {isWrongNetwork && (
                 <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/20 flex gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <LogOut className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                  <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
                   <div className="space-y-1">
                     <p className="text-xs font-bold text-red-200">Switch Network Needed</p>
                     <p className="text-[10px] text-red-200/60 leading-relaxed">
@@ -173,7 +335,7 @@ export function WalletConnect() {
                     { label: "Mint IP Asset", icon: PlusCircle, href: "/create/asset" },
                     { label: "Deploy Collection", icon: Rocket, href: "/launchpad/collection-drop" },
                     { label: "IP Templates", icon: ShieldCheck, href: "/create/templates" },
-                    { label: "Account Settings", icon: Settings, href: "/portfolio/settings" }
+                    { label: "Account Settings", icon: Settings, href: "/portfolio/settings" },
                   ].map((item) => (
                     <Link key={item.label} href={item.href} onClick={() => setOpen(false)}>
                       <div className="group flex items-center justify-between p-3 rounded-lg border border-transparent hover:border-border/50 hover:bg-muted/20 transition-all cursor-pointer">
@@ -193,10 +355,7 @@ export function WalletConnect() {
           <div className="p-6 border-t border-border/40 bg-card/10 mt-auto space-y-4">
             <Button
               variant="outline"
-              onClick={() => {
-                disconnect();
-                setOpen(false);
-              }}
+              onClick={handleDisconnect}
               className="w-full h-11 border-border/40 hover:bg-destructive/10 hover:border-destructive/20 hover:text-destructive group transition-all"
             >
               <LogOut className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
@@ -212,14 +371,107 @@ export function WalletConnect() {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Not connected — icon button + connection dialog
+  // ---------------------------------------------------------------------------
+
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="rounded-full h-9 w-9 bg-black/5 dark:bg-foreground/5 hover:bg-black/10 dark:hover:bg-foreground/10 border border-black/5 dark:border-foreground/5 transition-all text-foreground"
-      onClick={handleConnect}
-    >
-      <Wallet className="h-4 w-4" />
-    </Button>
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="rounded-full h-9 w-9 bg-black/5 dark:bg-foreground/5 hover:bg-black/10 dark:hover:bg-foreground/10 border border-black/5 dark:border-foreground/5 transition-all text-foreground"
+        onClick={() => setConnectDialogOpen(true)}
+      >
+        <Wallet className="h-4 w-4" />
+      </Button>
+
+      <Dialog open={connectDialogOpen} onOpenChange={setConnectDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Connect Wallet</DialogTitle>
+            <DialogDescription>
+              Choose how you want to connect to Medialane.
+            </DialogDescription>
+          </DialogHeader>
+
+          {szError && (
+            <p className="text-sm text-red-400 bg-red-900/20 border border-red-900/40 rounded p-2">
+              {szError}
+            </p>
+          )}
+
+          <div className="grid gap-5 pt-1">
+            {/* ── Browser Wallets ──────────────────────────────── */}
+            <section>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Browser Wallets
+              </p>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-3"
+                onClick={handleBrowserConnect}
+                disabled={isConnecting}
+              >
+                <Wallet className="h-4 w-4 shrink-0" />
+                <span>
+                  Argent / Braavos{" "}
+                  <span className="text-muted-foreground text-xs">
+                    · via starknetkit
+                  </span>
+                </span>
+              </Button>
+            </section>
+
+            <div className="border-t border-border/50" />
+
+            {/* ── Cartridge ───────────────────────────────────── */}
+            <section>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                Cartridge Controller
+              </p>
+              <p className="text-xs text-muted-foreground mb-2">
+                Gaming wallet · auto-gasless transactions
+              </p>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-3"
+                onClick={handleCartridgeConnect}
+                disabled={isConnecting}
+              >
+                <Gamepad2 className="h-4 w-4 shrink-0 text-purple-400" />
+                <span>
+                  {isConnecting ? "Connecting…" : "Connect with Cartridge"}
+                </span>
+                {isConnecting && <Loader2 className="ml-auto h-3 w-3 animate-spin" />}
+              </Button>
+            </section>
+
+            <div className="border-t border-border/50" />
+
+            {/* ── Privy ───────────────────────────────────────── */}
+            <section>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                Privy — Email / Social
+              </p>
+              <p className="text-xs text-muted-foreground mb-2">
+                No seed phrase · managed keys
+              </p>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-3"
+                onClick={handlePrivyConnect}
+                disabled={isConnecting}
+              >
+                <Mail className="h-4 w-4 shrink-0 text-blue-400" />
+                <span>
+                  {isConnecting ? "Connecting…" : "Continue with Email / Social"}
+                </span>
+              </Button>
+            </section>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

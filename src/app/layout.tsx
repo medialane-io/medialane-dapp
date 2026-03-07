@@ -8,6 +8,7 @@ import { CommandMenu } from "@/components/command-menu"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { NavigationBar } from "@/components/navigation-bar"
+import { Providers } from "@/components/providers"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -68,16 +69,18 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <StarknetProvider>
-            <Header />
-            <main className="min-h-screen pb-20 layout-container">
-              {children}
-            </main>
-            <Footer />
-            <NavigationBar />
-            <CommandMenu />
-            <Toaster />
-          </StarknetProvider>
+          <Providers>
+            <StarknetProvider>
+              <Header />
+              <main className="min-h-screen pb-20 layout-container">
+                {children}
+              </main>
+              <Footer />
+              <NavigationBar />
+              <CommandMenu />
+              <Toaster />
+            </StarknetProvider>
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

@@ -9,8 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@avnu/gasless-sdk": "^0.1.8",
     "@clerk/nextjs": "^6.0.2",
     "@hookform/resolvers": "^3.10.0",
+    "@privy-io/node": "^0.10.1",
+    "@privy-io/react-auth": "^3.16.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
@@ -76,6 +79,7 @@
     "sonner": "^1.7.4",
     "starknet": "^8.9.2",
     "starknetkit": "^3.4.3",
+    "starkzap": "^1.0.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2",
