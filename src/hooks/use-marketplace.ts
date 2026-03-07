@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useAccount, useContract, useNetwork, useProvider } from "@starknet-react/core";
 import { Abi, shortString, constants } from "starknet";
 import { IPMarketplaceABI } from "@/abis/ip_market";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { getOrderParametersTypedData, getOrderCancellationTypedData, getOrderFulfillmentTypedData, stringifyBigInts } from "@/utils/marketplace-utils";
 
 interface UseMarketplaceReturn {
@@ -292,14 +292,23 @@ export function useMarketplace(): UseMarketplaceReturn {
     }, [account, medialaneContract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall]);
 
     const checkoutCart = useCallback(async (items: any[]) => {
+        console.log("checkoutCart called with items:", items.length);
+        console.log("checkoutCart context:", {
+            hasAccount: !!account,
+            hasContract: !!medialaneContract,
+            hasChain: !!chain
+        });
+
         if (!account || !medialaneContract || !chain || items.length === 0) {
             const msg = "Account, contract, network not available, or cart empty";
+            console.error("checkoutCart early return:", msg);
             setError(msg);
             toast({ title: "Error", description: msg, variant: "destructive" });
             return undefined;
         }
 
         return withProcessing(async () => {
+            console.log("checkoutCart inside withProcessing");
             // Group required ERC20 approvals by token address
             const tokenTotals = new Map<string, bigint>();
             items.forEach((item) => {

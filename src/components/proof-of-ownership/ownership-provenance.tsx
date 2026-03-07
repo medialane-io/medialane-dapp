@@ -29,7 +29,7 @@ export function OwnershipProvenance({ assetId, assetName, creationDate, creator,
   }
 
   return (
-    <Card className="shadow-lg">
+    <Card className="shadow-m3-3 transition-shadow hover:shadow-m3-4 duration-300">
       <CardContent className="p-6">
         <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
           <Shield className="h-6 w-6 text-primary" />

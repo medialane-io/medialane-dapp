@@ -14,6 +14,7 @@ import { ShoppingBag, Loader2, AlertTriangle, Layers } from "lucide-react";
 import { CartItemRow } from "@/components/cart-item-row";
 import { isOwnListing } from "@/lib/ownership";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function CartDrawer() {
     const { items, isOpen, setIsOpen, removeItem, clearCart } = useCart();
@@ -29,7 +30,19 @@ export function CartDrawer() {
     const ownItemCount = items.length - displayItems.length;
 
     const handleCheckout = async () => {
-        await checkout();
+        if (!address) {
+            toast.info("Wallet Connection Required", {
+                description: "Please connect your wallet using the button in the top right to complete your purchase.",
+            });
+            return;
+        }
+
+        try {
+            console.log("CartDrawer: Calling handleCheckout");
+            await checkout();
+        } catch (e: any) {
+            console.error("CartDrawer: Error in handleCheckout", e);
+        }
     };
 
     return (
@@ -108,9 +121,11 @@ export function CartDrawer() {
                             <Button
                                 className="flex-[2] font-semibold transition-all"
                                 onClick={handleCheckout}
-                                disabled={isProcessing}
+                                disabled={isProcessing && !!address}
                             >
-                                {isProcessing ? (
+                                {!address ? (
+                                    "Connect Wallet"
+                                ) : isProcessing ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                         Processing...

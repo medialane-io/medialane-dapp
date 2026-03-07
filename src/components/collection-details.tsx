@@ -215,7 +215,7 @@ export default function CollectionDetails({ collectionAddress }: CollectionDetai
                             <div className="flex-shrink-0 relative group w-full lg:w-1/2 mx-auto lg:mx-0">
                                 <div className="absolute -inset-1 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500 bg-gradient-to-tr from-outrun-magenta to-neon-cyan/50" />
                                 <div
-                                    className="relative w-full rounded-2xl overflow-hidden border-2 border-border/50 dark:border-border/50 backdrop-blur-xl shadow-neon-cyan/20 transition-all duration-300 ease-in-out bg-black/20"
+                                    className="relative w-full rounded-2xl overflow-hidden border-2 border-border/50 dark:border-border/50 backdrop-blur-xl shadow-glow-blue transition-all duration-300 ease-in-out bg-black/20"
                                     style={{ aspectRatio: imageRatio || "1/1" }}
                                 >
                                     <LazyImage
@@ -260,7 +260,7 @@ export default function CollectionDetails({ collectionAddress }: CollectionDetai
                                             trigger={
                                                 <Button
                                                     variant="default"
-                                                    className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 font-bold"
+                                                    className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow-blue font-bold"
                                                 >
                                                     Make Collection Offer
                                                 </Button>
@@ -301,7 +301,7 @@ export default function CollectionDetails({ collectionAddress }: CollectionDetai
 
                                     {/* Stats Widget - Moved into the same flex column */}
                                     <div className="grid grid-cols-2 gap-3 lg:gap-4 mt-6">
-                                        <div className="glass-panel p-4 lg:p-5 border-border/50 shadow-glow-sm shadow-outrun-purple/10 rounded-2xl">
+                                        <div className="glass-panel p-4 lg:p-5 border-border/50 shadow-glow-mauve hover:-translate-y-1 transition-transform duration-300 rounded-2xl">
                                             <div className="flex flex-col">
                                                 <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Floor Price</p>
                                                 <p className="text-2xl lg:text-3xl font-black text-foreground">
@@ -309,19 +309,19 @@ export default function CollectionDetails({ collectionAddress }: CollectionDetai
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="glass-panel p-4 lg:p-5 border-border/50 shadow-glow-sm shadow-outrun-purple/10 rounded-2xl">
+                                        <div className="glass-panel p-4 lg:p-5 border-border/50 shadow-glow-mauve hover:-translate-y-1 transition-transform duration-300 rounded-2xl">
                                             <div className="flex flex-col">
                                                 <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Listed</p>
                                                 <p className="text-2xl lg:text-3xl font-black text-foreground">{listedCount}</p>
                                             </div>
                                         </div>
-                                        <div className="glass-panel p-4 lg:p-5 border-border/50 shadow-glow-sm shadow-outrun-purple/10 rounded-2xl">
+                                        <div className="glass-panel p-4 lg:p-5 border-border/50 shadow-glow-mauve hover:-translate-y-1 transition-transform duration-300 rounded-2xl">
                                             <div className="flex flex-col">
                                                 <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Owners</p>
                                                 <p className="text-2xl lg:text-3xl font-black text-foreground">{uniqueOwnersCount}</p>
                                             </div>
                                         </div>
-                                        <div className="glass-panel p-4 lg:p-5 border-border/50 shadow-glow-sm shadow-outrun-purple/10 rounded-2xl">
+                                        <div className="glass-panel p-4 lg:p-5 border-border/50 shadow-glow-mauve hover:-translate-y-1 transition-transform duration-300 rounded-2xl">
                                             <div className="flex flex-col">
                                                 <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Volume</p>
                                                 <p className="text-2xl lg:text-3xl font-black text-foreground">{collectionVolume}</p>

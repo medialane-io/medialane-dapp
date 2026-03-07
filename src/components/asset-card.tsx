@@ -70,12 +70,22 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
   const handleCartAction = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!listing || !asset || isOwn) return;
+    if (!listing || isOwn) return;
 
     if (isInCart) {
       removeItem(listing.orderHash);
     } else {
-      addItem(listing, asset as Asset | RecentAsset, address);
+      const cartAsset = asset || {
+        id: `${offerToken}-${offerIdentifier}`,
+        name: fetchedName || "Unknown Asset",
+        image: fetchedImage,
+        collectionAddress: offerToken,
+        nftAddress: offerToken,
+        tokenId: offerIdentifier,
+        collectionName: collectionName || "IP Asset",
+      };
+
+      addItem(listing, cartAsset as Asset | RecentAsset, address);
       setIsOpen(true);
     }
   };
@@ -92,7 +102,7 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
   const isLoading = shouldFetchMetadata && metadataLoading;
 
   return (
-    <Card className="overflow-hidden bg-m3-surface-container-lowest rounded-m3-xl shadow-m3-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-m3-outline-variant hover:border-blue-600/40 transition-all duration-m3-medium ease-m3-standard group flex flex-col h-full relative">
+    <Card className="overflow-hidden bg-m3-surface-container-lowest rounded-m3-xl shadow-m3-1 hover:shadow-glow-mixed hover:-translate-y-1 border border-m3-outline-variant hover:border-blue-600/40 transition-all duration-m3-medium ease-m3-standard group flex flex-col h-full relative">
       <motion.div layoutId={`asset-card-${offerToken}-${offerIdentifier}`} className="block relative aspect-square overflow-hidden bg-m3-surface-variant/30 rounded-t-m3-xl">
         <Link href={assetUrl} className="block w-full h-full">
           {isLoading ? (
@@ -185,7 +195,7 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0 gap-2 grid grid-cols-[1fr,auto]">
+      <CardFooter className={cn("p-4 pt-0 gap-2 grid", listing && !isOwn ? "grid-cols-[1fr,1fr,auto]" : "grid-cols-[1fr,auto]")}>
         {listing ? (
           isOwn ? (
             <Link href={assetUrl} className="w-full">
@@ -198,15 +208,26 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
               </Button>
             </Link>
           ) : (
-            <Button
-              variant={isInCart ? "secondary" : "premium"}
-              onTouchStart={handleCartAction}
-              onClick={handleCartAction}
-              className="w-full h-9 gap-1.5 px-2 font-bold active:scale-[0.98] transition-transform"
-            >
-              <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">{isInCart ? "In Cart" : "Add to Cart"}</span>
-            </Button>
+            <>
+              <Link href={assetUrl} className="w-full">
+                <Button
+                  variant="outline"
+                  className="w-full h-9 gap-1.5 px-2 font-medium active:scale-[0.98] transition-transform"
+                >
+                  <Eye className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">View</span>
+                </Button>
+              </Link>
+              <Button
+                variant={isInCart ? "default" : "premium"}
+                onTouchStart={handleCartAction}
+                onClick={handleCartAction}
+                className="w-full h-9 gap-1.5 px-2 font-bold active:scale-[0.98] transition-transform"
+              >
+                <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{isInCart ? "In Cart" : "Add to Cart"}</span>
+              </Button>
+            </>
           )
         ) : (
           <Link href={assetUrl} className="w-full">

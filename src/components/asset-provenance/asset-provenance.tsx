@@ -155,16 +155,16 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
 
   const getEventColorCode = (type: ProvenanceEvent["type"]) => {
     switch (type) {
-      case "mint": return "from-blue-500/80 to-indigo-600/80 dark:from-blue-600/80 dark:to-indigo-700/80 shadow-sm"
-      case "transfer": return "from-emerald-500/80 to-teal-600/80 dark:from-emerald-600/80 dark:to-teal-700/80 shadow-sm"
+      case "mint": return "from-blue-500/80 to-indigo-600/80 dark:from-blue-600/80 dark:to-indigo-700/80 shadow-m3-1"
+      case "transfer": return "from-emerald-500/80 to-teal-600/80 dark:from-emerald-600/80 dark:to-teal-700/80 shadow-m3-1"
       case "sale":
-      case "accept": return "from-green-500/80 to-emerald-600/80 dark:from-green-600/80 dark:to-emerald-700/80 shadow-sm"
-      case "cancel": return "from-red-500/80 to-rose-600/80 dark:from-red-600/80 dark:to-rose-700/80 shadow-sm"
+      case "accept": return "from-green-500/80 to-emerald-600/80 dark:from-green-600/80 dark:to-emerald-700/80 shadow-m3-1"
+      case "cancel": return "from-red-500/80 to-rose-600/80 dark:from-red-600/80 dark:to-rose-700/80 shadow-m3-1"
       case "offer":
-      case "license": return "from-purple-500/80 to-pink-600/80 dark:from-purple-600/80 dark:to-pink-700/80 shadow-sm"
-      case "list": return "from-blue-400/80 to-indigo-500/80 dark:from-blue-500/80 dark:to-indigo-600/80 shadow-sm"
-      case "verification": return "from-cyan-500/80 to-blue-600/80 shadow-sm"
-      default: return "from-orange-500/80 to-red-600/80 dark:from-orange-600/80 dark:to-red-700/80 shadow-sm"
+      case "license": return "from-purple-500/80 to-pink-600/80 dark:from-purple-600/80 dark:to-pink-700/80 shadow-m3-1"
+      case "list": return "from-blue-400/80 to-indigo-500/80 dark:from-blue-500/80 dark:to-indigo-600/80 shadow-m3-1"
+      case "verification": return "from-cyan-500/80 to-blue-600/80 shadow-m3-1"
+      default: return "from-orange-500/80 to-red-600/80 dark:from-orange-600/80 dark:to-red-700/80 shadow-m3-1"
     }
   }
 
@@ -313,14 +313,14 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
                   className="relative pl-12 sm:pl-14 group"
                 >
                   {/* Event Icon */}
-                  <div className={`absolute left-0 top-1 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br ${getEventColorCode(event.type)} flex items-center justify-center z-10 shadow-md group-hover:scale-105 transition-transform duration-300`}>
+                  <div className={`absolute left-0 top-1 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br ${getEventColorCode(event.type)} flex items-center justify-center z-10 shadow-m3-2 group-hover:scale-105 group-hover:shadow-glow-mixed transition-all duration-300`}>
                     <div className="text-white">
                       {getEventIcon(event.type)}
                     </div>
                   </div>
 
                   {/* Event Card */}
-                  <div className="p-5 sm:p-6 rounded-2xl glass-panel shadow-sm hover:shadow-md hover:border-border/30">
+                  <div className="p-5 sm:p-6 rounded-2xl glass-panel shadow-m3-1 hover:shadow-m3-2 hover:border-border/30 transition-shadow duration-300">
                     {/* Header */}
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
                       <div>
@@ -426,7 +426,7 @@ export function AssetProvenance({ asset, events, showActions = true, compact = f
             <p className="text-muted-foreground font-light leading-relaxed max-w-md">
               Each asset is immutable, secured by a unique cryptographic hash, ensuring integrity.
             </p>
-            <Button className="w-full h-14 rounded-2xl font-bold bg-foreground text-background hover:bg-foreground/90 transition-all shadow-lg" asChild>
+            <Button className="w-full h-14 rounded-2xl font-bold bg-foreground text-background hover:bg-foreground/90 hover:shadow-glow-mixed transition-all shadow-m3-3" asChild>
               <Link href={`/proof-of-ownership/${asset.contract}`}>
                 <Shield className="h-4 w-4 mr-3" />
                 View Proof of Ownership

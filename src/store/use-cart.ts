@@ -125,26 +125,39 @@ export function useCheckout() {
     const { address } = useAccount();
 
     const checkout = useCallback(async () => {
+        console.log("Cart Checkout Initiated!");
+        console.log("Current Context:", { address, itemsCount: items.length });
+
         // Filter out any own assets (defensive — handles stale persisted data)
         const safeItems = items.filter(
-            (i) => !isOwnListing(i.listing.offerer, address)
+            (i) => !isOwnListing(i.listing?.offerer, address)
         );
+        console.log("Safe items to checkout:", safeItems.length);
 
         // Remove own-asset items from the cart
         const removedItems = items.filter(
-            (i) => isOwnListing(i.listing.offerer, address)
+            (i) => isOwnListing(i.listing?.offerer, address)
         );
-        removedItems.forEach((i) => removeItem(i.listing.orderHash));
+        removedItems.forEach((i) => removeItem(i.listing?.orderHash));
 
-        if (safeItems.length === 0) return;
+        if (safeItems.length === 0) {
+            console.log("Aborting checkout: safeItems is empty after filtering");
+            return;
+        }
 
         const orders = safeItems.map((i) => i.listing);
-        const txHash = await checkoutCart(orders);
-        if (txHash) {
-            clearCart();
-            setIsOpen(false);
+        console.log("Calling checkoutCart with orders:", orders);
+        try {
+            const txHash = await checkoutCart(orders);
+            console.log("checkoutCart returned txHash:", txHash);
+            if (txHash) {
+                clearCart();
+                setIsOpen(false);
+            }
+            return txHash;
+        } catch (e) {
+            console.error("checkoutCart THREW an error:", e);
         }
-        return txHash;
     }, [items, address, checkoutCart, clearCart, setIsOpen, removeItem]);
 
     return { checkout, isProcessing };

@@ -26,12 +26,12 @@
     /* Very deep navy */
     --m3-on-secondary-container: 0 0% 100%;
 
-    /* ── Tertiary (Brand Orange) ── */
-    --m3-tertiary: 25 95% 53%;
-    /* #F97316 - Vibrant Orange Accent */
+    /* ── Tertiary (Brand Mauve) ── */
+    --m3-tertiary: 270 50% 50%;
+    /* #9356C1 - Radiant Mauve Accent */
     --m3-on-tertiary: 0 0% 100%;
-    --m3-tertiary-container: 25 95% 45%;
-    /* Darker orange */
+    --m3-tertiary-container: 270 50% 40%;
+    /* Darker mauve */
     --m3-on-tertiary-container: 0 0% 100%;
 
     /* ── Brand Mauve (Used for subtle accents/surfaces) ── */
@@ -122,10 +122,11 @@
     --m3-secondary-container: 213 60% 20%;
     --m3-on-secondary-container: 0 0% 100%;
 
-    /* ── Tertiary (Brand Orange) ── */
-    --m3-tertiary: 25 95% 53%;
+    /* ── Tertiary (Brand Mauve) ── */
+    --m3-tertiary: 270 50% 60%;
+    /* Slightly lighter Mauve for dark mode visibility */
     --m3-on-tertiary: 0 0% 100%;
-    --m3-tertiary-container: 25 95% 40%;
+    --m3-tertiary-container: 270 50% 45%;
     --m3-on-tertiary-container: 0 0% 100%;
 
     /* ── Brand Mauve (Dark Mode) ── */
@@ -219,11 +220,37 @@
 
   /* ── M3 Glass / Translucent Utilities ── */
   .glass {
-    @apply bg-m3-surface/70 backdrop-blur-md border border-m3-outline-variant/30 shadow-sm;
+    @apply bg-m3-surface/70 backdrop-blur-md border border-m3-outline-variant/30 shadow-m3-1;
   }
 
   .glass-heavy {
     @apply bg-m3-surface/90 backdrop-blur-xl border border-m3-outline-variant/50 shadow-m3-3;
+  }
+
+  /* ── Brand Gradients & Vivid Utilities ── */
+  .gradient-border {
+    @apply relative;
+    background-clip: padding-box;
+    border: 1px solid transparent;
+  }
+
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, hsl(var(--m3-primary)/0.3), hsl(var(--m3-tertiary)/0.3), hsl(30, 95%, 53%, 0.2));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+  }
+
+  .brand-gradient-bg {
+    @apply bg-gradient-to-br from-m3-primary/5 via-m3-tertiary/5 to-transparent;
+  }
+
+  .brand-gradient-text {
+    @apply bg-gradient-to-r from-m3-primary via-m3-tertiary to-orange-500 bg-clip-text text-transparent;
   }
 
   /* ═══════════════════════════════════════════════════════

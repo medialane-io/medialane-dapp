@@ -74,7 +74,7 @@ export function ProofCertificate({ asset }: ProofCertificateProps) {
     <div className="space-y-6 w-full animate-in fade-in duration-700 slide-in-from-bottom-4">
 
       {/* Responsive Card: Stacked on Mobile, Side-by-Side on Desktop */}
-      <Card className="overflow-hidden border-border/50 bg-background/60 backdrop-blur-xl shadow-lg rounded-3xl">
+      <Card className="overflow-hidden border-border/50 bg-background/60 backdrop-blur-xl shadow-m3-4 hover:shadow-glow-mixed transition-all duration-500 rounded-3xl">
         <CardContent className="p-0 flex flex-col lg:flex-row align-stretch">
 
           {/* Visual Header / Side */}

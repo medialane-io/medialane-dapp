@@ -64,3 +64,16 @@ export const M3_STAGGER_ITEM = {
         transition: M3_EASED,
     },
 };
+
+/** Hover lift — subtle float-up for cards / interactive elements */
+export const M3_HOVER_LIFT = { y: -4, transition: { ...M3_SPRING_SNAPPY } };
+export const M3_HOVER_RESET = { y: 0, transition: { ...M3_SPRING } };
+
+/** Scale pop — for badges, icons, success states */
+export const M3_POP_IN = { scale: [0, 1.08, 1], transition: { duration: 0.4, ease: [0.2, 0, 0, 1] } };
+
+/** Entrance stagger (fade + slide) — faster variant */
+export const M3_QUICK_STAGGER_CONTAINER = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.04, delayChildren: 0.05 } },
+};

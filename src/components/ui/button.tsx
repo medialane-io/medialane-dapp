@@ -14,7 +14,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-blue-600 text-white shadow-m3-1 hover:bg-blue-700 active:bg-blue-800",
+          "bg-blue-600 text-white shadow-m3-1 hover:shadow-glow-blue hover:bg-blue-700 active:bg-blue-800 transition-all duration-300",
         destructive:
           "bg-m3-error text-m3-on-error shadow-m3-1 hover:bg-m3-error/90 active:bg-m3-error/80",
         outline:
@@ -28,7 +28,7 @@ const buttonVariants = cva(
         link:
           "text-m3-primary underline-offset-4 hover:underline transition-colors",
         premium:
-          "bg-m3-tertiary text-m3-on-tertiary shadow-m3-2 hover:bg-m3-tertiary/90 border border-foreground/20",
+          "bg-m3-tertiary text-m3-on-tertiary shadow-m3-2 hover:shadow-glow-mauve hover:bg-m3-tertiary/90 border border-foreground/20 transition-all duration-300",
       },
       size: {
         default: "h-10 px-6 py-2",

@@ -247,8 +247,8 @@ function CollectionCard({ collection, nftCount, onReportClick, onCollectionClick
   return (
     <Card
       className={cn(
-        "bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl transition-shadow hover:shadow-m3-2 duration-m3-short overflow-hidden transition-all duration-300 cursor-pointer group",
-        "hover:shadow-[0_0_25px_rgba(0,255,255,0.15)] hover:border-outrun-cyan/30",
+        "bg-m3-surface-container shadow-m3-1 border border-m3-outline-variant/20 rounded-m3-xl overflow-hidden transition-all duration-500 cursor-pointer group",
+        "hover:shadow-glow-mixed hover:-translate-y-1 hover:border-blue-500/30",
         onCollectionClick && "hover:ring-2 hover:ring-outrun-cyan/50"
       )}
       onClick={onCollectionClick}
@@ -462,7 +462,7 @@ export function FeaturedCollectionCard({ collection, nftCount, onReportClick }: 
   const coverImage = collection.image || "/background.jpg"
 
   return (
-    <div className="rounded-xl overflow-hidden border cursor-pointer hover:shadow transition-all">
+    <div className="rounded-xl overflow-hidden border cursor-pointer hover:shadow-glow-mauve hover:-translate-y-1 transition-all duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
         <Link href={`/collections/${collection.nftAddress || String(collection.id)}`}>
           <div className="relative h-64 md:h-auto">

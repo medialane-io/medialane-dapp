@@ -62,8 +62,8 @@ export function LaunchpadCard({ feature, index, className }: LaunchpadCardProps)
             className={cn(
                 "h-full rounded-[32px] overflow-hidden", // M3 massive organic curve
                 isActive
-                    ? "bg-m3-surface-container-lowest shadow-m3-1 dark:shadow-m3-2 border border-m3-outline-variant cursor-pointer"
-                    : "bg-m3-surface-variant/30 border border-transparent opacity-60 cursor-default"
+                    ? "bg-m3-surface-container-lowest shadow-m3-1 hover:shadow-glow-blue hover:-translate-y-1 transition-all duration-300 border border-m3-outline-variant cursor-pointer"
+                    : "bg-m3-surface-variant/30 border border-transparent opacity-60 cursor-default transition-all duration-300"
             )}
         >
             <div className="relative p-6 sm:p-8 flex flex-col h-full">
