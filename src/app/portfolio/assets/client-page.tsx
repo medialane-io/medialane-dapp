@@ -56,68 +56,66 @@ export default function AssetsClientPage() {
     return (
         <div className="min-h-screen">
             <main className="">
-                <div className="layout-px">
-                    <PageHeader
-                        title="My Assets"
-                        description="View and manage your digital assets"
-                    >
-                        <div className="flex items-center gap-4 w-full md:w-auto">
-                            <Button variant="ghost" size="icon" asChild className="shrink-0">
-                                <Link href="/portfolio">
-                                    <ArrowLeft className="h-4 w-4" />
-                                </Link>
-                            </Button>
-                            {address && (
-                                <div className="relative w-full sm:min-w-[300px]">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        placeholder="Search your assets..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="pl-9 pr-9"
-                                    />
-                                    {searchQuery && (
-                                        <button
-                                            onClick={() => setSearchQuery("")}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                        >
-                                            <X className="h-4 w-4" />
-                                        </button>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </PageHeader>
-
-                    {/* Show CTA when no wallet is connected */}
-                    {!address && (
-                        <div className="max-w-4xl mx-auto py-12">
-                            <WalletConnectCTA
-                                title="Connect wallet"
-                                description="Securely access and manage your onchain assets."
-                            />
-                        </div>
-                    )}
-
-                    {/* Show content when wallet is connected */}
-                    {address && (
-                        <Suspense fallback={<AssetsSkeleton />}>
-                            <div className="space-y-8 w-full pb-12">
-                                {loading ? (
-                                    <AssetsSkeleton />
-                                ) : error ? (
-                                    <Alert variant="destructive">{error}</Alert>
-                                ) : (
-                                    <PortfolioAssets
-                                        tokens={filteredTokens}
-                                        loading={loading}
-                                        collections={validCollections}
-                                    />
+                <PageHeader
+                    title="My Assets"
+                    description="View and manage your digital assets"
+                >
+                    <div className="flex items-center gap-4 w-full md:w-auto">
+                        <Button variant="ghost" size="icon" asChild className="shrink-0">
+                            <Link href="/portfolio">
+                                <ArrowLeft className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                        {address && (
+                            <div className="relative w-full sm:min-w-[300px]">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search your assets..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="pl-9 pr-9"
+                                />
+                                {searchQuery && (
+                                    <button
+                                        onClick={() => setSearchQuery("")}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </button>
                                 )}
                             </div>
-                        </Suspense>
-                    )}
-                </div>
+                        )}
+                    </div>
+                </PageHeader>
+
+                {/* Show CTA when no wallet is connected */}
+                {!address && (
+                    <div className="max-w-4xl mx-auto py-12">
+                        <WalletConnectCTA
+                            title="Connect wallet"
+                            description="Securely access and manage your onchain assets."
+                        />
+                    </div>
+                )}
+
+                {/* Show content when wallet is connected */}
+                {address && (
+                    <Suspense fallback={<AssetsSkeleton />}>
+                        <div className="space-y-8 w-full pb-12">
+                            {loading ? (
+                                <AssetsSkeleton />
+                            ) : error ? (
+                                <Alert variant="destructive">{error}</Alert>
+                            ) : (
+                                <PortfolioAssets
+                                    tokens={filteredTokens}
+                                    loading={loading}
+                                    collections={validCollections}
+                                />
+                            )}
+                        </div>
+                    </Suspense>
+                )}
             </main>
         </div>
     );

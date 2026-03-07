@@ -30,59 +30,57 @@ export default function CollectionsClientPage() {
     return (
         <div className="min-h-screen">
             <main className="">
-                <div className="layout-px">
-                    <PageHeader
-                        title="My Collections"
-                        description="Manage your created collections"
-                    >
-                        <Button variant="ghost" size="icon" asChild>
-                            <Link href="/portfolio">
-                                <ArrowLeft className="h-4 w-4" />
-                            </Link>
-                        </Button>
-                    </PageHeader>
+                <PageHeader
+                    title="My Collections"
+                    description="Manage your created collections"
+                >
+                    <Button variant="ghost" size="icon" asChild>
+                        <Link href="/portfolio">
+                            <ArrowLeft className="h-4 w-4" />
+                        </Link>
+                    </Button>
+                </PageHeader>
 
-                    {/* Show message when no wallet is connected */}
-                    {!address && (
-                        <div className="text-center py-12">
-                            <p className="text-muted-foreground">Please connect your wallet to view your collections</p>
-                        </div>
-                    )}
+                {/* Show message when no wallet is connected */}
+                {!address && (
+                    <div className="text-center py-12">
+                        <p className="text-muted-foreground">Please connect your wallet to view your collections</p>
+                    </div>
+                )}
 
-                    {/* Show content when wallet is connected */}
-                    {address && (
-                        <Suspense fallback={<CollectionsSkeleton />}>
-                            <div className="space-y-8 w-full mt-6 pb-12">
-                                {loading ? (
-                                    <CollectionsSkeleton />
-                                ) : error ? (
-                                    <Alert variant="destructive">{error}</Alert>
-                                ) : (
-                                    <div className="space-y-6">
-                                        {validCollections.length === 0 ? (
-                                            <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
-                                                <div className="bg-muted/30 p-6 rounded-full">
-                                                    <Grid3X3 className="h-10 w-10 text-muted-foreground/50" />
-                                                </div>
-                                                <div className="space-y-2 max-w-md">
-                                                    <h3 className="text-xl font-bold">No collections found</h3>
-                                                    <p className="text-muted-foreground">
-                                                        You don't have any collections yet. Create your first IP collection to start managing your assets.
-                                                    </p>
-                                                </div>
-                                                <Button asChild size="lg" className="mt-4">
-                                                    <Link href="/create/collection">Create Collection</Link>
-                                                </Button>
+                {/* Show content when wallet is connected */}
+                {address && (
+                    <Suspense fallback={<CollectionsSkeleton />}>
+                        <div className="space-y-8 w-full mt-6 pb-12">
+                            {loading ? (
+                                <CollectionsSkeleton />
+                            ) : error ? (
+                                <Alert variant="destructive">{error}</Alert>
+                            ) : (
+                                <div className="space-y-6">
+                                    {validCollections.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
+                                            <div className="bg-muted/30 p-6 rounded-full">
+                                                <Grid3X3 className="h-10 w-10 text-muted-foreground/50" />
                                             </div>
-                                        ) : (
-                                            <CollectionsPortfolioGrid collections={validCollections} />
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </Suspense>
-                    )}
-                </div>
+                                            <div className="space-y-2 max-w-md">
+                                                <h3 className="text-xl font-bold">No collections found</h3>
+                                                <p className="text-muted-foreground">
+                                                    You don't have any collections yet. Create your first IP collection to start managing your assets.
+                                                </p>
+                                            </div>
+                                            <Button asChild size="lg" className="mt-4">
+                                                <Link href="/create/collection">Create Collection</Link>
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <CollectionsPortfolioGrid collections={validCollections} />
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </Suspense>
+                )}
             </main>
         </div>
     );

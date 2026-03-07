@@ -41,7 +41,7 @@ import { isCollectionFeatured } from "@/lib/utils";
 
 type SortOption = "value-high" | "value-low" | "name-asc" | "name-desc" | "size-high" | "size-low"
 
-export function CollectionsPortfolioGrid({ collections }: { collections: Collection[] }) {
+export function CollectionsPortfolioGrid({ collections, notInLayoutPx = false }: { collections: Collection[], notInLayoutPx?: boolean }) {
   const [searchQuery, setSearchQuery] = useState("")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sortOption, setSortOption] = useState<SortOption>("size-high")
@@ -88,7 +88,7 @@ export function CollectionsPortfolioGrid({ collections }: { collections: Collect
   }
 
   return (
-    <div className="space-y-8">
+    <div className={cn("space-y-8", !notInLayoutPx && "layout-px")}>
 
 
 

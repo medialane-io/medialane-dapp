@@ -26,7 +26,7 @@ import { PageHeader } from "@/components/page-header"
 
 export function LaunchpadContent() {
     return (
-        <div className="relative">
+        <div className="relative layout-px">
             <CreatorStatsBar />
 
             {/* Standard Page Header */}
@@ -123,7 +123,7 @@ export function LaunchpadContent() {
                             Quick Actions
                         </h3>
 
-                        <div className="space-y-3">
+                        <div className="space-y-2 layout-px">
                             <QuickActionItem
                                 title="Start from Template"
                                 description="Optimized blueprints for creators."

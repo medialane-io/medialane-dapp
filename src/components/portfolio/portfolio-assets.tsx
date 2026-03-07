@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Box, Sparkles, MoreHorizontal, History, ShieldCheck, Flag, Send, Eye } from "lucide-react";
+import { cn } from "@/lib/utils"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -24,9 +25,10 @@ interface PortfolioAssetsProps {
     tokens: Record<string, TokenData[]>;
     loading: boolean;
     collections?: any[]; // Optional to resolve collection names if needed
+    notInLayoutPx?: boolean;
 }
 
-export function PortfolioAssets({ tokens, loading, collections = [] }: PortfolioAssetsProps) {
+export function PortfolioAssets({ tokens, loading, collections = [], notInLayoutPx = false }: PortfolioAssetsProps) {
     const [visibleCount, setVisibleCount] = useState(12);
 
     // Fetch active marketplace listings to display status/price
@@ -50,7 +52,7 @@ export function PortfolioAssets({ tokens, loading, collections = [] }: Portfolio
 
     if (loading && allAssets.length === 0) {
         return (
-            <div className="space-y-6">
+            <div className={cn("space-y-8", !notInLayoutPx && "layout-px")}>
                 <div className="flex justify-between items-center">
                     <Skeleton className="h-10 w-[300px]" />
                 </div>
@@ -64,7 +66,7 @@ export function PortfolioAssets({ tokens, loading, collections = [] }: Portfolio
     }
 
     return (
-        <div className="space-y-8">
+        <div className={cn("space-y-8", !notInLayoutPx && "layout-px")}>
             {allAssets.length === 0 ? (
                 <EmptyState
                     title="No Assets Found"

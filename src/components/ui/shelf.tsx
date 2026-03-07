@@ -33,7 +33,7 @@ export const Shelf = React.forwardRef<HTMLDivElement, ShelfProps>(
                 )}
                 <div
                     className={cn(
-                        "flex w-[calc(100%+3rem)] sm:w-[calc(100%+5rem)] lg:w-[calc(100%+8rem)] overflow-x-auto snap-x snap-mandatory scroll-smooth pb-8 items-stretch layout-bleed",
+                        "flex w-full overflow-x-auto snap-x snap-mandatory scroll-smooth pb-8 items-stretch",
                         "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                     )}
                 >

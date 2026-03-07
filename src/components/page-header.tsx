@@ -6,6 +6,7 @@ interface PageHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'ti
     title: React.ReactNode
     description?: React.ReactNode
     children?: React.ReactNode
+    notInLayoutPx?: boolean
 }
 
 export function PageHeader({
@@ -13,11 +14,12 @@ export function PageHeader({
     description,
     children,
     className,
+    notInLayoutPx = false,
     ...props
 }: PageHeaderProps) {
     return (
-        <div className={cn("w-full pt-20 md:pt-28 pb-10 md:pb-14", className)} {...props}>
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className={cn("w-full flex flex-col justify-center py-10", className)} {...props}>
+            <div className={cn("flex flex-col md:flex-row md:items-center justify-between gap-8", !notInLayoutPx && "layout-px")}>
                 <div className="flex flex-col space-y-3.5 max-w-4xl">
                     <h1 className="text-4xl leading-[1.1] font-bold tracking-tight text-m3-on-surface">
                         {title}

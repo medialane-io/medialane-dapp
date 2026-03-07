@@ -34,9 +34,9 @@ export function Header() {
 
   return (
     <header
-      className="fixed top-0 z-50 w-full transition-all duration-m3-medium ease-m3-standard bg-transparent border-none"
+      className="fixed top-0 z-50 w-full transition-all duration-m3-medium ease-m3-standard bg-transparent border-none backdrop-blur-xl"
     >
-      <div className="w-full px-6 sm:px-10 lg:px-16 flex items-center justify-between h-16">
+      <div className="layout-px flex items-center justify-between h-16">
 
         {/* Left: Logo */}
         <div className="flex items-center">
@@ -104,7 +104,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="sm"
-            className="hidden sm:flex gap-2 px-3 "
+            className="hidden sm:flex gap-2 px-3 mr-[-8px]"
             onClick={() => document.dispatchEvent(new CustomEvent("openCommandMenu"))}
           >
             <Command className="h-4 w-4" />

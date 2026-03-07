@@ -77,7 +77,7 @@ export function AssetGrid({ sortOrder = "recent" }: AssetGridProps) {
     }
 
     return (
-        <div className="space-y-6 pb-20">
+        <div className="pb-20">
 
 
             <Shelf title="Marketplace Listings">
