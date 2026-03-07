@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Grid3X3, Wallet, BarChart3 } from "lucide-react"
 import { Collection } from "@/lib/types"
 import { TokenData } from "@/hooks/use-portfolio"
+import { cn } from "@/lib/utils"
 
 interface CollectionStatsProps {
   totalCollections: number;
@@ -16,6 +17,7 @@ interface CollectionStatsProps {
   };
   collections?: Collection[]; // Add collections data
   tokens?: Record<string, TokenData[]>;
+  notInLayoutPx?: boolean;
 }
 
 export function CollectionStats({
@@ -24,7 +26,8 @@ export function CollectionStats({
   totalValue,
   topCollection,
   collections = [],
-  tokens = {}
+  tokens = {},
+  notInLayoutPx = false
 }: CollectionStatsProps) {
 
   // Calculate average collection size based on actual collection data
@@ -45,7 +48,7 @@ export function CollectionStats({
   const averageCollectionSize = calculateAverageCollectionSize();
 
   return (
-    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+    <div className={cn("grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4", !notInLayoutPx && "layout-px")}>
       <Card className="bg-card/20">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Collections</CardTitle>

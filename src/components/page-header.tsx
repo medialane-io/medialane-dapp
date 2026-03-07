@@ -16,14 +16,14 @@ export function PageHeader({
     ...props
 }: PageHeaderProps) {
     return (
-        <div className={cn("w-full pt-10 pb-10 px-4 sm:px-6 lg:px-8 xl:px-10", className)} {...props}>
+        <div className={cn("w-full pt-20 md:pt-28 pb-10 md:pb-14", className)} {...props}>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                 <div className="flex flex-col space-y-3.5 max-w-4xl">
                     <h1 className="text-4xl leading-[1.1] font-bold tracking-tight text-m3-on-surface">
                         {title}
                     </h1>
                     {description && (
-                        <p className="text-sm text-muted-foreground greatleading-relaxed max-w-2xl font-medium">
+                        <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl font-medium">
                             {description}
                         </p>
                     )}

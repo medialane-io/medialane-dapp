@@ -12,7 +12,7 @@ export default function PortfolioActivitiesPage() {
 
     if (!address) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4 pt-24 text-center">
+            <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4 pt-24 text-center layout-px">
                 <div className="p-4 rounded-full bg-muted/20 backdrop-blur-sm border border-border/20">
                     <Wallet className="h-10 w-10 text-muted-foreground/80" />
                 </div>
@@ -27,12 +27,12 @@ export default function PortfolioActivitiesPage() {
     }
 
     return (
-        <div className="min-h-screen py-10">
+        <div className="min-h-screen">
             <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px] pointer-events-none fixed" />
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-outrun-cyan/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-outrun-magenta/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
-            <main className="relative py-8">
+            <main className="relative">
                 <PageHeader
                     title="My Activities"
                     description="Track your personal history on the Mediolano Protocol. View your mints, transfers, and remixes."

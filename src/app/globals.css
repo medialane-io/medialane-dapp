@@ -231,8 +231,12 @@
      Unified alignment system to prevent staggered edges.
      ═══════════════════════════════════════════════════════ */
 
+  .layout-px {
+    @apply px-6 sm:px-10 lg:px-16;
+  }
+
   .layout-container {
-    @apply w-full mx-auto;
+    @apply w-full mx-auto layout-px;
   }
 
   /* Allows child carousels to bleed to edge while content aligns to layout-container baseline */

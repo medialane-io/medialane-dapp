@@ -8,14 +8,15 @@ import { cn } from "@/lib/utils"
 export interface ShelfProps extends React.HTMLAttributes<HTMLDivElement> {
     title?: string
     href?: string
+    notInLayoutPx?: boolean
 }
 
 export const Shelf = React.forwardRef<HTMLDivElement, ShelfProps>(
-    ({ title, href, children, className, ...props }, ref) => {
+    ({ title, href, children, className, notInLayoutPx = false, ...props }, ref) => {
         return (
             <div className={cn("relative w-full overflow-hidden mb-8", className)} ref={ref} {...props}>
                 {title && (
-                    <div className="flex justify-between items-center mb-6">
+                    <div className={cn("flex justify-between items-center mb-6", !notInLayoutPx && "layout-px")}>
                         <h2 className="text-xl sm:text-2xl font-medium tracking-tight text-m3-on-surface">
                             {title}
                         </h2>
@@ -32,11 +33,11 @@ export const Shelf = React.forwardRef<HTMLDivElement, ShelfProps>(
                 )}
                 <div
                     className={cn(
-                        "flex w-[calc(100%+2rem)] sm:w-[calc(100%+3rem)] lg:w-[calc(100%+4rem)] xl:w-[calc(100%+5rem)] overflow-x-auto snap-x snap-mandatory scroll-smooth pb-8 items-stretch layout-bleed",
+                        "flex w-[calc(100%+3rem)] sm:w-[calc(100%+5rem)] lg:w-[calc(100%+8rem)] overflow-x-auto snap-x snap-mandatory scroll-smooth pb-8 items-stretch layout-bleed",
                         "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                     )}
                 >
-                    <div className="snap-start shrink-0 w-4 sm:w-6 lg:w-8 xl:w-10" />
+                    <div className="snap-start shrink-0 w-6 sm:w-10 lg:w-16" />
                     {React.Children.map(children, (child, index) => (
                         <div className={cn(
                             "snap-start shrink-0 w-[85vw] sm:w-[320px] md:w-[350px]",
@@ -45,7 +46,7 @@ export const Shelf = React.forwardRef<HTMLDivElement, ShelfProps>(
                             {child}
                         </div>
                     ))}
-                    <div className="snap-start shrink-0 w-4 sm:w-6 lg:w-8 xl:w-10" />
+                    <div className="snap-start shrink-0 w-6 sm:w-10 lg:w-16" />
                 </div>
 
                 {/* Right edge fade for affordance */}

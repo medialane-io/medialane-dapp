@@ -45,8 +45,7 @@ export const navigation = {
     ],
     launchpad: [
         { title: "Creator Launchpad", href: "/launchpad", icon: Rocket, description: "Creator tools dashboard" },
-        { title: "Create Panel", href: "/create", icon: Rocket, description: "Creator studio" },
-        { title: "Collection Drop", href: "/launchpad/collection-drop", icon: Layers, description: "Deploy a collection drop" },
+        { title: "Creator Studio", href: "/create", icon: Rocket, description: "Creator studio" },
         { title: "Standard Collection", href: "/create/collection", icon: PlusCircle, description: "Start from scratch" },
         { title: "Mint Asset", href: "/create/asset", icon: Box, description: "Mint single asset" },
         { title: "Create with IP Templates", href: "/create/templates", icon: LayoutTemplate, description: "Use legal templates" },
@@ -76,25 +75,18 @@ export const navigation = {
     resources: [
         { title: "Documentation", href: "/docs", icon: FileText, description: "Technical guides & API refs" },
         { title: "User Guide", href: "/docs/user-guide", icon: Code, description: "User guide" },
-        { title: "IP Protection", href: "/docs/ip-protection", icon: Code, description: "Global conventions for IP protection" },
-        { title: "Mediolano Protocol", href: "/docs/mediolano-protocol", icon: Code, description: "Protocol" },
-        { title: "Programmable Licensing", href: "/docs/programmable-licensing", icon: Code, description: "Programmable licensing" },
         { title: "Permissionless Setup", href: "/docs/permissionless-setup", icon: Code, description: "Permissionless setup" },
         { title: "Community Guidelines", href: "/docs/community-guidelines", icon: Shield, description: "Community rules and conduct code" },
         { title: "Compliance Guidelines", href: "/docs/compliance-guidelines", icon: Code, description: "Compliance orientation" },
         { title: "Dapp Guidelines", href: "/docs/dapp-guidelines", icon: Code, description: "Know our dapp guidelines" },
-        { title: "Developers", href: "/docs/developers", icon: Code, description: "SDKs and tools" },
-        { title: "Security", href: "/docs/security", icon: Code, description: "Security" },
-        { title: "MediaLane DAO", href: "/docs/medialane-dao", icon: Code, description: "Decentralized autonomous organization" },
-        { title: "DAO Constitution", href: "/docs/dao-constitution", icon: Code, description: "Decentralized autonomous organization constitution" },
-        { title: "Governance Charter", href: "/docs/governance-charter", icon: Code, description: "Our governance guidelines" },
+        { title: "Developers", href: "https://medialane.xyz", icon: Code, description: "SDKs and tools" },
         { title: "Privacy Policy", href: "/docs/privacy-policy", icon: Code, description: "Privacy policy" },
         { title: "Terms of Use", href: "/docs/terms-of-use", icon: Code, description: "Terms of use" },
     ],
     socials: [
         { title: "X (Twitter)", href: "https://x.com/medialane_io", icon: Twitter },
-        { title: "GitHub", href: "https://github.com/mediolano-xyz", icon: Github },
+        { title: "GitHub", href: "https://github.com/medialane-io", icon: Github },
         { title: "Telegram", href: "https://t.me/integrityweb", icon: Send },
-        { title: "Email", href: "mailto:medialanexyz@gmail.com", icon: Mail },
+        { title: "Email", href: "mailto:dao@medialane.org", icon: Mail },
     ]
 }
