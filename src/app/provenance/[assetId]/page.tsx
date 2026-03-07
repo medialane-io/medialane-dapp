@@ -203,7 +203,7 @@ export default function ProvenancePage({ params }: ProvenancePageProps) {
 
   if (isLoading) {
     return (
-      <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto py-10 min-h-screen">
+      <main className="w-full px-6 sm:px-10 lg:px-16 mx-auto py-10 min-h-screen">
         <PageHeader
           title="Provenance"
           description="Track the complete history of ownership and events for this asset onchain."
@@ -341,7 +341,7 @@ export default function ProvenancePage({ params }: ProvenancePageProps) {
 
   return (
     <AssetErrorBoundary onRetry={reload}>
-      <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto py-10">
+      <main className="w-full px-6 sm:px-10 lg:px-16 mx-auto py-10">
         <PageHeader
           title="Provenance"
           description="Track the complete history of ownership and events for this asset onchain."

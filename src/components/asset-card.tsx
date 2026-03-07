@@ -185,7 +185,7 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0 gap-2 grid grid-cols-[1fr,1fr,auto]">
+      <CardFooter className="p-4 pt-0 gap-2 grid grid-cols-[1fr,auto]">
         {listing ? (
           isOwn ? (
             <Link href={assetUrl} className="w-full">
@@ -220,16 +220,6 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
           </Link>
         )}
 
-        <Link href={`/create/remix/${offerToken}-${offerIdentifier}`} className="w-full">
-          <Button
-            variant="tonal"
-            className="w-full h-9 gap-1.5 px-2 font-medium active:scale-[0.98] transition-transform"
-          >
-            <RefreshCw className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">Remix</span>
-          </Button>
-        </Link>
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-9 w-10 text-m3-on-surface-variant shrink-0 rounded-m3-md p-0">
@@ -243,13 +233,6 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
                 <Eye className="mr-3 h-4 w-4 opacity-60" /> View Details
               </DropdownMenuItem>
             </Link>
-            {!listing && (
-              <Link href={`/create/remix/${offerToken}-${offerIdentifier}`}>
-                <DropdownMenuItem className="focus:bg-m3-on-surface/8 cursor-pointer py-2.5 rounded-m3-sm">
-                  <RefreshCw className="mr-3 h-4 w-4 opacity-60" /> Remix Asset
-                </DropdownMenuItem>
-              </Link>
-            )}
             <Link href={`/proof-of-ownership/${offerToken}-${offerIdentifier}`}>
               <DropdownMenuItem className="focus:bg-m3-on-surface/8 cursor-pointer py-2.5 rounded-m3-sm">
                 <Shield className="mr-3 h-4 w-4 opacity-60" /> Proof of Ownership

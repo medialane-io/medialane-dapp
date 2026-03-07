@@ -74,7 +74,7 @@ export default function AssetsPage() {
 
     return (
         <div className="min-h-screen py-6 md:py-10">
-            <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto py-4">
+            <main className="w-full px-6 sm:px-10 lg:px-16 mx-auto py-4">
 
                 <PageHeader
                     title="Explore Onchain IP Assets"

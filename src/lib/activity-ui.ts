@@ -6,7 +6,6 @@ import { SUPPORTED_TOKENS } from "@/lib/constants"
 export const ACTIVITY_LABELS: Record<string, string> = {
   mint: "Minted",
   transfer: "Transferred",
-  remix: "Remixed",
   collection: "Created Collection",
   listing: "Listed",
   offer: "Offered",
@@ -20,8 +19,6 @@ export function getActivityIcon(type: string): LucideIcon {
       return Plus
     case "transfer":
       return Send
-    case "remix":
-      return GitBranch
     case "collection":
       return Plus
     case "listing":
@@ -48,11 +45,6 @@ export function getActivityColor(type: string): { badge: string; icon: string } 
       return {
         badge: "bg-outrun-magenta/10 text-outrun-magenta border-outrun-magenta/20 hover:bg-outrun-magenta/20",
         icon: "text-outrun-magenta",
-      }
-    case "remix":
-      return {
-        badge: "bg-outrun-orange/10 text-outrun-orange border-outrun-orange/20 hover:bg-outrun-orange/20",
-        icon: "text-outrun-orange",
       }
     case "collection":
       return {

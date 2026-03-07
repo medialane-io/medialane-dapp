@@ -50,7 +50,6 @@ export const navigation = {
         { title: "Standard Collection", href: "/create/collection", icon: PlusCircle, description: "Start from scratch" },
         { title: "Mint Asset", href: "/create/asset", icon: Box, description: "Mint single asset" },
         { title: "Create with IP Templates", href: "/create/templates", icon: LayoutTemplate, description: "Use legal templates" },
-        { title: "Create Remix", href: "/create/remix", icon: Sparkles, description: "Remix existing IP" },
     ],
     portfolio: [
         { title: "Onchain Dashboard", href: "/portfolio", icon: Box, description: "Your portfolio dashboard" },
@@ -73,7 +72,6 @@ export const navigation = {
         { title: "IP Asset", href: "/create/asset", icon: Box, description: "Mint single asset" },
         { title: "Create NFT", href: "/create/templates/nft", icon: Box, description: "Create NFT" },
         { title: "IP Templates", href: "/create/templates", icon: LayoutTemplate, description: "Use legal templates" },
-        { title: "Create Remix", href: "/create/remix", icon: Sparkles, description: "Remix existing IP" },
     ],
     resources: [
         { title: "Documentation", href: "/docs", icon: FileText, description: "Technical guides & API refs" },

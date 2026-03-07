@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export function constructMetadata({
     title = "Medialane | IP Innovation Protocol",
-    description = "Create, Trade, Remix, and Monetize on the Integrity Web. The premier decentralized protocol for programmable intellectual property.",
+    description = "Create, Trade, and Monetize on the Integrity Web. The premier decentralized protocol for programmable intellectual property.",
     image = "/og-image.jpg",
     icons = "/favicon.ico",
     noIndex = false,

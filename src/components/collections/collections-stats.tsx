@@ -3,7 +3,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Grid3X3, Wallet, BarChart3 } from "lucide-react"
 import { Collection } from "@/lib/types"
-import { RemixStatsWidget } from "@/components/remix/remix-stats-widget"
 import { TokenData } from "@/hooks/use-portfolio"
 
 interface CollectionStatsProps {
@@ -69,7 +68,6 @@ export function CollectionStats({
         </CardContent>
       </Card>
 
-      <RemixStatsWidget tokens={tokens} />
 
       <Card className="bg-card/20">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

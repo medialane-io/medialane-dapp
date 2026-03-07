@@ -338,21 +338,6 @@ export function MarketplaceActions({
                 </p>
             )}
 
-            {/* ── Remix panel ──────────────────────────────────────────── */}
-            <Link href={`/create/remix/${slug}`} className="block">
-                <div className="p-5 rounded-2xl glass-panel hover:border-outrun-magenta/50 hover:shadow-glow-sm hover:shadow-neon-magenta/10 transition-all flex items-center justify-between group cursor-pointer">
-                    <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-outrun-magenta/10 flex items-center justify-center group-hover:bg-outrun-magenta/20 transition-colors">
-                            <RefreshCw className="h-5 w-5 text-outrun-magenta" />
-                        </div>
-                        <div>
-                            <p className="font-bold text-foreground group-hover:text-outrun-magenta transition-colors">Create a Remix</p>
-                            <p className="text-xs text-muted-foreground font-medium">Custom licensing & pricing</p>
-                        </div>
-                    </div>
-                    <Sparkles className="h-5 w-5 text-muted-foreground group-hover:text-outrun-magenta transition-colors" />
-                </div>
-            </Link>
         </div>
     )
 }

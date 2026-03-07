@@ -62,7 +62,6 @@ export function ActivityFilters({
                         <SelectItem value="all">All Types</SelectItem>
                         <SelectItem value="mint">Mint</SelectItem>
                         <SelectItem value="transfer">Transfer</SelectItem>
-                        <SelectItem value="remix">Remix</SelectItem>
                         <SelectItem value="collection">Collection</SelectItem>
                         <SelectItem value="listing">Listing</SelectItem>
                         <SelectItem value="offer">Offer</SelectItem>

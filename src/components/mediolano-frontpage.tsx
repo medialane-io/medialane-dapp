@@ -60,7 +60,7 @@ export function MediolanoFrontpage() {
     {
       icon: ShoppingBag,
       title: "NFT Marketplace",
-      description: "Trade, license, and remix tokenized assets with 1% fee.",
+      description: "Trade and license tokenized assets with 1% fee.",
     },
     {
       icon: Shield,
@@ -128,7 +128,7 @@ export function MediolanoFrontpage() {
             <ShoppingBag className="relative w-10 h-10 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
             <h3 className="relative text-xl font-semibold mb-2">NFT Marketplace</h3>
             <p className="relative text-muted-foreground mb-4 leading-relaxed">
-              Trade, license, and remix tokenized creator assets
+              Trade and license tokenized creator assets
             </p>
             <div className="relative flex items-center text-primary font-medium">
               Browse Marketplace <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -136,19 +136,6 @@ export function MediolanoFrontpage() {
           </div>
         </Link>
 
-        <Link href="/create/remix" className="group">
-          <div className="relative overflow-hidden p-8 rounded-2xl border bg-card/20 hover:bg-card/40 hover:shadow-sm transition-all duration-300 h-full">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
-            <GitBranch className="relative w-10 h-10 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
-            <h3 className="relative text-xl font-semibold mb-2">Remix & Collaborate</h3>
-            <p className="relative text-muted-foreground mb-4 leading-relaxed">
-              Build upon existing IP with proper attribution
-            </p>
-            <div className="relative flex items-center text-primary font-medium">
-              Explore <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-        </Link>
 
       </section>
 

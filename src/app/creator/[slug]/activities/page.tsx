@@ -8,7 +8,7 @@ export default function CreatorActivitiesPage() {
     const section = useActivitySection(walletAddress, 12)
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto py-8 space-y-8">
+        <div className="w-full px-6 sm:px-10 lg:px-16 mx-auto py-8 space-y-8">
             <ActivityFeedSection
                 {...section}
                 showRefresh

@@ -89,7 +89,19 @@ export default function CollectionDetails({ collectionAddress }: CollectionDetai
     }, [collectionAssets]);
 
     // Load active marketplace listings
-    const { listings } = useMarketplaceListings();
+    const { listings, allOrders } = useMarketplaceListings();
+
+    const listedCount = useMemo(() => {
+        if (!listings || !collection?.nftAddress) return 0;
+        const normalizedAddr = collection.nftAddress.toLowerCase();
+        return listings.filter(l => l.offerToken.toLowerCase() === normalizedAddr).length;
+    }, [listings, collection?.nftAddress]);
+
+    const collectionVolume = useMemo(() => {
+        if (!allOrders || !collection?.nftAddress) return 0;
+        const normalizedAddr = collection.nftAddress.toLowerCase();
+        return allOrders.filter(o => o.status === "fulfilled" && o.offerToken.toLowerCase() === normalizedAddr).length;
+    }, [allOrders, collection?.nftAddress]);
 
     // Derive collection floor directly
     const floorInfo = useCollectionFloor(collection?.nftAddress);
@@ -181,7 +193,7 @@ export default function CollectionDetails({ collectionAddress }: CollectionDetai
                     <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 via-transparent to-background/90 backdrop-blur-[2px]" />
                 </div>
 
-                <div className="relative z-10 w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto">
+                <div className="relative z-10 w-full px-6 sm:px-10 lg:px-16 mx-auto">
                     {collection && isCollectionReported(collection.nftAddress) && (
                         <Alert
                             variant="destructive"
@@ -291,18 +303,6 @@ export default function CollectionDetails({ collectionAddress }: CollectionDetai
                                     <div className="grid grid-cols-2 gap-3 lg:gap-4 mt-6">
                                         <div className="glass-panel p-4 lg:p-5 border-border/50 shadow-glow-sm shadow-outrun-purple/10 rounded-2xl">
                                             <div className="flex flex-col">
-                                                <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Total Assets</p>
-                                                <p className="text-2xl lg:text-3xl font-black text-foreground">{collection.itemCount || 0}</p>
-                                            </div>
-                                        </div>
-                                        <div className="glass-panel p-4 lg:p-5 border-border/50 shadow-glow-sm shadow-outrun-purple/10 rounded-2xl">
-                                            <div className="flex flex-col">
-                                                <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Total Minted</p>
-                                                <p className="text-2xl lg:text-3xl font-black text-foreground">{collection.totalMinted || 0}</p>
-                                            </div>
-                                        </div>
-                                        <div className="glass-panel p-4 lg:p-5 border-border/50 shadow-glow-sm shadow-outrun-purple/10 rounded-2xl">
-                                            <div className="flex flex-col">
                                                 <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Floor Price</p>
                                                 <p className="text-2xl lg:text-3xl font-black text-foreground">
                                                     {floorInfo ? `${floorInfo.formattedPrice} ${floorInfo.symbol}` : '--'}
@@ -311,8 +311,20 @@ export default function CollectionDetails({ collectionAddress }: CollectionDetai
                                         </div>
                                         <div className="glass-panel p-4 lg:p-5 border-border/50 shadow-glow-sm shadow-outrun-purple/10 rounded-2xl">
                                             <div className="flex flex-col">
+                                                <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Listed</p>
+                                                <p className="text-2xl lg:text-3xl font-black text-foreground">{listedCount}</p>
+                                            </div>
+                                        </div>
+                                        <div className="glass-panel p-4 lg:p-5 border-border/50 shadow-glow-sm shadow-outrun-purple/10 rounded-2xl">
+                                            <div className="flex flex-col">
                                                 <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Owners</p>
                                                 <p className="text-2xl lg:text-3xl font-black text-foreground">{uniqueOwnersCount}</p>
+                                            </div>
+                                        </div>
+                                        <div className="glass-panel p-4 lg:p-5 border-border/50 shadow-glow-sm shadow-outrun-purple/10 rounded-2xl">
+                                            <div className="flex flex-col">
+                                                <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Volume</p>
+                                                <p className="text-2xl lg:text-3xl font-black text-foreground">{collectionVolume}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -361,7 +373,7 @@ export default function CollectionDetails({ collectionAddress }: CollectionDetai
                 </div>
             </div>
 
-            <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto py-8">
+            <main className="w-full px-6 sm:px-10 lg:px-16 mx-auto py-8">
                 {/* Assets Section */}
                 <div className="space-y-6">
                     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -432,7 +444,7 @@ function CollectionPageSkeleton() {
         <div className="min-h-screen bg-background">
             {/* Hero Skeleton - Matches new design */}
             <div className="relative overflow-hidden -mt-[88px] pt-[150px] pb-24 min-h-[500px] flex flex-col justify-center">
-                <div className="relative z-10 w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto">
+                <div className="relative z-10 w-full px-6 sm:px-10 lg:px-16 mx-auto">
                     <div className="flex flex-col gap-10">
                         {/* Top Section: Avatar + Info */}
                         <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 lg:gap-12">
@@ -468,7 +480,7 @@ function CollectionPageSkeleton() {
                 </div>
             </div>
 
-            <main className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto py-8">
+            <main className="w-full px-6 sm:px-10 lg:px-16 mx-auto py-8">
                 <div className="space-y-6">
                     <div className="flex justify-between items-center">
                         <div className="space-y-2">

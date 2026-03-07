@@ -10,12 +10,14 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ShoppingBag, Loader2, AlertTriangle } from "lucide-react";
+import { ShoppingBag, Loader2, AlertTriangle, Layers } from "lucide-react";
 import { CartItemRow } from "@/components/cart-item-row";
 import { isOwnListing } from "@/lib/ownership";
+import { useRouter } from "next/navigation";
 
 export function CartDrawer() {
     const { items, isOpen, setIsOpen, removeItem, clearCart } = useCart();
+    const router = useRouter();
     const { address } = useAccount();
     const totals = useCartTotals();
     const { checkout, isProcessing } = useCheckout();
@@ -32,12 +34,12 @@ export function CartDrawer() {
 
     return (
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetContent className="w-full sm:max-w-md flex flex-col glass-heavy text-foreground p-0">
-                <SheetHeader className="p-6 border-b border-foreground/10">
+            <SheetContent className="w-full sm:max-w-md flex flex-col glass-heavy p-0 border-l border-m3-outline-variant/50">
+                <SheetHeader className="p-6 border-b border-m3-outline-variant/30">
                     <div className="flex items-center justify-between">
                         <SheetTitle className="flex items-center gap-2 text-xl">
                             <ShoppingBag className="w-5 h-5 text-outrun-cyan" />
-                            Your Cart
+                            Your bag
                             <span className="text-sm font-normal text-muted-foreground ml-2">
                                 ({displayItems.length} items)
                             </span>
@@ -48,14 +50,14 @@ export function CartDrawer() {
                 <div className="flex-1 overflow-hidden">
                     {displayItems.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-4">
-                            <ShoppingBag className="w-12 h-12 opacity-20" />
-                            <p>Your cart is empty</p>
+                            <Layers className="w-12 h-12 opacity-20" />
+                            <p>Nothing to see here for now!</p>
                             <Button
                                 variant="outline"
-                                onClick={() => setIsOpen(false)}
+                                onClick={() => router.push("/marketplace")}
                                 className="mt-4"
                             >
-                                Continue Shopping
+                                Explore markets
                             </Button>
                         </div>
                     ) : (
@@ -80,7 +82,7 @@ export function CartDrawer() {
                 </div>
 
                 {displayItems.length > 0 && (
-                    <div className="p-6 border-t border-border/40 bg-card mt-auto space-y-4">
+                    <div className="p-6 border-t border-m3-outline-variant/30 bg-m3-surface-container-low mt-auto space-y-4">
                         <div className="space-y-2">
                             <div className="flex justify-between items-center text-sm font-medium text-muted-foreground mb-1">
                                 <span>Total</span>

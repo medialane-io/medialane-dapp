@@ -41,7 +41,7 @@ export function Header() {
           : "bg-transparent border-b border-transparent"
       )}
     >
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 flex items-center justify-between h-16">
+      <div className="w-full px-6 sm:px-10 lg:px-16 flex items-center justify-between h-16">
 
         {/* Left: Logo */}
         <div className="flex items-center">

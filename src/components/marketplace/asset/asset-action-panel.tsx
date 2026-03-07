@@ -69,12 +69,6 @@ export function AssetActionPanel({
                     </Button>
                 )}
 
-                <Link href={`/create/remix/${slug}`} className="block">
-                    <Button variant="ghost" className={`w-full ${actionButtonClass}`}>
-                        <Palette className="mr-2.5 h-4 w-4 text-outrun-magenta" />
-                        Remix Studio
-                    </Button>
-                </Link>
 
                 <Link href={`/provenance/${slug}`} className="block">
                     <Button variant="ghost" className={`w-full ${actionButtonClass}`}>

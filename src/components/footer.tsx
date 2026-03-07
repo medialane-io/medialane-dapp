@@ -24,7 +24,7 @@ export function Footer() {
       role="contentinfo"
       aria-label="Medialane Footer"
     >
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20 py-16">
+      <div className="mx-auto w-full px-6 sm:px-10 lg:px-16 py-16">
 
         {/* Core Footer Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
@@ -33,7 +33,7 @@ export function Footer() {
           <div className="flex flex-col gap-6">
             <Logo />
             <p className="text-sm font-medium text-m3-on-surface-variant leading-relaxed max-w-[280px]">
-              The premier decentralized protocol for programmable intellectual property. Create, trade, remix, and monetize on the Integrity Web.
+              The premier decentralized protocol for programmable intellectual property. Create, trade, and monetize on the Integrity Web.
             </p>
             <div className="flex items-center gap-2 mt-2">
               <Link

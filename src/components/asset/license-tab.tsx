@@ -73,7 +73,7 @@ export function LicenseTab({ asset }: LicenseTabProps) {
                 <span className="font-semibold block mb-0.5">Derivatives</span>
                 <span className="text-sm text-muted-foreground">
                   {asset.licenseInfo.allowDerivatives
-                    ? "You can remix and adapt this work."
+                    ? "You can adapt this work."
                     : "Modifications are not permitted."}
                 </span>
               </div>

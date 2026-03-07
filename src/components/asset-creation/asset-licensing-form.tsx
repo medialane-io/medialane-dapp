@@ -165,9 +165,8 @@ export function AssetLicensingForm({ formState, updateFormField }: AssetLicensin
                   </div>
                   <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/30">
                     <div
-                      className={`h-3 w-3 rounded-full ${
-                        formState.licenseTerms?.includes("NC") ? "bg-red-500" : "bg-green-500"
-                      }`}
+                      className={`h-3 w-3 rounded-full ${formState.licenseTerms?.includes("NC") ? "bg-red-500" : "bg-green-500"
+                        }`}
                     ></div>
                     <span className="text-sm font-medium">
                       Commercial Use {formState.licenseTerms?.includes("NC") ? "Prohibited" : "Allowed"}
@@ -175,9 +174,8 @@ export function AssetLicensingForm({ formState, updateFormField }: AssetLicensin
                   </div>
                   <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/30">
                     <div
-                      className={`h-3 w-3 rounded-full ${
-                        formState.licenseTerms?.includes("ND") ? "bg-red-500" : "bg-green-500"
-                      }`}
+                      className={`h-3 w-3 rounded-full ${formState.licenseTerms?.includes("ND") ? "bg-red-500" : "bg-green-500"
+                        }`}
                     ></div>
                     <span className="text-sm font-medium">
                       Derivatives {formState.licenseTerms?.includes("ND") ? "Prohibited" : "Allowed"}
@@ -185,9 +183,8 @@ export function AssetLicensingForm({ formState, updateFormField }: AssetLicensin
                   </div>
                   <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/30">
                     <div
-                      className={`h-3 w-3 rounded-full ${
-                        formState.licenseTerms?.includes("SA") ? "bg-blue-500" : "bg-gray-500"
-                      }`}
+                      className={`h-3 w-3 rounded-full ${formState.licenseTerms?.includes("SA") ? "bg-blue-500" : "bg-gray-500"
+                        }`}
                     ></div>
                     <span className="text-sm font-medium">
                       Share-Alike {formState.licenseTerms?.includes("SA") ? "Required" : "Not Required"}
@@ -232,7 +229,7 @@ export function AssetLicensingForm({ formState, updateFormField }: AssetLicensin
                   Allow Derivative Works
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  Allow others to remix, transform, or build upon your work
+                  Allow others to transform or build upon your work
                 </p>
               </div>
               <Switch
@@ -356,15 +353,14 @@ export function AssetLicensingForm({ formState, updateFormField }: AssetLicensin
                   <p className="text-sm text-muted-foreground">
                     {formState.licenseDuration === "perpetual"
                       ? "License will not expire"
-                      : `License will expire after ${
-                          formState.licenseDuration === "30days"
-                            ? "30 days"
-                            : formState.licenseDuration === "6months"
-                              ? "6 months"
-                              : formState.licenseDuration === "1year"
-                                ? "1 year"
-                                : "5 years"
-                        }`}
+                      : `License will expire after ${formState.licenseDuration === "30days"
+                        ? "30 days"
+                        : formState.licenseDuration === "6months"
+                          ? "6 months"
+                          : formState.licenseDuration === "1year"
+                            ? "1 year"
+                            : "5 years"
+                      }`}
                   </p>
                 </div>
               </div>

@@ -195,18 +195,6 @@ export async function buildActivities(
                             assetName = metadata.name || assetName;
                             assetImage = processIPFSHashToUrl(metadata.image || "/placeholder.svg", "/placeholder.svg");
 
-                            const isRemix =
-                                metadata.templateType === "Remix Art" ||
-                                metadata.template_type === "Remix Art" ||
-                                (metadata.attributes && Array.isArray(metadata.attributes) &&
-                                    metadata.attributes.some((attr: { trait_type: string; value: string }) =>
-                                        attr.trait_type === "Type" && attr.value === "Remix"
-                                    ));
-
-                            if (isRemix) {
-                                activityType = "remix";
-                                details = "Remixed an asset";
-                            }
                         }
                     }
                 } catch {

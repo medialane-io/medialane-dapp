@@ -50,7 +50,7 @@ export default function CreatorAssetsPage() {
     const hasAssets = Object.values(standardTokensMap).flat().length > 0
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 mx-auto py-8">
+        <div className="w-full px-6 sm:px-10 lg:px-16 mx-auto py-8">
             {/*  Search Bar */}
             <div className="mb-6 flex items-center gap-3">
                 <div className="relative max-w-md flex-1">

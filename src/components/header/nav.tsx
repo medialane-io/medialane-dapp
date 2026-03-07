@@ -190,12 +190,6 @@ export function MainNav() {
                 title="Transfer"
                 description="Transfer assets"
               />
-              <NavLink
-                href="/create/remix"
-                icon={IterationCcw}
-                title="Remix"
-                description="Remix existing IP"
-              />
             </div>
           </NavigationMenuContent>
         </NavigationMenuItem>

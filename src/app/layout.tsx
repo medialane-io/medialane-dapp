@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://dapp.medialane.io'),
   ...constructMetadata({
     title: "Medialane",
-    description: "Create, Trade, Remix, and Monetize your Creative Works.",
+    description: "Create, Trade, and Monetize your Creative Works.",
   }),
   applicationName: "Medialane Dapp",
   authors: [{ name: "Medialane Protocol" }],
@@ -48,7 +48,7 @@ export default function RootLayout({
     name: 'Medialane Protocol',
     url: 'https://dapp.medialane.io',
     logo: 'https://dapp.medialane.io/favicon.ico',
-    description: "Create, Trade, Remix, and Monetize on the Integrity Web.",
+    description: "Create, Trade, and Monetize on the Integrity Web.",
     sameAs: [
       'https://twitter.com/medialane',
     ]

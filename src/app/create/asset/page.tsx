@@ -334,7 +334,7 @@ export default function CreateAssetPage() {
             description="Mint unique assets and build your intellectual property portfolio."
           />
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 mt-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="w-full px-6 sm:px-10 lg:px-16 mt-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Main Content */}
             <div className="lg:col-span-3 space-y-8">
 

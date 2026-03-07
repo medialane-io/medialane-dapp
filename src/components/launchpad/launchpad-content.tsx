@@ -32,7 +32,7 @@ export function LaunchpadContent() {
             {/* Standard Page Header */}
             <PageHeader
                 title="Creator Launchpad"
-                description="Your refined terminal for intellectual property. Launch, remix, and own every asset with professional grade tools."
+                description="Your refined terminal for intellectual property. Launch and own every asset with professional grade tools."
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mt-6">
@@ -129,13 +129,6 @@ export function LaunchpadContent() {
                                 description="Optimized blueprints for creators."
                                 icon={Grid3X3}
                                 href="/create/templates"
-                            />
-                            <QuickActionItem
-                                title="Remix Existing IP"
-                                description="Derivative works with split routing."
-                                icon={RefreshCw}
-                                href="/create/asset"
-                                highlight
                             />
                         </div>
 

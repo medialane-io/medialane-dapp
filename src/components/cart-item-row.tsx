@@ -18,7 +18,7 @@ export function CartItemRow({ item, onRemove }: CartItemRowProps) {
     const price = formatPrice(item.listing.considerationAmount, currency.decimals);
 
     return (
-        <div className="flex items-start gap-4 p-3 rounded-lg border border-border/50 bg-muted/20">
+        <div className="flex items-start gap-4 p-3 rounded-lg border border-m3-outline-variant/30 bg-m3-surface-variant/10">
             <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted flex-shrink-0">
                 <Image
                     src={image}

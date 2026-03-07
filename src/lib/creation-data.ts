@@ -37,16 +37,6 @@ export const creationOptions: CinematicOption[] = [
         tags: ["Organization", "Contract", "Branding"],
     },
     {
-        id: "remix",
-        title: "Remix Existing Work",
-        description: "Create value from existing IP. Legal, onchain remixing that respects the original creator's terms while creating a new asset for you.",
-        icon: RefreshCw,
-        href: "/create/remix",
-        gradient: "from-purple-600 to-pink-600",
-        tags: ["Derivative", "Remix", "Collab"],
-        trending: true,
-    },
-    {
         id: "templates",
         title: "Use IP Templates",
         description: "Start fast with pre-configured templates for Music, Art, Video, and Code. Optimized metadata structures for your specific medium.",

@@ -31,7 +31,7 @@ const DefaultHero = () => (
                             Loading collections...
                         </h2>
                         <p className="text-lg md:text-xl text-m3-on-surface-variant mb-10 leading-relaxed max-w-2xl mx-auto">
-                            Create, share, and remix with permissionless ownership.
+                            Create and share with permissionless ownership.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Button
