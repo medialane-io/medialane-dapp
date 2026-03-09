@@ -3,10 +3,12 @@ import {
   useAccount,
   useContract,
   useSendTransaction,
+  useProvider,
 } from "@starknet-react/core";
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
-import { Abi } from "starknet";
+import { Abi, ProviderInterface, Contract, shortString } from "starknet";
 import { ipCollectionAbi } from "@/abis/ip_collection";
+import { COLLECTION_NFT_ABI } from "@/abis/ip_nft";
 import { COLLECTION_CONTRACT_ADDRESS, IPFS_URL } from "@/lib/constants";
 import { fetchWithRateLimit } from "@/lib/utils";
 import { isCollectionReported } from "@/lib/reported-content";
@@ -54,6 +56,37 @@ export interface UseCollectionReturn {
 }
 
 const COLLECTION_CONTRACT_ABI = ipCollectionAbi as Abi;
+
+// Helper to decode Cairo 1 ByteArray from raw felt array
+function decodeByteArray(data: string[]): string {
+    if (!data || data.length < 1) return "";
+    try {
+        const numWords = parseInt(data[0]);
+        let str = "";
+
+        // Words are 31 bytes each
+        for (let i = 0; i < numWords; i++) {
+            const word = data[i + 1];
+            if (word) {
+                str += shortString.decodeShortString(word);
+            }
+        }
+
+        // Pending word
+        if (data.length >= numWords + 3) {
+            const pendingWord = data[numWords + 1];
+            const pendingLen = parseInt(data[numWords + 2]);
+            if (pendingLen > 0 && pendingWord) {
+                const decoded = shortString.decodeShortString(pendingWord);
+                str += decoded.substring(0, pendingLen);
+            }
+        }
+
+        return str.replace(/\0/g, "").trim();
+    } catch (e) {
+        return "";
+    }
+}
 
 // Shared hook to get the collection registry contract instance
 function useCollectionContract() {
@@ -123,7 +156,8 @@ async function findMaxCollectionId(contract: any): Promise<number> {
 // function to process collection metadata with validation
 async function processCollectionMetadata(
   id: string,
-  metadata: CollectionMetadata
+  metadata: CollectionMetadata,
+  provider?: ProviderInterface
 ): Promise<Collection> {
   let baseUri = metadata.base_uri;
   let nftAddress = metadata.ip_nft;
@@ -177,7 +211,7 @@ async function processCollectionMetadata(
   // Use total_minted for total supply 
   const totalSupply = parseInt(metadata.total_minted) || 0;
 
-  // Process image with priority: IPFS metadata > valid IPFS URL > placeholder
+  // Process image with priority: IPFS metadata > valid IPFS URL > fallback to token > placeholder
   let image = '/placeholder.svg';
   if (ipfsMetadata?.coverImage) {
     image = processIPFSHashToUrl(ipfsMetadata.coverImage as string, '/placeholder.svg');
@@ -185,6 +219,43 @@ async function processCollectionMetadata(
     image = processIPFSHashToUrl(ipfsMetadata.image as string, '/placeholder.svg');
   } else if (isValidIPFS && baseUri) {
     image = baseUri;
+  }
+
+  // FALLBACK: If image is still placeholder but tokens have been minted, try to get image from first token
+  if (image === '/placeholder.svg' && totalSupply > 0 && nftAddress && provider) {
+    try {
+      const nftContract = new Contract({ abi: COLLECTION_NFT_ABI as Abi, address: nftAddress, providerOrAccount: provider });
+      
+      // We try to get token_uri for token #1 (common first token ID)
+      // or try to get token_by_index(0) if it's Enumerable.
+      // Based on my research, token ID 1 or token_by_index(0) are good bets.
+      let tokenUriBA;
+      try {
+          // Try token_uri(1) first as it's most common
+          tokenUriBA = await nftContract.call("token_uri", ["1", "0"]);
+      } catch (e) {
+          try {
+              // Try token_by_index(0) then token_uri
+              const tokenId: any = await nftContract.call("token_by_index", ["0", "0"]);
+              tokenUriBA = await nftContract.call("token_uri", [tokenId]);
+          } catch (e2) {}
+      }
+
+      if (tokenUriBA) {
+          const tokenUri = decodeByteArray(tokenUriBA as any);
+          if (tokenUri) {
+              const cid = tokenUri.replace('ipfs://', '').replace(/^ipfs\//, '').replace('https://ipfs.io/ipfs/', '').replace('https://gateway.pinata.cloud/ipfs/', '');
+              if (cid && cid.length >= 32) {
+                  const tokenMetadata = await fetchIPFSMetadata(cid);
+                  if (tokenMetadata?.image) {
+                      image = processIPFSHashToUrl(tokenMetadata.image as string, '/placeholder.svg');
+                  }
+              }
+          }
+      }
+    } catch (err) {
+      console.warn(`Failed to fetch fallback image for collection ${id}:`, err);
+    }
   }
 
   // Additional check: if the IPFS metadata itself has "undefined/" prefix, handle it
@@ -307,6 +378,7 @@ interface UseGetAllCollectionsReturn {
 
 export function useGetAllCollections(): UseGetAllCollectionsReturn {
   const { contract } = useCollectionContract();
+  const { provider } = useProvider();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["collections", "all"],
@@ -336,7 +408,7 @@ export function useGetAllCollections(): UseGetAllCollectionsReturn {
             const collection = await contract!.call("get_collection", [id.toString()]);
             const collectionStat = await contract!.call("get_collection_stats", [id.toString()]);
             const metadata = { id: id.toString(), ...collection, ...collectionStat } as CollectionMetadata;
-            return await processCollectionMetadata(id.toString(), metadata);
+            return await processCollectionMetadata(id.toString(), metadata, provider);
           } catch (e) {
             return null;
           }
@@ -365,6 +437,7 @@ interface UseGetCollectionReturn {
 
 export function useGetCollection(): UseGetCollectionReturn {
   const { contract } = useCollectionContract();
+  const { provider } = useProvider();
 
   const fetchCollection = useCallback(
     async (id: string): Promise<Collection> => {
@@ -376,7 +449,7 @@ export function useGetCollection(): UseGetCollectionReturn {
         const collectionStat = await contract.call("get_collection_stats", [String(id)]);
         const metadata = { id, ...collection, ...collectionStat } as CollectionMetadata;
 
-        return await processCollectionMetadata(id, metadata);
+        return await processCollectionMetadata(id, metadata, provider);
 
       } catch (error) {
         console.error(`Error fetching collection ${id}:`, error);
@@ -458,6 +531,7 @@ export interface UsePaginatedCollectionsReturn {
 
 export function usePaginatedCollections(pageSize: number = 12): UsePaginatedCollectionsReturn {
   const { contract } = useCollectionContract();
+  const { provider } = useProvider();
 
   const fetchBatch = async (startId: number, count: number) => {
     if (!contract) return { data: [], nextStartId: startId };
@@ -490,7 +564,7 @@ export function usePaginatedCollections(pageSize: number = 12): UsePaginatedColl
                 const collection = await contract!.call("get_collection", [id.toString()]);
                 const collectionStat = await contract!.call("get_collection_stats", [id.toString()]);
                 const metadata = { id: id.toString(), ...collection, ...collectionStat } as CollectionMetadata;
-                return await processCollectionMetadata(id.toString(), metadata);
+                return await processCollectionMetadata(id.toString(), metadata, provider);
               } catch (e) {
                 return null;
               }
@@ -563,6 +637,7 @@ export function usePaginatedCollections(pageSize: number = 12): UsePaginatedColl
 
 export function useFeaturedCollections(featuredIds: number[] = []): UseGetAllCollectionsReturn {
   const { contract } = useCollectionContract();
+  const { provider } = useProvider();
 
   const idsKey = featuredIds.join(',');
 
@@ -578,7 +653,7 @@ export function useFeaturedCollections(featuredIds: number[] = []): UseGetAllCol
             const collection = await contract.call("get_collection", [id.toString()]);
             const collectionStat = await contract.call("get_collection_stats", [id.toString()]);
             const metadata = { id, ...collection, ...collectionStat } as CollectionMetadata;
-            return await processCollectionMetadata(id.toString(), metadata);
+            return await processCollectionMetadata(id.toString(), metadata, provider);
           }
         } catch (e) {
           console.warn(`Error fetching featured collection ${id}`, e);
