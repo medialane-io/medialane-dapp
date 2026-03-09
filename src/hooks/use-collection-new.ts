@@ -3,7 +3,7 @@ import { useContract } from "@starknet-react/core";
 import { Asset, LicenseType } from "@/types/asset";
 import { Collection } from "@/lib/types";
 import { isAssetReported } from "@/lib/reported-content";
-import { Abi } from "starknet";
+import { Abi, shortString } from "starknet";
 import { fetchIPFSMetadata, processIPFSHashToUrl } from "@/utils/ipfs";
 
 // --- Minimal ABIs ---
@@ -51,6 +51,13 @@ const MINIMAL_COLLECTION_ABI = [
     type: "function",
     name: "token_uri",
     inputs: [{ name: "token_id", type: "core::integer::u256" }],
+    outputs: [{ type: "core::byte_array::ByteArray" }],
+    state_mutability: "view",
+  },
+  {
+    type: "function",
+    name: "name",
+    inputs: [],
     outputs: [{ type: "core::byte_array::ByteArray" }],
     state_mutability: "view",
   },
@@ -124,6 +131,59 @@ function mapStringToLicenseType(value: string): LicenseType {
   if (normalized.includes("open source") || normalized === "mit" || normalized === "apache-2.0") return "custom";
 
   return "all-rights-reserved"; // Default fallback
+}
+
+// Helper to decode Cairo 1 ByteArray from raw felt array (object with data, pending_word, etc)
+function decodeByteArray(data: any): string {
+  if (!data) return "";
+  
+  // Handle already decoded string
+  if (typeof data === 'string') return data;
+
+  try {
+    // If it's the new Starknet.js ByteArray object format
+    if (data.data && Array.isArray(data.data)) {
+      let str = "";
+      // Words are 31 bytes each
+      for (const word of data.data) {
+        if (word) {
+          str += shortString.decodeShortString(word);
+        }
+      }
+
+      // Pending word
+      if (data.pending_word && data.pending_word_len) {
+        const pendingLen = Number(data.pending_word_len);
+        if (pendingLen > 0) {
+          const decoded = shortString.decodeShortString(data.pending_word);
+          str += decoded.substring(0, pendingLen);
+        }
+      }
+      return str.replace(/\0/g, "").trim();
+    }
+    
+    // Fallback for old felt array format
+    if (Array.isArray(data) && data.length > 0) {
+        const numWords = parseInt(data[0]);
+        let str = "";
+        for (let i = 0; i < numWords; i++) {
+            const word = data[i + 1];
+            if (word) str += shortString.decodeShortString(word);
+        }
+        if (data.length >= numWords + 3) {
+            const pendingWord = data[numWords + 1];
+            const pendingLen = parseInt(data[numWords + 2]);
+            if (pendingLen > 0 && pendingWord) {
+                const decoded = shortString.decodeShortString(pendingWord);
+                str += decoded.substring(0, pendingLen);
+            }
+        }
+        return str.replace(/\0/g, "").trim();
+    }
+  } catch (e) {
+    console.warn("Failed to decode ByteArray:", e);
+  }
+  return "";
 }
 
 export function useCollectionMetadata(collectionAddress: string) {
@@ -205,16 +265,64 @@ export function useCollectionMetadata(collectionAddress: string) {
             resolvedBaseUri = metadataUrl;
           } catch (e) {
             console.warn("Failed to fetch collection IPFS metadata", e);
-            // If direct fetch fails, it might be a directory or specialized format.
-            // Fallback: leave description empty for now.
+          }
+        }
+
+        // --- FALLBACKS ---
+
+        // 1. Fallback for Name: If registry name is empty or too generic, try NFT contract name()
+        let finalName = decodeByteArray(name);
+        if (!finalName || finalName === "IP Collection" || finalName === "MIP Collection") {
+          try {
+            const nftNameResult = await collectionContract.call("name", []);
+            const decodedNftName = decodeByteArray(nftNameResult);
+            if (decodedNftName) finalName = decodedNftName;
+          } catch (e) {
+            // nft.name() might not exist or fail
+          }
+        }
+
+        // 2. Fallback for Description/Image: If baseUri was empty or fetch failed, try first token
+        if ((!description || image === "/placeholder.svg") && Number(totalSupply) > 0) {
+          try {
+            // Try token #1 then token #0 (as found in some collections)
+            let tokenUriBA: any = null;
+            try {
+              tokenUriBA = await collectionContract.call("token_uri", ["1", "0"]);
+            } catch (e) {
+              try {
+                tokenUriBA = await collectionContract.call("token_uri", ["0", "0"]);
+              } catch (e2) {}
+            }
+
+            if (tokenUriBA) {
+              const tokenUri = decodeByteArray(tokenUriBA);
+              if (tokenUri) {
+                const cid = tokenUri.replace('ipfs://', '').replace(/^ipfs\//, '').replace('https://ipfs.io/ipfs/', '').replace('https://gateway.pinata.cloud/ipfs/', '');
+                if (cid && cid.length >= 32) {
+                  const tokenMetadata = await fetchIPFSMetadata(cid);
+                  if (tokenMetadata) {
+                    if (!description) description = tokenMetadata.description || "";
+                    if (image === "/placeholder.svg") {
+                      const tokenImage = tokenMetadata.image || tokenMetadata.image_url || tokenMetadata.assetUrl || tokenMetadata.asset_url || tokenMetadata.cover_image || tokenMetadata.coverImage || tokenMetadata.thumbnail_uri;
+                      if (tokenImage) {
+                        image = resolveIpfsUrl(tokenImage as string);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          } catch (err) {
+            console.warn("Failed to fetch fallback token metadata", err);
           }
         }
 
         setCollection({
           id: collectionId.toString(),
-          name: name || "IP Collection",
-          symbol: symbol || "MIP",
-          description: description,
+          name: finalName || "IP Collection",
+          symbol: decodeByteArray(symbol) || "MIP",
+          description: description || "Programmable Intellectual Property Collection",
           image: image,
           nftAddress: normalizedAddress as string,
           owner: owner,
@@ -301,18 +409,27 @@ export function useCollectionAssets(collectionAddress: string) {
 
         const validUris = uriResults.map((result, index) => {
           if (result.status === "fulfilled") {
-            return { tokenId: validOwners[index].tokenId, owner: validOwners[index].owner, uri: resolveIpfsUrl(result.value as string) };
+            return { tokenId: validOwners[index].tokenId, owner: validOwners[index].owner, uri: resolveIpfsUrl(decodeByteArray(result.value)) };
           }
           return null;
-        }).filter((item): item is { tokenId: number, owner: string, uri: string } => item !== null);
+        }).filter((item): item is { tokenId: number, owner: string, uri: string } => item !== null && !!item.uri && item.uri !== "/placeholder.svg");
 
-        // Fetch Metadata
+        // Fetch Metadata using the more robust fetchIPFSMetadata
         const metadataPromises = validUris.map(async ({ tokenId, owner, uri }) => {
           try {
+            // Extract CID from URI if possible
+            const cid = uri.replace('ipfs://', '').replace(/^ipfs\//, '').replace('https://ipfs.io/ipfs/', '').replace('https://gateway.pinata.cloud/ipfs/', '');
+            const metadata = await fetchIPFSMetadata(cid);
+            if (metadata) {
+              return { tokenId, owner, metadata };
+            }
+            // Fallback for non-IPFS URIs
             const res = await fetch(uri);
-            if (!res.ok) throw new Error("Fetch failed");
-            const metadata = await res.json();
-            return { tokenId, owner, metadata };
+            if (res.ok) {
+              const directMetadata = await res.json();
+              return { tokenId, owner, metadata: directMetadata };
+            }
+            return null;
           } catch (e) {
             console.warn(`Failed to fetch metadata for ${tokenId}`, e);
             return null;
@@ -327,12 +444,14 @@ export function useCollectionAssets(collectionAddress: string) {
 
           const typeAttribute = metadata.attributes?.find((attr: any) => attr.trait_type === "Type");
 
+          // Exhaustive image field check
+          const rawImage = metadata.image || metadata.image_url || metadata.assetUrl || metadata.asset_url || metadata.cover_image || metadata.coverImage || metadata.thumbnail_uri;
           return {
             id: `${normalizedAddress}-${tokenId}`,
             name: metadata.name || `Asset #${tokenId}`,
             creator: owner,
             verified: true,
-            image: resolveIpfsUrl(metadata.image || metadata.assetUrl),
+            image: resolveIpfsUrl((rawImage || "/placeholder.svg") as string),
             collection: normalizedAddress as string,
             licenseType,
             description: metadata.description || "",

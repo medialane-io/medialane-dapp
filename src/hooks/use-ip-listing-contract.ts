@@ -7,6 +7,8 @@ import { IPListingABI } from "@/abis/ip_listing";
 import { Abi } from "starknet";
 import { Listing } from "@/types/marketplace";
 
+import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
+
 export interface CreateListingParams {
   assetContract: string;
   tokenId: string;
@@ -20,6 +22,7 @@ export interface CreateListingParams {
 
 export const useCreateIPLising = (data: CreateListingParams) => {
   const { address, account } = useAccount();
+  const { execute: unifiedExecute } = useUnifiedWallet();
 
   // Initialize contract
   const { contract: IPListingContract } = useContract({
@@ -53,8 +56,7 @@ export const useCreateIPLising = (data: CreateListingParams) => {
       // Create the transaction call directly via account.execute
       const call = IPListingContract.populate("create_listing", formattedData);
 
-      const result = await account.execute([call]);
-      console.log("Transaction sent:", result);
+      await unifiedExecute([call]);
       return true;
     } catch (error) {
       console.error("Error creating listing:", error);
@@ -79,6 +81,8 @@ export const useUpdateIPMarketplaceAddress = (newAddress: string) => {
     abi: IPListingABI as any,
   });
 
+  const { execute: unifiedExecute } = useUnifiedWallet();
+
   // Updating marketplace address
   const updateAddress = async () => {
     console.log("creating listing...");
@@ -86,7 +90,7 @@ export const useUpdateIPMarketplaceAddress = (newAddress: string) => {
     try {
       if (IPListingContract && account) {
         const call = IPListingContract.populate("update_ip_marketplace_address", [newAddress]);
-        await account.execute([call]);
+        await unifiedExecute([call]);
       }
     } catch (error) {
       console.log("mint error", error);

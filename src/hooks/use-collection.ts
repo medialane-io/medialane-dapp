@@ -2,9 +2,9 @@ import { useState, useCallback, useEffect } from "react";
 import {
   useAccount,
   useContract,
-  useSendTransaction,
   useProvider,
 } from "@starknet-react/core";
+import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { Abi, ProviderInterface, Contract, shortString } from "starknet";
 import { ipCollectionAbi } from "@/abis/ip_collection";
@@ -333,9 +333,7 @@ export function useCollection(): UseCollectionReturn {
 
   const { contract } = useCollectionContract();
 
-  const { sendAsync: createCollectionSend } = useSendTransaction({
-    calls: [],
-  });
+  const { execute: unifiedExecute } = useUnifiedWallet();
 
   const mutation = useMutation({
     mutationFn: async (formData: ICreateCollection) => {
@@ -353,8 +351,8 @@ export function useCollection(): UseCollectionReturn {
         formData.base_uri,
       ]);
 
-      const response = await createCollectionSend([contractCall]);
-      return response.transaction_hash;
+      const response = await unifiedExecute([contractCall]);
+      return response;
     },
     onSuccess: () => {
       // Invalidate collections to trigger refetch

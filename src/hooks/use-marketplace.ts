@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useAccount, useContract, useNetwork, useProvider } from "@starknet-react/core";
+import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { Abi, shortString, constants } from "starknet";
 import { IPMarketplaceABI } from "@/abis/ip_market";
 import { useToast } from "@/hooks/use-toast";
@@ -57,6 +58,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         address: process.env.NEXT_PUBLIC_MEDIALANE_CONTRACT_ADDRESS as `0x${string}`,
         abi: IPMarketplaceABI as any[],
     });
+    const { execute: unifiedExecute } = useUnifiedWallet();
 
     const resetState = useCallback(() => {
         setTxHash(null);
@@ -217,13 +219,12 @@ export function useMarketplace(): UseMarketplaceReturn {
             };
 
             const calls = isAlreadyApproved ? [registerCall] : [approveCall, registerCall];
-            const tx = await account.execute(calls);
-            console.log("Transaction sent:", tx.transaction_hash);
-
-            await provider.waitForTransaction(tx.transaction_hash);
-            setTxHash(tx.transaction_hash);
+            const hash = await unifiedExecute(calls);
+            console.log("Transaction sent:", hash);
+            setTxHash(hash);
+            await provider.waitForTransaction(hash);
             toast({ title: "Listing Created", description: "Your asset has been listed successfully." });
-            return tx.transaction_hash;
+            return hash;
         });
     }, [account, medialaneContract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall]);
 
@@ -281,13 +282,12 @@ export function useMarketplace(): UseMarketplaceReturn {
             };
 
             // ERC20 approve + register_order as atomic multicall
-            const tx = await account.execute([approveCall, registerCall]);
-            console.log("Offer MultiCall sent:", tx.transaction_hash);
-
-            await provider.waitForTransaction(tx.transaction_hash);
-            setTxHash(tx.transaction_hash);
+            const hash = await unifiedExecute([approveCall, registerCall]);
+            console.log("Offer MultiCall sent:", hash);
+            setTxHash(hash);
+            await provider.waitForTransaction(hash);
             toast({ title: "Offer Placed", description: "Your offer has been submitted and is now live." });
-            return tx.transaction_hash;
+            return hash;
         });
     }, [account, medialaneContract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall]);
 
@@ -368,13 +368,12 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Executing Purchase", description: "Approve the final transaction to sweep the cart." });
 
             // Single atomic multicall: all approvals + all fulfillments
-            const tx = await account.execute([...approveCalls, ...fulfillCalls]);
-            console.log("Cart checkout multicall sent:", tx.transaction_hash);
-
-            await provider.waitForTransaction(tx.transaction_hash);
-            setTxHash(tx.transaction_hash);
+            const hash = await unifiedExecute([...approveCalls, ...fulfillCalls]);
+            console.log("Cart checkout multicall sent:", hash);
+            setTxHash(hash);
+            await provider.waitForTransaction(hash);
             toast({ title: "Purchase Successful", description: `Successfully purchased ${items.length} item(s).` });
-            return tx.transaction_hash;
+            return hash;
         });
     }, [account, medialaneContract, chain, toast, provider, withProcessing]);
 
@@ -410,12 +409,11 @@ export function useMarketplace(): UseMarketplaceReturn {
             });
 
             const call = medialaneContract.populate("cancel_order", [cancelRequest]);
-            const tx = await account.execute(call);
-
-            await provider.waitForTransaction(tx.transaction_hash);
-            setTxHash(tx.transaction_hash);
+            const hash = await unifiedExecute([call]);
+            setTxHash(hash);
+            await provider.waitForTransaction(hash);
             toast({ title: "Listing Cancelled", description: "The listing has been successfully cancelled on-chain." });
-            return tx.transaction_hash;
+            return hash;
         });
     }, [account, medialaneContract, chain, toast, provider, withProcessing]);
 
@@ -468,13 +466,12 @@ export function useMarketplace(): UseMarketplaceReturn {
                 calldata: [medialaneContract.address, tokenIdUint256.low.toString(), tokenIdUint256.high.toString()],
             };
 
-            const tx = await account.execute([approveCall, fulfillCall]);
-            console.log("Accept offer transaction sent:", tx.transaction_hash);
-
-            await provider.waitForTransaction(tx.transaction_hash);
-            setTxHash(tx.transaction_hash);
+            const hash = await unifiedExecute([approveCall, fulfillCall]);
+            console.log("Accept offer transaction sent:", hash);
+            setTxHash(hash);
+            await provider.waitForTransaction(hash);
             toast({ title: "Offer Accepted", description: "The offer has been accepted and the asset transferred." });
-            return tx.transaction_hash;
+            return hash;
         });
     }, [account, medialaneContract, chain, toast, provider, withProcessing]);
 

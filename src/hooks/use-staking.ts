@@ -32,6 +32,7 @@ import {
   STARKZAP_TOKENS,
   fromAddress,
 } from "@/lib/starkzap";
+import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import type { WalletInterface } from "starkzap";
 
 // ---------------------------------------------------------------------------
@@ -137,18 +138,19 @@ export function useStaking(
     refresh();
   }, [refresh]);
 
+  const { execute: unifiedExecute } = useUnifiedWallet();
+
   const executeAndReturn = useCallback(
     async (calls: unknown[]): Promise<string | null> => {
-      if (!account) {
-        setError("Wallet not connected");
+      try {
+        const hash = await unifiedExecute(calls as any);
+        return hash;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Transaction failed");
         return null;
       }
-      // starkzap Call[] is structurally identical to starknet v8 Call[]
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const response = await account.execute(calls as any);
-      return response.transaction_hash;
     },
-    [account]
+    [unifiedExecute]
   );
 
   const stake = useCallback(

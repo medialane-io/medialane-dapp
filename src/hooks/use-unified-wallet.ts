@@ -21,6 +21,7 @@ import { useCallback } from "react";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import type { Call } from "starknet";
 import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
+import { usePaymasterTransaction } from "@/hooks/use-paymaster-transaction";
 
 export type UnifiedWalletType = "injected" | "cartridge" | "privy" | null;
 
@@ -57,6 +58,12 @@ export function useUnifiedWallet(): UnifiedWallet {
   const { disconnect: injectedDisconnect } = useDisconnect();
   const injectedConnected = injectedConnectedRaw ?? false;
 
+  const {
+    executeAuto,
+    isLoading: paymasterLoading,
+    error: paymasterError,
+  } = usePaymasterTransaction();
+
   // StarkZap wallet takes priority
   const hasStarkZap = szWallet !== null && szAddress !== null;
 
@@ -76,18 +83,15 @@ export function useUnifiedWallet(): UnifiedWallet {
 
   const execute = useCallback(
     async (calls: Call[]): Promise<string> => {
-      if (hasStarkZap && szWallet) {
-        const tx = await szWallet.execute(calls);
-        return tx.hash;
+      // Use the paymaster's executeAuto which handles both StarkZap and injected wallets
+      // with automatic sponsorship fallback.
+      const hash = await executeAuto(calls);
+      if (!hash) {
+        throw new Error(paymasterError || "Transaction failed");
       }
-      if (account) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const response = await account.execute(calls as any);
-        return response.transaction_hash;
-      }
-      throw new Error("No wallet connected");
+      return hash;
     },
-    [hasStarkZap, szWallet, account]
+    [executeAuto, paymasterError]
   );
 
   const disconnect = useCallback(() => {
