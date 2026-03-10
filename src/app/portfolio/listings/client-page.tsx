@@ -26,6 +26,7 @@ export default function ListingsClientPage() {
             <main className="">
                 {/* Header Section */}
                 <PageHeader
+                    variant="expressive"
                     title="My Listings"
                     description="Manage your active marketplace listings."
                     className="pt-8 pb-8"

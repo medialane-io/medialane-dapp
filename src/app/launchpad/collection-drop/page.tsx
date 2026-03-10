@@ -249,16 +249,25 @@ export default function CreateDropPage() {
     const selectedLicense = licenseTypes.find((license) => license.id === licenseType) || licenseTypes[0];
 
     return (
-        <div className="min-h-screen text-foreground py-10 relative overflow-hidden">
+        <div className="min-h-screen text-foreground relative overflow-hidden">
 
 
 
 
             <main className="container mx-auto px-4 py-8 relative z-10">
                 <PageHeader
+                    variant="expressive"
                     title="Create Collection Drop"
                     description="Launch a high-quality NFT collection with built-in scarcity, reveal mechanics, and programmable IP rights."
                     className="mb-8"
+                    breadcrumbs={[
+                        { label: "Home", href: "/" },
+                        { label: "Launchpad", href: "/launchpad" },
+                        { label: "Create Drop" }
+                    ]}
+                    showBackButton
+                    backHref="/launchpad"
+                    statusBadge="IP Protocol v1"
                 />
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

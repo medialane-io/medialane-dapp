@@ -17,6 +17,7 @@ export default function OffersClientPage() {
             <main className="">
                 {/* Header Section */}
                 <PageHeader
+                    variant="expressive"
                     title="Offers Made"
                     description="Track offers you have made on assets."
                     className="pt-8 pb-8"

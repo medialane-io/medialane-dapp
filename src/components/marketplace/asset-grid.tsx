@@ -12,19 +12,30 @@ import { Shelf } from "@/components/ui/shelf"
 
 export interface AssetGridProps {
     sortOrder?: "recent" | "oldest"
+    searchQuery?: string
 }
 
-export function AssetGrid({ sortOrder = "recent" }: AssetGridProps) {
+export function AssetGrid({ sortOrder = "recent", searchQuery = "" }: AssetGridProps) {
     const { listings, isLoading, error, refetch } = useMarketplaceListings()
 
     const activeListings = useMemo(() => {
         if (!listings) return [];
 
-        // Filter for active sell listings (NFT in offer)
-        return listings.filter(l =>
-            l.status === "active" &&
-            (l.offerType === "ERC721" || l.offerType === "ERC1155")
-        ).sort((a, b) => {
+        // Filter for active sell listings (NFT in offer) and search query
+        return listings.filter(l => {
+            const matchesStatus = l.status === "active" && (l.offerType === "ERC721" || l.offerType === "ERC1155");
+            if (!matchesStatus) return false;
+
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                const offerer = l.offerer?.toLowerCase() || "";
+                const offerToken = l.offerToken?.toLowerCase() || "";
+                const orderHash = l.orderHash?.toLowerCase() || "";
+                return offerer.includes(query) || offerToken.includes(query) || orderHash.includes(query);
+            }
+
+            return true;
+        }).sort((a, b) => {
             const timeA = a.startTime || 0
             const timeB = b.startTime || 0
             if (sortOrder === "oldest") {
@@ -32,11 +43,11 @@ export function AssetGrid({ sortOrder = "recent" }: AssetGridProps) {
             }
             return timeB - timeA
         });
-    }, [listings, sortOrder]);
+    }, [listings, sortOrder, searchQuery]);
 
     if (isLoading && activeListings.length === 0) {
         return (
-            <Shelf title="Marketplace Listings">
+            <Shelf title="Recent Listings">
                 {Array.from({ length: 8 }).map((_, i) => (
                     <AssetCardSkeleton key={i} />
                 ))}
@@ -80,7 +91,7 @@ export function AssetGrid({ sortOrder = "recent" }: AssetGridProps) {
         <div className="pb-20">
 
 
-            <Shelf title="Marketplace Listings">
+            <Shelf title="Recent Listings">
                 {activeListings.map((listing) => (
                     <AssetCard
                         key={listing.orderHash}

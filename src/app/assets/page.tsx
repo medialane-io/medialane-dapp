@@ -35,6 +35,7 @@ import {
 } from "lucide-react"
 import { useRecentAssets, type RecentAsset } from "@/hooks/use-recent-assets"
 import { useMarketplaceListings } from "@/hooks/use-marketplace-events"
+import { cn } from "@/lib/utils"
 
 import { AssetCard } from "@/components/asset-card"
 
@@ -73,42 +74,51 @@ export default function AssetsPage() {
     }, [listings])
 
     return (
-        <div className="min-h-screen py-6 md:py-10">
+        <div className="min-h-screen">
+            <div className="h-12"></div>
             <main className="w-full px-6 sm:px-10 lg:px-16 mx-auto py-4">
 
                 <PageHeader
-                    title="Explore Onchain IP Assets"
+                    variant="expressive"
+                    title="Onchain Assets"
                     description="Discover and collect intellectual property assets secured on Starknet."
-                >
-                    <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto mt-4 md:mt-0">
-                        <div className="relative flex-1 md:min-w-[300px] group">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-outrun-cyan transition-colors" />
+                    statusBadge="NFTs"
+                    primaryAction={
+                        <div className="relative w-full max-w-xl">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-m3-on-surface-variant/50" />
                             <Input
+                                type="search"
                                 placeholder="Search by name, ID, or collection..."
+                                className="h-12 md:h-14 pl-12 bg-m3-surface-container border border-m3-outline-variant/20 focus:border-m3-primary/30 text-base transition-all rounded-full shadow-sm focus:shadow-md"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9 h-10 bg-background/50 border-input/50 focus:border-outrun-cyan/50 focus:ring-outrun-cyan/20 rounded-xl"
                             />
                         </div>
-                        <div className="flex items-center gap-2">
+                    }
+                    utilityContent={
+                        <div className="flex flex-wrap items-center gap-3">
                             {totalCount > 0 && (
-                                <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-outrun-cyan/10 backdrop-blur-md rounded-xl border border-outrun-cyan/20 h-10">
-                                    <Box className="h-4 w-4 text-outrun-cyan" />
-                                    <span className="font-semibold text-sm">{totalCount}</span>
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-m3-primary/5 border border-m3-primary/10">
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-m3-primary/70">Registry Assets:</span>
+                                    <span className="text-[11px] font-black text-m3-primary">{totalCount}</span>
                                 </div>
                             )}
+
+                            <div className="h-4 w-px bg-m3-outline-variant/20 mx-1 hidden lg:block" />
+
                             <Button
-                                variant="outline"
-                                size="icon"
+                                variant="ghost"
+                                size="sm"
                                 onClick={refresh}
                                 disabled={loading}
-                                className="h-10 w-10 border-input/50 bg-background/50 hover:bg-outrun-cyan/10 hover:border-outrun-cyan/30 backdrop-blur-sm rounded-xl transition-all"
+                                className="h-9 gap-2 rounded-full border border-m3-outline-variant/10 bg-m3-surface-container-high/30 hover:bg-m3-surface-container-high/60 transition-colors"
                             >
-                                <RefreshCw className={`h-4 w-4 ${loading && !loadingMore ? "animate-spin text-outrun-cyan" : ""}`} />
+                                <RefreshCw className={cn("h-4 w-4 text-m3-primary", loading && !loadingMore && "animate-spin")} />
+                                <span className="text-xs font-bold text-m3-on-surface-variant">Sync Protocol</span>
                             </Button>
                         </div>
-                    </div>
-                </PageHeader>
+                    }
+                />
 
                 {/* Assets Grid */}
                 <div className="space-y-6">
@@ -123,7 +133,7 @@ export default function AssetsPage() {
                     )}
 
                     {loading && !loadingMore && assets.length === 0 ? (
-                        <Card className="border-dashed">
+                        <div>
                             <div className="p-12 flex flex-col items-center justify-center text-center space-y-4 min-h-[300px]">
                                 <Loader2 className="h-10 w-10 text-outrun-cyan animate-spin" />
                                 <div className="space-y-2">
@@ -133,9 +143,9 @@ export default function AssetsPage() {
                                     </p>
                                 </div>
                             </div>
-                        </Card>
+                        </div>
                     ) : filteredAssets.length === 0 && !loading ? (
-                        <Card className="border-dashed">
+                        <div>
                             <div className="p-8 md:p-12 text-center space-y-4">
                                 <Box className="h-10 md:h-12 w-10 md:w-12 mx-auto text-muted-foreground/50" />
                                 <div className="space-y-2">
@@ -153,10 +163,10 @@ export default function AssetsPage() {
                                     </Button>
                                 )}
                             </div>
-                        </Card>
+                        </div>
                     ) : (
                         <>
-                            <div className="space-y-12">
+                            <div className="space-y-12 mt-12">
                                 {Array.from(
                                     filteredAssets.reduce((acc, asset) => {
                                         const type = asset.ipType || "Other";
@@ -165,7 +175,7 @@ export default function AssetsPage() {
                                         return acc;
                                     }, new Map<string, typeof filteredAssets>())
                                 ).map(([type, typeAssets]) => (
-                                    <Shelf key={type} title={type === 'Other' ? 'Discover More IP' : `${type} Assets`}>
+                                    <Shelf key={type} title={type === 'Other' ? 'Discover More IP' : `${type}`}>
                                         {typeAssets.map((asset) => {
                                             const key = `${asset.collectionAddress.toLowerCase()}-${asset.tokenId}`
                                             const matchedListing = activeListingsMap.get(key)

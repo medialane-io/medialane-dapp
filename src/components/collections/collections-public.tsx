@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import type { Collection } from "@/lib/types"
@@ -45,11 +45,21 @@ import { ReportAssetDialog } from "@/components/report-asset-dialog"
 
 type SortOption = "date-new" | "date-old" | "name-asc" | "name-desc" | "assets-high" | "assets-low"
 
-export function CollectionsGrid({ collections, onCollectionClick }: { collections: Collection[], onCollectionClick?: (collection: Collection) => void }) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [sortOption, setSortOption] = useState<SortOption>("date-new")
-  const [featuredOnly, setFeaturedOnly] = useState(false)
+export function CollectionsGrid({
+  collections,
+  onCollectionClick,
+  searchQuery = "",
+  viewMode = "grid",
+  sortOption = "date-new",
+  featuredOnly = false
+}: {
+  collections: Collection[],
+  onCollectionClick?: (collection: Collection) => void,
+  searchQuery?: string,
+  viewMode?: "grid" | "list",
+  sortOption?: SortOption,
+  featuredOnly?: boolean
+}) {
   const [reportDialogState, setReportDialogState] = useState<{ isOpen: boolean; collectionId: string; collectionName: string }>({
     isOpen: false,
     collectionId: "",
@@ -64,128 +74,36 @@ export function CollectionsGrid({ collections, onCollectionClick }: { collection
   })
 
   // Sort collections based on selected sort option
-  const sortedCollections = [...filteredCollections].sort((a, b) => {
-    switch (sortOption) {
-      case "date-new":
-        return Number(b.lastMintTime || 0) - Number(a.lastMintTime || 0)
-      case "date-old":
-        return Number(a.lastMintTime || 0) - Number(b.lastMintTime || 0)
-      case "name-asc":
-        return a.name.localeCompare(b.name)
-      case "name-desc":
-        return b.name.localeCompare(a.name)
-      case "assets-high":
-        return (b.itemCount || 0) - (a.itemCount || 0)
-      case "assets-low":
-        return (a.itemCount || 0) - (b.itemCount || 0)
-      default:
-        return 0
-    }
-  })
-
-  const getSortIcon = () => {
-    if (sortOption.includes("high") || sortOption.includes("desc")) {
-      return <ArrowDown className="h-4 w-4" />
-    }
-    return <ArrowUp className="h-4 w-4" />
-  }
-
-  // Find featured collections for the featured section
-  const featuredCollections = collections.filter((c) => String(c.id) === "kalamaha" || String(c.id) === "mizu").slice(0, 1)
-  const featuredCollection = featuredCollections.length > 0 ? featuredCollections[0] : null
+  const sortedCollections = useMemo(() => {
+    return [...filteredCollections].sort((a, b) => {
+      switch (sortOption) {
+        case "date-new":
+          return Number(b.lastMintTime || 0) - Number(a.lastMintTime || 0)
+        case "date-old":
+          return Number(a.lastMintTime || 0) - Number(b.lastMintTime || 0)
+        case "name-asc":
+          return a.name.localeCompare(b.name)
+        case "name-desc":
+          return b.name.localeCompare(a.name)
+        case "assets-high":
+          return (b.itemCount || 0) - (a.itemCount || 0)
+        case "assets-low":
+          return (a.itemCount || 0) - (b.itemCount || 0)
+        default:
+          return 0
+      }
+    })
+  }, [filteredCollections, sortOption])
 
   return (
-    <div className="space-y-2 layout-px">
-
-      {/*}
-      {featuredCollection && (
-        <div className="mb-10">
-          <FeaturedCollectionCard
-            collection={featuredCollection}
-            nftCount={featuredCollection.itemCount}
-            onReportClick={() => setReportDialogState({
-              isOpen: true,
-              collectionId: String(featuredCollection.id),
-              collectionName: featuredCollection.name
-            })}
-          />
-        </div>
-      )}*/}
-
-
-
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
-        <div className="relative w-full sm:w-[350px]">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search collections..."
-            className="pl-8 focus:border-outrun-cyan/50 focus:shadow-[0_0_10px_rgba(0,255,255,0.15)] transition-all duration-200"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="icon" onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}>
-            {viewMode === "grid" ? <List className="h-4 w-4" /> : <Grid className="h-4 w-4" />}
-          </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Filter Options</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setFeaturedOnly(!featuredOnly)}>
-                <Star
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    featuredOnly && "text-yellow-500 fill-yellow-500 dark:text-yellow-400 dark:fill-yellow-400",
-                  )}
-                />
-                {featuredOnly ? "Show all collections" : "Show featured only"}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-1">
-                <ArrowUpDown className="h-4 w-4 mr-1" />
-                <span className="hidden xs:inline">Sort</span>
-                {getSortIcon()}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuRadioGroup value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
-                <DropdownMenuRadioItem value="date-new">Date: Newest</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="date-old">Date: Oldest</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="name-asc">Name: A to Z</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="name-desc">Name: Z to A</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="assets-high">Assets: High to Low</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="assets-low">Assets: Low to High</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Link href="/create/collection">
-            <Button className="gap-1 ml-auto sm:ml-0">
-              <Plus className="h-4 w-4" />
-              <span className="hidden xs:inline">New Collection</span>
-            </Button>
-          </Link>
-        </div>
-      </div>
-
+    <div className="space-y-6 layout-px">
       {filteredCollections.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No collections found matching your criteria</p>
+        <div className="text-center py-20 bg-m3-surface-container-low rounded-m3-xl border border-dashed border-m3-outline-variant/30">
+          <p className="text-m3-on-surface-variant font-medium text-lg">No collections found matching your criteria</p>
+          <p className="text-m3-on-surface-variant/50 text-sm mt-1">Try adjusting your filters or search query</p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative">
           {sortedCollections.map((collection: Collection) => (
             <CollectionCard
               key={String(collection.id)}
@@ -201,7 +119,7 @@ export function CollectionsGrid({ collections, onCollectionClick }: { collection
           ))}
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-3">
           {sortedCollections.map((collection) => (
             <CollectionListItem
               key={String(collection.id)}

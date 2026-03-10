@@ -31,8 +31,14 @@ export function LaunchpadContent() {
 
             {/* Standard Page Header */}
             <PageHeader
+                variant="expressive"
                 title="Creator Launchpad"
                 description="Your refined terminal for intellectual property. Launch and own every asset with professional grade tools."
+                breadcrumbs={[
+                    { label: "Home", href: "/" },
+                    { label: "Launchpad" }
+                ]}
+                statusBadge="Creator Terminal"
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mt-6">
