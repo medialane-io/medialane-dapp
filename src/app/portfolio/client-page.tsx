@@ -161,7 +161,7 @@ export default function PortfolioClientPage() {
 
 function StatsSkeleton() {
     return (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 layout-px">
             {Array(4)
                 .fill(null)
                 .map((_, i) => (
@@ -182,7 +182,7 @@ function StatsSkeleton() {
 
 function PortfolioSkeleton() {
     return (
-        <div className="space-y-8 w-full mt-6">
+        <div className="space-y-8 w-full mt-6 layout-px">
             <StatsSkeleton />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Skeleton className="h-64 w-full rounded-2xl" />

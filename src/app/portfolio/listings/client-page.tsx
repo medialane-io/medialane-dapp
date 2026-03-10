@@ -71,7 +71,7 @@ export default function ListingsClientPage() {
 
 function ListingsSkeleton() {
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 layout-px">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {Array(4).fill(0).map((_, i) => (
                     <div key={i} className="rounded-xl border border-border/50 bg-card/50 overflow-hidden shadow-sm">

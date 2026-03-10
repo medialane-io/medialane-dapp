@@ -123,7 +123,7 @@ export default function AssetsClientPage() {
 
 function AssetsSkeleton() {
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 layout-px">
             <div className="flex justify-between items-center">
                 <Skeleton className="h-10 w-[300px]" />
             </div>

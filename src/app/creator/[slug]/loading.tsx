@@ -9,7 +9,7 @@ export default function CreatorLoading() {
         {/* Background Placeholder */}
         <div className="absolute inset-0 z-0 bg-muted/20 animate-pulse" />
 
-        <div className="relative z-10 container mx-auto px-4">
+        <div className="relative z-10 layout-container">
           <div className="flex flex-col lg:flex-row items-start gap-8">
             {/* Avatar Skeleton */}
             <div className="flex flex-col items-center lg:items-start w-full lg:w-auto">
@@ -40,7 +40,7 @@ export default function CreatorLoading() {
         </div>
       </div>
 
-      <main className="container mx-auto px-4 -mt-4 relative z-10">
+      <main className="layout-container -mt-4 relative z-10">
         <div className="max-w-7xl mx-auto">
           {/* Loading Indicator */}
           <div className="flex items-center justify-center py-8 text-muted-foreground gap-2">

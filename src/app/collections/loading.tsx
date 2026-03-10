@@ -6,7 +6,7 @@ export default function CollectionsLoading() {
     <div className="min-h-screen">
       {/* Header Skeleton */}
       <header className="border-b sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+        <div className="layout-container py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <Skeleton className="h-8 w-32" />
@@ -25,7 +25,7 @@ export default function CollectionsLoading() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="layout-container py-8">
         {/* Page Header Skeleton */}
         <div className="mb-8">
           <Skeleton className="h-10 w-64 mb-2" />

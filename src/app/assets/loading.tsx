@@ -23,7 +23,7 @@ function AssetCardSkeleton() {
 export default function AssetsLoading() {
     return (
         <div className="min-h-screen">
-            <main className="container mx-auto px-4 py-8 md:py-12 lg:py-16 space-y-8 md:space-y-12">
+            <main className="layout-container py-8 md:py-12 lg:py-16 space-y-8 md:space-y-12">
                 {/* Hero Section Skeleton */}
                 <div className="text-center space-y-4 md:space-y-6 max-w-4xl mx-auto">
                     <Skeleton className="h-8 w-40 mx-auto rounded-full" />

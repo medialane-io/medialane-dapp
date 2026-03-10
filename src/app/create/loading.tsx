@@ -6,7 +6,7 @@ export default function CreateLoading() {
     <div className="min-h-screen bg-background">
       {/* Header Skeleton */}
       <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+        <div className="layout-container py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <Skeleton className="h-8 w-32" />
@@ -22,7 +22,7 @@ export default function CreateLoading() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="layout-container py-8">
         <div className="mb-8">
           <Skeleton className="h-10 w-48 mb-2" />
           <Skeleton className="h-5 w-96" />

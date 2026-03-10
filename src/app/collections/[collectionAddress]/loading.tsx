@@ -6,7 +6,7 @@ export default function CollectionDetailLoading() {
     <div className="min-h-screen">
       {/* Header */}
       <header className="border-b sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+        <div className="layout-container py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <Skeleton className="h-8 w-32" />
@@ -22,7 +22,7 @@ export default function CollectionDetailLoading() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="layout-container py-8">
         {/* Back Button */}
         <div className="mb-6">
           <Skeleton className="h-10 w-40" />

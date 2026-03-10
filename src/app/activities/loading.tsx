@@ -5,7 +5,7 @@ export default function ActivitiesLoading() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
-        <div className="container mx-auto flex items-center justify-between p-4">
+        <div className="layout-container flex items-center justify-between p-4">
           <div className="flex items-center gap-4">
             <Skeleton className="h-9 w-20" />
             <div className="flex items-center gap-2">
@@ -20,7 +20,7 @@ export default function ActivitiesLoading() {
         </div>
       </header>
 
-      <main className="container mx-auto p-4 py-6 space-y-6">
+      <main className="layout-container p-4 py-6 space-y-6">
         <div className="space-y-2">
           <Skeleton className="h-10 w-80" />
           <Skeleton className="h-5 w-96" />

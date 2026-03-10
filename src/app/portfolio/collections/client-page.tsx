@@ -88,7 +88,7 @@ export default function CollectionsClientPage() {
 
 function CollectionsSkeleton() {
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 layout-px">
             <div className="flex flex-col sm:flex-row gap-4 justify-between">
                 <Skeleton className="h-10 w-full sm:w-[350px]" />
                 <div className="flex gap-2">
