@@ -35,6 +35,7 @@ interface ActivityFeedSectionProps {
     searchPlaceholder?: string;
     showEndMessage?: boolean;
     showRefresh?: boolean;
+    showFilters?: boolean;
 }
 
 export function ActivityFeedSection({
@@ -57,18 +58,21 @@ export function ActivityFeedSection({
     searchPlaceholder,
     showEndMessage,
     showRefresh,
+    showFilters = true,
 }: ActivityFeedSectionProps) {
     return (
         <div className="space-y-6">
-            <ActivityFilters
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                typeFilter={typeFilter}
-                onTypeChange={setTypeFilter}
-                onRefresh={showRefresh ? refresh : undefined}
-                isRefreshing={loading && !loadingMore}
-                searchPlaceholder={searchPlaceholder}
-            />
+            {showFilters && (
+                <ActivityFilters
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    typeFilter={typeFilter}
+                    onTypeChange={setTypeFilter}
+                    onRefresh={showRefresh ? refresh : undefined}
+                    isRefreshing={loading && !loadingMore}
+                    searchPlaceholder={searchPlaceholder}
+                />
+            )}
             <ActivityFeed
                 activities={activities}
                 filteredActivities={filtered}

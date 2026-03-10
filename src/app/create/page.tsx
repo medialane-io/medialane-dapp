@@ -22,6 +22,7 @@ import {
   Code,
 } from "lucide-react"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CreationOptionCard } from "@/components/create/creation-option-card"
@@ -265,222 +266,202 @@ export default function CreatePage() {
   const selectedOptionData = creationOptions.find((opt) => opt.id === selectedOption)
 
   return (
-    <div className="min-h-screen pb-8 px-4 md:px-8">
+    <div className="min-h-screen pb-8">
+      <div className="h-16"></div>
 
-      <main className="container mx-auto max-w-10xl">
-
+      <main className="w-full mx-auto py-4">
         {/* Creator Stats */}
-        <CreatorStatsBar />
+        <div className="layout-px mb-6">
+          <CreatorStatsBar />
+        </div>
 
         <PageHeader
+          variant="expressive"
           title="Create"
           description="Start your journey. Mint assets, launch collections, and build your IP portfolio."
-        />
-
-        {/* Search and Filters */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
+          statusBadge="Creator Workspace"
+          primaryAction={
+            <div className="relative w-full max-w-xl">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-m3-on-surface-variant/50" />
+              <input
+                type="search"
                 placeholder="Search creation options..."
+                className="w-full h-12 md:h-14 pl-12 pr-4 bg-m3-surface-container border border-m3-outline-variant/20 focus:border-m3-primary/30 text-base transition-all rounded-full shadow-sm focus:shadow-md outline-none text-m3-on-surface placeholder:text-m3-on-surface-variant/40"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-12 focus:border-outrun-cyan/50 focus:shadow-[0_0_15px_rgba(0,255,255,0.12)] transition-all"
               />
             </div>
-            <div className="flex gap-2">
+          }
+          utilityContent={
+            <div className="flex flex-wrap items-center gap-3">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-[140px] h-12">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue />
+                <SelectTrigger className="h-9 w-[130px] rounded-full border-m3-outline-variant/10 bg-m3-surface-container-high/30 hover:bg-m3-surface-container-high/60 transition-colors text-xs font-bold text-m3-on-surface-variant">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-3.5 w-3.5 text-m3-primary" />
+                    <SelectValue placeholder="Category" />
+                  </div>
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
+                    <SelectItem key={category.id} value={category.id} className="text-xs font-medium">
                       {category.name} ({category.count})
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[120px] h-12">
+                <SelectTrigger className="h-9 w-[110px] rounded-full border-m3-outline-variant/10 bg-m3-surface-container-high/30 hover:bg-m3-surface-container-high/60 transition-colors text-xs font-bold text-m3-on-surface-variant">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="popularity">Popular</SelectItem>
-                  <SelectItem value="time">Fastest</SelectItem>
-
-                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="popularity" className="text-xs font-medium">Popular</SelectItem>
+                  <SelectItem value="time" className="text-xs font-medium">Fastest</SelectItem>
+                  <SelectItem value="name" className="text-xs font-medium">Name</SelectItem>
                 </SelectContent>
               </Select>
-              <div className="hidden md:flex border rounded-lg p-1">
+
+              <div className="h-4 w-px bg-m3-outline-variant/20 mx-1 hidden sm:block" />
+
+              <div className="flex items-center p-1 rounded-full bg-m3-surface-container-high/20 border border-m3-outline-variant/10">
                 <Button
-                  variant={viewMode === "grid" ? "default" : "ghost"}
+                  variant="ghost"
                   size="sm"
                   onClick={() => setViewMode("grid")}
+                  className={cn(
+                    "h-7 w-7 p-0 rounded-full transition-all",
+                    viewMode === "grid" ? "bg-m3-primary text-m3-on-primary shadow-sm" : "text-m3-on-surface-variant/60 hover:text-m3-primary"
+                  )}
                 >
-                  <Grid3X3 className="h-4 w-4" />
+                  <Grid3X3 className="h-3.5 w-3.5" />
                 </Button>
                 <Button
-                  variant={viewMode === "list" ? "default" : "ghost"}
+                  variant="ghost"
                   size="sm"
                   onClick={() => setViewMode("list")}
+                  className={cn(
+                    "h-7 w-7 p-0 rounded-full transition-all",
+                    viewMode === "list" ? "bg-m3-primary text-m3-on-primary shadow-sm" : "text-m3-on-surface-variant/60 hover:text-m3-primary"
+                  )}
                 >
-                  <List className="h-4 w-4" />
+                  <List className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </div>
-          </div>
+          }
+        />
 
-          <div className="flex overflow-x-auto gap-2 pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap">
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(category.id)}
-                className="h-8 whitespace-nowrap flex-shrink-0"
-              >
-                {category.name}
-                <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
-                  {category.count}
-                </Badge>
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Options Grid */}
-          <div className="lg:col-span-3">
-            {sortedOptions.length === 0 ? (
-              <Card className="p-8 text-center">
-                <div className="text-muted-foreground mb-4">
-                  <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No options found matching your search.</p>
-                  <p className="text-sm">Try adjusting your filters or search terms.</p>
-                </div>
-                <Button variant="outline" onClick={() => setSearchQuery("")}>
-                  Clear Search
-                </Button>
-              </Card>
-            ) : (
-              <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-4"}>
-                {sortedOptions.map((option) => (
-                  <CreationOptionCard
-                    key={option.id}
-                    option={option}
-                    viewMode={viewMode}
-                    isSelected={selectedOption === option.id}
-                    onSelect={() => setSelectedOption(selectedOption === option.id ? null : option.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6">
-              {selectedOptionData ? (
-                <CreationOptionDetails option={selectedOptionData} />
+        <div className="layout-px py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-3">
+              {sortedOptions.length === 0 ? (
+                <Card className="p-8 text-center bg-m3-surface-container-low border-dashed border-m3-outline-variant/20">
+                  <div className="text-m3-on-surface-variant/60 mb-4">
+                    <Search className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                    <p className="font-medium text-m3-on-surface">No options found matching your search.</p>
+                    <p className="text-sm">Try adjusting your filters or search terms.</p>
+                  </div>
+                  <Button variant="outline" onClick={() => setSearchQuery("")} className="rounded-full">
+                    Clear Search
+                  </Button>
+                </Card>
               ) : (
-                <>
-                  {/* Popular Templates */}
-                  <Card className="glass-panel border-outrun-cyan/30 bg-card/5 backdrop-blur-md">
-                    <CardHeader className="pb-3 border-b border-outrun-cyan/10">
-                      <CardTitle className="text-base flex items-center gap-2 font-bold tracking-wide">
-                        <TrendingUp className="h-4 w-4 text-neon-cyan drop-shadow-[0_0_5px_rgba(0,255,255,0.8)]" />
-                        Popular Templates
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 pt-3">
-                      {templates.slice(0, 4).map((template) => {
-                        const getIconComponent = (iconName: string) => {
-                          switch (iconName) {
-                            case "Music":
-                              return <Music className="h-4 w-4" />
-                            case "Palette":
-                              return <Palette className="h-4 w-4" />
-                            case "Video":
-                              return <Video className="h-4 w-4" />
-                            case "Code":
-                              return <Code className="h-4 w-4" />
-                            default:
-                              return <FileText className="h-4 w-4" />
-                          }
-                        }
-
-                        return (
-                          <Link key={template.id} href={`/create/templates/${template.id}`} className="block group">
-                            <div className="flex items-center gap-3 p-2 rounded-lg bg-card/20 hover:bg-outrun-cyan/10 ring-1 ring-border/20 hover:ring-outrun-cyan/30 transition-all cursor-pointer">
-                              <div className="p-1.5 rounded-md bg-outrun-cyan/10 text-outrun-cyan group-hover:shadow-glow-sm shadow-neon-cyan/20">
-                                {getIconComponent(template.icon)}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="font-medium text-sm text-foreground/90 group-hover:text-neon-cyan transition-colors">{template.name}</div>
-                              </div>
-                              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-neon-cyan group-hover:translate-x-0.5 transition-all" />
-                            </div>
-                          </Link>
-                        )
-                      })}
-                      <Link href="/create/templates" className="block mt-4">
-                        <Button variant="outline" size="sm" className="w-full bg-transparent border-outrun-cyan/30 text-outrun-cyan hover:bg-outrun-cyan/10 hover:border-neon-cyan/50 hover:shadow-glow-sm hover:shadow-neon-cyan/20 transition-all font-bold">
-                          View All Templates
-                        </Button>
-                      </Link>
-                    </CardContent>
-                  </Card>
-
-                  {/* Help Card 
-                  <Card>
-                    <CardContent className="p-4">
-                      <h4 className="font-medium mb-2 flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-primary" />
-                        Need Help?
-                      </h4>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        New to IP protection? Our guide will help you choose the right option for your needs.
-                      </p>
-                      <Button variant="outline" size="sm" className="w-full bg-transparent">
-                        View Getting Started Guide
-                      </Button>
-                    </CardContent>
-                  </Card>*/}
-
-                  {/* Benefits */}
-                  <Card className="glass-panel border-outrun-magenta/30 bg-card/5 backdrop-blur-md">
-                    <CardContent className="p-5">
-                      <h4 className="font-bold mb-4 text-outrun-magenta tracking-wide">Why tokenize with Medialane?</h4>
-                      <div className="space-y-3">
-                        <div className="flex items-start gap-2.5 text-sm text-foreground/90">
-                          <CheckCircle className="h-4 w-4 text-neon-cyan drop-shadow-[0_0_5px_rgba(0,255,255,0.8)] mt-0.5 shrink-0" />
-                          <span>Zero fees protocol and dapp</span>
-                        </div>
-                        <div className="flex items-start gap-2.5 text-sm text-foreground/90">
-                          <CheckCircle className="h-4 w-4 text-neon-cyan drop-shadow-[0_0_5px_rgba(0,255,255,0.8)] mt-0.5 shrink-0" />
-                          <span>Full ownership onchain</span>
-                        </div>
-                        <div className="flex items-start gap-2.5 text-sm text-foreground/90">
-                          <CheckCircle className="h-4 w-4 text-neon-cyan drop-shadow-[0_0_5px_rgba(0,255,255,0.8)] mt-0.5 shrink-0" />
-                          <span>Instant tokenization</span>
-                        </div>
-                        <div className="flex items-start gap-2.5 text-sm text-foreground/90">
-                          <CheckCircle className="h-4 w-4 text-neon-cyan drop-shadow-[0_0_5px_rgba(0,255,255,0.8)] mt-0.5 shrink-0" />
-                          <span>Powered on Starknet Blockchain</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </>
+                <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-4"}>
+                  {sortedOptions.map((option) => (
+                    <CreationOptionCard
+                      key={option.id}
+                      option={option}
+                      viewMode={viewMode}
+                      isSelected={selectedOption === option.id}
+                      onSelect={() => setSelectedOption(selectedOption === option.id ? null : option.id)}
+                    />
+                  ))}
+                </div>
               )}
             </div>
+
+            <div className="lg:col-span-1">
+              <div className="sticky top-24 space-y-6">
+                {selectedOptionData ? (
+                  <CreationOptionDetails option={selectedOptionData} />
+                ) : (
+                  <>
+                    <Card className="bg-m3-surface-container-low border border-m3-outline-variant/20 rounded-[24px] shadow-sm overflow-hidden">
+                      <CardHeader className="pb-3 border-b border-m3-outline-variant/10">
+                        <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-wider text-m3-on-surface/70">
+                          <TrendingUp className="h-4 w-4 text-m3-primary" />
+                          Popular Templates
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3 pt-3">
+                        {templates.slice(0, 4).map((template) => {
+                          const getIconComponent = (iconName: string) => {
+                            switch (iconName) {
+                              case "Music":
+                                return <Music className="h-4 w-4" />
+                              case "Palette":
+                                return <Palette className="h-4 w-4" />
+                              case "Video":
+                                return <Video className="h-4 w-4" />
+                              case "Code":
+                                return <Code className="h-4 w-4" />
+                              default:
+                                return <FileText className="h-4 w-4" />
+                            }
+                          }
+
+                          return (
+                            <Link key={template.id} href={`/create/templates/${template.id}`} className="block group">
+                              <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-m3-primary/5 transition-colors cursor-pointer">
+                                <div className="p-1.5 rounded-md bg-m3-primary/10 text-m3-primary group-hover:bg-m3-primary group-hover:text-m3-on-primary transition-colors">
+                                  {getIconComponent(template.icon)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-bold text-xs text-m3-on-surface-variant group-hover:text-m3-primary transition-colors">{template.name}</div>
+                                </div>
+                                <ArrowRight className="h-3.5 w-3.5 text-m3-on-surface-variant/40 group-hover:text-m3-primary group-hover:translate-x-0.5 transition-all" />
+                              </div>
+                            </Link>
+                          )
+                        })}
+                        <Link href="/create/templates" className="block mt-4">
+                          <Button variant="outline" size="sm" className="w-full rounded-full border-m3-outline-variant/30 text-[10px] font-black uppercase tracking-widest hover:bg-m3-primary/5">
+                            View All Templates
+                          </Button>
+                        </Link>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-m3-surface-container-low border border-m3-outline-variant/20 rounded-[24px] shadow-sm">
+                      <CardContent className="p-5">
+                        <h4 className="font-black text-[10px] uppercase tracking-[0.2em] mb-4 text-m3-primary/60">Why tokenize with Medialane?</h4>
+                        <div className="space-y-3">
+                          <div className="flex items-start gap-2.5 text-xs text-m3-on-surface font-bold">
+                            <CheckCircle className="h-3.5 w-3.5 text-m3-primary mt-0.5 shrink-0" />
+                            <span>Zero fees protocol and dapp</span>
+                          </div>
+                          <div className="flex items-start gap-2.5 text-xs text-m3-on-surface font-bold">
+                            <CheckCircle className="h-3.5 w-3.5 text-m3-primary mt-0.5 shrink-0" />
+                            <span>Full ownership onchain</span>
+                          </div>
+                          <div className="flex items-start gap-2.5 text-xs text-m3-on-surface font-bold">
+                            <CheckCircle className="h-3.5 w-3.5 text-m3-primary mt-0.5 shrink-0" />
+                            <span>Instant tokenization</span>
+                          </div>
+                          <div className="flex items-start gap-2.5 text-xs text-m3-on-surface font-bold">
+                            <CheckCircle className="h-3.5 w-3.5 text-m3-primary mt-0.5 shrink-0" />
+                            <span>Powered by Starknet Blockchain</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-      </main >
-    </div >
+      </main>
+    </div>
   )
 }

@@ -76,7 +76,7 @@ export default function AssetsPage() {
     return (
         <div className="min-h-screen">
             <div className="h-12"></div>
-            <main className="w-full px-6 sm:px-10 lg:px-16 mx-auto py-4">
+            <main className="w-full mx-auto py-4">
 
                 <PageHeader
                     variant="expressive"
@@ -125,15 +125,17 @@ export default function AssetsPage() {
 
 
                     {error && (
-                        <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive flex items-center gap-2">
-                            <AlertCircle className="h-4 w-4" />
-                            <p>{error}</p>
-                            <Button variant="link" onClick={refresh} className="h-auto p-0 ml-2">Try Again</Button>
+                        <div className="layout-px">
+                            <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive flex items-center gap-2">
+                                <AlertCircle className="h-4 w-4" />
+                                <p>{error}</p>
+                                <Button variant="link" onClick={refresh} className="h-auto p-0 ml-2">Try Again</Button>
+                            </div>
                         </div>
                     )}
 
                     {loading && !loadingMore && assets.length === 0 ? (
-                        <div>
+                        <div className="layout-px">
                             <div className="p-12 flex flex-col items-center justify-center text-center space-y-4 min-h-[300px]">
                                 <Loader2 className="h-10 w-10 text-outrun-cyan animate-spin" />
                                 <div className="space-y-2">
@@ -145,7 +147,7 @@ export default function AssetsPage() {
                             </div>
                         </div>
                     ) : filteredAssets.length === 0 && !loading ? (
-                        <div>
+                        <div className="layout-px">
                             <div className="p-8 md:p-12 text-center space-y-4">
                                 <Box className="h-10 md:h-12 w-10 md:w-12 mx-auto text-muted-foreground/50" />
                                 <div className="space-y-2">
