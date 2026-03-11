@@ -3,6 +3,7 @@ import { useCallback, useMemo } from "react";
 import { IPMarketplaceABI } from "@/abis/ip_market";
 import { shortString, type Call } from "starknet";
 import { stringifyBigInts, getOrderParametersTypedData } from "@/utils/marketplace-utils";
+import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 
 const MARKETPLACE_ADDRESS = process.env.NEXT_PUBLIC_MEDIALANE_CONTRACT_ADDRESS as `0x${string}`;
 const STRK_ADDRESS = process.env.NEXT_PUBLIC_STARKNET_STRK as string;
@@ -50,6 +51,7 @@ export const encodeLicensingTerms = (terms: LicensingTerms): { salt: string, add
  */
 export const useSubmitLicenseOffer = () => {
     const { account } = useAccount();
+    const { execute: unifiedExecute } = useUnifiedWallet();
     const { contract } = useContract({
         address: MARKETPLACE_ADDRESS,
         abi: IPMarketplaceABI as any[],
@@ -122,10 +124,10 @@ export const useSubmitLicenseOffer = () => {
         });
 
         const call = contract.populate("register_order", [registerPayload]);
-        const res = await account.execute(call);
+        const txHash = await unifiedExecute([call]);
 
-        return res.transaction_hash;
-    }, [account, contract]);
+        return txHash;
+    }, [account, contract, unifiedExecute]);
 
     return { submitOnChainOffer };
 };

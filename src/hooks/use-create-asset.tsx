@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import {
   useAccount,
   useContract,
-  useSendTransaction,
   useProvider,
 } from "@starknet-react/core";
 import { Abi } from "starknet";
@@ -11,6 +10,7 @@ import {
   COLLECTION_CONTRACT_ADDRESS,
 } from "@/lib/constants";
 import { useToast } from "./use-toast";
+import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 
 export interface ICreateAsset {
   collection_id: string;
@@ -40,14 +40,11 @@ export function useCreateAsset(): IMintReturnType {
   const { toast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { execute: unifiedExecute } = useUnifiedWallet();
 
   const { contract } = useContract({
     abi: COLLECTION_CONTRACT_ABI as Abi,
     address: COLLECTION_CONTRACT_ADDRESS as `0x${string}`,
-  });
-
-  const { sendAsync: mintAsset } = useSendTransaction({
-    calls: [],
   });
 
   const createAsset = useCallback(
@@ -81,13 +78,13 @@ export function useCreateAsset(): IMintReturnType {
           formData.token_uri,
         ]);
 
-        // Execute the transaction
-        const tx = await mintAsset([contractCall]);
+        // Execute the transaction via paymaster (sponsored → fallback to traditional)
+        const txHash = await unifiedExecute([contractCall]);
 
         // Wait for transaction confirmation using existing pattern
-        await provider.waitForTransaction(tx.transaction_hash);
+        await provider.waitForTransaction(txHash);
 
-        const receipt = await provider.getTransactionReceipt(tx.transaction_hash);
+        const receipt = await provider.getTransactionReceipt(txHash);
 
         let tokenId = "0";
         // @ts-expect-error receipt is has events
@@ -112,7 +109,7 @@ export function useCreateAsset(): IMintReturnType {
         const assetSlug = `${formData.collection_nft_address}-${tokenId}`;
 
         const result: IMintResult = {
-          transactionHash: tx.transaction_hash,
+          transactionHash: txHash,
           tokenId: tokenId,
           collectionId: formData.collection_id,
           assetSlug: assetSlug,
@@ -131,7 +128,7 @@ export function useCreateAsset(): IMintReturnType {
         setIsCreating(false);
       }
     },
-    [address, contract, mintAsset, provider, toast]
+    [address, contract, unifiedExecute, provider, toast]
   );
 
   return {

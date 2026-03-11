@@ -1,12 +1,12 @@
 import { userSettingsAbi } from "@/abis/user_settings";
 import {
   useContract,
-  useSendTransaction,
   useAccount,
   useProvider,
 } from "@starknet-react/core";
 import { useCallback, useState } from "react";
 import { Abi } from "starknet";
+import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 
 const USER_SETTINGS_CONTRACT_ADDRESS = process.env
   .NEXT_PUBLIC_USER_SETTINGS_CONTRACT_ADDRESS as `0x${string}`;
@@ -17,13 +17,10 @@ export const useUsersSettings = () => {
   const { provider } = useProvider();
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { execute: unifiedExecute } = useUnifiedWallet();
   const { contract } = useContract({
     address: USER_SETTINGS_CONTRACT_ADDRESS,
     abi: USER_SETTINGS_CONTRACT_ABI,
-  });
-
-  const { sendAsync: settingsSend } = useSendTransaction({
-    calls: [],
   });
 
   // Queries
@@ -75,7 +72,7 @@ export const useUsersSettings = () => {
 
     try {
       const contractCall = contract.populate(method, args);
-      await settingsSend([contractCall]);
+      await unifiedExecute([contractCall]);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to execute contract call";
@@ -102,8 +99,8 @@ export const useUsersSettings = () => {
         contract.populate(method, args)
       );
       
-      const multiCall = await account.execute(contractCalls);
-      await provider.waitForTransaction(multiCall.transaction_hash);
+      const txHash = await unifiedExecute(contractCalls);
+      await provider.waitForTransaction(txHash);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to execute multicall";

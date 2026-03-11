@@ -22,7 +22,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent } from "@/components/ui/card"
-import { useSendTransaction } from "@starknet-react/core"
+import { useUnifiedWallet } from "@/hooks/use-unified-wallet"
 import { COLLECTION_NFT_ABI } from "@/abis/ip_nft"
 import { shortenAddress } from "@/lib/utils"
 import { EXPLORER_URL } from "@/lib/constants"
@@ -112,9 +112,8 @@ export function TransferAssetDialog({
     }))
   }, [assets, currentOwner, recipientAddress])
 
-  const { sendAsync, isPending } = useSendTransaction({
-    calls
-  })
+  const { execute: unifiedExecute } = useUnifiedWallet()
+  const [isTransferPending, setIsTransferPending] = useState(false)
 
   // Recipient preview data
   const recipientItem = recentAddresses.find(a => a.address.toLowerCase() === recipientAddress.toLowerCase())
@@ -128,8 +127,8 @@ export function TransferAssetDialog({
 
   // estimated
   const transactionFee = {
-    amount: "< 0.001 STRK", // Lower fee for L2
-    usdValue: "< $0.001",
+    amount: "Sponsored",
+    usdValue: "$0.00",
     estimatedTime: "< 5 seconds",
   }
 
@@ -169,38 +168,36 @@ export function TransferAssetDialog({
     setProgress(10)
 
     try {
-      if (!sendAsync) {
+      if (!calls) {
         throw new Error("Wallet not connected or invalid parameters")
       }
 
+      setIsTransferPending(true)
       setProgress(30)
-      const tx = await sendAsync()
+      const txHash = await unifiedExecute(calls)
       setProgress(80)
 
-      // We could wait for transaction receipt here if we want to show strict success
-      // But typically we show success after submission hash is received
-
-      setTxHash(tx.transaction_hash)
+      setTxHash(txHash)
       saveRecentAddress(recipientAddress)
       setProgress(100)
       setStep("success")
 
       toast({
         title: "Transfer Submitted",
-        description: `Tx Hash: ${shortenAddress(tx.transaction_hash)}`,
+        description: `Tx Hash: ${shortenAddress(txHash)}`,
       })
     } catch (err) {
       console.error(err)
       setError("Failed to transfer asset. Please try again.")
-      setStep("details") // Go back on error? or stay on confirm?
-
-      // If user rejected, it's a specific error
+      setStep("details")
 
       toast({
         variant: "destructive",
         title: "Transfer failed",
         description: "There was an error transferring your asset.",
       })
+    } finally {
+      setIsTransferPending(false)
     }
   }
 
@@ -220,7 +217,7 @@ export function TransferAssetDialog({
   }
 
   const handleClose = () => {
-    if (step === "processing" && isPending) {
+    if (step === "processing" && isTransferPending) {
       return // Prevent closing during processing
     }
     handleReset()
@@ -339,7 +336,7 @@ export function TransferAssetDialog({
                 <ul className="mt-2 space-y-1 text-muted-foreground">
                   <li className="flex justify-between">
                     <span>Estimated Fee:</span>
-                    <span className="font-medium text-foreground">{transactionFee.amount}</span>
+                    <span className="font-medium text-green-400">{transactionFee.amount}</span>
                   </li>
                   <li className="flex justify-between">
                     <span>USD Value:</span>
