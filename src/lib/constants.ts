@@ -46,7 +46,7 @@ export const SUPPORTED_TOKENS = [
 
 // AVNU Paymaster configuration
 export const AVNU_PAYMASTER_CONFIG = {
-  API_BASE_URL: "https://starknet.api.avnu.fi/paymaster/v1",
+  API_BASE_URL: "https://starknet.paymaster.avnu.fi",
   API_KEY: process.env.NEXT_PUBLIC_AVNU_PAYMASTER_API_KEY,
   GASLESS_API_URL: "https://starknet.api.avnu.fi",
   SUPPORTED_GAS_TOKENS: [

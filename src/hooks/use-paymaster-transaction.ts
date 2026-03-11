@@ -21,13 +21,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAccount } from "@starknet-react/core";
+import { PaymasterRpc } from "starknet";
 import type { Call } from "starknet";
 import {
   checkAccountCompatibility,
   getGasTokenPrices,
   executeGaslessTransaction,
-  buildSponsoredTypedData,
-  executeSponsoredTransaction,
   canSponsor,
 } from "@/utils/paymaster";
 import type { GasTokenPrice } from "@/types/paymaster";
@@ -169,21 +168,24 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
       setError(null);
 
       try {
-        // Build AVNU typed data, sign it, then submit
-        const typedData = await buildSponsoredTypedData(address, calls);
-        const signature = await account.signMessage(typedData);
-        const sigArray = Array.isArray(signature) ? signature : [signature as unknown as string];
-
-        const response = await executeSponsoredTransaction({
-          userAddress: address,
-          typedData,
-          signature: sigArray,
+        const paymaster = new PaymasterRpc({
+          nodeUrl: AVNU_PAYMASTER_CONFIG.API_BASE_URL,
+          headers: {
+            "x-paymaster-api-key": AVNU_PAYMASTER_CONFIG.API_KEY!,
+          },
         });
 
-        if (!response.success) {
-          throw new Error(response.error ?? "Sponsored execution failed");
-        }
-        return response.transactionHash;
+        const response = await account.execute(calls, {
+          paymaster: {
+            provider: paymaster,
+            params: {
+              version: "0x1",
+              feeMode: { mode: "sponsored" },
+            },
+          },
+        } as any);
+
+        return response.transaction_hash;
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Sponsored transaction failed";
         setError(msg);
@@ -212,20 +214,25 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
       // Try sponsored path when API key is present
       if (isSponsorAvailable) {
         try {
-          const typedData = await buildSponsoredTypedData(address, calls);
-          const signature = await account.signMessage(typedData);
-          const sigArray = Array.isArray(signature) ? signature : [signature as unknown as string];
-          const response = await executeSponsoredTransaction({
-            userAddress: address,
-            typedData,
-            signature: sigArray,
+          const paymaster = new PaymasterRpc({
+            nodeUrl: AVNU_PAYMASTER_CONFIG.API_BASE_URL,
+            headers: {
+              "x-paymaster-api-key": AVNU_PAYMASTER_CONFIG.API_KEY!,
+            },
           });
-          if (response.success) {
-            setIsLoading(false);
-            return response.transactionHash;
-          }
-          // Paymaster rejected — fall through to traditional
-          console.warn("[paymaster] Sponsored tx rejected, falling back to traditional:", response.error);
+
+          const response = await account.execute(calls, {
+            paymaster: {
+              provider: paymaster,
+              params: {
+                version: "0x1",
+                feeMode: { mode: "sponsored" },
+              },
+            },
+          } as any);
+
+          setIsLoading(false);
+          return response.transaction_hash;
         } catch (err) {
           // Sponsorship failed — fall through silently
           console.warn("[paymaster] Sponsored tx failed, falling back to traditional:", err);

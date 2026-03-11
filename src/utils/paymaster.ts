@@ -12,14 +12,13 @@ import {
   fetchAccountCompatibility,
   executeCalls,
 } from "@avnu/gasless-sdk";
-import { Account, Call, num } from "starknet";
+import { Account, Call } from "starknet";
 import { AVNU_PAYMASTER_CONFIG } from "@/lib/constants";
 import type {
   GasTokenPrice,
   PaymasterOptions,
   AccountCompatibility,
   PaymasterResponse,
-  SponsoredTransactionData,
   PaymasterStatus,
   TransactionType,
 } from "@/types/paymaster";
@@ -88,95 +87,6 @@ export async function executeGaslessTransaction(
     return { transactionHash: response.transactionHash, success: true };
   } catch (error) {
     console.error("[paymaster] executeGaslessTransaction:", error);
-    return {
-      transactionHash: "",
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Sponsored execution (Medialane pays gas via API key)
-// ---------------------------------------------------------------------------
-
-const HEADERS = () => ({
-  "api-key": AVNU_PAYMASTER_CONFIG.API_KEY ?? "",
-  "Content-Type": "application/json",
-});
-
-/**
- * Build AVNU typed data for a sponsored transaction (API key required).
- */
-export async function buildSponsoredTypedData(
-  userAddress: string,
-  calls: Call[]
-): Promise<any> {
-  if (!AVNU_PAYMASTER_CONFIG.API_KEY) {
-    throw new Error("AVNU API key required for sponsored transactions");
-  }
-
-  // AVNU requires all calldata to be formatted as hex strings
-  const formattedCalls = calls.map((call) => ({
-    ...call,
-    calldata: call.calldata 
-      ? (call.calldata as Array<string | number | bigint>).map((c) => num.toHex(c)) 
-      : undefined,
-  }));
-
-  const res = await fetch(`${AVNU_PAYMASTER_CONFIG.API_BASE_URL}/build-typed-data`, {
-    method: "POST",
-    headers: HEADERS(),
-    body: JSON.stringify({
-      userAddress,
-      gasTokenAddress: null,
-      maxGasTokenAmount: null,
-      calls: formattedCalls,
-    }),
-  });
-
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(
-      (body as { message?: string }).message ?? "Failed to build sponsored typed data"
-    );
-  }
-
-  return res.json();
-}
-
-/**
- * Submit a sponsored transaction to AVNU (API key required).
- */
-export async function executeSponsoredTransaction(
-  data: SponsoredTransactionData
-): Promise<PaymasterResponse> {
-  if (!AVNU_PAYMASTER_CONFIG.API_KEY) {
-    throw new Error("AVNU API key required for sponsored transactions");
-  }
-
-  try {
-    const res = await fetch(`${AVNU_PAYMASTER_CONFIG.API_BASE_URL}/execute`, {
-      method: "POST",
-      headers: HEADERS(),
-      body: JSON.stringify({
-        userAddress: data.userAddress,
-        typedData: data.typedData,
-        signature: data.signature,
-      }),
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(
-        (body as { message?: string }).message ?? "Sponsored transaction rejected"
-      );
-    }
-
-    const result = await res.json();
-    return { transactionHash: result.transactionHash, success: true };
-  } catch (error) {
-    console.error("[paymaster] executeSponsoredTransaction:", error);
     return {
       transactionHash: "",
       success: false,
