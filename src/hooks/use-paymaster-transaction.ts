@@ -21,7 +21,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAccount } from "@starknet-react/core";
-import { PaymasterRpc } from "starknet";
 import type { Call } from "starknet";
 import {
   checkAccountCompatibility,
@@ -168,22 +167,9 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
       setError(null);
 
       try {
-        const paymaster = new PaymasterRpc({
-          nodeUrl: AVNU_PAYMASTER_CONFIG.API_BASE_URL,
-          headers: {
-            "x-paymaster-api-key": AVNU_PAYMASTER_CONFIG.API_KEY!,
-          },
+        const response = await (account as any).executePaymasterTransaction(calls, {
+          feeMode: { mode: "sponsored" },
         });
-
-        const response = await account.execute(calls, {
-          paymaster: {
-            provider: paymaster,
-            params: {
-              version: "0x1",
-              feeMode: { mode: "sponsored" },
-            },
-          },
-        } as any);
 
         return response.transaction_hash;
       } catch (err) {
@@ -214,22 +200,9 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
       // Try sponsored path when API key is present
       if (isSponsorAvailable) {
         try {
-          const paymaster = new PaymasterRpc({
-            nodeUrl: AVNU_PAYMASTER_CONFIG.API_BASE_URL,
-            headers: {
-              "x-paymaster-api-key": AVNU_PAYMASTER_CONFIG.API_KEY!,
-            },
+          const response = await (account as any).executePaymasterTransaction(calls, {
+            feeMode: { mode: "sponsored" },
           });
-
-          const response = await account.execute(calls, {
-            paymaster: {
-              provider: paymaster,
-              params: {
-                version: "0x1",
-                feeMode: { mode: "sponsored" },
-              },
-            },
-          } as any);
 
           setIsLoading(false);
           return response.transaction_hash;
