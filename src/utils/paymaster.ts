@@ -12,7 +12,7 @@ import {
   fetchAccountCompatibility,
   executeCalls,
 } from "@avnu/gasless-sdk";
-import { Account, Call } from "starknet";
+import { Account, Call, num } from "starknet";
 import { AVNU_PAYMASTER_CONFIG } from "@/lib/constants";
 import type {
   GasTokenPrice,
@@ -116,6 +116,14 @@ export async function buildSponsoredTypedData(
     throw new Error("AVNU API key required for sponsored transactions");
   }
 
+  // AVNU requires all calldata to be formatted as hex strings
+  const formattedCalls = calls.map((call) => ({
+    ...call,
+    calldata: call.calldata 
+      ? (call.calldata as Array<string | number | bigint>).map((c) => num.toHex(c)) 
+      : undefined,
+  }));
+
   const res = await fetch(`${AVNU_PAYMASTER_CONFIG.API_BASE_URL}/build-typed-data`, {
     method: "POST",
     headers: HEADERS(),
@@ -123,7 +131,7 @@ export async function buildSponsoredTypedData(
       userAddress,
       gasTokenAddress: null,
       maxGasTokenAmount: null,
-      calls,
+      calls: formattedCalls,
     }),
   });
 
