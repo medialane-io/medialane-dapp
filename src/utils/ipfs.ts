@@ -4,6 +4,16 @@ export interface IPFSMetadata {
   name?: string;
   description?: string;
   image?: string;
+  // OpenSea collection metadata standard fields
+  image_url?: string;
+  cover_image?: string;
+  coverImage?: string;
+  banner_image_url?: string;
+  featured_image?: string;
+  external_link?: string;
+  seller_fee_basis_points?: number;
+  fee_recipient?: string;
+  // Token metadata fields
   type?: string;
   creator?: string | { name: string; address: string };
   attributes?: Array<{ trait_type: string; value: string }>;
@@ -30,6 +40,12 @@ export interface IPFSMetadata {
   pages?: number;
   authors?: string[];
   publisher?: string;
+  // Token image alternatives
+  image_data?: string;
+  animation_url?: string;
+  assetUrl?: string;
+  asset_url?: string;
+  thumbnail_uri?: string;
   [key: string]: unknown;
 }
 
@@ -297,7 +313,7 @@ export function processIPFSHashToUrl(input: string, fallbackUrl: string): string
   // ipfs:/CID, ipfs://CID, ipfs:ipfs/CID
   if (processedUrl.startsWith("ipfs:")) {
     const cid = processedUrl.replace(/^ipfs:(?:ipfs)?\/+/, "");
-    return `${IPFS_GATEWAYS[1]}${cid}`;
+    return `${IPFS_GATEWAYS[0]}${cid}`;
   }
 
 

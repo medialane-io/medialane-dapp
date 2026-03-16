@@ -246,23 +246,49 @@ export function useCollectionMetadata(collectionAddress: string) {
 
         if (rawBaseUri) {
           try {
-            // If rawBaseUri is 'ipfs://...' or hash, extract CID
-            const cidMatch = rawBaseUri.match(/ipfs:\/\/([a-zA-Z0-9]+)/) || rawBaseUri.match(/^([a-zA-Z0-9]+)$/);
+            const isDirectory = rawBaseUri.endsWith("/");
 
-            // Try fetching metadata from IPFS if it looks like a CID or processable URL
-            // If the base_uri points to a directory (common for collections), we might need `base_uri + "collection.json"`
-            // But let's try assuming base_uri points to metadata file first.
-            const metadataUrl = resolveIpfsUrl(rawBaseUri);
+            // Candidate URLs to try, in order of preference.
+            // If base_uri is a directory (token base), try well-known collection metadata paths first.
+            // If base_uri is a file CID, fetch it directly as collection metadata.
+            const candidates = isDirectory
+              ? [
+                  rawBaseUri + "collection",       // OpenSea/Manifold standard
+                  rawBaseUri + "collection.json",  // Alternative extension
+                  rawBaseUri + "contract",          // Used by some protocols
+                  rawBaseUri + "0",                 // Some collections store collection metadata at token 0
+                ]
+              : [rawBaseUri];
 
-            if (metadataUrl && metadataUrl !== "/placeholder.svg") {
-              const res = await fetch(metadataUrl);
-              if (res.ok) {
+            for (const candidate of candidates) {
+              try {
+                const metadataUrl = resolveIpfsUrl(candidate);
+                if (!metadataUrl || metadataUrl === "/placeholder.svg") continue;
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                const res = await fetch(metadataUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (!res.ok) continue;
                 const json = await res.json();
+
+                // Validate it looks like metadata (not a binary or error response)
+                if (typeof json !== "object" || json === null) continue;
+
                 description = json.description || "";
-                image = resolveIpfsUrl(json.image || json.cover_image || json.coverImage || "/placeholder.svg");
+                // OpenSea collection standard: image, image_url, cover_image, banner_image_url, featured_image
+                const rawImage = json.image || json.image_url || json.cover_image || json.coverImage ||
+                  json.banner_image_url || json.featured_image;
+                if (rawImage) {
+                  image = resolveIpfsUrl(rawImage);
+                }
+                resolvedBaseUri = resolveIpfsUrl(rawBaseUri);
+                break;
+              } catch {
+                // Try next candidate
               }
             }
-            resolvedBaseUri = metadataUrl;
           } catch (e) {
             console.warn("Failed to fetch collection IPFS metadata", e);
           }
@@ -304,7 +330,11 @@ export function useCollectionMetadata(collectionAddress: string) {
                   if (tokenMetadata) {
                     if (!description) description = tokenMetadata.description || "";
                     if (image === "/placeholder.svg") {
-                      const tokenImage = tokenMetadata.image || tokenMetadata.image_url || tokenMetadata.assetUrl || tokenMetadata.asset_url || tokenMetadata.cover_image || tokenMetadata.coverImage || tokenMetadata.thumbnail_uri;
+                      const tokenImage = tokenMetadata.image || tokenMetadata.image_url ||
+                        tokenMetadata.assetUrl || tokenMetadata.asset_url ||
+                        tokenMetadata.cover_image || tokenMetadata.coverImage ||
+                        tokenMetadata.banner_image_url || tokenMetadata.featured_image ||
+                        tokenMetadata.thumbnail_uri;
                       if (tokenImage) {
                         image = resolveIpfsUrl(tokenImage as string);
                       }
