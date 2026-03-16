@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +37,7 @@ import {
 } from "@/hooks/use-collection-new";
 import { useMarketplaceListings } from "@/hooks/use-marketplace-events";
 import { Asset } from "@/types/asset";
+import { nextIpfsGatewayUrl } from "@/utils/ipfs";
 import { CollectionOfferDialog } from "@/components/marketplace/checkout/collection-offer-dialog";
 import { useCollectionFloor } from "@/hooks/use-collection-floor";
 
@@ -50,6 +51,7 @@ export default function CollectionDetails({ collectionAddress }: CollectionDetai
     const [copied, setCopied] = useState<string | null>(null);
     const [imageRatio, setImageRatio] = useState<number | null>(null);
     const [reportOpen, setReportOpen] = useState(false);
+    const [bgImageSrc, setBgImageSrc] = useState<string | null>(null);
 
     // Use new hooks for fetching data
     const {
@@ -66,6 +68,13 @@ export default function CollectionDetails({ collectionAddress }: CollectionDetai
 
     const isLoading = collectionLoading || assetsLoading;
     const error = collectionError || assetsError;
+
+    // Keep bgImageSrc in sync with collection.image; retry with next gateway on error
+    const resolvedBgSrc = bgImageSrc ?? collection?.image ?? "/placeholder.svg";
+    const handleBgImageError = useCallback(() => {
+        const next = nextIpfsGatewayUrl(resolvedBgSrc);
+        if (next) setBgImageSrc(next);
+    }, [resolvedBgSrc]);
 
     const filteredAssets = (collectionAssets || []).filter((asset) => {
         const matchesSearch = asset.name
@@ -181,12 +190,13 @@ export default function CollectionDetails({ collectionAddress }: CollectionDetai
 
                     {/* Collection Image Background - More visible */}
                     <Image
-                        src={collection.image || "/placeholder.svg"}
+                        src={resolvedBgSrc}
                         alt="Collection Background"
                         fill
                         className="object-cover opacity-60 blur-2xl scale-110"
                         priority
                         sizes="100vw"
+                        onError={handleBgImageError}
                     />
 
                     {/*  overlay - Lighter for vividness */}

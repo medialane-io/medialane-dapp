@@ -262,26 +262,34 @@ export function useCollectionMetadata(collectionAddress: string) {
 
             for (const candidate of candidates) {
               try {
-                const metadataUrl = resolveIpfsUrl(candidate);
-                if (!metadataUrl || metadataUrl === "/placeholder.svg") continue;
+                // Extract the CID so we can use fetchIPFSMetadata's multi-gateway
+                // fallback instead of fetching from a single hardcoded gateway.
+                const cid = candidate
+                  .replace(/^ipfs:\/\//, "")
+                  .replace(/^https?:\/\/[^/]+\/ipfs\//, "")
+                  .trim();
 
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000);
-                const res = await fetch(metadataUrl, { signal: controller.signal });
-                clearTimeout(timeoutId);
-
-                if (!res.ok) continue;
-                const json = await res.json();
+                let json: Record<string, unknown> | null = null;
+                if (cid && cid.length >= 32) {
+                  json = await fetchIPFSMetadata(cid) as Record<string, unknown> | null;
+                } else {
+                  // Non-IPFS URL (http/https): single direct fetch
+                  const controller = new AbortController();
+                  const timeoutId = setTimeout(() => controller.abort(), 5000);
+                  const res = await fetch(candidate, { signal: controller.signal });
+                  clearTimeout(timeoutId);
+                  if (res.ok) json = await res.json();
+                }
 
                 // Validate it looks like metadata (not a binary or error response)
-                if (typeof json !== "object" || json === null) continue;
+                if (!json || typeof json !== "object") continue;
 
-                description = json.description || "";
+                description = (json.description as string) || "";
                 // OpenSea collection standard: image, image_url, cover_image, banner_image_url, featured_image
                 const rawImage = json.image || json.image_url || json.cover_image || json.coverImage ||
                   json.banner_image_url || json.featured_image;
                 if (rawImage) {
-                  image = resolveIpfsUrl(rawImage);
+                  image = resolveIpfsUrl(rawImage as string);
                 }
                 resolvedBaseUri = resolveIpfsUrl(rawBaseUri);
                 break;

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image, { ImageProps } from "next/image";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { nextIpfsGatewayUrl } from "@/utils/ipfs";
 
 interface LazyImageProps extends ImageProps {
     fallbackSrc?: string;
@@ -45,6 +46,14 @@ export function LazyImage({
     };
 
     const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+        // If the current src is an IPFS gateway URL, try the next fallback gateway
+        if (imgSrc) {
+            const next = nextIpfsGatewayUrl(imgSrc);
+            if (next) {
+                setImgSrc(next);
+                return; // keep isLoading=true, retry with new src
+            }
+        }
         setIsLoading(false);
         setError(true);
         if (props.onError) {

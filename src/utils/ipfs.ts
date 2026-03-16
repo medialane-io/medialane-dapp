@@ -339,3 +339,18 @@ export function processIPFSHashToUrl(input: string, fallbackUrl: string): string
 
   return fallbackUrl || "";
 }
+
+/**
+ * Given an IPFS gateway URL that failed to load, return the same CID served
+ * from the next gateway in the fallback list.  Returns null if the URL is not
+ * an IPFS gateway URL or all gateways have been exhausted.
+ */
+export function nextIpfsGatewayUrl(url: string): string | null {
+  if (!url) return null;
+  const currentIdx = IPFS_GATEWAYS.findIndex((g) => url.startsWith(g));
+  if (currentIdx === -1) return null;
+  const nextGateway = IPFS_GATEWAYS[currentIdx + 1];
+  if (!nextGateway) return null;
+  const cid = url.slice(IPFS_GATEWAYS[currentIdx].length);
+  return nextGateway + cid;
+}
