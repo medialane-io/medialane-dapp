@@ -45,12 +45,12 @@ export function LaunchpadContent() {
                 {/* LEFT: Primary Feature Column */}
                 <div className="lg:col-span-8 space-y-8">
 
-                    {/* HERO: Collection Drop */}
+                    {/* HERO: Collection Drop 
                     <motion.div
                         whileTap={{ scale: 0.985 }}
                         className="group relative overflow-hidden bg-m3-surface-container-lowest border border-m3-outline-variant rounded-[32px] p-8 sm:p-10 shadow-m3-1 hover:shadow-m3-2 transition-shadow"
                     >
-                        {/* Gradient Accent Top */}
+                        
                         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500" />
 
                         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
@@ -69,7 +69,7 @@ export function LaunchpadContent() {
                                     Build a premium NFT drop with dedicated minting mechanics and built-in community storytelling.
                                 </p>
 
-                                {/* Rich Metadata Pills */}
+                                
                                 <div className="flex flex-wrap gap-3 mb-8">
                                     <div className="flex items-center gap-2 text-xs font-bold text-m3-on-surface-variant bg-m3-surface-variant/40 px-3 py-1.5 rounded-full">
                                         <Clock className="h-3.5 w-3.5" /> 2-5 min
@@ -97,6 +97,7 @@ export function LaunchpadContent() {
                             </div>
                         </div>
                     </motion.div>
+                    */}
 
                     {/* SECONDARY ROW: Single Mint & Standard Collection */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">

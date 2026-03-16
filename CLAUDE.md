@@ -147,6 +147,31 @@ Medialane collects a 1% fee on all marketplace and launchpad transactions, so ga
 - `src/utils/` — Helper functions (SEO, marketplace utils, IPFS, starknet address utils, paymaster utils)
 - `src/actions/` — Next.js Server Actions
 
+## Collection Metadata Resolution
+
+Collections are resolved via `base_uri` on-chain. The dapp reads `base_uri` from the registry contract and resolves the metadata JSON from IPFS — no backend calls.
+
+### Strategy (in `src/hooks/use-collection-new.ts`)
+- If `base_uri` is empty → no collection image available (legacy collections created before 2026-03-16)
+- If `base_uri` ends with `/` (directory style) → tries sub-paths in order: `collection`, `collection.json`, `contract`, `0`. This covers OpenSea, Manifold, and Medialane conventions.
+- If `base_uri` is a file CID or direct IPFS URI → fetched directly
+
+### Image field resolution order
+Metadata JSON image is read from (first non-null wins): `image`, `image_url`, `cover_image`, `banner_image_url`, `featured_image`. This ensures compatibility with OpenSea collection metadata standard.
+
+### IPFS gateways (`src/utils/ipfs.ts`)
+Multi-gateway fallback: Pinata → ipfs.io → Cloudflare → dweb.link. 24h localStorage cache (`ipfs-metadata-{cid}`). All `ipfs://` URIs go to `IPFS_GATEWAYS[0]` (Pinata) — do not change to index 1.
+
+### OpenSea metadata standards compliance
+- Token metadata: `{ name, description, image, external_url, attributes: [{ trait_type, value }] }`
+- Collection metadata: `{ name, description, image, external_link }`
+- `IPFSMetadata` interface in `src/utils/ipfs.ts` includes all standard OpenSea collection and token fields
+
+### Design constraint
+This dapp MUST remain fully permissionless — no backend API calls, no Clerk, no ChipiPay. All data comes from on-chain reads (starknet.js direct contract calls) and IPFS. This enables anti-censorship self-hosting for AI agents and autonomous actors.
+
+---
+
 ## Conventions
 
 - Filenames: `kebab-case`; components: `PascalCase`
