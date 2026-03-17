@@ -220,6 +220,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             };
 
             const calls = isAlreadyApproved ? [registerCall] : [approveCall, registerCall];
+            console.log("createListing calls:", JSON.stringify(calls, null, 2));
             const hash = await unifiedExecute(calls);
             console.log("Transaction sent:", hash);
             setTxHash(hash);

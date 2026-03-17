@@ -217,6 +217,7 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
         const response = await account.execute(calls as any); // eslint-disable-line @typescript-eslint/no-explicit-any
         return response.transaction_hash;
       } catch (err) {
+        console.error("[paymaster] Traditional tx failed:", err);
         const msg = err instanceof Error ? err.message : "Transaction failed";
         setError(msg);
         throw new Error(msg); // propagate so callers get the real error, not a stale closure
