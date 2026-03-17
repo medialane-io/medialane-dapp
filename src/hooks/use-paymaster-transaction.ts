@@ -219,7 +219,7 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Transaction failed";
         setError(msg);
-        return null;
+        throw new Error(msg); // propagate so callers get the real error, not a stale closure
       } finally {
         setIsLoading(false);
       }

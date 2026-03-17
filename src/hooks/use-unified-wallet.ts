@@ -83,15 +83,15 @@ export function useUnifiedWallet(): UnifiedWallet {
 
   const execute = useCallback(
     async (calls: Call[]): Promise<string> => {
-      // Use the paymaster's executeAuto which handles both StarkZap and injected wallets
-      // with automatic sponsorship fallback.
+      // executeAuto now throws on failure, so errors propagate with real messages.
+      // If it returns null for any unexpected reason, throw a generic fallback.
       const hash = await executeAuto(calls);
       if (!hash) {
-        throw new Error(paymasterError || "Transaction failed");
+        throw new Error("Transaction failed");
       }
       return hash;
     },
-    [executeAuto, paymasterError]
+    [executeAuto]
   );
 
   const disconnect = useCallback(() => {
