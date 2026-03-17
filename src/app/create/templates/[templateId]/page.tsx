@@ -247,14 +247,7 @@ export default function CreateAssetFromTemplate() {
 
           const tokenId = mintTxApply.tokenId
           const nftAddress = contractHex
-          const usdcAddress = usdcToken?.address || "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8"
-          const usdcDecimals = usdcToken?.decimals || 6
-
-          const priceInSmallestUnit = BigInt(
-            Math.round(parseFloat(formState.listingPrice) * Math.pow(10, usdcDecimals))
-          ).toString()
-
-          const now = Math.floor(Date.now() / 1000)
+          const listingCurrency = formState.listingCurrency || "USDC"
           const duration = 30 * 24 * 60 * 60
 
           setMintProgress(95)
@@ -262,14 +255,14 @@ export default function CreateAssetFromTemplate() {
             nftAddress,
             tokenId,
             formState.listingPrice,
-            "USDC",
+            listingCurrency,
             duration
           )
 
           if (listingTxHash) {
             toast({
               title: "🏷️ Listed on Marketplace!",
-              description: `Your ${template.name} asset is now listed for ${formState.listingPrice} USDC.`,
+              description: `Your ${template.name} asset is now listed for ${formState.listingPrice} ${listingCurrency}.`,
             })
           }
         } catch (listingError) {
@@ -341,7 +334,7 @@ export default function CreateAssetFromTemplate() {
         data={{
           "License Type": formState.licenseType,
           "Collection": collections.find(c => c.id.toString() === formState.collection)?.name || "Unknown",
-          ...(formState.listOnMarketplace && formState.listingPrice ? { "Listing Price": `${formState.listingPrice} USDC` } : {}),
+          ...(formState.listOnMarketplace && formState.listingPrice ? { "Listing Price": `${formState.listingPrice} ${formState.listingCurrency || "USDC"}` } : {}),
         }}
       />
 

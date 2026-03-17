@@ -32,12 +32,23 @@ export const getCurrency = (tokenAddress: string) => {
   return { symbol: "TOKEN", decimals: 18 };
 };
 
+function adaptiveDecimals(num: number): number {
+  if (num === 0 || num >= 1) return 2;
+  if (num >= 0.01) return 4;
+  // Show enough decimals to reveal 2 significant figures (e.g. 0.000014 → 6)
+  const leadingZeros = Math.floor(-Math.log10(Math.abs(num)));
+  return leadingZeros + 2;
+}
+
 export const formatPrice = (amount: string, decimals: number) => {
   if (!amount) return "0";
   try {
     const val = BigInt(amount);
-    return (Number(val) / Math.pow(10, decimals)).toFixed(decimals <= 6 ? 2 : 4);
-  } catch (e) {
+    const num = Number(val) / Math.pow(10, decimals);
+    return num.toLocaleString(undefined, {
+      maximumFractionDigits: adaptiveDecimals(num),
+    });
+  } catch {
     return "0";
   }
 };

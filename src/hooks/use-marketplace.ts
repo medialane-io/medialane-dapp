@@ -38,8 +38,9 @@ interface UseMarketplaceReturn {
 }
 
 // Module-level helpers
+import { SUPPORTED_TOKENS } from "@/lib/constants";
 const getDecimals = (currencySymbol: string) =>
-    currencySymbol === "USDC" || currencySymbol === "USDT" ? 6 : 18;
+    SUPPORTED_TOKENS.find((t) => t.symbol === currencySymbol)?.decimals ?? 18;
 
 const toWei = (price: string, currencySymbol: string): string =>
     BigInt(Math.floor(parseFloat(price) * Math.pow(10, getDecimals(currencySymbol)))).toString();

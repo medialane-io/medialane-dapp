@@ -75,7 +75,7 @@ export function AssetPreview({ formState, template }: AssetPreviewProps) {
               ))}
               {formState.listOnMarketplace && formState.listingPrice && (
                 <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-600 border-green-500/20">
-                  {formState.listingPrice} USDC
+                  {formState.listingPrice} {formState.listingCurrency || "USDC"}
                 </Badge>
               )}
             </div>

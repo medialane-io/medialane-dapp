@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { SUPPORTED_TOKENS } from "@/lib/constants"
 
 const DURATION_OPTIONS = [
     { value: "1d", label: "1 Day", seconds: 86400 },
@@ -52,12 +53,39 @@ export function MarketplacePricing({ formState, updateFormField }: MarketplacePr
                         className="h-14 text-xl font-bold pl-10 pr-16 bg-m3-surface-container-highest border border-m3-outline-variant/40 hover:border-m3-primary/50 focus:border-m3-primary focus:ring-1 focus:ring-m3-primary/30 transition-all duration-m3-medium ease-m3-standard rounded-m3-md shadow-m3-1"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                        <span className="text-xs font-black text-primary/50 tracking-tighter">USDC</span>
+                        <span className="text-xs font-black text-primary/50 tracking-tighter">
+                            {formState.listingCurrency || "USDC"}
+                        </span>
                     </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
                     Setting a price ensures your asset is immediately tradable on our marketplace.
                 </p>
+            </div>
+
+            <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                    Listing Currency
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                    {SUPPORTED_TOKENS.map((token) => (
+                        <Button
+                            key={token.symbol}
+                            type="button"
+                            variant={(formState.listingCurrency || "USDC") === token.symbol ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => updateFormField("listingCurrency", token.symbol)}
+                            className={cn(
+                                "h-9 px-4 text-xs font-bold rounded-full transition-all border",
+                                (formState.listingCurrency || "USDC") === token.symbol
+                                    ? "bg-m3-secondary-container text-m3-on-secondary-container border-transparent shadow-m3-1"
+                                    : "bg-m3-surface-container-low border-m3-outline-variant/40 text-m3-on-surface hover:bg-m3-surface-container"
+                            )}
+                        >
+                            {token.symbol}
+                        </Button>
+                    ))}
+                </div>
             </div>
 
             <div className="space-y-2">
@@ -92,7 +120,7 @@ export function MarketplacePricing({ formState, updateFormField }: MarketplacePr
                 <div className="flex items-center justify-center gap-2 p-3 rounded-m3-md bg-m3-primary-container border border-m3-primary/20 animate-in fade-in slide-in-from-top-2 duration-m3-medium">
                     <Zap className="h-4 w-4 text-m3-on-primary-container" />
                     <span className="text-xs font-semibold text-m3-on-primary-container">
-                        Ready to launch: Listed for {formState.listingPrice} USDC at mint
+                        Ready to launch: Listed for {formState.listingPrice} {formState.listingCurrency || "USDC"} at mint
                     </span>
                 </div>
             )}

@@ -106,6 +106,14 @@ export const STARKZAP_TOKENS = {
     ),
     decimals: 6,
   },
+  WBTC: {
+    name: "Wrapped Bitcoin",
+    symbol: "WBTC",
+    address: fromAddress(
+      "0x03fe2b97c1fd336e750087d68b9b867997fd64a2661ff3ca5a7c771641e8e7ac"
+    ),
+    decimals: 8,
+  },
 } satisfies Record<string, Token>;
 
 export type StarkZapTokenKey = keyof typeof STARKZAP_TOKENS;

@@ -75,7 +75,7 @@ import { useAccount } from "@starknet-react/core"
 import { SUPPORTED_TOKENS, EXPLORER_URL } from "@/lib/constants"
 import { useTokenMetadata } from "@/hooks/use-token-metadata"
 
-const SUPPORTED_CURRENCY_SYMBOLS = ["STRK", "USDC", "USDT"] as const;
+const CURRENCY_SYMBOLS = SUPPORTED_TOKENS.map((t) => t.symbol);
 
 const offerSchema = z.object({
     price: z.string()
@@ -83,8 +83,8 @@ const offerSchema = z.object({
         .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
             message: "Amount must be greater than zero",
         }),
-    currency: z.enum(SUPPORTED_CURRENCY_SYMBOLS, {
-        required_error: "Currency is required",
+    currency: z.string().refine((val) => (CURRENCY_SYMBOLS as string[]).includes(val), {
+        message: "Currency is required",
     }),
     durationSeconds: z.number().min(86400, "Duration must be at least 1 day"),
 })
@@ -285,6 +285,38 @@ export function OfferDialog({ trigger, asset, isOpen: controlledOpen, onOpenChan
                                                         </span>
                                                     </div>
                                                 </div>
+                                                <FormMessage className="text-xs ml-1" />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="currency"
+                                        render={({ field }) => (
+                                            <FormItem className="space-y-2.5">
+                                                <FormLabel className="text-xs font-bold uppercase tracking-wider text-m3-on-surface-variant ml-1">
+                                                    Currency
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {SUPPORTED_TOKENS.map((token) => (
+                                                            <Button
+                                                                key={token.symbol}
+                                                                type="button"
+                                                                variant={field.value === token.symbol ? "default" : "tonal"}
+                                                                size="sm"
+                                                                onClick={() => field.onChange(token.symbol)}
+                                                                className={cn(
+                                                                    "h-9 px-4 text-xs font-bold rounded-m3-full transition-all",
+                                                                    field.value === token.symbol ? "shadow-m3-1" : "hover:bg-m3-surface-container-highest"
+                                                                )}
+                                                            >
+                                                                {token.symbol}
+                                                            </Button>
+                                                        ))}
+                                                    </div>
+                                                </FormControl>
                                                 <FormMessage className="text-xs ml-1" />
                                             </FormItem>
                                         )}

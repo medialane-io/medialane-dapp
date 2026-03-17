@@ -33,7 +33,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { useMarketplace } from "@/hooks/use-marketplace"
-import { EXPLORER_URL } from "@/lib/constants"
+import { EXPLORER_URL, SUPPORTED_TOKENS } from "@/lib/constants"
 import { useTokenMetadata } from "@/hooks/use-token-metadata"
 import { useRouter } from "next/navigation"
 
@@ -58,9 +58,7 @@ const DURATION_OPTIONS = [
     { value: "180d", label: "6 Months", seconds: 15552000 },
 ]
 
-// Determine supported currencies - ideally this comes from SUPPORTED_TOKENS directly
-// But for schema defining at module level, we explicitly define the core valid ones
-const SUPPORTED_CURRENCY_SYMBOLS = ["STRK", "USDC", "USDT"] as const;
+const CURRENCY_SYMBOLS = SUPPORTED_TOKENS.map((t) => t.symbol);
 
 // Strict form validation schema
 const listingSchema = z.object({
@@ -70,17 +68,16 @@ const listingSchema = z.object({
             message: "Price must be a positive number",
         })
         .refine((val) => {
-            // Check for excessive decimals
             if (val.includes(".")) {
                 const decimalPlaces = val.split(".")[1].length;
-                return decimalPlaces <= 18; // generic cap, actual decimal limits per token handle later if needed
+                return decimalPlaces <= 18;
             }
             return true;
         }, {
             message: "Too many decimal places",
         }),
-    currency: z.enum(SUPPORTED_CURRENCY_SYMBOLS, {
-        required_error: "Please select a currency",
+    currency: z.string().refine((val) => (CURRENCY_SYMBOLS as string[]).includes(val), {
+        message: "Please select a currency",
     }),
     durationSeconds: z.number().min(86400, "Duration must be at least 1 day"),
 })
@@ -218,6 +215,39 @@ export function ListingDialog({ trigger, asset }: ListingDialogProps) {
                                                     </span>
                                                 </div>
                                             </div>
+                                            <FormMessage className="text-xs ml-1" />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="currency"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-2.5">
+                                            <FormLabel className="text-xs font-bold uppercase tracking-wider text-m3-on-surface-variant ml-1">
+                                                Currency
+                                            </FormLabel>
+                                            <FormControl>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {SUPPORTED_TOKENS.map((token) => (
+                                                        <Button
+                                                            key={token.symbol}
+                                                            type="button"
+                                                            variant={field.value === token.symbol ? "default" : "tonal"}
+                                                            size="sm"
+                                                            onClick={() => field.onChange(token.symbol)}
+                                                            className={cn(
+                                                                "h-9 px-4 text-xs font-bold rounded-m3-full transition-all",
+                                                                field.value === token.symbol ? "shadow-m3-1" : "hover:bg-m3-surface-container-highest"
+                                                            )}
+                                                            disabled={isProcessing}
+                                                        >
+                                                            {token.symbol}
+                                                        </Button>
+                                                    ))}
+                                                </div>
+                                            </FormControl>
                                             <FormMessage className="text-xs ml-1" />
                                         </FormItem>
                                     )}
