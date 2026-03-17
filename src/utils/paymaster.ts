@@ -96,6 +96,45 @@ export async function executeGaslessTransaction(
 }
 
 // ---------------------------------------------------------------------------
+// Sponsored execution (Medialane pays gas via AVNU API key)
+// ---------------------------------------------------------------------------
+
+/**
+ * Execute calls via AVNU gasless SDK with sponsored gas.
+ * Passing no gasTokenAddress/maxGasTokenAmount + apiKey in options tells
+ * AVNU to charge the API key owner for gas instead of the user.
+ */
+export async function executeSponsoredTransaction(
+  account: Account,
+  calls: Call[]
+): Promise<PaymasterResponse> {
+  const apiKey = AVNU_PAYMASTER_CONFIG.API_KEY;
+  if (!apiKey) {
+    return {
+      transactionHash: "",
+      success: false,
+      error: "AVNU API key not configured",
+    };
+  }
+  try {
+    const response = await executeCalls(
+      account,
+      calls,
+      {},
+      { apiKey }
+    );
+    return { transactionHash: response.transactionHash, success: true };
+  } catch (error) {
+    console.error("[paymaster] executeSponsoredTransaction:", error);
+    return {
+      transactionHash: "",
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Sponsorship eligibility
 // ---------------------------------------------------------------------------
 

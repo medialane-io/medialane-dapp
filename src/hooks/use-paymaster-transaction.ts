@@ -26,6 +26,7 @@ import {
   checkAccountCompatibility,
   getGasTokenPrices,
   executeGaslessTransaction,
+  executeSponsoredTransaction,
   canSponsor,
 } from "@/utils/paymaster";
 import type { GasTokenPrice } from "@/types/paymaster";
@@ -167,11 +168,15 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
       setError(null);
 
       try {
-        const response = await (account as any).executePaymasterTransaction(calls, {
-          feeMode: { mode: "sponsored" },
-        });
+        const response = await executeSponsoredTransaction(
+          account as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+          calls
+        );
 
-        return response.transaction_hash;
+        if (!response.success) {
+          throw new Error(response.error ?? "Sponsored transaction failed");
+        }
+        return response.transactionHash;
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Sponsored transaction failed";
         setError(msg);
@@ -200,12 +205,17 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
       // Try sponsored path when API key is present
       if (isSponsorAvailable) {
         try {
-          const response = await (account as any).executePaymasterTransaction(calls, {
-            feeMode: { mode: "sponsored" },
-          });
+          const response = await executeSponsoredTransaction(
+            account as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+            calls
+          );
 
-          setIsLoading(false);
-          return response.transaction_hash;
+          if (response.success) {
+            setIsLoading(false);
+            return response.transactionHash;
+          }
+          // Sponsorship rejected — fall through silently
+          console.warn("[paymaster] Sponsored tx rejected, falling back to traditional:", response.error);
         } catch (err) {
           // Sponsorship failed — fall through silently
           console.warn("[paymaster] Sponsored tx failed, falling back to traditional:", err);
