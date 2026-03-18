@@ -1,7 +1,7 @@
 "use client";
 
 import { MarketplaceOrder } from "@/hooks/use-marketplace-events";
-import { normalizeStarknetAddress, cn } from "@/lib/utils";
+import { normalizeStarknetAddress, cn, formatPrice } from "@/lib/utils";
 import { SUPPORTED_TOKENS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -49,16 +49,6 @@ export function ListingCard({ listing, onCancel }: ListingCardProps) {
     };
 
     const currency = getCurrency(paymentToken);
-
-    // Price formatting matching use-listing.ts logic
-    const formatPrice = (amount: string, decimals: number) => {
-        try {
-            const val = BigInt(amount);
-            return (Number(val) / Math.pow(10, decimals)).toFixed(decimals <= 6 ? 2 : 4);
-        } catch (e) {
-            return "0";
-        }
-    };
 
     const formattedPrice = formatPrice(paymentAmount, currency.decimals);
 

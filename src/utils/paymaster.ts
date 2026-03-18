@@ -14,6 +14,7 @@ import {
 } from "@avnu/gasless-sdk";
 import { Account, Call } from "starknet";
 import { AVNU_PAYMASTER_CONFIG } from "@/lib/constants";
+import { formatPrice } from "@/lib/utils";
 import type {
   GasTokenPrice,
   PaymasterOptions,
@@ -163,6 +164,5 @@ export function formatGasTokenAmount(
   decimals: number,
   symbol: string
 ): string {
-  const formatted = (Number(amount) / Math.pow(10, decimals)).toFixed(6);
-  return `${formatted} ${symbol}`;
+  return `${formatPrice(amount, decimals)} ${symbol}`;
 }

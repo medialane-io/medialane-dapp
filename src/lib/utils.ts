@@ -40,16 +40,29 @@ function adaptiveDecimals(num: number): number {
   return leadingZeros + 2;
 }
 
-export const formatPrice = (amount: string, decimals: number) => {
-  if (!amount) return "0";
+export const formatPrice = (amount: string | number, decimals: number = 18) => {
+  if (amount === undefined || amount === null) return "0.00";
   try {
-    const val = BigInt(amount);
-    const num = Number(val) / Math.pow(10, decimals);
-    return num.toLocaleString(undefined, {
-      maximumFractionDigits: adaptiveDecimals(num),
+    let num: number;
+    if (typeof amount === "number") {
+      num = amount;
+    } else {
+      const val = BigInt(amount);
+      num = Number(val) / Math.pow(10, decimals);
+    }
+    
+    if (num === 0) return "0.00";
+    
+    // Determine min/max fraction digits based on the number's magnitude
+    const maxFractions = Math.min(20, adaptiveDecimals(num));
+    const minFractions = num >= 1 ? 2 : undefined;
+    
+    return num.toLocaleString("en-US", {
+      minimumFractionDigits: minFractions,
+      maximumFractionDigits: maxFractions,
     });
   } catch {
-    return "0";
+    return "0.00";
   }
 };
 

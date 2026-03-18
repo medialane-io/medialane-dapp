@@ -2,17 +2,8 @@
 
 import { useMemo } from "react";
 import { useMarketplaceListings } from "@/hooks/use-marketplace-events";
-import { normalizeStarknetAddress } from "@/lib/utils";
+import { normalizeStarknetAddress, formatPrice } from "@/lib/utils";
 import { SUPPORTED_TOKENS } from "@/lib/constants";
-
-const formatPrice = (amount: string, decimals: number = 18): string => {
-    try {
-        const val = BigInt(amount);
-        return (Number(val) / Math.pow(10, decimals)).toFixed(decimals <= 6 ? 2 : 4);
-    } catch {
-        return "0";
-    }
-};
 
 const getCurrencyInfo = (tokenAddress: string): { symbol: string; decimals: number } => {
     const normalized = normalizeStarknetAddress(tokenAddress).toLowerCase();

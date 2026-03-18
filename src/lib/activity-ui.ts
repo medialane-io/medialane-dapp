@@ -1,6 +1,6 @@
 import { Plus, Send, GitBranch, Activity as ActivityIcon, Tag, Gavel, ShoppingCart, XCircle, type LucideIcon } from "lucide-react"
 import { format } from "date-fns"
-import { normalizeStarknetAddress } from "@/lib/utils"
+import { normalizeStarknetAddress, formatPrice as utilsFormatPrice } from "@/lib/utils"
 import { SUPPORTED_TOKENS } from "@/lib/constants"
 
 export const ACTIVITY_LABELS: Record<string, string> = {
@@ -131,12 +131,7 @@ export function shouldShowGradient(type: string, assetImage: string): boolean {
 }
 
 export function formatPrice(raw: string, decimals: number): string {
-  try {
-    const value = Number(BigInt(raw)) / 10 ** decimals
-    return decimals === 6 ? value.toFixed(2) : value.toFixed(4)
-  } catch {
-    return "0"
-  }
+  return utilsFormatPrice(raw, decimals)
 }
 
 export function lookupToken(address: string): { symbol: string; decimals: number } | null {

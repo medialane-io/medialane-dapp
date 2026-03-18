@@ -72,7 +72,7 @@ const typeColors: Record<string, string> = {
   Custom: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
 }
 import { useAccount } from "@starknet-react/core"
-import { shortenAddress } from "@/lib/utils"
+import { shortenAddress, formatPrice } from "@/lib/utils"
 
 // ... imports remain the same ...
 
@@ -185,7 +185,7 @@ export default function TransferPage() {
 
     toast({
       title: "Transfer Complete",
-      description: `${selectedAssets.length} asset${selectedAssets.length > 1 ? "s" : ""} (${(totalValue / 1000).toFixed(2)} ETH) transferred to ${recipientAddress.substring(0, 6)}...${recipientAddress.substring(recipientAddress.length - 4)}`,
+      description: `${selectedAssets.length} asset${selectedAssets.length > 1 ? "s" : ""} (${formatPrice(totalValue / 1000)} ETH) transferred to ${recipientAddress.substring(0, 6)}...${recipientAddress.substring(recipientAddress.length - 4)}`,
     })
 
     // Reset selection after transfer
@@ -244,7 +244,7 @@ export default function TransferPage() {
                 <span>{selectedAssets.length} selected</span>
                 <Separator orientation="vertical" className="h-4" />
                 <Zap className="h-4 w-4 text-primary" />
-                <span className="font-medium">{(selectedValue / 1000).toFixed(2)} ETH</span>
+                <span className="font-medium">{formatPrice(selectedValue / 1000)} ETH</span>
               </div>
             )}
             {selectedAssets.length > 0 && (
@@ -427,7 +427,7 @@ export default function TransferPage() {
                           {selectedAssets.length > 0 && (
                             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                               <Zap className="h-3 w-3 text-primary" />
-                              Total value: {(selectedValue / 1000).toFixed(2)} ETH
+                               Total value: {formatPrice(selectedValue / 1000)} ETH
                             </p>
                           )}
                         </div>
@@ -735,7 +735,7 @@ export default function TransferPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <Zap className="h-3 w-3 text-outrun-cyan" />
-                  <span className="font-medium">{(selectedValue / 1000).toFixed(2)} ETH</span>
+                  <span className="font-medium">{formatPrice(selectedValue / 1000)} ETH</span>
                 </div>
               </div>
             </CardContent>

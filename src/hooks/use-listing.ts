@@ -6,17 +6,7 @@ import { Abi } from "starknet";
 import { IPMarketplaceABI } from "@/abis/ip_market";
 import { useMarketplaceListings, findListingForToken, MarketplaceOrder } from "@/hooks/use-marketplace-events";
 import { SUPPORTED_TOKENS } from "@/lib/constants";
-import { normalizeStarknetAddress } from "@/lib/utils";
-
-// Helper to format wei to human-readable price
-const formatPrice = (amount: string, decimals: number = 18) => {
-    try {
-        const val = BigInt(amount);
-        return (Number(val) / Math.pow(10, decimals)).toFixed(decimals <= 6 ? 2 : 4);
-    } catch {
-        return "0";
-    }
-};
+import { normalizeStarknetAddress, formatPrice } from "@/lib/utils";
 
 // Find currency symbol from address
 const getCurrencySymbol = (tokenAddress: string): { symbol: string; decimals: number } => {
