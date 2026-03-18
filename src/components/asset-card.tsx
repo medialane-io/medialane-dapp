@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Eye, Share2, FileText, Flag, Shield, MoreHorizontal, RefreshCw, ShoppingBag, Loader2, ExternalLink } from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
+import { LazyImage } from "@/components/ui/lazy-image"
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { useCart } from "@/store/use-cart"
@@ -46,7 +46,7 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
   const ipType = asset?.ipType || asset?.type || null;
 
   // Fetch metadata mirroring ListingCard ONLY if asset doesn't provide it
-  const shouldFetchMetadata = !asset?.image || !asset?.name;
+  const shouldFetchMetadata = !asset?.image || asset?.image === "/placeholder.svg" || !asset?.name;
   const { name: fetchedName, image: fetchedImage, loading: metadataLoading } = useTokenMetadata(
     shouldFetchMetadata ? offerIdentifier : "",
     shouldFetchMetadata ? offerToken : ""
@@ -95,8 +95,8 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
   const formattedPrice = formatPrice(listing?.considerationAmount || "0", currency.decimals);
 
   // Final Display Values
-  const name = asset?.name || fetchedName || "Unknown Asset";
-  const image = asset?.image || fetchedImage;
+  const name = (asset?.name && !asset.name.startsWith("Asset #")) ? asset.name : (fetchedName || asset?.name || "Unknown Asset");
+  const image = (asset?.image && asset.image !== "/placeholder.svg") ? asset.image : (fetchedImage || "/placeholder.svg");
   const displayImage = imageError || !image ? "/placeholder.svg" : image;
   const assetUrl = `/asset/${offerToken}-${offerIdentifier}`;
   const isLoading = shouldFetchMetadata && metadataLoading;
@@ -110,13 +110,13 @@ export function AssetCard({ listing, asset }: AssetCardProps) {
               <Loader2 className="w-8 h-8 animate-spin text-m3-on-surface-variant/30" />
             </div>
           ) : (
-            <Image
+            <LazyImage
               src={displayImage}
+              fallbackSrc="/placeholder.svg"
               alt={name}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover transition-transform duration-m3-long ease-m3-standard group-hover:scale-105"
-              onError={() => setImageError(true)}
               unoptimized={displayImage.startsWith("htt")}
             />
           )}

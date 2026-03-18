@@ -368,62 +368,94 @@ export function useRecentAssets(pageSize: number = 50): UseRecentAssetsReturn {
                     let ipType = "Asset";
 
                     if (parsed.metadataUri) {
-                        // Check if it's likely an IPFS CID or ipfs:// URI
-                        const isIpfs = !parsed.metadataUri.startsWith("http") || parsed.metadataUri.startsWith("ipfs://");
+                        try {
+                            const isIpfs = !parsed.metadataUri.startsWith("http") || parsed.metadataUri.startsWith("ipfs://");
 
-                        if (isIpfs) {
-                            // Extract CID for the utility
-                            let cid = parsed.metadataUri;
-                            if (cid.startsWith("ipfs://")) cid = cid.replace("ipfs://", "");
-                            if (cid.startsWith("ipfs/")) cid = cid.replace("ipfs/", "");
-
-                            const metadata = await fetchIPFSMetadata(cid);
-                            if (metadata) {
-                                // console.log("Fetched IPFS metadata for CID:", cid, metadata);
-                                name = metadata.name || name;
-                                image = processIPFSHashToUrl(metadata.image || "/placeholder.svg", "/placeholder.svg");
-
-                                // info: Try to extract type from attributes (OpenSea standard)
-                                let extractedType = metadata.type;
-                                if (metadata.attributes && Array.isArray(metadata.attributes)) {
-                                    const typeAttr = metadata.attributes.find(
-                                        (attr: any) => attr.trait_type === "Type" || attr.trait_type === "Asset Type"
-                                    );
-                                    if (typeAttr) {
-                                        extractedType = typeAttr.value;
-                                    }
+                            if (isIpfs) {
+                                let cid = parsed.metadataUri.replace("ipfs://", "").replace("ipfs/", "");
+                                const metadata = await fetchIPFSMetadata(cid);
+                                if (metadata) {
+                                    name = metadata.name || name;
+                                    image = processIPFSHashToUrl((metadata.image || metadata.image_url) as string || "/placeholder.svg", "/placeholder.svg");
+                                    const typeAttr = metadata.attributes?.find((a: any) => a.trait_type === "Type" || a.trait_type === "Asset Type");
+                                    ipType = typeAttr?.value || metadata.type || "Asset";
                                 }
-                                ipType = extractedType || "Asset";
-                                // console.log("Extracted IP Type:", ipType);
                             } else {
-                                // console.log("Failed to fetch metadata for CID:", cid);
-                            }
-                        } else {
-                            // Direct HTTP fetch for non-IPFS URIs
-                            try {
-                                const res = await fetch(parsed.metadataUri, {
-                                    signal: AbortSignal.timeout(5000)
-                                });
+                                const res = await fetch(parsed.metadataUri, { signal: AbortSignal.timeout(5000) });
                                 if (res.ok) {
                                     const metadata = await res.json();
                                     name = metadata.name || name;
                                     image = processIPFSHashToUrl(metadata.image || "/placeholder.svg", "/placeholder.svg");
-
-                                    // info: Try to extract type from attributes
-                                    let extractedType = metadata.type;
-                                    if (metadata.attributes && Array.isArray(metadata.attributes)) {
-                                        const typeAttr = metadata.attributes.find(
-                                            (attr: any) => attr.trait_type === "Type" || attr.trait_type === "Asset Type"
-                                        );
-                                        if (typeAttr) {
-                                            extractedType = typeAttr.value;
-                                        }
-                                    }
-                                    ipType = extractedType || "Asset";
+                                    const typeAttr = metadata.attributes?.find((a: any) => a.trait_type === "Type" || a.trait_type === "Asset Type");
+                                    ipType = typeAttr?.value || metadata.type || "Asset";
                                 }
-                            } catch {
-                                // Continue with default values
                             }
+                        } catch (e) {
+                            console.warn("Failed resolving metadataUri:", parsed.metadataUri, e);
+                        }
+                    } else if (parsed.collectionAddress && parsed.tokenId) {
+                        // Fallback: the token didn't emit a metadataUri (like Medialane SDK assets), so query the NFT contract
+                        try {
+                            const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || `https://starknet-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`;
+                            const provider = new RpcProvider({ nodeUrl: rpcUrl });
+                            let resolvedUri = "";
+                            
+                            try {
+                                const uriData = await provider.callContract({
+                                    contractAddress: parsed.collectionAddress,
+                                    entrypoint: "token_uri",
+                                    calldata: [parsed.tokenId, "0"]
+                                });
+                                if (uriData?.length > 0) {
+                                    // Parse the u256 length string array. Using shortString decode fallback
+                                    try {
+                                        const numWords = parseInt(uriData[0]);
+                                        let str = "";
+                                        for (let i = 0; i < numWords; i++) {
+                                            const word = uriData[i + 1];
+                                            if (word) str += shortString.decodeShortString(word);
+                                        }
+                                        if (uriData.length >= numWords + 3) {
+                                            const pendingWord = uriData[numWords + 1];
+                                            const pendingLen = parseInt(uriData[numWords + 2]);
+                                            if (pendingLen > 0 && pendingWord) {
+                                                const decoded = shortString.decodeShortString(pendingWord);
+                                                str += decoded.substring(0, pendingLen);
+                                            }
+                                        }
+                                        resolvedUri = str.replace(/\0/g, "").trim();
+                                    } catch (e) {
+                                        if(uriData[0]) resolvedUri = shortString.decodeShortString(uriData[0]).replace(/\0/g, "").trim();
+                                    }
+                                }
+                            } catch (e) {
+                                // Ignore
+                            }
+
+                            if (resolvedUri) {
+                                const isIpfs = !resolvedUri.startsWith("http") || resolvedUri.startsWith("ipfs://");
+                                if (isIpfs) {
+                                    let cid = resolvedUri.replace("ipfs://", "").replace("ipfs/", "");
+                                    const metadata = await fetchIPFSMetadata(cid);
+                                    if (metadata) {
+                                        name = metadata.name || name;
+                                        image = processIPFSHashToUrl((metadata.image || metadata.image_url) as string || "/placeholder.svg", "/placeholder.svg");
+                                        const typeAttr = metadata.attributes?.find((a: any) => a.trait_type === "Type" || a.trait_type === "Asset Type");
+                                        ipType = typeAttr?.value || metadata.type || "Asset";
+                                    }
+                                } else {
+                                    const res = await fetch(resolvedUri, { signal: AbortSignal.timeout(5000) });
+                                    if (res.ok) {
+                                        const metadata = await res.json();
+                                        name = metadata.name || name;
+                                        image = processIPFSHashToUrl(metadata.image || "/placeholder.svg", "/placeholder.svg");
+                                        const typeAttr = metadata.attributes?.find((a: any) => a.trait_type === "Type" || a.trait_type === "Asset Type");
+                                        ipType = typeAttr?.value || metadata.type || "Asset";
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            console.warn("Failed resolving token_uri fallback:", e);
                         }
                     }
 
