@@ -676,4 +676,61 @@ export function useFeaturedCollections(featuredIds: number[] = []): UseGetAllCol
   };
 }
 
+const MINIMAL_GET_ID_ABI = [
+  {
+    type: "function",
+    name: "get_collection_id",
+    inputs: [],
+    outputs: [{ type: "core::integer::u256" }],
+    state_mutability: "view",
+  }
+] as const;
+
+export function useFeaturedCollectionsByAddress(addresses: string[] = []): UseGetAllCollectionsReturn {
+  const { provider } = useProvider();
+  const [ids, setIds] = useState<number[]>([]);
+  const [resolvingIds, setResolvingIds] = useState(true);
+
+  useEffect(() => {
+    async function resolveIds() {
+      if (!provider || addresses.length === 0) {
+        setResolvingIds(false);
+        return;
+      }
+      setResolvingIds(true);
+      const resolved: number[] = [];
+      for (const addr of addresses) {
+        try {
+          // Add 0x padding if missing
+          let normalizedAddr = addr;
+          if (!normalizedAddr.startsWith("0x")) {
+            normalizedAddr = `0x${BigInt(addr).toString(16)}`;
+          }
+
+          const contract = new Contract({ 
+            abi: MINIMAL_GET_ID_ABI as any, 
+            address: normalizedAddr as `0x${string}`, 
+            providerOrAccount: provider 
+          });
+          const res: any = await contract.call("get_collection_id", []);
+          const id = typeof res === 'object' ? Number((BigInt(res.high) << 128n) + BigInt(res.low)) : Number(res);
+          resolved.push(id);
+        } catch(e) { 
+          console.warn("Failed resolving id for", addr, e); 
+        }
+      }
+      setIds(resolved);
+      setResolvingIds(false);
+    }
+    resolveIds();
+  }, [addresses.join(','), provider]);
+
+  const query = useFeaturedCollections(ids);
+
+  if (resolvingIds) {
+    return { ...query, collections: [], loading: true };
+  }
+
+  return query;
+}
 

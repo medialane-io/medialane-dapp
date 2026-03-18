@@ -8,15 +8,16 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 
-import { useFeaturedCollections } from "@/hooks/use-collection"
+import { useFeaturedCollectionsByAddress } from "@/hooks/use-collection"
+import { FEATURED_COLLECTION_ADDRESSES } from "@/lib/featured-collections"
 import type { Collection } from "@/lib/types"
 
 // Default "Welcome" Hero Content
 const DefaultHero = () => (
-    <div className="container mx-auto relative overflow-hidden rounded-m3-xl">
-        <Card className="border-0">
+    <div className="w-full relative overflow-hidden">
+        <Card className="border-0 rounded-none shadow-none">
             <CardContent className="p-0">
-                <div className="relative h-[600px] md:h-[640px] bg-m3-surface-container-high flex items-center justify-center">
+                <div className="relative h-[100svh] w-full bg-m3-surface-container-high flex items-center justify-center">
                     {/* Subtle abstract background using M3 primary tones */}
                     <div className="absolute inset-0 overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-m3-primary-container/30 via-transparent to-transparent opacity-50"></div>
@@ -28,11 +29,9 @@ const DefaultHero = () => (
                             Medialane
                         </Badge>
                         <h2 className="text-4xl md:text-6xl font-bold mb-6 text-m3-on-surface leading-tight tracking-tight">
-                            Loading collections...
+                            Feature your collection here
                         </h2>
-                        <p className="text-lg md:text-xl text-m3-on-surface-variant mb-10 leading-relaxed max-w-2xl mx-auto">
-                            Create and share with permissionless ownership.
-                        </p>
+
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Button
                                 asChild
@@ -58,7 +57,8 @@ const DefaultHero = () => (
 );
 
 export function FeaturedHero() {
-    const { collections, loading } = useFeaturedCollections([1, 2, 4]);
+    const { collections, loading } = useFeaturedCollectionsByAddress(FEATURED_COLLECTION_ADDRESSES);
+    
     const [currentSlide, setCurrentSlide] = useState(0)
     const [isTransitioning, setIsTransitioning] = useState(false)
 
@@ -100,10 +100,10 @@ export function FeaturedHero() {
     const currentCollection = collections[currentSlide]
 
     return (
-        <div className="container mx-auto relative overflow-hidden rounded-m3-xl">
-            <Card className="border-0 shadow-m3-3">
+        <div className="w-full relative overflow-hidden">
+            <Card className="border-0 rounded-none shadow-none">
                 <CardContent className="p-0">
-                    <div className="relative h-[600px] md:h-[640px] bg-m3-scrim">
+                    <div className="relative h-[100svh] w-full bg-m3-scrim">
                         {/* Background Image */}
                         <div className="absolute inset-0">
                             <Image

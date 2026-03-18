@@ -7,7 +7,6 @@ import { StarknetProvider } from "@/components/starknet-provider";
 import { CommandMenu } from "@/components/command-menu"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { NavigationBar } from "@/components/navigation-bar"
 import { Providers } from "@/components/providers"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -45,7 +44,7 @@ export default function RootLayout({
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Medialane Protocol',
+    name: 'Medialane Dapp',
     url: 'https://dapp.medialane.io',
     logo: 'https://dapp.medialane.io/favicon.ico',
     description: "Create, Trade, and Monetize on the Integrity Web.",
@@ -76,7 +75,6 @@ export default function RootLayout({
                 {children}
               </main>
               <Footer />
-              <NavigationBar />
               <CommandMenu />
               <Toaster />
             </StarknetProvider>
