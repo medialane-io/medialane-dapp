@@ -25,12 +25,9 @@ const DefaultHero = () => (
                     </div>
 
                     <div className="text-center p-8 max-w-3xl relative z-10">
-                        <Badge variant="secondary" className="mb-6 bg-m3-secondary-container text-m3-on-secondary-container border-0">
-                            Medialane
+                        <Badge variant="secondary" className="mb-6 text-lg bg-m3-secondary-container text-m3-on-secondary-container border-0">
+                            Loading onchain collections...
                         </Badge>
-                        <h2 className="text-4xl md:text-6xl font-bold mb-6 text-m3-on-surface leading-tight tracking-tight">
-                            Feature your collection here
-                        </h2>
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Button
@@ -38,7 +35,7 @@ const DefaultHero = () => (
                                 size="lg"
                                 className="font-bold px-8 h-12 text-base"
                             >
-                                <Link href="/create/">Create</Link>
+                                <Link href="/collections/">Explore</Link>
                             </Button>
                             <Button
                                 asChild
@@ -46,7 +43,7 @@ const DefaultHero = () => (
                                 variant="outline"
                                 className="font-semibold px-8 h-12 text-base"
                             >
-                                <Link href="/collections">Explore</Link>
+                                <Link href="/create">Create</Link>
                             </Button>
                         </div>
                     </div>
@@ -58,7 +55,7 @@ const DefaultHero = () => (
 
 export function FeaturedHero() {
     const { collections, loading } = useFeaturedCollectionsByAddress(FEATURED_COLLECTION_ADDRESSES);
-    
+
     const [currentSlide, setCurrentSlide] = useState(0)
     const [isTransitioning, setIsTransitioning] = useState(false)
 
