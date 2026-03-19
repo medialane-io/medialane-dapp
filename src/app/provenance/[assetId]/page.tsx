@@ -50,9 +50,6 @@ export default function ProvenancePage({ params }: ProvenancePageProps) {
 
   const { asset, loading: assetLoading, loadingState, error: assetError, uiState, showSkeleton, notFound } = useAsset(contractAddress as `0x${string}`, Number(tokenId))
 
-  // Debug log to check addresses and owner
-  console.log(`[ProvenancePage] URL Address: ${contractAddress}, Asset NFT Address: ${asset?.nftAddress}, TokenID: ${tokenId}, Owner: ${asset?.owner}`);
-
   // Extract collection ID if available from asset (passed as string or undefined)
   const collectionId = asset?.collectionId;
 

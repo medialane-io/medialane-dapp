@@ -193,7 +193,6 @@ export async function fetchWithRateLimit<T>(
 
       // If it's a rate limit error, use exponential backoff
       if (err instanceof Error && (err.message.includes('429') || err.message.includes('Too Many Requests'))) {
-        console.log(`Rate limit hit, waiting ${currentDelay}ms...`);
         await new Promise((res) => setTimeout(res, currentDelay));
         // Exponential backoff: double the delay, but cap it
         currentDelay = Math.min(currentDelay * 2, maxDelayMs);

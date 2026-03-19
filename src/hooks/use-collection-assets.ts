@@ -135,8 +135,7 @@ export function useCollectionAssets(
         image,
         tokenUri,
       };
-    } catch (error) {
-      console.log(`Failed to load token ${tokenId}:`, error);
+    } catch {
       return null;
     }
   }, [contract, nftAddress]);

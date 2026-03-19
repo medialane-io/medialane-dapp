@@ -51,7 +51,6 @@ export function useMIP() {
         address,
         tokenIndex
       );
-      console.log("Token ID:", tokenId);
       return tokenId;
     } catch (e) {
       console.error(e);
@@ -60,7 +59,6 @@ export function useMIP() {
   }
 
   useEffect(() => {
-    console.log(isError, "isError", balanceError);
     if (isError) return;
     if (tBalance > 0) {
       const fetchTokenIds = async () => {

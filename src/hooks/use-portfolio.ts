@@ -77,7 +77,7 @@ function decodeByteArray(data: string[]): string {
 
     return str.replace(/\0/g, "").trim();
   } catch (e) {
-    console.warn("[DEBUG] Failed to decode ByteArray:", e);
+    // Failed to decode ByteArray — return empty string
     return "";
   }
 }
@@ -151,7 +151,6 @@ export function usePortfolio(): PortfolioData & { refetch: () => void } {
     try {
       const cid = extractCid(metadata_uri);
       if (cid) {
-        console.log(`[DEBUG] Attempting to fetch IPFS metadata for CID: ${cid}`);
         const metadata = await fetchIPFSMetadata(cid);
         if (metadata) {
           tokenData = {
@@ -163,7 +162,6 @@ export function usePortfolio(): PortfolioData & { refetch: () => void } {
             attributes: Array.isArray(metadata.attributes) ? metadata.attributes : [],
             metadata: metadata
           };
-          console.log(`[DEBUG] Metadata loaded for ${tokenData.name}`);
         }
       } else {
         // Maybe it's a direct JSON URL?
@@ -199,7 +197,6 @@ export function usePortfolio(): PortfolioData & { refetch: () => void } {
       return;
     }
 
-    console.log(`[DEBUG] loadTokens for address: ${address}`);
     setLoadingTokens(true);
 
     try {
@@ -235,7 +232,6 @@ export function usePortfolio(): PortfolioData & { refetch: () => void } {
                 const balance = balanceData && balanceData.length > 0 ? Number(BigInt(balanceData[0])) : 0;
 
                 if (balance > 0) {
-                  console.log(`[DEBUG] Collection ${collection.id} has ${balance} tokens`);
                   for (let i = 0; i < balance; i++) {
                     try {
                       let tidData: string[] = [];
@@ -295,8 +291,6 @@ export function usePortfolio(): PortfolioData & { refetch: () => void } {
 
             if (tokenIds.length === 0) return;
 
-            console.log(`[DEBUG] Found ${tokenIds.length} tokens for collection ${collection.id}`);
-
             const tokenDetails = await Promise.all(
               tokenIds.map(async (tokenId) => {
                 let metadataUri = "";
@@ -327,7 +321,6 @@ export function usePortfolio(): PortfolioData & { refetch: () => void } {
 
                     if (uriData && uriData.length > 0) {
                       metadataUri = decodeByteArray(uriData);
-                      if (metadataUri) console.log(`[DEBUG] Decoded metadata_uri: ${metadataUri}`);
                     }
                   } catch (e) { }
                 }
@@ -378,7 +371,6 @@ export function usePortfolio(): PortfolioData & { refetch: () => void } {
         recentActivity: activities.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 10)
       });
 
-      console.log(`[DEBUG] Final stats: totalNFTs=${totalNFTs}`);
     } catch (err) {
       console.error("Error loading portfolio:", err);
     } finally {

@@ -38,7 +38,6 @@ export function CartDrawer() {
         }
 
         try {
-            console.log("CartDrawer: Calling handleCheckout");
             await checkout();
         } catch (e: any) {
             console.error("CartDrawer: Error in handleCheckout", e);

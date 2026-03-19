@@ -112,12 +112,10 @@ export function useMarketplace(): UseMarketplaceReturn {
         const chainId = chain!.id as any as constants.StarknetChainId;
         const typedData = stringifyBigInts(getOrderParametersTypedData(orderParams, chainId));
 
-        console.log("Signing typed data:", typedData);
         const signature = await account!.signMessage(typedData);
         const signatureArray = Array.isArray(signature)
             ? signature
             : [signature.r.toString(), signature.s.toString()];
-        console.log("Signature generated:", signatureArray);
 
         const registerPayload = stringifyBigInts({
             parameters: {
@@ -140,9 +138,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             const contractHash = await medialaneContract!.get_order_hash(registerPayload.parameters, account!.address);
             const contractHashHex = "0x" + BigInt(contractHash).toString(16);
             if (localHash !== contractHashHex) {
-                console.warn("HASH MISMATCH: Local hash does not match contract hash. Signature will likely be rejected.");
-            } else {
-                console.log("HASH MATCH: Local and contract hashes are consistent.");
+                console.warn("[marketplace] Hash mismatch — signature may be rejected by contract");
             }
         } catch (hashErr) {
             console.warn("Could not verify hash:", hashErr);
@@ -208,7 +204,6 @@ export function useMarketplace(): UseMarketplaceReturn {
                 });
                 isAlreadyApproved =
                     BigInt(isApprovedRes[0]).toString() === BigInt(medialaneContract.address).toString();
-                console.log("Is already approved for token:", isAlreadyApproved);
             } catch (err) {
                 console.warn("Failed to check approval status", err);
             }
@@ -220,9 +215,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             };
 
             const calls = isAlreadyApproved ? [registerCall] : [approveCall, registerCall];
-            console.log("createListing calls:", JSON.stringify(calls, null, 2));
             const hash = await unifiedExecute(calls);
-            console.log("Transaction sent:", hash);
             setTxHash(hash);
             await provider.waitForTransaction(hash);
             toast({ title: "Listing Created", description: "Your asset has been listed successfully." });
@@ -285,7 +278,6 @@ export function useMarketplace(): UseMarketplaceReturn {
 
             // ERC20 approve + register_order as atomic multicall
             const hash = await unifiedExecute([approveCall, registerCall]);
-            console.log("Offer MultiCall sent:", hash);
             setTxHash(hash);
             await provider.waitForTransaction(hash);
             toast({ title: "Offer Placed", description: "Your offer has been submitted and is now live." });
@@ -294,23 +286,14 @@ export function useMarketplace(): UseMarketplaceReturn {
     }, [account, medialaneContract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall]);
 
     const checkoutCart = useCallback(async (items: any[]) => {
-        console.log("checkoutCart called with items:", items.length);
-        console.log("checkoutCart context:", {
-            hasAccount: !!account,
-            hasContract: !!medialaneContract,
-            hasChain: !!chain
-        });
-
         if (!account || !medialaneContract || !chain || items.length === 0) {
             const msg = "Account, contract, network not available, or cart empty";
-            console.error("checkoutCart early return:", msg);
             setError(msg);
             toast({ title: "Error", description: msg, variant: "destructive" });
             return undefined;
         }
 
         return withProcessing(async () => {
-            console.log("checkoutCart inside withProcessing");
             // Group required ERC20 approvals by token address
             const tokenTotals = new Map<string, bigint>();
             items.forEach((item) => {
@@ -371,7 +354,6 @@ export function useMarketplace(): UseMarketplaceReturn {
 
             // Single atomic multicall: all approvals + all fulfillments
             const hash = await unifiedExecute([...approveCalls, ...fulfillCalls]);
-            console.log("Cart checkout multicall sent:", hash);
             setTxHash(hash);
             await provider.waitForTransaction(hash);
             toast({ title: "Purchase Successful", description: `Successfully purchased ${items.length} item(s).` });
@@ -399,7 +381,6 @@ export function useMarketplace(): UseMarketplaceReturn {
             const chainId = chain.id as any as constants.StarknetChainId;
             const typedData = stringifyBigInts(getOrderCancellationTypedData(cancelParams, chainId));
 
-            console.log("Signing cancellation typed data:", typedData);
             const signature = await account.signMessage(typedData);
             const signatureArray = Array.isArray(signature)
                 ? signature
@@ -448,7 +429,6 @@ export function useMarketplace(): UseMarketplaceReturn {
             const chainId = chain.id as any as constants.StarknetChainId;
             const typedData = stringifyBigInts(getOrderFulfillmentTypedData(fulfillmentParams, chainId));
 
-            console.log("Signing offer acceptance typed data:", typedData);
             const signature = await account.signMessage(typedData);
             const signatureArray = Array.isArray(signature)
                 ? signature
@@ -469,7 +449,6 @@ export function useMarketplace(): UseMarketplaceReturn {
             };
 
             const hash = await unifiedExecute([approveCall, fulfillCall]);
-            console.log("Accept offer transaction sent:", hash);
             setTxHash(hash);
             await provider.waitForTransaction(hash);
             toast({ title: "Offer Accepted", description: "The offer has been accepted and the asset transferred." });

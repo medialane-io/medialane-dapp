@@ -216,7 +216,6 @@ export default function CreateAssetPage() {
             // data layout: [collection_id_low, collection_id_high, token_id_low, token_id_high, ...]
             const low = mintEvent.data[2];
             parsedId = num.toBigInt(low).toString();
-            console.log("Parsed Token ID:", parsedId);
 
             // Update mint result data with accurate ID
             mintResultData.tokenId = parsedId;

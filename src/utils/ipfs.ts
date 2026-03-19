@@ -78,27 +78,41 @@ export const IPFS_GATEWAYS = [
   'https://dweb.link/ipfs/'
 ];
 
+// SSR-safe localStorage helpers
+function localGet(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+
+function localSet(key: string, value: string): void {
+  if (typeof window === 'undefined') return;
+  try { localStorage.setItem(key, value); } catch { /* quota exceeded — non-fatal */ }
+}
+
+function localRemove(key: string): void {
+  if (typeof window === 'undefined') return;
+  try { localStorage.removeItem(key); } catch { /* non-fatal */ }
+}
+
 /**
- * Retrieve metadata from IPFS using public a gateaway with cache 
- * @param {string} cid 
- * @param {boolean} bypassCache 
- * @returns {Promise<IPFSMetadata|null>} 
+ * Retrieve metadata from IPFS using public gateways with 24h localStorage cache.
+ * Returns null when called server-side (no localStorage) or when all gateways fail.
  */
 export async function fetchIPFSMetadata(cid: string, bypassCache = false): Promise<IPFSMetadata | null> {
   if (!cid) return null;
 
+  // Skip entirely during SSR — no localStorage, no network benefit
+  if (typeof window === 'undefined') return null;
+
   if (!bypassCache) {
-    const cachedData = localStorage.getItem(`${CACHE_PREFIX}${cid}`);
+    const cachedData = localGet(`${CACHE_PREFIX}${cid}`);
     if (cachedData) {
       try {
         const { data, timestamp } = JSON.parse(cachedData);
-
-        if (Date.now() - timestamp < CACHE_EXPIRY) {
-          return data as IPFSMetadata;
-        } else {
-        }
-      } catch (e) {
-        console.warn(`Failed to parse cached metadata for ${cid}:`, e);
+        if (Date.now() - timestamp < CACHE_EXPIRY) return data as IPFSMetadata;
+        // Stale — fall through to re-fetch
+      } catch {
+        localRemove(`${CACHE_PREFIX}${cid}`);
       }
     }
   }
@@ -108,84 +122,65 @@ export async function fetchIPFSMetadata(cid: string, bypassCache = false): Promi
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch(`${gateway}${cid}`, {
-        signal: controller.signal
-      });
-
+      const response = await fetch(`${gateway}${cid}`, { signal: controller.signal });
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        console.warn(`Gateway ${gateway} returned ${response.status} for ${cid}`);
-        continue;
-      }
+      if (!response.ok) continue; // Try next gateway silently
 
       const metadata = await response.json();
-
-      const cacheEntry = {
-        data: metadata,
-        timestamp: Date.now()
-      };
-
-      localStorage.setItem(`${CACHE_PREFIX}${cid}`, JSON.stringify(cacheEntry));
-
-
+      localSet(`${CACHE_PREFIX}${cid}`, JSON.stringify({ data: metadata, timestamp: Date.now() }));
       return metadata as IPFSMetadata;
-    } catch (error) {
-      console.warn(`Error fetching from ${gateway}${cid}:`, error);
+    } catch {
+      // Try next gateway silently
     }
   }
 
-  console.error(`All IPFS gateways failed for ${cid}`);
+  // Only log in development — all gateways exhausted
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(`[IPFS] All gateways failed for CID: ${cid}`);
+  }
   return null;
 }
 
 
-
 /**
  * Stract the known CDIs
- * @returns {Record<string, string>} 
+ * @returns {Record<string, string>}
  */
 export function getKnownCids(): Record<string, string> {
-  const cachedCids = localStorage.getItem('known-ipfs-cids');
+  const cachedCids = localGet('known-ipfs-cids');
   if (cachedCids) {
     try {
       return JSON.parse(cachedCids);
     } catch {
-      console.warn('Failed to parse cached CIDs, regenerating');
+      // Ignore parse error
     }
   }
 
-
   const cids = {
-    "1": "QmT7fTAgtScnXy1WGHYfzWrZfTsZEWPXbZqRPKqsYbifF1", // Arte digital
-    "2": "QmULxVeZ6ADXYfSmvbWAr3k6WVp7WFjEbxxUdqkzKwxriY", // Software 
-    "3": "QmVLDAhCY3X9P2uRudKAryuQFPM5zqA3Yij1dY8FpGbL3T", // Audio
-    "4": "QmP1QyqoYxmYJQfYDj6BcUa5YNbgWgSJNjGTpz1G8HbR1N", // Video
-    "5": "QmWnSQ3oRrYa9GyYaUCKQ5amL1z2Q1LFMYVM8Rkd3r9Kj2", // Patent
-    // Add more if is necessary 
+    "1": "QmT7fTAgtScnXy1WGHYfzWrZfTsZEWPXbZqRPKqsYbifF1",
+    "2": "QmULxVeZ6ADXYfSmvbWAr3k6WVp7WFjEbxxUdqkzKwxriY",
+    "3": "QmVLDAhCY3X9P2uRudKAryuQFPM5zqA3Yij1dY8FpGbL3T",
+    "4": "QmP1QyqoYxmYJQfYDj6BcUa5YNbgWgSJNjGTpz1G8HbR1N",
+    "5": "QmWnSQ3oRrYa9GyYaUCKQ5amL1z2Q1LFMYVM8Rkd3r9Kj2",
   };
 
-  localStorage.setItem('known-ipfs-cids', JSON.stringify(cids));
-
+  localSet('known-ipfs-cids', JSON.stringify(cids));
   return cids;
 }
 
 /**
  * Mix the dappData with ipfsdata if is necessary
- * @param {IPFSMetadata} ipfsData 
- * @param {AssetType} dappData
- * @returns {AssetType}
  */
 export function combineData(ipfsData: IPFSMetadata | null, dappData: AssetType): AssetType {
   if (!ipfsData) return dappData;
 
-  // Combinar los datos, priorizando los datos de IPFS
   const result: AssetType = {
     ...dappData,
     ...(ipfsData as Partial<AssetType>),
     id: dappData.id,
     creator: ipfsData.creator || dappData.creator,
-    owner: dappData.owner, // Mantener el owner actual
+    owner: dappData.owner,
     image: ipfsData.image || dappData.image,
     attributes: ipfsData.attributes || dappData.attributes,
     type: ipfsData.type || dappData.type,
@@ -200,10 +195,7 @@ export function combineData(ipfsData: IPFSMetadata | null, dappData: AssetType):
 }
 
 /**
- * Load the IPFS metatada to multiple assets in the background
- * @param {AssetType[]} assets 
- * @param {Function} updateCallback 
- * @param {number} batchSize 
+ * Load IPFS metadata for multiple assets in the background (batched).
  */
 export async function loadIPFSMetadataInBackground(
   assets: AssetType[],
@@ -226,8 +218,7 @@ export async function loadIPFSMetadataInBackground(
         try {
           const metadata = await fetchIPFSMetadata(asset.ipfsCid!);
           return combineData(metadata, asset) as EnhancedAsset;
-        } catch (error) {
-          console.error(`Failed to load metadata for asset ${asset.id}:`, error);
+        } catch {
           return asset as EnhancedAsset;
         }
       })
@@ -247,30 +238,28 @@ export async function loadIPFSMetadataInBackground(
 }
 
 /**
- * Clean cache of IPFS metadata
- * @param {string} cid 
+ * Clear IPFS metadata cache (single CID or all).
  */
 export function clearIPFSCache(cid?: string): void {
+  if (typeof window === 'undefined') return;
   if (cid) {
-    localStorage.removeItem(`${CACHE_PREFIX}${cid}`);
+    localRemove(`${CACHE_PREFIX}${cid}`);
   } else {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith(CACHE_PREFIX)) {
-        localStorage.removeItem(key);
+    const keys: string[] = [];
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(CACHE_PREFIX)) keys.push(key);
       }
-    }
-    console.log('Cleared all IPFS metadata cache');
+      keys.forEach(k => localRemove(k));
+    } catch { /* non-fatal */ }
   }
 }
 
 
 /**
- * Process IPFS hash to URL
- * Converts various IPFS input formats to proper gateway URLs
- * @param {string} input - The IPFS input (CID, undefined/CID, ipfs:/, ipfs://, ipfs:ipfs/, or gateway URL)
- * @param {string} fallbackUrl - Fallback URL if processing fails
- * @returns {string} Processed URL or fallback
+ * Process IPFS hash to URL.
+ * Converts various IPFS input formats to proper gateway URLs.
  */
 export function processIPFSHashToUrl(input: string, fallbackUrl: string): string {
   if (typeof input !== "string") return fallbackUrl;
@@ -282,21 +271,16 @@ export function processIPFSHashToUrl(input: string, fallbackUrl: string): string
     const cid = processedUrl.replace("undefined/", "");
     if (cid.match(/^[a-zA-Z0-9]+$/) && cid.length >= 34) {
       return `${IPFS_GATEWAYS[0]}${cid}`;
-    } else {
-      return fallbackUrl;
     }
+    return fallbackUrl;
   }
 
-  // Reject inputs too short to be valid CIDs
+  // Reject inputs too short to be valid CIDs (silent — callers handle the fallback)
   if (
     processedUrl.length < 34 &&
     !processedUrl.startsWith("http") &&
     !processedUrl.startsWith("/")
   ) {
-    console.log(
-      `Input too short to be valid IPFS CID (${processedUrl.length} chars):`,
-      processedUrl
-    );
     return fallbackUrl;
   }
 
@@ -316,34 +300,26 @@ export function processIPFSHashToUrl(input: string, fallbackUrl: string): string
     return `${IPFS_GATEWAYS[0]}${cid}`;
   }
 
-
   // Handle www. prefix
   if (processedUrl.startsWith("www.")) {
     return `https://${processedUrl}`;
   }
 
-  // Already a normal http(s) URL (non-gateway or direct IPFS path)
+  // Already a normal http(s) URL
   if (processedUrl.startsWith("http")) {
     const cidMatch = processedUrl.match(/\/ipfs\/([a-zA-Z0-9]+)/);
-    // Only flag as invalid if it explicitly looks like a BROKEN IPFS url (very short alphanumeric after /ipfs/)
     if (cidMatch && cidMatch[1].length < 34) {
-      console.log(
-        `Invalid IPFS gateway URL - CID too short (${cidMatch[1].length} chars):`,
-        processedUrl
-      );
       return fallbackUrl;
     }
     return processedUrl;
   }
-
 
   return fallbackUrl || "";
 }
 
 /**
  * Given an IPFS gateway URL that failed to load, return the same CID served
- * from the next gateway in the fallback list.  Returns null if the URL is not
- * an IPFS gateway URL or all gateways have been exhausted.
+ * from the next gateway in the fallback list. Returns null if exhausted.
  */
 export function nextIpfsGatewayUrl(url: string): string | null {
   if (!url) return null;
