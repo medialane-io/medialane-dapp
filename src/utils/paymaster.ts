@@ -12,7 +12,7 @@ import {
   fetchAccountCompatibility,
   executeCalls,
 } from "@avnu/gasless-sdk";
-import { Account, Call } from "starknet";
+import { Account, Call, PaymasterRpc } from "starknet";
 import { AVNU_PAYMASTER_CONFIG } from "@/lib/constants";
 import { formatPrice } from "@/lib/utils";
 import type {
@@ -101,9 +101,10 @@ export async function executeGaslessTransaction(
 // ---------------------------------------------------------------------------
 
 /**
- * Execute calls via AVNU gasless SDK with sponsored gas.
- * Passing no gasTokenAddress/maxGasTokenAmount + apiKey in options tells
- * AVNU to charge the API key owner for gas instead of the user.
+ * Execute calls with AVNU-sponsored gas via PaymasterRpc (SNIP-29).
+ * Uses the JSON-RPC paymaster endpoint with x-paymaster-api-key — works for
+ * both Argent X and Braavos, regardless of whether the connector natively
+ * supports avnuPaymasterProvider.
  */
 export async function executeSponsoredTransaction(
   account: Account,
@@ -111,23 +112,44 @@ export async function executeSponsoredTransaction(
 ): Promise<PaymasterResponse> {
   const apiKey = AVNU_PAYMASTER_CONFIG.apiKey;
   if (!apiKey) {
-    return {
-      transactionHash: "",
-      success: false,
-      error: "AVNU API key not configured",
-    };
+    return { transactionHash: "", success: false, error: "AVNU API key not configured" };
   }
   try {
-    const response = await executeCalls(
-      account,
-      calls,
-      {},
-      { apiKey }
+    const paymaster = new PaymasterRpc({
+      nodeUrl: "https://starknet.paymaster.avnu.fi/",
+      headers: { "x-paymaster-api-key": apiKey },
+    });
+
+    // Build typed data for the sponsored transaction
+    const built = await paymaster.buildTransaction(
+      { type: "invoke", invoke: { userAddress: account.address, calls } },
+      { version: "0x1", feeMode: { mode: "sponsored" } }
     );
-    return { transactionHash: response.transactionHash, success: true };
+
+    if (built.type !== "invoke") {
+      throw new Error("Unexpected paymaster response type");
+    }
+
+    // Sign the typed data with the wallet
+    const signature = await account.signMessage(built.typed_data);
+
+    // Submit to AVNU paymaster
+    const result = await paymaster.executeTransaction(
+      {
+        type: "invoke",
+        invoke: {
+          userAddress: account.address,
+          typedData: built.typed_data,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          signature: signature as any,
+        },
+      },
+      built.parameters
+    );
+
+    return { transactionHash: result.transaction_hash, success: true };
   } catch (error) {
-    // Log full error for debugging — common cause is invalid/expired API key (401 "Invalid api key")
-    console.warn("[paymaster] Sponsored tx rejected (falling back to traditional):", error);
+    console.warn("[paymaster] Sponsored tx rejected:", error);
     return {
       transactionHash: "",
       success: false,

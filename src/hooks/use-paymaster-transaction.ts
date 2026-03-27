@@ -27,6 +27,7 @@ import {
   checkAccountCompatibility,
   getGasTokenPrices,
   executeGaslessTransaction,
+  executeSponsoredTransaction,
   canSponsor,
 } from "@/utils/paymaster";
 import type { GasTokenPrice } from "@/types/paymaster";
@@ -213,9 +214,22 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
       setIsLoading(true);
       setError(null);
 
-      // account.execute() is automatically wrapped by avnuPaymasterProvider in
-      // StarknetConfig — AVNU sponsors the gas via the x-paymaster-api-key header.
-      // No manual executeCalls needed.
+      // Try sponsored via PaymasterRpc (SNIP-29 JSON-RPC paymaster — works for Argent & Braavos)
+      if (isSponsorAvailable) {
+        try {
+          const response = await executeSponsoredTransaction(account as any, calls); // eslint-disable-line @typescript-eslint/no-explicit-any
+          if (response.success) {
+            setIsLoading(false);
+            return response.transactionHash;
+          }
+          console.warn("[paymaster] Sponsored tx rejected, falling back:", response.error);
+        } catch (err) {
+          console.warn("[paymaster] Sponsored tx failed, falling back:", err);
+        }
+      }
+
+      // Fallback: account.execute() — also routed through avnuPaymasterProvider for
+      // connectors that support it (Argent X), or direct wallet signing (Braavos).
       try {
         const response = await account.execute(calls as any); // eslint-disable-line @typescript-eslint/no-explicit-any
         return response.transaction_hash;
@@ -228,7 +242,7 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
         setIsLoading(false);
       }
     },
-    [szWallet, account, address]
+    [szWallet, account, address, isSponsorAvailable]
   );
 
   // ---------------------------------------------------------------------------
