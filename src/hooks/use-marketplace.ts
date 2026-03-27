@@ -59,7 +59,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         address: process.env.NEXT_PUBLIC_MEDIALANE_CONTRACT_ADDRESS as `0x${string}`,
         abi: IPMarketplaceABI as any[],
     });
-    const { execute: unifiedExecute, address: walletAddress, walletType } = useUnifiedWallet();
+    const { address: walletAddress, walletType } = useUnifiedWallet();
 
     const resetState = useCallback(() => {
         setTxHash(null);
@@ -76,8 +76,8 @@ export function useMarketplace(): UseMarketplaceReturn {
         try {
             return await fn();
         } catch (err: any) {
-            console.error(err);
-            const msg = err.message || "An unexpected error occurred";
+            console.error("[marketplace] error:", JSON.stringify(err, null, 2), err);
+            const msg = err?.message || (err?.code ? `Wallet error ${err.code}` : "An unexpected error occurred");
             setError(msg);
             toast({ title: "Error", description: msg, variant: "destructive" });
             return undefined;
@@ -221,7 +221,9 @@ export function useMarketplace(): UseMarketplaceReturn {
             };
 
             const calls = isAlreadyApproved ? [registerCall] : [approveCall, registerCall];
-            const hash = await unifiedExecute(calls);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const tx = await account!.execute(calls as any);
+            const hash = tx.transaction_hash;
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
@@ -292,7 +294,9 @@ export function useMarketplace(): UseMarketplaceReturn {
             };
 
             // ERC20 approve + register_order as atomic multicall
-            const hash = await unifiedExecute([approveCall, registerCall]);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const tx = await account!.execute([approveCall, registerCall] as any);
+            const hash = tx.transaction_hash;
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
@@ -377,7 +381,9 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Executing Purchase", description: "Approve the final transaction to sweep the cart." });
 
             // Single atomic multicall: all approvals + all fulfillments
-            const hash = await unifiedExecute([...approveCalls, ...fulfillCalls]);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const tx = await account!.execute([...approveCalls, ...fulfillCalls] as any);
+            const hash = tx.transaction_hash;
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
@@ -425,7 +431,9 @@ export function useMarketplace(): UseMarketplaceReturn {
             });
 
             const call = medialaneContract.populate("cancel_order", [cancelRequest]);
-            const hash = await unifiedExecute([call]);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const tx = await account!.execute([call] as any);
+            const hash = tx.transaction_hash;
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
@@ -490,7 +498,9 @@ export function useMarketplace(): UseMarketplaceReturn {
                 calldata: [medialaneContract.address, tokenIdUint256.low.toString(), tokenIdUint256.high.toString()],
             };
 
-            const hash = await unifiedExecute([approveCall, fulfillCall]);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const tx = await account!.execute([approveCall, fulfillCall] as any);
+            const hash = tx.transaction_hash;
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
