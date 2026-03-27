@@ -40,7 +40,7 @@ export const useNetwork = () => {
 export function StarknetProvider({ children }: { children: React.ReactNode }) {
   const { connectors } = useInjectedConnectors({
     recommended: [argent(), braavos()],
-    includeRecommended: "onlyIfNoConnectors",
+    includeRecommended: "always",
     order: "alphabetical",
   });
 
