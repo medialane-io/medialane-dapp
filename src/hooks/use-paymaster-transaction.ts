@@ -27,11 +27,9 @@ import {
   checkAccountCompatibility,
   getGasTokenPrices,
   executeGaslessTransaction,
-  executeSponsoredTransaction,
   canSponsor,
 } from "@/utils/paymaster";
 import type { GasTokenPrice } from "@/types/paymaster";
-import { AVNU_PAYMASTER_CONFIG } from "@/lib/constants";
 
 export interface UsePaymasterTransactionResult {
   // ----- Execution -----
@@ -171,15 +169,9 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
       setError(null);
 
       try {
-        const response = await executeSponsoredTransaction(
-          account as any, // eslint-disable-line @typescript-eslint/no-explicit-any
-          calls
-        );
-
-        if (!response.success) {
-          throw new Error(response.error ?? "Sponsored transaction failed");
-        }
-        return response.transactionHash;
+        // avnuPaymasterProvider in StarknetConfig wraps account.execute automatically
+        const response = await account.execute(calls as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+        return response.transaction_hash;
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Sponsored transaction failed";
         setError(msg);
@@ -221,40 +213,22 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
       setIsLoading(true);
       setError(null);
 
-      // Try sponsored path when API key is present
-      if (isSponsorAvailable) {
-        try {
-          const response = await executeSponsoredTransaction(
-            account as any, // eslint-disable-line @typescript-eslint/no-explicit-any
-            calls
-          );
-
-          if (response.success) {
-            setIsLoading(false);
-            return response.transactionHash;
-          }
-          // Sponsorship rejected — fall through silently
-          console.warn("[paymaster] Sponsored tx rejected, falling back to traditional:", response.error);
-        } catch (err) {
-          // Sponsorship failed — fall through silently
-          console.warn("[paymaster] Sponsored tx failed, falling back to traditional:", err);
-        }
-      }
-
-      // Fallback: traditional gas
+      // account.execute() is automatically wrapped by avnuPaymasterProvider in
+      // StarknetConfig — AVNU sponsors the gas via the x-paymaster-api-key header.
+      // No manual executeCalls needed.
       try {
         const response = await account.execute(calls as any); // eslint-disable-line @typescript-eslint/no-explicit-any
         return response.transaction_hash;
       } catch (err) {
-        console.error("[paymaster] Traditional tx failed:", err);
+        console.error("[paymaster] Transaction failed:", err);
         const msg = err instanceof Error ? err.message : "Transaction failed";
         setError(msg);
-        throw new Error(msg); // propagate so callers get the real error, not a stale closure
+        throw new Error(msg);
       } finally {
         setIsLoading(false);
       }
     },
-    [szWallet, account, address, isSponsorAvailable]
+    [szWallet, account, address]
   );
 
   // ---------------------------------------------------------------------------

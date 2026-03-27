@@ -154,63 +154,12 @@ export function AppSidebar() {
 
         <SidebarSeparator />
 
-        {/* Browse by IP type 
-        <SidebarGroup>
-          <SidebarGroupLabel>Browse</SidebarGroupLabel>
-          <SidebarMenu>
-            {IP_TYPE_CONFIG.map(({ slug, label, icon: Icon, colorClass }) => (
-              <SidebarMenuItem key={slug}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === `/${slug}`}
-                  tooltip={label}
-                  onClick={closeSidebar}
-                >
-                  <Link href={`/${slug}`}>
-                    <Icon className={pathname === `/${slug}` ? colorClass : undefined} />
-                    <span>{label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarSeparator />*/}
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Docs</SidebarGroupLabel>
-          <SidebarMenu>
-            {[
-              { href: "/about",  label: "About",  icon: Info },
-              { href: "/learn",  label: "Learn",  icon: BookOpen },
-              { href: "/docs",   label: "Docs",   icon: FileCode2 },
-            ].map(({ href, label, icon: Icon }) => (
-              <SidebarMenuItem key={href}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === href || (href !== "/about" && !!pathname?.startsWith(href))}
-                  tooltip={label}
-                  onClick={closeSidebar}
-                >
-                  <Link href={href}>
-                    <Icon />
-                    <span>{label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
+    
         <SidebarGroup>
           <SidebarGroupLabel>DAO</SidebarGroupLabel>
           <SidebarMenu>
             {[
               { href: "/contact", label: "Contact Us",   icon: Mail },
-              { href: "/support", label: "Support",      icon: LifeBuoy },
             ].map(({ href, label, icon: Icon }) => (
               <SidebarMenuItem key={href}>
                 <SidebarMenuButton

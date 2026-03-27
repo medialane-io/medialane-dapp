@@ -30,7 +30,6 @@ const NAV_GROUPS = [
   {
     label: "Manage",
     items: [
-      { label: "Wallet",            href: "/portfolio/wallet" },
       { label: "Collections",       href: "/portfolio/collections" },
       { label: "Claim Collection",  href: "/portfolio/claim" },
       { label: "Settings",          href: "/portfolio/settings" },

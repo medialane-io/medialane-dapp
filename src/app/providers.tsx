@@ -37,9 +37,6 @@ function Shell({ children }: { children: React.ReactNode }) {
             <nav className="flex items-center gap-4 flex-wrap justify-center">
               <Link href="/marketplace" className="hover:text-foreground transition-colors">Trade</Link>
               <Link href="/launchpad" className="hover:text-foreground transition-colors">Launch</Link>
-              <Link href="/about" className="hover:text-foreground transition-colors">About</Link>
-              <Link href="/learn" className="hover:text-foreground transition-colors">Learn</Link>
-              <Link href="/docs" className="hover:text-foreground transition-colors">Docs</Link>
               <Link href="/contact" className="hover:text-foreground transition-colors">Contact</Link>
               <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
               <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>

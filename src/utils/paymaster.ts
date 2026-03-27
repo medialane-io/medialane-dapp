@@ -126,7 +126,8 @@ export async function executeSponsoredTransaction(
     );
     return { transactionHash: response.transactionHash, success: true };
   } catch (error) {
-    console.warn("[paymaster] Sponsored tx rejected (falling back to traditional):", error instanceof Error ? error.message : error);
+    // Log full error for debugging — common cause is invalid/expired API key (401 "Invalid api key")
+    console.warn("[paymaster] Sponsored tx rejected (falling back to traditional):", error);
     return {
       transactionHash: "",
       success: false,
