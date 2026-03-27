@@ -39,8 +39,16 @@ export function PurchaseDialog({ order, open, onOpenChange, onSuccess }: Purchas
   const handleBuy = async () => {
     if (!isConnected) { toast.error("Connect your wallet first"); return; }
     try {
-      await checkoutCart([order as any]);
-      setTxStatus("confirmed");
+      // checkoutCart expects flat fields (considerationToken, considerationAmount)
+      // but ApiOrder has them nested under consideration.token / consideration.startAmount
+      const item = {
+        orderHash: order.orderHash,
+        considerationToken: order.consideration.token,
+        considerationAmount: order.consideration.startAmount,
+        offerIdentifier: order.offer.identifier,
+      };
+      const hash = await checkoutCart([item as any]);
+      if (hash) setTxStatus("confirmed");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Purchase failed");
     }

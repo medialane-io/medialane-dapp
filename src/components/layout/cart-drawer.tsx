@@ -122,7 +122,7 @@ export function CartDrawer() {
       const item = validItems[i];
       setBatchProgress((p) => p ? { ...p, current: i + 1 } : p);
       try {
-        await checkoutCart([cartItemToOrder(item) as any]);
+        await checkoutCart([item as any]);
         removeItem(item.orderHash);
         setBatchProgress((p) => p ? { ...p, done: p.done + 1 } : p);
       } catch {
