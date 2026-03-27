@@ -46,7 +46,7 @@ const toWei = (price: string, currencySymbol: string): string =>
     BigInt(Math.floor(parseFloat(price) * Math.pow(10, getDecimals(currencySymbol)))).toString();
 
 export function useMarketplace(): UseMarketplaceReturn {
-    const { account, address } = useAccount();
+    const { account } = useAccount();
     const { chain } = useNetwork();
     const { toast } = useToast();
     const { provider } = useProvider();
@@ -59,7 +59,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         address: process.env.NEXT_PUBLIC_MEDIALANE_CONTRACT_ADDRESS as `0x${string}`,
         abi: IPMarketplaceABI as any[],
     });
-    const { execute: unifiedExecute } = useUnifiedWallet();
+    const { execute: unifiedExecute, address: walletAddress, walletType } = useUnifiedWallet();
 
     const resetState = useCallback(() => {
         setTxHash(null);
@@ -100,11 +100,11 @@ export function useMarketplace(): UseMarketplaceReturn {
         const currencyAddress = SUPPORTED_TOKENS.find((t: any) => t.symbol === currencySymbol)?.address;
         if (!currencyAddress) throw new Error("Unsupported currency selected");
 
-        const currentNonce = await medialaneContract!.nonces(account!.address);
+        const currentNonce = await medialaneContract!.nonces(walletAddress!);
         const nonce = currentNonce.toString();
 
         return { startTime, endTime, salt, currencyAddress, nonce };
-    }, [account, medialaneContract]);
+    }, [walletAddress, medialaneContract]);
 
     // Signs the orderParams, verifies the hash against the contract, and returns a
     // populated register_order call ready to include in a multicall.
@@ -135,7 +135,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         // Hash verification
         try {
             const localHash = await account!.hashMessage(typedData);
-            const contractHash = await medialaneContract!.get_order_hash(registerPayload.parameters, account!.address);
+            const contractHash = await medialaneContract!.get_order_hash(registerPayload.parameters, walletAddress!);
             const contractHashHex = "0x" + BigInt(contractHash).toString(16);
             if (localHash !== contractHashHex) {
                 console.warn("[marketplace] Hash mismatch — signature may be rejected by contract");
@@ -145,7 +145,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         }
 
         return medialaneContract!.populate("register_order", [registerPayload]);
-    }, [account, chain, medialaneContract]);
+    }, [account, chain, medialaneContract, walletAddress]);
 
     const createListing = useCallback(async (
         assetContractAddress: string,
@@ -154,8 +154,14 @@ export function useMarketplace(): UseMarketplaceReturn {
         currencySymbol: string,
         durationSeconds: number
     ) => {
-        if (!account || !medialaneContract || !chain) {
+        if (!walletAddress || !medialaneContract || !chain) {
             const msg = "Account, contract, or network not available";
+            setError(msg);
+            toast({ title: "Error", description: msg, variant: "destructive" });
+            return undefined;
+        }
+        if (!account) {
+            const msg = "Marketplace listing requires Argent X or Braavos wallet";
             setError(msg);
             toast({ title: "Error", description: msg, variant: "destructive" });
             return undefined;
@@ -167,7 +173,7 @@ export function useMarketplace(): UseMarketplaceReturn {
                 await buildBaseOrderParams(currencySymbol, durationSeconds);
 
             const orderParams = {
-                offerer: account.address,
+                offerer: walletAddress,
                 offer: {
                     item_type: "ERC721",
                     token: assetContractAddress,
@@ -181,7 +187,7 @@ export function useMarketplace(): UseMarketplaceReturn {
                     identifier_or_criteria: "0",
                     start_amount: priceWei,
                     end_amount: priceWei,
-                    recipient: account.address,
+                    recipient: walletAddress,
                 },
                 start_time: startTime,
                 end_time: endTime,
@@ -221,7 +227,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Listing Created", description: "Your asset has been listed successfully." });
             return hash;
         });
-    }, [account, medialaneContract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall]);
+    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall]);
 
     const makeOffer = useCallback(async (
         assetContractAddress: string,
@@ -230,8 +236,14 @@ export function useMarketplace(): UseMarketplaceReturn {
         currencySymbol: string,
         durationSeconds: number
     ) => {
-        if (!account || !medialaneContract || !chain) {
+        if (!walletAddress || !medialaneContract || !chain) {
             const msg = "Account, contract, or network not available";
+            setError(msg);
+            toast({ title: "Error", description: msg, variant: "destructive" });
+            return undefined;
+        }
+        if (!account) {
+            const msg = "Making offers requires Argent X or Braavos wallet";
             setError(msg);
             toast({ title: "Error", description: msg, variant: "destructive" });
             return undefined;
@@ -244,7 +256,7 @@ export function useMarketplace(): UseMarketplaceReturn {
 
             // Inverted vs. listing: offerer sends ERC20, receives ERC721
             const orderParams = {
-                offerer: account.address,
+                offerer: walletAddress,
                 offer: {
                     item_type: "ERC20",
                     token: currencyAddress,
@@ -258,7 +270,7 @@ export function useMarketplace(): UseMarketplaceReturn {
                     identifier_or_criteria: tokenId,
                     start_amount: "1",
                     end_amount: "1",
-                    recipient: account.address,
+                    recipient: walletAddress,
                 },
                 start_time: startTime,
                 end_time: endTime,
@@ -283,11 +295,17 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Offer Placed", description: "Your offer has been submitted and is now live." });
             return hash;
         });
-    }, [account, medialaneContract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall]);
+    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall]);
 
     const checkoutCart = useCallback(async (items: any[]) => {
-        if (!account || !medialaneContract || !chain || items.length === 0) {
+        if (!walletAddress || !medialaneContract || !chain || items.length === 0) {
             const msg = "Account, contract, network not available, or cart empty";
+            setError(msg);
+            toast({ title: "Error", description: msg, variant: "destructive" });
+            return undefined;
+        }
+        if (!account) {
+            const msg = "Checkout requires Argent X or Braavos wallet";
             setError(msg);
             toast({ title: "Error", description: msg, variant: "destructive" });
             return undefined;
@@ -313,7 +331,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             });
 
             // Fetch base nonce; each fulfillment increments it sequentially
-            const currentNonce = await medialaneContract.nonces(account.address);
+            const currentNonce = await medialaneContract.nonces(walletAddress);
             const baseNonce = BigInt(currentNonce);
 
             const chainId = chain.id as any as constants.StarknetChainId;
@@ -326,7 +344,7 @@ export function useMarketplace(): UseMarketplaceReturn {
 
                 const fulfillmentParams = {
                     order_hash: item.orderHash,
-                    fulfiller: account.address,
+                    fulfiller: walletAddress,
                     nonce: executionNonce.toString(),
                 };
 
@@ -359,22 +377,28 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Purchase Successful", description: `Successfully purchased ${items.length} item(s).` });
             return hash;
         });
-    }, [account, medialaneContract, chain, toast, provider, withProcessing]);
+    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing]);
 
     const cancelOrder = useCallback(async (orderHash: string) => {
-        if (!account || !medialaneContract || !chain) {
+        if (!walletAddress || !medialaneContract || !chain) {
             const msg = "Account, contract, or network not available";
+            setError(msg);
+            toast({ title: "Error", description: msg, variant: "destructive" });
+            return undefined;
+        }
+        if (!account) {
+            const msg = "Cancelling orders requires Argent X or Braavos wallet";
             setError(msg);
             toast({ title: "Error", description: msg, variant: "destructive" });
             return undefined;
         }
 
         return withProcessing(async () => {
-            const currentNonce = await medialaneContract.nonces(account.address);
+            const currentNonce = await medialaneContract.nonces(walletAddress);
 
             const cancelParams = {
                 order_hash: orderHash,
-                offerer: account.address,
+                offerer: walletAddress,
                 nonce: currentNonce.toString(),
             };
 
@@ -398,7 +422,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Listing Cancelled", description: "The listing has been successfully cancelled on-chain." });
             return hash;
         });
-    }, [account, medialaneContract, chain, toast, provider, withProcessing]);
+    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing]);
 
     /**
      * Asset owner accepts an incoming bid. Signs OrderFulfillment typed data,
@@ -410,19 +434,25 @@ export function useMarketplace(): UseMarketplaceReturn {
         nftContractAddress: string,
         tokenId: string
     ) => {
-        if (!account || !medialaneContract || !chain) {
+        if (!walletAddress || !medialaneContract || !chain) {
             const msg = "Account, contract, or network not available";
+            setError(msg);
+            toast({ title: "Error", description: msg, variant: "destructive" });
+            return undefined;
+        }
+        if (!account) {
+            const msg = "Accepting offers requires Argent X or Braavos wallet";
             setError(msg);
             toast({ title: "Error", description: msg, variant: "destructive" });
             return undefined;
         }
 
         return withProcessing(async () => {
-            const currentNonce = await medialaneContract.nonces(account.address);
+            const currentNonce = await medialaneContract.nonces(walletAddress);
 
             const fulfillmentParams = {
                 order_hash: orderHash,
-                fulfiller: account.address,
+                fulfiller: walletAddress,
                 nonce: currentNonce.toString(),
             };
 
@@ -454,7 +484,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Offer Accepted", description: "The offer has been accepted and the asset transferred." });
             return hash;
         });
-    }, [account, medialaneContract, chain, toast, provider, withProcessing]);
+    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing]);
 
     return {
         createListing,
