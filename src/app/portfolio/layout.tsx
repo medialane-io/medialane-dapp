@@ -11,6 +11,7 @@ import { markOffersAsSeen } from "@/hooks/use-unread-offers";
 import { useRemixOffers } from "@/hooks/use-remix-offers";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ConnectWallet } from "@/components/ConnectWallet";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -79,7 +80,7 @@ export default function PortfolioLayout({ children }: { children: React.ReactNod
     }
   }, [orders]);
 
-  if (!isConnected && walletAddress === null) {
+  if (!isConnected && !walletAddress) {
     return (
       <div className="px-4 sm:px-6 lg:px-8 pt-14 pb-8 space-y-6">
         <Skeleton className="h-5 w-32" />
@@ -101,10 +102,15 @@ export default function PortfolioLayout({ children }: { children: React.ReactNod
 
   if (!isConnected) {
     return (
-      <div className="px-4 sm:px-6 lg:px-8 py-24 text-center space-y-4">
+      <div className="px-4 sm:px-6 lg:px-8 py-24 text-center space-y-6">
         <Wallet className="h-12 w-12 mx-auto text-muted-foreground" />
-        <h1 className="text-2xl font-bold">Connect your wallet</h1>
-        <p className="text-muted-foreground">Connect your wallet to view your assets, listings, and offers.</p>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold">Connect your wallet</h1>
+          <p className="text-muted-foreground">Connect your wallet to view your assets, listings, and offers.</p>
+        </div>
+        <div className="flex justify-center">
+          <ConnectWallet />
+        </div>
       </div>
     );
   }
