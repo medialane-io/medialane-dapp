@@ -5,6 +5,7 @@ import { Abi, shortString, constants } from "starknet";
 import { IPMarketplaceABI } from "@/abis/ip_market";
 import { useToast } from "@/hooks/use-toast";
 import { getOrderParametersTypedData, getOrderCancellationTypedData, getOrderFulfillmentTypedData, stringifyBigInts } from "@/utils/marketplace-utils";
+import { executeSponsoredTransaction, canSponsor } from "@/utils/paymaster";
 
 interface UseMarketplaceReturn {
     createListing: (
@@ -85,6 +86,19 @@ export function useMarketplace(): UseMarketplaceReturn {
             setIsProcessing(false);
         }
     }, [toast]);
+
+    // Executes calls with AVNU-sponsored gas; falls back to direct account.execute() on failure.
+    const executeWithSponsor = useCallback(async (calls: any[]): Promise<string> => {
+        if (canSponsor()) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const sponsored = await executeSponsoredTransaction(account as any, calls);
+            if (sponsored.success) return sponsored.transactionHash;
+            console.warn("[marketplace] Sponsored tx rejected, using direct wallet:", sponsored.error);
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const tx = await account!.execute(calls as any);
+        return tx.transaction_hash;
+    }, [account]);
 
     // Builds shared timing/nonce/currency fields for an order.
     const buildBaseOrderParams = useCallback(async (
@@ -221,9 +235,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             };
 
             const calls = isAlreadyApproved ? [registerCall] : [approveCall, registerCall];
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const tx = await account!.execute(calls as any);
-            const hash = tx.transaction_hash;
+            const hash = await executeWithSponsor(calls);
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
@@ -232,7 +244,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Listing Created", description: "Your asset has been listed successfully." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall]);
+    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeWithSponsor]);
 
     const makeOffer = useCallback(async (
         assetContractAddress: string,
@@ -294,9 +306,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             };
 
             // ERC20 approve + register_order as atomic multicall
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const tx = await account!.execute([approveCall, registerCall] as any);
-            const hash = tx.transaction_hash;
+            const hash = await executeWithSponsor([approveCall, registerCall]);
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
@@ -305,7 +315,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Offer Placed", description: "Your offer has been submitted and is now live." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall]);
+    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeWithSponsor]);
 
     const checkoutCart = useCallback(async (items: any[]) => {
         if (!walletAddress || !medialaneContract || !chain || items.length === 0) {
@@ -381,9 +391,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Executing Purchase", description: "Approve the final transaction to sweep the cart." });
 
             // Single atomic multicall: all approvals + all fulfillments
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const tx = await account!.execute([...approveCalls, ...fulfillCalls] as any);
-            const hash = tx.transaction_hash;
+            const hash = await executeWithSponsor([...approveCalls, ...fulfillCalls]);
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
@@ -392,7 +400,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Purchase Successful", description: `Successfully purchased ${items.length} item(s).` });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing]);
+    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, executeWithSponsor]);
 
     const cancelOrder = useCallback(async (orderHash: string) => {
         if (!walletAddress || !medialaneContract || !chain) {
@@ -431,9 +439,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             });
 
             const call = medialaneContract.populate("cancel_order", [cancelRequest]);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const tx = await account!.execute([call] as any);
-            const hash = tx.transaction_hash;
+            const hash = await executeWithSponsor([call]);
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
@@ -442,7 +448,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Listing Cancelled", description: "The listing has been successfully cancelled on-chain." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing]);
+    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, executeWithSponsor]);
 
     /**
      * Asset owner accepts an incoming bid. Signs OrderFulfillment typed data,
@@ -498,9 +504,7 @@ export function useMarketplace(): UseMarketplaceReturn {
                 calldata: [medialaneContract.address, tokenIdUint256.low.toString(), tokenIdUint256.high.toString()],
             };
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const tx = await account!.execute([approveCall, fulfillCall] as any);
-            const hash = tx.transaction_hash;
+            const hash = await executeWithSponsor([approveCall, fulfillCall]);
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
@@ -509,7 +513,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Offer Accepted", description: "The offer has been accepted and the asset transferred." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing]);
+    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, executeWithSponsor]);
 
     return {
         createListing,
