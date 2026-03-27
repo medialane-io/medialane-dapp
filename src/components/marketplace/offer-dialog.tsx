@@ -50,12 +50,8 @@ export function OfferDialog({ open, onOpenChange, assetContract, tokenId, tokenN
 
   const onSubmit = async (values: FormValues) => {
     if (!isConnected) { toast.error("Connect your wallet first"); return; }
-    try {
-      await makeOffer(assetContract, tokenId, values.price, values.currency, values.durationSeconds);
-      setTxStatus("confirmed");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Offer failed");
-    }
+    const hash = await makeOffer(assetContract, tokenId, values.price, values.currency, values.durationSeconds);
+    if (hash) setTxStatus("confirmed");
   };
 
   useEffect(() => {

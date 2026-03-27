@@ -223,7 +223,10 @@ export function useMarketplace(): UseMarketplaceReturn {
             const calls = isAlreadyApproved ? [registerCall] : [approveCall, registerCall];
             const hash = await unifiedExecute(calls);
             setTxHash(hash);
-            await provider.waitForTransaction(hash);
+            const receipt = await provider.waitForTransaction(hash);
+            if ((receipt as any).execution_status === "REVERTED") {
+                throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
+            }
             toast({ title: "Listing Created", description: "Your asset has been listed successfully." });
             return hash;
         });
@@ -291,7 +294,10 @@ export function useMarketplace(): UseMarketplaceReturn {
             // ERC20 approve + register_order as atomic multicall
             const hash = await unifiedExecute([approveCall, registerCall]);
             setTxHash(hash);
-            await provider.waitForTransaction(hash);
+            const receipt = await provider.waitForTransaction(hash);
+            if ((receipt as any).execution_status === "REVERTED") {
+                throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
+            }
             toast({ title: "Offer Placed", description: "Your offer has been submitted and is now live." });
             return hash;
         });
@@ -373,7 +379,10 @@ export function useMarketplace(): UseMarketplaceReturn {
             // Single atomic multicall: all approvals + all fulfillments
             const hash = await unifiedExecute([...approveCalls, ...fulfillCalls]);
             setTxHash(hash);
-            await provider.waitForTransaction(hash);
+            const receipt = await provider.waitForTransaction(hash);
+            if ((receipt as any).execution_status === "REVERTED") {
+                throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
+            }
             toast({ title: "Purchase Successful", description: `Successfully purchased ${items.length} item(s).` });
             return hash;
         });
@@ -418,7 +427,10 @@ export function useMarketplace(): UseMarketplaceReturn {
             const call = medialaneContract.populate("cancel_order", [cancelRequest]);
             const hash = await unifiedExecute([call]);
             setTxHash(hash);
-            await provider.waitForTransaction(hash);
+            const receipt = await provider.waitForTransaction(hash);
+            if ((receipt as any).execution_status === "REVERTED") {
+                throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
+            }
             toast({ title: "Listing Cancelled", description: "The listing has been successfully cancelled on-chain." });
             return hash;
         });
@@ -480,7 +492,10 @@ export function useMarketplace(): UseMarketplaceReturn {
 
             const hash = await unifiedExecute([approveCall, fulfillCall]);
             setTxHash(hash);
-            await provider.waitForTransaction(hash);
+            const receipt = await provider.waitForTransaction(hash);
+            if ((receipt as any).execution_status === "REVERTED") {
+                throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
+            }
             toast({ title: "Offer Accepted", description: "The offer has been accepted and the asset transferred." });
             return hash;
         });

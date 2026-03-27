@@ -50,12 +50,8 @@ export function ListingDialog({ open, onOpenChange, assetContract, tokenId, toke
 
   const onSubmit = async (values: FormValues) => {
     if (!isConnected) { toast.error("Connect your wallet first"); return; }
-    try {
-      await createListing(assetContract, tokenId, values.price, values.currency, values.durationSeconds);
-      setTxStatus("confirmed");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Listing failed");
-    }
+    const hash = await createListing(assetContract, tokenId, values.price, values.currency, values.durationSeconds);
+    if (hash) setTxStatus("confirmed");
   };
 
   useEffect(() => {
