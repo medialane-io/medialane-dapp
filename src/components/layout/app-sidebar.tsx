@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
-import { Home, Compass, Briefcase, PlusCircle, Zap, Activity, LayoutGrid, Telescope, Search, Sun, Moon, ShoppingBag, Info, BookOpen, FileCode2, Mail, LifeBuoy, Scale, Lock, Users } from "lucide-react";
+import { Home, Compass, Briefcase, PlusCircle, Zap, Activity, LayoutGrid, Telescope, Search, Sun, Moon, ShoppingBag, Info, BookOpen, FileCode2, Mail, LifeBuoy, Scale, Lock, Users, ArrowRightLeft } from "lucide-react";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { IP_TYPE_CONFIG } from "@/lib/ip-type-config";
 import { useUnreadOffers } from "@/hooks/use-unread-offers";
@@ -36,6 +36,7 @@ const NAV = [
   { href: "/creators",   label: "Creators",    icon: Users,      exact: true },
   { href: "/portfolio", label: "Portfolio", icon: Briefcase, exact: true, prefetch: false },
   { href: "/create", label: "Create", icon: PlusCircle, exact: true, prefetch: false },
+  { href: "/swap", label: "Swap", icon: ArrowRightLeft, exact: true },
   { href: "/launchpad", label: "Launchpad", icon: Zap, exact: true },
   { href: "/activities", label: "Activity", icon: Activity, exact: true },
 ];
