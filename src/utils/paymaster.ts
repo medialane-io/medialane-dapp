@@ -117,7 +117,7 @@ export async function executeSponsoredTransaction(
   try {
     const paymaster = new PaymasterRpc({
       nodeUrl: "https://starknet.paymaster.avnu.fi/",
-      headers: { "api-key": apiKey },
+      headers: { "x-paymaster-api-key": apiKey },
     });
 
     // Build typed data for the sponsored transaction
