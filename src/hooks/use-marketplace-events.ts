@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { RpcProvider, hash, num, Contract, shortString } from "starknet";
 import { MEDIALANE_CONTRACT_ADDRESS, START_BLOCK } from "@/lib/constants";
-import { normalizeStarknetAddress } from "@/lib/utils";
+import { normalizeAddress } from "@/lib/utils";
 import { IPMarketplaceABI } from "@/abis/ip_market";
 
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
@@ -80,7 +80,7 @@ export function useMarketplaceListings() {
 
         globalListingsPromise = (async () => {
             const provider = new RpcProvider({ nodeUrl: RPC_URL });
-            const contractAddress = normalizeStarknetAddress(MEDIALANE_CONTRACT_ADDRESS);
+            const contractAddress = normalizeAddress(MEDIALANE_CONTRACT_ADDRESS);
 
             // Fetch all marketplace events in one call (created + fulfilled + cancelled)
             const allEvents: any[] = [];
@@ -142,11 +142,7 @@ export function useMarketplaceListings() {
 
             // Fetch details for each order hash
             // Rate-limiting parallel calls for Alchemy Free Tier (~330 CU/sec, starknet_call is ~15 CU)
-            const contract = new Contract({
-                abi: IPMarketplaceABI as any,
-                address: contractAddress,
-                providerOrAccount: provider
-            });
+            const contract = new Contract({ abi: IPMarketplaceABI as any, address: contractAddress, providerOrAccount: provider });
 
             const orderDetailsResults: any[] = [];
             const BATCH_SIZE = 10;
@@ -169,12 +165,12 @@ export function useMarketplaceListings() {
 
                             return {
                                 orderHash,
-                                offerer: normalizeStarknetAddress(details.offerer.toString()),
-                                offerToken: normalizeStarknetAddress(details.offer.token.toString()),
+                                offerer: normalizeAddress(details.offerer.toString()),
+                                offerToken: normalizeAddress(details.offer.token.toString()),
                                 offerIdentifier: details.offer.identifier_or_criteria.toString(),
                                 offerAmount: details.offer.start_amount.toString(),
                                 offerType: shortString.decodeShortString(num.toHex(details.offer.item_type)),
-                                considerationToken: normalizeStarknetAddress(details.consideration.token.toString()),
+                                considerationToken: normalizeAddress(details.consideration.token.toString()),
                                 considerationIdentifier: details.consideration.identifier_or_criteria.toString(),
                                 considerationAmount: details.consideration.start_amount.toString(),
                                 considerationType: shortString.decodeShortString(num.toHex(details.consideration.item_type)),
@@ -269,13 +265,13 @@ export function findListingForToken(
     nftContract: string,
     tokenId: string
 ): MarketplaceOrder | null {
-    const normalizedContract = normalizeStarknetAddress(nftContract).toLowerCase();
+    const normalizedContract = normalizeAddress(nftContract).toLowerCase();
     const targetTokenId = BigInt(tokenId);
 
     // Find listings where offer is an ERC721 matching our token
     const matching = listings.filter((listing) => {
         try {
-            const listingOfferToken = normalizeStarknetAddress(listing.offerToken).toLowerCase();
+            const listingOfferToken = normalizeAddress(listing.offerToken).toLowerCase();
             const listingIdentifier = BigInt(listing.offerIdentifier);
 
             const isMatch = listingOfferToken === normalizedContract && listingIdentifier === targetTokenId;

@@ -21,6 +21,15 @@ const config: Config = {
 			   All reference CSS variables from globals.css
 			   ═══════════════════════════════════════════ */
 			colors: {
+				// ── Brand palette (matches medialane-io) ──
+				brand: {
+					blue:   "hsl(var(--brand-blue))",
+					navy:   "hsl(var(--brand-navy))",
+					rose:   "hsl(var(--brand-rose))",
+					purple: "hsl(var(--brand-purple))",
+					orange: "hsl(var(--brand-orange))",
+				},
+
 				// ── M3 Primary ──
 				"m3-primary": "hsl(var(--m3-primary))",
 				"m3-on-primary": "hsl(var(--m3-on-primary))",

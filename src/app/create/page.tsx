@@ -1,467 +1,280 @@
-"use client"
-
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import type { Metadata } from "next";
+import Link from "next/link";
 import {
-  Search,
-  Filter,
-  Grid3X3,
-  List,
-  Sparkles,
-  TrendingUp,
+  ImagePlus,
+  Layers,
+  Zap,
+  Rocket,
+  Store,
+  Fingerprint,
+  ShieldCheck,
+  Globe2,
+  Bolt,
+  FileCode2,
+  Cpu,
+  Unlink,
+  Lock,
   ArrowRight,
-  CheckCircle,
-  Shield,
-  Music,
-  Palette,
-  FileText,
-  Video,
-  Code,
-} from "lucide-react"
-import Link from "next/link"
-import { cn } from "@/lib/utils"
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CreationOptionCard } from "@/components/create/creation-option-card"
-import { CreationOptionDetails } from "@/components/create/creation-option-details"
-import { CreatorStatsBar } from "@/components/create/creator-stats-bar"
-import { PageHeader } from "@/components/page-header"
+export const metadata: Metadata = {
+  title: "Creator Studio · Medialane",
+  description:
+    "Protect, manage and unlock new revenue streams for your Intellectual Property.",
+};
 
-const creationOptions = [
+// ── Feature definitions ──────────────────────────────────────────────────────
+
+const FEATURES = [
   {
-    id: "asset",
-    title: "Create Asset: Programmable IP",
-    description: "Register and protect your intellectual property with comprehensive metadata and licensing options.",
-    icon: "Shield",
-    color: "blue",
-    category: "core",
-    trending: true,
-    popular: true,
-    estimatedTime: "1-5 min",
-    estimatedFee: 0.001,
-    userCount: "75",
-    benefits: [
-      "Comprehensive IP protection",
-      "Decentralized Authorship",
-      "Proof of Ownership",
-      "Global Reach and Recognition",
-    ],
-    process: [
-      "Upload your asset and add basic information",
-      "Configure metadata and licensing terms",
-      "Review and confirm registration",
-      "Self custody your IP onchain",
-    ],
+    icon: Zap,
+    title: "Frictionless Web3",
+    body: "Gasless transactions and invisible wallets with Google login powered by StarknetKit. Zero crypto knowledge required.",
+    accent: "from-yellow-400 to-orange-400",
+    border: "border-yellow-500/20",
+    bg: "bg-yellow-500/5",
+  },
+  {
+    icon: Rocket,
+    title: "Creator Launchpad",
+    body: "Launch and mint NFT Collections, Programmable IP, and Real World Assets — all in a few clicks.",
+    accent: "from-violet-500 to-purple-600",
+    border: "border-violet-500/20",
+    bg: "bg-violet-500/5",
+  },
+  {
+    icon: Store,
+    title: "NFT Marketplace",
+    body: "Monetize and trade digital assets with smart-contract security. Earn royalties on every secondary sale.",
+    accent: "from-blue-400 to-cyan-400",
+    border: "border-blue-500/20",
+    bg: "bg-blue-500/5",
+  },
+  {
+    icon: Fingerprint,
+    title: "Immutable Provenance",
+    body: "Secure your intellectual property copyright with blockchain-based, timestamped proof of ownership.",
+    accent: "from-emerald-400 to-teal-500",
+    border: "border-emerald-500/20",
+    bg: "bg-emerald-500/5",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Censorship Resistance",
+    body: "Ensure your content remains permanently accessible and immutable onchain. No central authority can remove it.",
+    accent: "from-rose-400 to-pink-500",
+    border: "border-rose-500/20",
+    bg: "bg-rose-500/5",
+  },
+  {
+    icon: Lock,
+    title: "Onchain Sovereignty",
+    body: "Maintain complete control over your intellectual property with fully self-custodied, user-owned assets.",
+    accent: "from-indigo-400 to-blue-500",
+    border: "border-indigo-500/20",
+    bg: "bg-indigo-500/5",
+  },
+  {
+    icon: Globe2,
+    title: "Global Protection",
+    body: "Compliant with the Berne Convention (1886) — guaranteeing authorship recognition across 181 countries.",
+    accent: "from-sky-400 to-blue-500",
+    border: "border-sky-500/20",
+    bg: "bg-sky-500/5",
+  },
+  {
+    icon: Bolt,
+    title: "Atomic Settlement",
+    body: "Asset transfer and payment happen simultaneously in a single transaction. No escrow, no counterparty risk.",
+    accent: "from-amber-400 to-yellow-400",
+    border: "border-amber-500/20",
+    bg: "bg-amber-500/5",
+  },
+  {
+    icon: FileCode2,
+    title: "Embedded Licensing",
+    body: "Usage terms are encoded directly into the asset — commercial use, derivatives, territory, AI policy and more.",
+    accent: "from-fuchsia-400 to-pink-500",
+    border: "border-fuchsia-500/20",
+    bg: "bg-fuchsia-500/5",
+  },
+  {
+    icon: Cpu,
+    title: "Onchain Composability",
+    body: "Machine-readable IP permissions let games, AI models, and dApps automatically query and interact onchain.",
+    accent: "from-teal-400 to-emerald-400",
+    border: "border-teal-500/20",
+    bg: "bg-teal-500/5",
+  },
+  {
+    icon: Unlink,
+    title: "Claim Any Collection",
+    body: "Medialane works with any ERC-721 compatible contract. Claim and manage existing collections on Starknet.",
+    accent: "from-orange-400 to-rose-400",
+    border: "border-orange-500/20",
+    bg: "bg-orange-500/5",
+  },
+] as const;
+
+// ── CTA cards ─────────────────────────────────────────────────────────────────
+
+const ACTIONS = [
+  {
     href: "/create/asset",
-    useCase: "Perfect for creators who want to customize their Programmable IP.",
-    gradient: "from-blue-500 to-blue-700",
-    iconColor: "text-blue-500",
-    requirements: ["Original work", "Metadata"],
-    timeEstimate: "1-5 min",
-    tags: ["IP", "Asset", "Protection"],
-    featured: true,
-    complexity: "Intermediate",
-    useCases: ["Custom IP registration", "Metadata management"],
-    popularity: 75,
+    icon: ImagePlus,
+    label: "Mint IP Asset",
+    description:
+      "Upload any creative work — art, music, document or file — and anchor it onchain as a programmable IP asset.",
+    gradient: "from-violet-500 to-purple-600",
+    ring: "hover:ring-violet-500/30",
+    iconBg: "bg-violet-500/10 group-hover:bg-violet-500/20",
+    iconColor: "text-violet-600 dark:text-violet-400",
   },
   {
-    id: "templates",
-    title: "Create With Template",
-    description: "Choose from optimized IP templates designed for specific types of content.",
-    icon: "Grid3X3",
-    color: "purple",
-    category: "advanced",
-    trending: true,
-    popular: false,
-    estimatedTime: "1-5 min",
-    estimatedFee: 0.001,
-    userCount: "25",
-    benefits: [
-      "Pre-configured for your asset type",
-      "Industry-specific metadata fields",
-      "Optimized licensing templates",
-      "Faster registration process",
-    ],
-    process: [
-      "Select the template that matches your asset type",
-      "Fill in template-specific information",
-      "Customize licensing and metadata",
-      "Complete registration with optimized settings",
-    ],
-    href: "/create/templates",
-    useCase: "Ideal for creators working with specific asset types who want streamlined registration.",
-    gradient: "from-purple-500 to-purple-700",
-    iconColor: "text-purple-500",
-    requirements: ["Template selection"],
-    timeEstimate: "2-5 min",
-    tags: ["Template", "IP", "Creator"],
-    featured: false,
-    complexity: "Beginner",
-    useCases: ["Music", "Publications", "Videos", "Software"],
-    popularity: 45,
-  },
-  {
-    id: "collection",
-    title: "Create Collection",
-    description: "Group related assets together for better organization and batch management.",
-    icon: "BookOpen",
-    color: "green",
-    category: "core",
-    trending: false,
-    popular: true,
-    estimatedTime: "1-2 min",
-    estimatedFee: 0.001,
-    userCount: "95",
-    benefits: ["Manage assets", "Showcase IP", "Unified branding", "Powerful features"],
-    process: [
-      "Define collection details and theme",
-      "Set collection-wide licensing terms",
-      "Open and collaborative collections",
-      "Publish and manage your collection",
-    ],
     href: "/create/collection",
-    useCase: "Great for creators with multiple related works or series of assets.",
-    gradient: "from-green-500 to-green-700",
-    iconColor: "text-green-500",
-    requirements: ["Multiple assets"],
-    timeEstimate: "1-2 min",
-    tags: ["Collection", "Batch", "Creators"],
-    featured: false,
-    complexity: "Beginner",
-    useCases: ["Showcase assets", "Portfolio organization"],
-    popularity: 95,
+    icon: Layers,
+    label: "Deploy Collection",
+    description:
+      "Launch a named NFT collection, set royalties, upload cover art and start minting assets into it instantly.",
+    gradient: "from-blue-500 to-cyan-500",
+    ring: "hover:ring-blue-500/30",
+    iconBg: "bg-blue-500/10 group-hover:bg-blue-500/20",
+    iconColor: "text-blue-600 dark:text-blue-400",
   },
-  {
-    id: "collection-drop",
-    title: "Collection Drop",
-    description: "Launch a premium NFT drop with a dedicated landing page.",
-    icon: "Sparkles",
-    color: "amber",
-    category: "advanced",
-    trending: true,
-    popular: true,
-    estimatedTime: "2-5 min",
-    estimatedFee: 0.05,
-    userCount: "120",
-    benefits: ["Dedicated landing page", "Minting mechanics", "Visual storytelling", "Premium experience"],
-    process: [
-      "Configure drop details (price, supply)",
-      "Upload assets and metadata",
-      "Set up roadmap and team info",
-      "Launch your public drop page",
-    ],
-    href: "/launchpad/collection-drop",
-    useCase: "Perfect for high-profile NFT launches and community building.",
-    gradient: "from-amber-500 to-amber-700",
-    iconColor: "text-amber-500",
-    requirements: ["Assets", "Roadmap"],
-    timeEstimate: "2-5 min",
-    tags: ["Drop", "NFT", "Launch"],
-    featured: true,
-    complexity: "Advanced",
-    useCases: ["NFT Drops", "Community Launch"],
-    popularity: 90,
-  },
-]
+] as const;
 
-const templates = [
-  {
-    id: "audio",
-    name: "Audio",
-    icon: "Music",
-    description: "Music, podcasts, sound effects, and audio content",
-    color: "blue",
-    category: "media",
-    count: "42",
-  },
-  {
-    id: "art",
-    name: "Art",
-    icon: "Palette",
-    description: "Digital art, illustrations, paintings, and visual creations",
-    color: "purple",
-    category: "media",
-    count: "12",
-  },
-  {
-    id: "video",
-    name: "Video",
-    icon: "Video",
-    description: "Films, animations, tutorials, and video content",
-    color: "red",
-    category: "media",
-    count: "61",
-  },
-  {
-    id: "software",
-    name: "Software",
-    icon: "Code",
-    description: "Applications, code, algorithms, and digital tools",
-    color: "violet",
-    category: "tech",
-    count: "37",
-  },
-  {
-    id: "documents",
-    name: "Documents",
-    icon: "FileText",
-    description: "Contracts, agreements, manuals, and written content",
-    color: "gray",
-    category: "legal",
-    count: "29",
-  },
-  {
-    id: "nft",
-    name: "NFT",
-    icon: "Hexagon",
-    description: "Non-fungible tokens and blockchain assets",
-    color: "teal",
-    category: "blockchain",
-    count: "84",
-  },
-]
-
-const categories = [
-  { id: "all", name: "All", count: 6 },
-  { id: "core", name: "Core", count: 3 },
-  { id: "advanced", name: "Advanced", count: 2 },
-]
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function CreatePage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [sortBy, setSortBy] = useState("popularity")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [selectedOption, setSelectedOption] = useState<string | null>(null)
-
-  const filteredOptions = creationOptions.filter((option) => {
-    const matchesSearch =
-      option.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      option.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      option.useCase?.toLowerCase().includes(searchQuery.toLowerCase())
-
-    const matchesCategory = selectedCategory === "all" || option.category === selectedCategory
-
-    return matchesSearch && matchesCategory
-  })
-
-  const sortedOptions = [...filteredOptions].sort((a, b) => {
-    switch (sortBy) {
-      case "popularity":
-        return Number.parseInt(b.userCount.replace("k", "")) - Number.parseInt(a.userCount.replace("k", ""))
-      case "time":
-        return Number.parseInt(a.estimatedTime.split("-")[0]) - Number.parseInt(b.estimatedTime.split("-")[0])
-      case "success":
-        return b.estimatedFee - a.estimatedFee
-      case "name":
-        return a.title.localeCompare(b.title)
-      default:
-        return 0
-    }
-  })
-
-  const selectedOptionData = creationOptions.find((opt) => opt.id === selectedOption)
-
   return (
-    <div className="min-h-screen pb-8">
-      <div className="h-16"></div>
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      {/* Subtle background tint — visible in dark mode, near-invisible in light */}
+      <div className="absolute inset-0 dark:bg-gradient-to-b dark:from-[#07000f]/80 dark:via-transparent dark:to-transparent pointer-events-none" />
 
-      <main className="w-full mx-auto py-4">
-        {/* Creator Stats */}
-        <div className="layout-px mb-6">
-          <CreatorStatsBar />
+      {/* Aurora — dark-only decorative glows */}
+      <div
+        className="aurora-purple absolute w-[70%] max-w-[700px] h-[50%] max-h-[500px] -top-1/4 -left-1/4 pointer-events-none hidden dark:block"
+        style={{ opacity: 0.18 }}
+      />
+      <div
+        className="aurora-blue absolute w-[50%] max-w-[500px] h-[40%] max-h-[400px] top-0 -right-1/4 pointer-events-none hidden dark:block"
+        style={{ opacity: 0.12 }}
+      />
+
+      {/* Top accent line */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 space-y-12 sm:space-y-16">
+
+        {/* ── Hero ── */}
+        <div className="max-w-2xl space-y-4 sm:space-y-5">
+          {/* Eyebrow badge */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-sm font-semibold text-violet-700 dark:text-violet-300 backdrop-blur-sm">
+            <Rocket className="h-3.5 w-3.5" />
+            Creator Studio
+          </div>
+
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-[1.06] tracking-tight text-foreground">
+            Mint, protect &amp;{" "}
+            <span className="gradient-text">generate revenue</span>
+          </h1>
+
+          <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg">
+            Unique monetization services — gasless, global, and truly yours on Starknet.
+          </p>
         </div>
 
-        <PageHeader
-          variant="expressive"
-          title="Create"
-          description="Start your journey. Mint assets, launch collections, and build your IP portfolio."
-          statusBadge="Creator Workspace"
-          primaryAction={
-            <div className="relative w-full max-w-xl">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-m3-on-surface-variant/50" />
-              <input
-                type="search"
-                placeholder="Search creation options..."
-                className="w-full h-12 md:h-14 pl-12 pr-4 bg-m3-surface-container border border-m3-outline-variant/20 focus:border-m3-primary/30 text-base transition-all rounded-full shadow-sm focus:shadow-md outline-none text-m3-on-surface placeholder:text-m3-on-surface-variant/40"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          }
-          utilityContent={
-            <div className="flex flex-wrap items-center gap-3">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="h-9 w-[130px] rounded-full border-m3-outline-variant/10 bg-m3-surface-container-high/30 hover:bg-m3-surface-container-high/60 transition-colors text-xs font-bold text-m3-on-surface-variant">
-                  <div className="flex items-center gap-2">
-                    <Filter className="h-3.5 w-3.5 text-m3-primary" />
-                    <SelectValue placeholder="Category" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id} className="text-xs font-medium">
-                      {category.name} ({category.count})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="h-9 w-[110px] rounded-full border-m3-outline-variant/10 bg-m3-surface-container-high/30 hover:bg-m3-surface-container-high/60 transition-colors text-xs font-bold text-m3-on-surface-variant">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="popularity" className="text-xs font-medium">Popular</SelectItem>
-                  <SelectItem value="time" className="text-xs font-medium">Fastest</SelectItem>
-                  <SelectItem value="name" className="text-xs font-medium">Name</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <div className="h-4 w-px bg-m3-outline-variant/20 mx-1 hidden sm:block" />
-
-              <div className="flex items-center p-1 rounded-full bg-m3-surface-container-high/20 border border-m3-outline-variant/10">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                  className={cn(
-                    "h-7 w-7 p-0 rounded-full transition-all",
-                    viewMode === "grid" ? "bg-m3-primary text-m3-on-primary shadow-sm" : "text-m3-on-surface-variant/60 hover:text-m3-primary"
-                  )}
-                >
-                  <Grid3X3 className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                  className={cn(
-                    "h-7 w-7 p-0 rounded-full transition-all",
-                    viewMode === "list" ? "bg-m3-primary text-m3-on-primary shadow-sm" : "text-m3-on-surface-variant/60 hover:text-m3-primary"
-                  )}
-                >
-                  <List className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-          }
-        />
-
-        <div className="layout-px py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-3">
-              {sortedOptions.length === 0 ? (
-                <Card className="p-8 text-center bg-m3-surface-container-low border-dashed border-m3-outline-variant/20">
-                  <div className="text-m3-on-surface-variant/60 mb-4">
-                    <Search className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                    <p className="font-medium text-m3-on-surface">No options found matching your search.</p>
-                    <p className="text-sm">Try adjusting your filters or search terms.</p>
-                  </div>
-                  <Button variant="outline" onClick={() => setSearchQuery("")} className="rounded-full">
-                    Clear Search
-                  </Button>
-                </Card>
-              ) : (
-                <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-4"}>
-                  {sortedOptions.map((option) => (
-                    <CreationOptionCard
-                      key={option.id}
-                      option={option}
-                      viewMode={viewMode}
-                      isSelected={selectedOption === option.id}
-                      onSelect={() => setSelectedOption(selectedOption === option.id ? null : option.id)}
-                    />
-                  ))}
-                </div>
+        {/* ── Action cards ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 max-w-2xl">
+          {ACTIONS.map(({ href, icon: Icon, label, description, ring, iconBg, iconColor }) => (
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                "group relative rounded-2xl border border-border bg-card p-5 sm:p-6 ring-2 ring-transparent transition-all duration-300",
+                "hover:border-border/80 hover:shadow-lg hover:shadow-primary/5",
+                ring
               )}
-            </div>
-
-            <div className="lg:col-span-1">
-              <div className="sticky top-24 space-y-6">
-                {selectedOptionData ? (
-                  <CreationOptionDetails option={selectedOptionData} />
-                ) : (
-                  <>
-                    <Card className="bg-m3-surface-container-low border border-m3-outline-variant/20 rounded-[24px] shadow-sm overflow-hidden">
-                      <CardHeader className="pb-3 border-b border-m3-outline-variant/10">
-                        <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-wider text-m3-on-surface/70">
-                          <TrendingUp className="h-4 w-4 text-m3-primary" />
-                          Popular Templates
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3 pt-3">
-                        {templates.slice(0, 4).map((template) => {
-                          const getIconComponent = (iconName: string) => {
-                            switch (iconName) {
-                              case "Music":
-                                return <Music className="h-4 w-4" />
-                              case "Palette":
-                                return <Palette className="h-4 w-4" />
-                              case "Video":
-                                return <Video className="h-4 w-4" />
-                              case "Code":
-                                return <Code className="h-4 w-4" />
-                              default:
-                                return <FileText className="h-4 w-4" />
-                            }
-                          }
-
-                          return (
-                            <Link key={template.id} href={`/create/templates/${template.id}`} className="block group">
-                              <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-m3-primary/5 transition-colors cursor-pointer">
-                                <div className="p-1.5 rounded-md bg-m3-primary/10 text-m3-primary group-hover:bg-m3-primary group-hover:text-m3-on-primary transition-colors">
-                                  {getIconComponent(template.icon)}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-bold text-xs text-m3-on-surface-variant group-hover:text-m3-primary transition-colors">{template.name}</div>
-                                </div>
-                                <ArrowRight className="h-3.5 w-3.5 text-m3-on-surface-variant/40 group-hover:text-m3-primary group-hover:translate-x-0.5 transition-all" />
-                              </div>
-                            </Link>
-                          )
-                        })}
-                        <Link href="/create/templates" className="block mt-4">
-                          <Button variant="outline" size="sm" className="w-full rounded-full border-m3-outline-variant/30 text-[10px] font-black uppercase tracking-widest hover:bg-m3-primary/5">
-                            View All Templates
-                          </Button>
-                        </Link>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-m3-surface-container-low border border-m3-outline-variant/20 rounded-[24px] shadow-sm">
-                      <CardContent className="p-5">
-                        <h4 className="font-black text-[10px] uppercase tracking-[0.2em] mb-4 text-m3-primary/60">Why tokenize with Medialane?</h4>
-                        <div className="space-y-3">
-                          <div className="flex items-start gap-2.5 text-xs text-m3-on-surface font-bold">
-                            <CheckCircle className="h-3.5 w-3.5 text-m3-primary mt-0.5 shrink-0" />
-                            <span>Zero fees protocol and dapp</span>
-                          </div>
-                          <div className="flex items-start gap-2.5 text-xs text-m3-on-surface font-bold">
-                            <CheckCircle className="h-3.5 w-3.5 text-m3-primary mt-0.5 shrink-0" />
-                            <span>Full ownership onchain</span>
-                          </div>
-                          <div className="flex items-start gap-2.5 text-xs text-m3-on-surface font-bold">
-                            <CheckCircle className="h-3.5 w-3.5 text-m3-primary mt-0.5 shrink-0" />
-                            <span>Instant tokenization</span>
-                          </div>
-                          <div className="flex items-start gap-2.5 text-xs text-m3-on-surface font-bold">
-                            <CheckCircle className="h-3.5 w-3.5 text-m3-primary mt-0.5 shrink-0" />
-                            <span>Powered by Starknet Blockchain</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </>
+            >
+              {/* Icon */}
+              <div
+                className={cn(
+                  "h-11 w-11 rounded-xl flex items-center justify-center mb-4 sm:mb-5 transition-all duration-300 group-hover:scale-110",
+                  iconBg
                 )}
+              >
+                <Icon className={cn("h-5 w-5", iconColor)} />
+              </div>
+
+              <h2 className="text-base sm:text-lg font-bold text-foreground mb-2">{label}</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+
+              <div className="mt-4 sm:mt-5 flex items-center gap-1.5 text-sm font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
+                Get started <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* ── Divider ── */}
+        <div className="flex items-center gap-4">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-[11px] uppercase tracking-widest text-muted-foreground/60 font-semibold whitespace-nowrap">
+            Platform Features
+          </span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
+        {/* ── Features grid ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+          {FEATURES.map(({ icon: Icon, title, body, accent, border, bg }) => (
+            <div
+              key={title}
+              className={cn(
+                "relative rounded-2xl border p-4 sm:p-5 space-y-3 transition-all duration-200 hover:shadow-sm group",
+                border,
+                bg
+              )}
+            >
+              {/* Gradient icon */}
+              <div
+                className={cn(
+                  "h-9 w-9 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-sm",
+                  accent
+                )}
+              >
+                <Icon className="h-[18px] w-[18px] text-white" />
+              </div>
+
+              <div className="space-y-1">
+                <h3 className="font-bold text-sm text-foreground">{title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{body}</p>
               </div>
             </div>
+          ))}
+        </div>
+
+        {/* ── Stats strip ── */}
+        <div className="rounded-2xl border border-border bg-card p-5 sm:p-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 sm:gap-8">
+            {[
+              { value: "181", label: "Countries protected" },
+              { value: "Free", label: "to mint & list" },
+              { value: "Gas-free", label: "transactions" },
+              { value: "On-chain", label: "royalties & licensing" },
+            ].map(({ value, label }) => (
+              <div key={label} className="text-center space-y-1">
+                <p className="text-2xl sm:text-3xl font-black text-foreground">{value}</p>
+                <p className="text-[11px] uppercase tracking-widest text-muted-foreground/70 font-medium">
+                  {label}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
-      </main>
+
+      </div>
     </div>
-  )
+  );
 }

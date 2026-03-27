@@ -3,15 +3,15 @@
 import { useMemo } from "react";
 import { useAccount } from "@starknet-react/core";
 import { useMarketplaceListings, MarketplaceOrder } from "@/hooks/use-marketplace-events";
-import { normalizeStarknetAddress, formatPrice } from "@/lib/utils";
+import { normalizeAddress, formatPrice } from "@/lib/utils";
 import { SUPPORTED_TOKENS } from "@/lib/constants";
 
 // ─── Helpers (mirrors use-listing.ts) ────────────────────────────────────────
 
 const getCurrencyInfo = (tokenAddress: string): { symbol: string; decimals: number } => {
-    const normalized = normalizeStarknetAddress(tokenAddress).toLowerCase();
+    const normalized = normalizeAddress(tokenAddress).toLowerCase();
     for (const token of SUPPORTED_TOKENS) {
-        if (normalizeStarknetAddress(token.address).toLowerCase() === normalized) {
+        if (normalizeAddress(token.address).toLowerCase() === normalized) {
             return { symbol: token.symbol, decimals: token.decimals };
         }
     }
@@ -59,7 +59,7 @@ export function useAssetOffers(nftAddress?: string, tokenId?: string) {
         if (!nftAddress || !tokenId || !allOrders.length) return [];
 
         const now = Math.floor(Date.now() / 1000);
-        const normalizedNft = normalizeStarknetAddress(nftAddress).toLowerCase();
+        const normalizedNft = normalizeAddress(nftAddress).toLowerCase();
 
         let targetId: bigint;
         try { targetId = BigInt(tokenId); } catch { return []; }
@@ -71,7 +71,7 @@ export function useAssetOffers(nftAddress?: string, tokenId?: string) {
                 if (order.offerType !== "ERC20") return false;
                 if (order.considerationType !== "ERC721") return false;
                 try {
-                    const cToken = normalizeStarknetAddress(order.considerationToken).toLowerCase();
+                    const cToken = normalizeAddress(order.considerationToken).toLowerCase();
                     const cId = BigInt(order.considerationIdentifier);
                     return cToken === normalizedNft && cId === targetId;
                 } catch {
@@ -101,10 +101,10 @@ export function useAssetOffers(nftAddress?: string, tokenId?: string) {
     // The connected user's own active offer (null if not connected or no offer)
     const userOffer = useMemo((): FormattedOffer | null => {
         if (!address) return null;
-        const normalizedUser = normalizeStarknetAddress(address).toLowerCase();
+        const normalizedUser = normalizeAddress(address).toLowerCase();
         return (
             allOffers.find(
-                (o) => normalizeStarknetAddress(o.offerer).toLowerCase() === normalizedUser
+                (o) => normalizeAddress(o.offerer).toLowerCase() === normalizedUser
             ) ?? null
         );
     }, [allOffers, address]);

@@ -1,33 +1,15 @@
-/**
- * Types for AVNU Paymaster integration
- */
-
-import { Call } from "starknet";
-
-export interface GasToken {
-  symbol: string;
-  address: string;
-  decimals: number;
-  balance?: string;
-}
-
+// AVNU Paymaster types
 export interface GasTokenPrice {
   tokenAddress: string;
-  gasTokenPrice: string;
-  gasUnitPrice: string;
+  gasTokenPrice: bigint;
+  priceInUSD?: string;
 }
 
 export interface PaymasterOptions {
+  apiKey?: string;
+  baseUrl?: string;
   gasTokenAddress?: string;
   maxGasTokenAmount?: bigint;
-  gasTokenPrices?: GasTokenPrice[];
-  sponsored?: boolean;
-}
-
-export interface PaymasterResponse {
-  transactionHash: string;
-  success: boolean;
-  error?: string;
 }
 
 export interface AccountCompatibility {
@@ -35,26 +17,12 @@ export interface AccountCompatibility {
   reason?: string;
 }
 
-export interface SponsoredTransactionData {
-  userAddress: string;
-  typedData: any;
-  signature: string[];
+export interface PaymasterResponse {
+  transactionHash: string;
+  success?: boolean;
+  error?: string;
 }
 
-export interface PaymasterStatus {
-  isActive: boolean;
-  supportedTokens: string[];
-  maxGasAmount: string;
-}
+export type PaymasterStatus = "idle" | "loading" | "success" | "error";
 
-/**
- * All transaction types in Medialane that can be gas-sponsored.
- */
-export type TransactionType =
-  | "mint"
-  | "transfer"
-  | "marketplace_list"
-  | "marketplace_buy"
-  | "marketplace_offer"
-  | "marketplace_cancel"
-  | "license_create";
+export type TransactionType = "gasless" | "sponsored" | "traditional" | "mint";

@@ -1,6 +1,6 @@
 import { Plus, Send, GitBranch, Activity as ActivityIcon, Tag, Gavel, ShoppingCart, XCircle, type LucideIcon } from "lucide-react"
 import { format } from "date-fns"
-import { normalizeStarknetAddress, formatPrice as utilsFormatPrice } from "@/lib/utils"
+import { normalizeAddress, formatPrice as utilsFormatPrice } from "@/lib/utils"
 import { SUPPORTED_TOKENS } from "@/lib/constants"
 
 export const ACTIVITY_LABELS: Record<string, string> = {
@@ -135,9 +135,9 @@ export function formatPrice(raw: string, decimals: number): string {
 }
 
 export function lookupToken(address: string): { symbol: string; decimals: number } | null {
-  const normalized = normalizeStarknetAddress(address.toLowerCase())
+  const normalized = normalizeAddress(address.toLowerCase())
   for (const t of SUPPORTED_TOKENS) {
-    if (normalizeStarknetAddress(t.address.toLowerCase()) === normalized) {
+    if (normalizeAddress(t.address.toLowerCase()) === normalized) {
       return { symbol: t.symbol, decimals: t.decimals }
     }
   }

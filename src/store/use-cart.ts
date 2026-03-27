@@ -35,7 +35,7 @@ interface CartStore {
 function resolveCollectionName(asset: Asset | RecentAsset): string {
     // RecentAsset has `collectionName` directly
     if ("collectionName" in asset && asset.collectionName) {
-        return asset.collectionName;
+        return asset.collectionName as string;
     }
     // Asset has `collection` which is a string
     if ("collection" in asset && asset.collection) {

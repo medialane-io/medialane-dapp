@@ -14,7 +14,7 @@ export interface TokenMetadata {
     loading: boolean;
 }
 
-import { normalizeStarknetAddress } from "@/lib/utils";
+import { normalizeAddress } from "@/lib/utils";
 
 /**
  * Helper to decode Cairo 1 ByteArray from raw felt array.
@@ -74,7 +74,7 @@ export function useTokenMetadata(tokenId: string, nftAddress?: string) {
     });
 
     const { provider } = useProvider();
-    const normalizedNftAddress = nftAddress ? normalizeStarknetAddress(nftAddress) : null;
+    const normalizedNftAddress = nftAddress ? normalizeAddress(nftAddress) : null;
 
     const { contract: managerContract } = useContract({
         abi: ipCollectionAbi as Abi,

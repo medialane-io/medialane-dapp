@@ -1,20 +1,7 @@
 "use client";
 
-import { PrivyProvider } from "@privy-io/react-auth";
-import { StarkZapWalletProvider } from "@/contexts/starkzap-wallet-context";
-
+// Legacy shim — the real provider tree lives in src/app/providers.tsx.
+// This file is kept for any stray imports that haven't been updated yet.
 export function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
-      config={{
-        loginMethods: ["email", "google", "twitter"],
-        appearance: { theme: "dark" },
-      }}
-    >
-      <StarkZapWalletProvider>
-        {children}
-      </StarkZapWalletProvider>
-    </PrivyProvider>
-  );
+  return <>{children}</>;
 }

@@ -4,11 +4,8 @@ import React, {
   createContext,
   useCallback,
   useContext,
-  useEffect,
-  useRef,
   useState,
 } from "react";
-import { usePrivy, useLogin } from "@privy-io/react-auth";
 import { OnboardStrategy } from "starkzap";
 import type { WalletInterface } from "starkzap";
 import { getStarkZapSdk } from "@/lib/starkzap";
@@ -17,16 +14,18 @@ import { getStarkZapSdk } from "@/lib/starkzap";
 // Cartridge session policies for Medialane contracts
 // ---------------------------------------------------------------------------
 
-const COLLECTION_CONTRACT = process.env.NEXT_PUBLIC_COLLECTION_CONTRACT_ADDRESS;
-const MARKETPLACE_CONTRACT = process.env.NEXT_PUBLIC_MEDIALANE_CONTRACT_ADDRESS;
+const COLLECTION_CONTRACT =
+  process.env.NEXT_PUBLIC_COLLECTION_CONTRACT_ADDRESS ||
+  process.env.NEXT_PUBLIC_COLLECTION_CONTRACT;
+const MARKETPLACE_CONTRACT =
+  process.env.NEXT_PUBLIC_MEDIALANE_CONTRACT_ADDRESS ||
+  process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT;
 
 const CARTRIDGE_POLICIES = [
-  // IP Collection contract
   COLLECTION_CONTRACT && { target: COLLECTION_CONTRACT, method: "mint" },
   COLLECTION_CONTRACT && { target: COLLECTION_CONTRACT, method: "create_collection" },
   COLLECTION_CONTRACT && { target: COLLECTION_CONTRACT, method: "burn" },
   COLLECTION_CONTRACT && { target: COLLECTION_CONTRACT, method: "transfer_token" },
-  // Marketplace contract
   MARKETPLACE_CONTRACT && { target: MARKETPLACE_CONTRACT, method: "register_order" },
   MARKETPLACE_CONTRACT && { target: MARKETPLACE_CONTRACT, method: "fulfill_order" },
   MARKETPLACE_CONTRACT && { target: MARKETPLACE_CONTRACT, method: "cancel_order" },
@@ -36,17 +35,15 @@ const CARTRIDGE_POLICIES = [
 // Context types
 // ---------------------------------------------------------------------------
 
-export type StarkZapWalletType = "cartridge" | "privy";
+export type StarkZapWalletType = "cartridge";
 
 export interface StarkZapWalletCtx {
   wallet: WalletInterface | null;
   walletType: StarkZapWalletType | null;
-  /** Address as a plain string (never Address branded type) */
   address: string | null;
   isConnecting: boolean;
   error: string | null;
   connectCartridge: () => Promise<void>;
-  connectPrivy: () => void;
   disconnect: () => void;
 }
 
@@ -63,132 +60,11 @@ export function StarkZapWalletProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { authenticated, getAccessToken } = usePrivy();
-
   const [wallet, setWallet] = useState<WalletInterface | null>(null);
   const [walletType, setWalletType] = useState<StarkZapWalletType | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // ---------------------------------------------------------------------------
-  // Connect Starknet wallet via Privy after authentication
-  // ---------------------------------------------------------------------------
-
-  const connectPrivyWallet = useCallback(async () => {
-    setIsConnecting(true);
-    setError(null);
-    try {
-      const sdk = getStarkZapSdk();
-
-      // Fetch the Privy wallet info once and reuse it across retries.
-      let cachedWallet: { id: string; publicKey: string } | null = null;
-      const resolve = async () => {
-        if (!cachedWallet) {
-          const token = await getAccessToken();
-          if (!token) throw new Error("No Privy access token");
-
-          const res = await fetch("/api/wallet/starknet", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          if (!res.ok) {
-            const body = await res.json().catch(() => ({}));
-            throw new Error(
-              (body as { error?: string }).error ?? "Failed to get wallet"
-            );
-          }
-          const { wallet: w } = (await res.json()) as {
-            wallet: { id: string; publicKey: string };
-          };
-          cachedWallet = w;
-        }
-
-        // PrivySigner requires a fully-qualified URL, not a relative path
-        const signUrl = `${window.location.origin}/api/wallet/sign`;
-        return {
-          walletId: cachedWallet.id,
-          publicKey: cachedWallet.publicKey,
-          serverUrl: signUrl,
-          headers: async (): Promise<Record<string, string>> => {
-            const t = await getAccessToken();
-            return t ? { Authorization: `Bearer ${t}` } : {};
-          },
-        };
-      };
-
-      const onboardOpts = {
-        strategy: OnboardStrategy.Privy,
-        accountPreset: "argentXV050",
-        privy: { resolve },
-      } as const;
-
-      let result;
-      try {
-        result = await sdk.onboard({
-          ...onboardOpts,
-          deploy: "if_needed",
-          feeMode: "sponsored",
-        });
-      } catch (deployErr) {
-        // The contract may already be deployed on-chain even though
-        // isDeployed() returned false (e.g. prior session, Privy infra).
-        // Retry without deploying so the wallet still connects.
-        if (String(deployErr).includes("already deployed")) {
-          result = await sdk.onboard({ ...onboardOpts, deploy: "never" });
-        } else {
-          throw deployErr;
-        }
-      }
-
-      setWallet(result.wallet);
-      setWalletType("privy");
-      setAddress(result.wallet.address as unknown as string);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to connect Privy wallet"
-      );
-    } finally {
-      setIsConnecting(false);
-    }
-  }, [getAccessToken]);
-
-  // Stable ref so useLogin's onComplete always calls the latest version
-  // without a stale closure (useLogin captures the callback at mount time).
-  const connectPrivyWalletRef = useRef(connectPrivyWallet);
-  useEffect(() => {
-    connectPrivyWalletRef.current = connectPrivyWallet;
-  }, [connectPrivyWallet]);
-
-  // ---------------------------------------------------------------------------
-  // Privy login — onComplete calls the wallet connection directly.
-  // ---------------------------------------------------------------------------
-
-  const { login: privyLogin } = useLogin({
-    onComplete: () => {
-      connectPrivyWalletRef.current();
-    },
-    onError: (err) => {
-      setError(typeof err === "string" ? err : "Privy login failed");
-      setIsConnecting(false);
-    },
-  });
-
-  // ---------------------------------------------------------------------------
-  // Connect Privy (triggers login modal, wallet connected in onComplete above)
-  // ---------------------------------------------------------------------------
-
-  const connectPrivy = useCallback(() => {
-    if (authenticated) {
-      connectPrivyWallet();
-    } else {
-      setIsConnecting(true);
-      privyLogin();
-    }
-  }, [authenticated, connectPrivyWallet, privyLogin]);
 
   // ---------------------------------------------------------------------------
   // Connect Cartridge
@@ -239,7 +115,6 @@ export function StarkZapWalletProvider({
         isConnecting,
         error,
         connectCartridge,
-        connectPrivy,
         disconnect,
       }}
     >
@@ -252,12 +127,17 @@ export function StarkZapWalletProvider({
 // Hook
 // ---------------------------------------------------------------------------
 
+const STARKZAP_DEFAULT_CTX: StarkZapWalletCtx = {
+  wallet: null,
+  walletType: null,
+  address: null,
+  isConnecting: false,
+  error: null,
+  connectCartridge: async () => {},
+  disconnect: () => {},
+};
+
 export function useStarkZapWallet(): StarkZapWalletCtx {
   const ctx = useContext(StarkZapWalletContext);
-  if (!ctx) {
-    throw new Error(
-      "useStarkZapWallet must be used within StarkZapWalletProvider"
-    );
-  }
-  return ctx;
+  return ctx ?? STARKZAP_DEFAULT_CTX;
 }

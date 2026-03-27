@@ -22,6 +22,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAccount } from "@starknet-react/core";
 import type { Call } from "starknet";
+import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
 import {
   checkAccountCompatibility,
   getGasTokenPrices,
@@ -68,6 +69,8 @@ export interface UsePaymasterTransactionResult {
 
 export function usePaymasterTransaction(): UsePaymasterTransactionResult {
   const { account, address } = useAccount();
+  // StarkZap wallet (Cartridge) — manages its own gas via session keys
+  const { wallet: szWallet } = useStarkZapWallet();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -194,6 +197,22 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
 
   const executeAuto = useCallback(
     async (calls: Call[]): Promise<string | null> => {
+      // StarkZap wallet (Cartridge) handles gas via session keys — bypass paymaster
+      if (szWallet) {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const tx = await szWallet.execute(calls);
+          return tx.hash;
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Transaction failed";
+          setError(msg);
+          throw new Error(msg);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+
       if (!account || !address) {
         setError("Wallet not connected");
         return null;
@@ -235,7 +254,7 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
         setIsLoading(false);
       }
     },
-    [account, address, isSponsorAvailable]
+    [szWallet, account, address, isSponsorAvailable]
   );
 
   // ---------------------------------------------------------------------------

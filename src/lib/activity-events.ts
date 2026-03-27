@@ -1,5 +1,5 @@
 import { RpcProvider, shortString, hash } from "starknet";
-import { normalizeStarknetAddress } from "@/lib/utils";
+import { normalizeAddress } from "@/lib/utils";
 import { isAssetReported } from "@/lib/reported-content";
 import { formatPrice, lookupToken } from "@/lib/activity-ui";
 import { MEDIALANE_CONTRACT_ADDRESS } from "@/lib/constants";
@@ -211,7 +211,7 @@ export async function fetchRegistryEventsInRange(
                         if (!owner) continue;
 
                         if (walletAddress) {
-                            const normalizedOwner = normalizeStarknetAddress(owner.toLowerCase());
+                            const normalizedOwner = normalizeAddress(owner.toLowerCase());
                             if (normalizedOwner !== walletAddress) continue;
                         }
 
@@ -244,7 +244,7 @@ export async function fetchRegistryEventsInRange(
                         if (!owner) continue;
 
                         if (walletAddress) {
-                            const normalizedOwner = normalizeStarknetAddress(owner.toLowerCase());
+                            const normalizedOwner = normalizeAddress(owner.toLowerCase());
                             if (normalizedOwner !== walletAddress) continue;
                         }
 
@@ -277,7 +277,7 @@ export async function fetchRegistryEventsInRange(
                         if (!operator || !tsHex) continue;
 
                         if (walletAddress) {
-                            const normalizedOperator = normalizeStarknetAddress(operator.toLowerCase());
+                            const normalizedOperator = normalizeAddress(operator.toLowerCase());
                             if (normalizedOperator !== walletAddress) continue;
                         }
 
@@ -308,8 +308,8 @@ export async function fetchRegistryEventsInRange(
                             if (BigInt(fromAddress) === 0n) continue; // ignore mints
 
                             if (walletAddress) {
-                                const normalizedFrom = normalizeStarknetAddress(fromAddress.toLowerCase());
-                                const normalizedTo = normalizeStarknetAddress(toAddress.toLowerCase());
+                                const normalizedFrom = normalizeAddress(fromAddress.toLowerCase());
+                                const normalizedTo = normalizeAddress(toAddress.toLowerCase());
                                 if (normalizedFrom !== walletAddress && normalizedTo !== walletAddress) continue;
                             }
 
@@ -382,9 +382,9 @@ export async function fetchMarketplaceEventsInRange(
                     if (!orderHash || !offerer) continue;
 
                     if (walletAddress) {
-                        const normalizedOfferer = normalizeStarknetAddress(offerer.toLowerCase());
+                        const normalizedOfferer = normalizeAddress(offerer.toLowerCase());
                         const normalizedFulfiller = fulfiller
-                            ? normalizeStarknetAddress(fulfiller.toLowerCase())
+                            ? normalizeAddress(fulfiller.toLowerCase())
                             : null;
 
                         if (eventKey === ORDER_CREATED_SELECTOR || eventKey === ORDER_CANCELLED_SELECTOR) {

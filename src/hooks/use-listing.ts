@@ -6,13 +6,13 @@ import { Abi } from "starknet";
 import { IPMarketplaceABI } from "@/abis/ip_market";
 import { useMarketplaceListings, findListingForToken, MarketplaceOrder } from "@/hooks/use-marketplace-events";
 import { SUPPORTED_TOKENS } from "@/lib/constants";
-import { normalizeStarknetAddress, formatPrice } from "@/lib/utils";
+import { normalizeAddress, formatPrice } from "@/lib/utils";
 
 // Find currency symbol from address
 const getCurrencySymbol = (tokenAddress: string): { symbol: string; decimals: number } => {
-    const normalized = normalizeStarknetAddress(tokenAddress).toLowerCase();
+    const normalized = normalizeAddress(tokenAddress).toLowerCase();
     for (const token of SUPPORTED_TOKENS) {
-        const tokenNormalized = normalizeStarknetAddress(token.address).toLowerCase();
+        const tokenNormalized = normalizeAddress(token.address).toLowerCase();
         if (tokenNormalized === normalized) {
             return { symbol: token.symbol, decimals: token.decimals };
         }

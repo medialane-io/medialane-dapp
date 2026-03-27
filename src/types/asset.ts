@@ -1,506 +1,106 @@
-import { Shield, CreativeCommons, FileText, Globe } from "lucide-react";
+// Shared asset/IP types used across the dapp
+
+export type LicenseType =
+  | "cc-by"
+  | "cc-by-sa"
+  | "cc-by-nc"
+  | "all-rights-reserved"
+  | "custom";
 
 export interface Asset {
   id: string;
   name: string;
-  creator: string;
-  owner?: string;
-  verified?: boolean;
-  image: string;
-  collection?: string | any; // allow any for mock data shape differences
-  licenseType: LicenseType;
-  description: string;
-  registrationDate?: string;
-  value?: string;
-  views?: number;
-  type: IPType | string;
-  templateType?: string;
-  templateId?: string;
-  metadata?: Record<string, any>;
-  protectionLevel?: number;
-  ownershipHistory?: OwnershipRecord[];
-  licensingTerms?: LicensingTerms;
-  category?: string;
-  isVisible?: boolean;
-  externalUrl?: string;
+  description?: string;
+  image?: string;
+  collection?: string | { id: string; name: string };
   tokenId?: string;
+  contractAddress?: string;
+  creator?: string;
+  owner?: string;
+  price?: number | string;
+  licenseType?: LicenseType;
+  attributes?: { trait_type: string; value: string }[];
+  createdAt?: string;
+  [key: string]: unknown;
 }
-
-// asset type definitions
 
 export interface AssetDetails {
   id: string;
-  title: string;
-  author: string;
-  description: string;
-  type: string;
-  mediaUrl: string;
-  externalUrl: string;
-  licenseType: string;
-  licenseDetails: string;
-  licenseDuration: string;
-  licenseTerritory: string;
-  version: string;
-  commercialUse: boolean;
-  modifications: boolean;
-  attribution: boolean;
-  registrationDate: string;
-  collection: string;
-}
-
-export interface IP {
-  id: string;
   name: string;
-  image: string;
-  isVisible: boolean;
-  category?: string;
-  collection?: string;
+  description?: string;
+  image?: string;
   tokenId?: string;
-  type?: string;
-}
-
-export interface NFT {
-  id: string;
-  name: string;
-  imageUrl: string;
-  isVisible: boolean;
-  category?: string;
-  collection?: string;
-  tokenId?: string;
-  externalUrl?: string;
-}
-
-export interface assetIP {
-  title: string;
-  author: string;
-  description: string;
-  type: string;
-  template: string;
-  collection: string;
-  tags: string;
-  mediaUrl: string;
-  externalUrl: string;
-  licenseType: string;
-  licenseDetails: string;
-  version: string;
-  commercialUse: boolean;
-  modifications: boolean;
-  attribution: boolean;
-  registrationDate: string;
-  protectionStatus: string;
-  protectionScope: string;
-  protectionDuration: string;
-}
-
-export interface artworkIP {
-  title: string;
-  author: string;
-  description: string;
-  type: string;
-  template: string;
-  format: string;
-  dimensions: string;
-  created: string;
-  language: string;
-  collection: string;
-  tags: string;
-  mediaUrl: string;
-  externalUrl: string;
-  licenseType: string;
-  licenseDetails: string;
-  version: string;
-  commercialUse: boolean;
-  modifications: boolean;
-  attribution: boolean;
-  registrationDate: string;
-  protectionStatus: string;
-  protectionScope: string;
-  protectionDuration: string;
-}
-
-export interface audioIP {
-  title: string;
-  author: string;
-  description: string;
-  type: string;
-  template: string;
-  artist: string;
-  album: string;
-  genre: string;
-  composer: string;
-  band: string;
-  publisher: string;
-  collection: string;
-  tags: string;
-  mediaUrl: string;
-  externalUrl: string;
-  licenseType: string;
-  licenseDetails: string;
-  version: string;
-  commercialUse: boolean;
-  modifications: boolean;
-  attribution: boolean;
-  registrationDate: string;
-  protectionStatus: string;
-  protectionScope: string;
-  protectionDuration: string;
-}
-
-export interface documentIP {
-  title: string;
-  description: string;
-  type: string;
-  template: string;
-  author: string;
-  format: string;
-  categories: string;
-  publisher: string;
-  date: string;
-  expiration: string;
-  language: string;
-  collection: string;
-  tags: string;
-  mediaUrl: string;
-  externalUrl: string;
-  licenseType: string;
-  licenseDetails: string;
-  version: string;
-  commercialUse: boolean;
-  modifications: boolean;
-  attribution: boolean;
-  filesCount: string;
-  transaction: string;
-  registrationDate: string;
-  protectionStatus: string;
-  protectionScope: string;
-  protectionDuration: string;
-}
-
-export interface patentIP {
-  title: string;
-  description: string;
-  type: string;
-  template: string;
-  author: string;
-  inventor: string;
-  patentType: string;
-  filingDate: string;
-  patentNumber: string;
-  status: string;
-  collection: string;
-  tags: string;
-  mediaUrl: string;
-  externalUrl: string;
-  licenseType: string;
-  licenseDetails: string;
-  version: string;
-  commercialUse: boolean;
-  modifications: boolean;
-  attribution: boolean;
-  filesCount: string;
-  transaction: string;
-  registrationDate: string;
-  protectionStatus: string;
-  protectionScope: string;
-  protectionDuration: string;
-}
-
-export interface publicationIP {
-  title: string;
-  description: string;
-  type: string;
-  template: string;
-  author: string;
-  format: string;
-  categories: string;
-  isbn: string;
-  publisher: string;
-  date: string;
-  collection: string;
-  tags: string;
-  mediaUrl: string;
-  externalUrl: string;
-  licenseType: string;
-  licenseDetails: string;
-  version: string;
-  commercialUse: boolean;
-  modifications: boolean;
-  attribution: boolean;
-  filesCount: string;
-  transaction: string;
-  registrationDate: string;
-  protectionStatus: string;
-  protectionScope: string;
-  protectionDuration: string;
-}
-
-export interface rwaIP {
-  title: string;
-  description: string;
-  type: string;
-  template: string;
-  rwa: string;
-  location: string;
-  valuation: string;
-  insurance: string;
-  structure: string;
-  documentation: string;
-  collection: string;
-  tags: string;
-  mediaUrl: string;
-  externalUrl: string;
-  licenseType: string;
-  licenseDetails: string;
-  version: string;
-  commercialUse: boolean;
-  modifications: boolean;
-  attribution: boolean;
-  filesCount: string;
-  transaction: string;
-  registrationDate: string;
-  protectionStatus: string;
-  protectionScope: string;
-  protectionDuration: string;
-}
-
-export interface softwareIP {
-  title: string;
-  description: string;
-  type: string;
-  template: string;
-  developer: string;
-  versionCode: string;
-  releaseDate: string;
-  progammingLanguage: string;
-  sourceCode: string;
-  documentation: string;
-  repository: string;
-  collection: string;
-  tags: string;
-  mediaUrl: string;
-  externalUrl: string;
-  licenseType: string;
-  licenseDetails: string;
-  version: string;
-  commercialUse: boolean;
-  modifications: boolean;
-  attribution: boolean;
-  filesCount: string;
-  transaction: string;
-  registrationDate: string;
-  protectionStatus: string;
-  protectionScope: string;
-  protectionDuration: string;
-}
-
-export interface trademarkIP {
-  title: string;
-  description: string;
-  type: string;
-  template: string;
-  movieType: string;
-  director: string;
-  duration: string;
-  studio: string;
-  genre: string;
-  collection: string;
-  tags: string;
-  mediaUrl: string;
-  externalUrl: string;
-  licenseType: string;
-  licenseDetails: string;
-  version: string;
-  commercialUse: boolean;
-  modifications: boolean;
-  attribution: boolean;
-  filesCount: string;
-  transaction: string;
-  registrationDate: string;
-  protectionStatus: string;
-  protectionScope: string;
-  protectionDuration: string;
-}
-
-export type IPType =
-  | "Art"
-  | "Audio"
-  | "Video"
-  | "Document"
-  | "Patent"
-  | "RWA"
-  | "Software"
-  | "NFT"
-  | "Post";
-
-export const licenseTypes = [
-  {
-    id: "all-rights-reserved",
-    name: "All Rights Reserved",
-    description: "Full copyright protection. You retain all rights to your work.",
-    icon: Shield,
-    recommended: true,
-  },
-  {
-    id: "cc-by",
-    name: "Creative Commons BY",
-    description: "Others can distribute, remix, and build upon your work, with attribution.",
-    icon: CreativeCommons,
-    recommended: false,
-  },
-  {
-    id: "cc-by-sa",
-    name: "Creative Commons BY-SA",
-    description: "Others can remix and build upon your work with attribution and same license.",
-    icon: CreativeCommons,
-    recommended: false,
-  },
-  {
-    id: "cc-by-nc",
-    name: "Creative Commons BY-NC",
-    description: "Others can use your work non-commercially with attribution.",
-    icon: CreativeCommons,
-    recommended: false,
-  },
-  {
-    id: "custom",
-    name: "Custom License",
-    description: "Define your own licensing terms and conditions.",
-    icon: FileText,
-    recommended: false,
-  },
-] as const;
-
-export const geographicScopes = [
-  { value: "worldwide", label: "Worldwide" },
-  { value: "us", label: "United States" },
-  { value: "eu", label: "European Union" },
-  { value: "uk", label: "United Kingdom" },
-  { value: "canada", label: "Canada" },
-  { value: "australia", label: "Australia" },
-  { value: "other", label: "Other" },
-] as const;
-
-export type LicenseType = typeof licenseTypes[number]["id"];
-
-export interface Creator {
-  id: string;
-  slug: string; // Add slug for creator routing
-  name: string;
-  address: string;
-  avatar?: string;
-  verified: boolean;
-  bio?: string;
-  website?: string;
-  twitter?: string;
-  instagram?: string;
-  discord?: string;
-  joinDate: string;
-  totalAssets: number;
-  totalValue: string;
-  totalSales: number;
-  followers: number;
-  following: number;
-  collections: string[]; // Collection IDs
-  specialties: IPType[];
-  location?: string;
-  isActive: boolean;
-}
-
-export interface OwnershipRecord {
-  owner: string;
-  acquiredDate: string;
-  transferType: "Creation" | "Purchase" | "License" | "Gift" | "Received";
-}
-
-export interface LicensingTerms {
-  type: string;
-  commercialUse: boolean;
-  modifications: boolean;
-  attribution: boolean;
-  territory: string;
-  duration?: string;
+  contractAddress?: string;
+  owner?: string;
+  creator?: string;
+  licenseType?: LicenseType;
+  attributes?: { trait_type: string; value: string }[];
+  collection?: {
+    id: string;
+    name: string;
+    description?: string;
+  };
 }
 
 export interface Collection {
   id: string;
-  slug: string;
   name: string;
-  type: string;
-  description: string;
-  coverImage: string;
-  bannerImage?: string;
-  creator: {
-    id: string;
-    username: string;
-    name: string;
-    avatar: string;
-    verified: boolean;
-    wallet: string;
-  };
-  assets: number;
-  floorPrice?: string;
-  totalVolume?: string;
-  createdAt: string;
-  updatedAt: string;
-  category: string;
-  tags: string;
-  isPublic: boolean;
-  isFeatured: boolean;
-  blockchain: string;
-  contractAddress?: string;
+  description?: string;
+  image?: string;
+  owner?: string;
+  floorPrice?: number;
+  itemCount?: number;
+  slug?: string;
+  creator?: string | { name: string; [key: string]: unknown };
 }
 
-export interface Activity {
+export interface Creator {
   id: string;
-  type:
-  | "mint"
-  | "transfer_in"
-  | "transfer_out"
-  | "sale"
-  | "license"
-  | "update"
-  | "collection_create"
-  | "collection_add";
-  title: string;
-  description: string;
-  timestamp: string;
-  network: string;
-  status: "completed" | "pending" | "failed";
-  value?: string;
-  txHash?: string;
-  assetId?: string;
-  collectionId?: string;
-  fromAddress?: string;
-  toAddress?: string;
-}
-
-export interface ActivityRecord {
-  id: string;
-  type: "view" | "license" | "transfer" | "creation" | "update";
-  assetId: string;
-  assetName: string;
-  user: string;
-  timestamp: string;
-  details?: string;
-}
-
-export interface PortfolioStats {
-  totalAssets: number;
-  totalValue: string;
-  createdAssets: number;
-  licensedAssets: number;
-  recentViews: number;
-  protectionLevel: number;
+  name: string;
+  address?: string;
+  avatar?: string;
+  bio?: string;
+  slug?: string;
 }
 
 export interface Template {
   id: string;
   name: string;
-  description: string;
-  type: IPType;
-  icon: string;
-  popularity: number;
-  features: string[];
-  suitableFor: string[];
-  metadataFields: string[];
+  description?: string;
+  category?: string;
+  metadataFields?: string[];
+  type?: string;
+  icon?: string;
+  popularity?: number;
+  features?: string[];
+  suitableFor?: string[];
+}
+
+export interface ActivityRecord {
+  id: string;
+  type: string;
+  assetId?: string;
+  assetName?: string;
+  user?: string;
+  timestamp?: string;
+  txHash?: string;
+  price?: string | number;
+}
+
+export interface PortfolioStats {
+  totalValue?: number | string;
+  totalNFTs?: number;
+  topCollection?: { name: string; value: number };
+  totalAssets?: number;
+  createdAssets?: number;
+  licensedAssets?: number;
+  protectionLevel?: number;
+  recentViews?: number;
+}
+
+export interface OwnershipRecord {
+  assetId: string;
+  owner: string;
+  acquiredAt?: string;
+  txHash?: string;
 }

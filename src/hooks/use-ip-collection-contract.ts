@@ -13,5 +13,5 @@ export function useIPCollectionContract() {
     address: contractAddressMIP as `0x${string}`,
   });
   
-  return contract as Contract;
+  return contract as unknown as Contract;
 } 

@@ -1,11 +1,9 @@
-import { Metadata } from "next";
-import OffersClientPage from "./client-page";
+"use client";
 
-export const metadata: Metadata = {
-    title: "My Offers | Medialane IP",
-    description: "Manage your active marketplace buy offers and bids.",
-};
+import { useSessionKey } from "@/hooks/use-session-key";
+import { OffersTable } from "@/components/portfolio/offers-table";
 
-export default function OffersPage() {
-    return <OffersClientPage />;
+export default function PortfolioOffersPage() {
+  const { walletAddress } = useSessionKey();
+  return <OffersTable address={walletAddress!} />;
 }

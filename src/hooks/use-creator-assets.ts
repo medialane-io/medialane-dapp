@@ -99,11 +99,12 @@ export function useCreatorAssets(address?: string, pageSize: number = 20): UseCr
 
             // Filter for Remix vs Regular Assets
             // Based on mock-data logic: asset.templateType === "Remix Art" || asset.metadata?.originalAsset
-            const newRemixes = fetchedAssets.filter(a =>
-                a.templateType === "Remix Art" ||
-                a.metadata?.originalAsset ||
-                (a.metadata?.attributes && Array.isArray(a.metadata.attributes) && a.metadata.attributes.some((attr: any) => attr.trait_type === "Type" && attr.value === "Remix"))
-            );
+            const newRemixes = fetchedAssets.filter(a => {
+                const meta = a.metadata as any;
+                return a.templateType === "Remix Art" ||
+                  meta?.originalAsset ||
+                  (meta?.attributes && Array.isArray(meta.attributes) && meta.attributes.some((attr: any) => attr.trait_type === "Type" && attr.value === "Remix"));
+            });
 
             const newStandardAssets = fetchedAssets.filter(a => !newRemixes.includes(a));
 

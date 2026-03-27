@@ -2,7 +2,7 @@ import { useEvents, useBlockNumber, useAccount } from "@starknet-react/core";
 import { BlockTag, RpcProvider, hash, num } from "starknet";
 import { useMemo, useEffect, useState, useCallback } from "react";
 import { CONTRACT_ADDRESS, START_BLOCK, REGISTRY_START_BLOCK } from "@/lib/constants";
-import { normalizeStarknetAddress, toHexString } from "@/lib/utils";
+import { normalizeAddress, toHexString } from "@/lib/utils";
 
 export function useMyTransferEvents() {
   const blockNumber = useBlockNumber();
@@ -30,8 +30,8 @@ export function useMyTransferEvents() {
       .flatMap((page) => page.events || [])
       .filter((event) => {
         const keys = event.keys.map((k) => k.toLowerCase());
-        const isSender = keys?.[1] === normalizeStarknetAddress(lowerWallet);
-        const isRecipient = keys?.[2] === normalizeStarknetAddress(lowerWallet);
+        const isSender = keys?.[1] === normalizeAddress(lowerWallet);
+        const isRecipient = keys?.[2] === normalizeAddress(lowerWallet);
         return isSender || isRecipient;
       });
   }, [data, walletAddress]);
@@ -62,7 +62,7 @@ export function useMyTransferEventsForTokenId(tokenId: string) {
   const filteredEvents = useMemo(() => {
     if (!walletAddress || !data?.data?.pages) return [];
 
-    const normalizedWallet = normalizeStarknetAddress(
+    const normalizedWallet = normalizeAddress(
       walletAddress.toLowerCase()
     );
 
@@ -99,7 +99,7 @@ export function useAssetTransferEvents(contractAddress: string, tokenId: string)
     if (!contractAddress) return undefined;
     try {
       // Ensure the address is normalized for Starknet (lowercase, leading zeros handled)
-      return normalizeStarknetAddress(contractAddress) as `0x${string}`;
+      return normalizeAddress(contractAddress) as `0x${string}`;
     } catch (e) {
       console.warn("Address normalization failed in useAssetTransferEvents:", e);
       return contractAddress as `0x${string}`;
@@ -199,7 +199,7 @@ export function useAssetProvenanceEvents(contractAddress: string, tokenId: strin
 
     const fetchAllRegistryEvents = async () => {
       try {
-        const registryAddress = normalizeStarknetAddress(CONTRACT_ADDRESS);
+        const registryAddress = normalizeAddress(CONTRACT_ADDRESS);
 
         // 1. Get the Collection ID for this asset's contract
         let collectionId = -1n;
@@ -214,7 +214,7 @@ export function useAssetProvenanceEvents(contractAddress: string, tokenId: strin
 
         if (collectionId === -1n) {
           try {
-            const normalizedContractAddress = normalizeStarknetAddress(contractAddress);
+            const normalizedContractAddress = normalizeAddress(contractAddress);
             let collectionIdResult: string[] | null = null;
 
             // Try snake_case selector first
@@ -293,7 +293,7 @@ export function useAssetProvenanceEvents(contractAddress: string, tokenId: strin
 
     const fetchAllContractEvents = async (contractAddr: string) => {
       try {
-        const normalizedContractAddress = normalizeStarknetAddress(contractAddr);
+        const normalizedContractAddress = normalizeAddress(contractAddr);
 
         const events = [];
         let continuationToken: string | undefined = undefined;
@@ -360,7 +360,7 @@ export function useAssetProvenanceEvents(contractAddress: string, tokenId: strin
         const keys = (event.keys || []).map(k => num.toHex(k));
         const data = (event.data || []).map(d => num.toHex(d));
         const eventSelector = keys[0];
-        const txHash = normalizeStarknetAddress(event.transaction_hash);
+        const txHash = normalizeAddress(event.transaction_hash);
 
         let match = false;
         let type: "mint" | "transfer" = "transfer";
@@ -419,8 +419,8 @@ export function useAssetProvenanceEvents(contractAddress: string, tokenId: strin
 
             if (eventTokenId === targetTokenId) {
               match = true;
-              const sender = normalizeStarknetAddress(keys[1]);
-              const receiver = normalizeStarknetAddress(keys[2]);
+              const sender = normalizeAddress(keys[1]);
+              const receiver = normalizeAddress(keys[2]);
 
               // Check for Mint (from 0x0)
               if (sender === "0x0" || sender === "0x0000000000000000000000000000000000000000000000000000000000000000") {
@@ -493,8 +493,8 @@ export function useAssetProvenanceEvents(contractAddress: string, tokenId: strin
           type,
           title: type === "mint" ? "Asset Minted" : "Asset Transferred",
           description: type === "mint" ? `Programmable IP minted (Source: ${source})` : `Ownership transferred on-chain (Source: ${source})`,
-          from: normalizeStarknetAddress(from),
-          to: normalizeStarknetAddress(to),
+          from: normalizeAddress(from),
+          to: normalizeAddress(to),
           timestamp,
           transactionHash: txHash,
           blockNumber: event.block_number,

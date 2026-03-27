@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Activity } from "@/hooks/use-activities"
+import type { Activity } from "@/hooks/use-activities"
 
 export function useActivityFilters(activities: Activity[]) {
   const [searchQuery, setSearchQuery] = useState("")
@@ -19,10 +19,11 @@ export function useActivityFilters(activities: Activity[]) {
       const q = debouncedSearch.toLowerCase()
       r = r.filter(
         (a) =>
-          a.assetName.toLowerCase().includes(q) ||
-          a.user.toLowerCase().includes(q) ||
-          a.details.toLowerCase().includes(q) ||
-          a.txHash.toLowerCase().includes(q)
+          (a.nftContract ?? "").toLowerCase().includes(q) ||
+          (a.nftTokenId ?? "").toLowerCase().includes(q) ||
+          (a.from ?? "").toLowerCase().includes(q) ||
+          (a.offerer ?? "").toLowerCase().includes(q) ||
+          (a.txHash ?? "").toLowerCase().includes(q)
       )
     }
     if (typeFilter !== "all") r = r.filter((a) => a.type === typeFilter)
@@ -39,7 +40,6 @@ export function useActivityFilters(activities: Activity[]) {
       setSearchQuery("")
       setTypeFilter("all")
     },
-    // Use debouncedSearch so hasActiveFilters aligns with the actual filtered output
     hasActiveFilters: debouncedSearch !== "" || typeFilter !== "all",
   }
 }

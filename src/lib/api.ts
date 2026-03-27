@@ -7,21 +7,7 @@ export async function getAssetDetails(assetId: string): Promise<AssetDetails> {
   // This is a placeholder implementation
   return {
     id: assetId,
-    title: "Test Asset",
-    author: "Sample Author",
+    name: "Test Asset",
     description: "Sample Description",
-    collection: "MIP",
-    type: "Custom",
-    mediaUrl: "",
-    externalUrl: "",
-    licenseType: "",
-    licenseDetails: "",
-    licenseDuration: "",
-    licenseTerritory: "",
-    version: "0.1.2",
-    commercialUse: false,
-    modifications: false,
-    attribution: false,
-    registrationDate: "2025-06-01",
-  };
+  } as AssetDetails;
 }

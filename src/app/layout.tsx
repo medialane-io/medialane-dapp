@@ -1,85 +1,46 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Providers } from "./providers";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/toaster";
-import { StarknetProvider } from "@/components/starknet-provider";
-import { CommandMenu } from "@/components/command-menu"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { Providers } from "@/components/providers"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-
-export const viewport: Viewport = {
-  themeColor: "#000000",
-}
-
-import { constructMetadata } from "@/utils/seo";
+const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://dapp.medialane.io'),
-  ...constructMetadata({
-    title: "Medialane",
-    description: "Create, Trade, and Monetize your Creative Works.",
-  }),
-  applicationName: "Medialane Dapp",
-  authors: [{ name: "Medialane Protocol" }],
-  generator: "Next.js",
-  keywords: ["IP", "Intellectual Property", "Web3", "Starknet", "NFT", "Creator Economy", "Programmable IP", "Integrity Web"],
-  appleWebApp: {
-    title: "Medialane",
-    statusBarStyle: "black-translucent",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://medialane.io"),
+  title: {
+    default: "Medialane — Creator Launchpad & IP Marketplace",
+    template: "%s | Medialane",
   },
-  formatDetection: {
-    telephone: false,
+  description: "Launch, collect, and monetize NFT digital assets.",
+  keywords: ["NFT", "IP", "Launchpad", "Starknet", "Creator", "Marketplace"],
+  authors: [{ name: "Medialane" }],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    title: "Medialane",
+    description: "Creator launchpad & IP marketplace on Starknet",
+    siteName: "Medialane",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Medialane" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    creator: "@medialane_io",
+    images: ["/og-image.jpg"],
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'Medialane Dapp',
-    url: 'https://dapp.medialane.io',
-    logo: 'https://dapp.medialane.io/favicon.ico',
-    description: "Create, Trade, and Monetize on the Integrity Web.",
-    sameAs: [
-      'https://twitter.com/medialane',
-    ]
-  };
+export const viewport = {
+  themeColor: "black",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
 
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </head>
-      <body className={`${inter.variable} font-sans antialiased text-foreground overflow-x-hidden`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          <Providers>
-            <StarknetProvider>
-              <Header />
-              <main className="min-h-screen pb-20">
-                {children}
-              </main>
-              <Footer />
-              <CommandMenu />
-              <Toaster />
-            </StarknetProvider>
-          </Providers>
-        </ThemeProvider>
+      <body className={inter.className}>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

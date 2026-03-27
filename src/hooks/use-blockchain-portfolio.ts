@@ -89,11 +89,7 @@ export function useBlockchainPortfolio() {
     }
 
     try {
-      const ipContract = new Contract({
-        abi: abi as Abi,
-        address: contractAddress as `0x${string}`,
-        providerOrAccount: account
-      });
+      const ipContract = new Contract({ abi: abi as Abi, address: contractAddress as `0x${string}`, providerOrAccount: account });
       setContract(ipContract);
     } catch (err) {
       console.error("Error initializing contract:", err);

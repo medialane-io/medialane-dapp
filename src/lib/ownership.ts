@@ -1,4 +1,4 @@
-import { normalizeStarknetAddress } from "@/lib/utils";
+import { normalizeAddress } from "@/lib/utils";
 
 /**
  * Returns true if the listing/asset belongs to the connected wallet.
@@ -10,7 +10,7 @@ export function isOwnListing(
 ): boolean {
     if (!offererAddress || !connectedAddress) return false;
     return (
-        normalizeStarknetAddress(offererAddress).toLowerCase() ===
-        normalizeStarknetAddress(connectedAddress).toLowerCase()
+        normalizeAddress(offererAddress).toLowerCase() ===
+        normalizeAddress(connectedAddress).toLowerCase()
     );
 }

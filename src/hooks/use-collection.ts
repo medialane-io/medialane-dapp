@@ -707,11 +707,7 @@ export function useFeaturedCollectionsByAddress(addresses: string[] = []): UseGe
             normalizedAddr = `0x${BigInt(addr).toString(16)}`;
           }
 
-          const contract = new Contract({ 
-            abi: MINIMAL_GET_ID_ABI as any, 
-            address: normalizedAddr as `0x${string}`, 
-            providerOrAccount: provider 
-          });
+          const contract = new Contract({ abi: MINIMAL_GET_ID_ABI as any, address: normalizedAddr as `0x${string}`, providerOrAccount: provider });
           const res: any = await contract.call("get_collection_id", []);
           const id = typeof res === 'object' ? Number((BigInt(res.high) << 128n) + BigInt(res.low)) : Number(res);
           resolved.push(id);

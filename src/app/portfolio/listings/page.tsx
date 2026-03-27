@@ -1,11 +1,9 @@
-import { Metadata } from "next";
-import ListingsClientPage from "./client-page";
+"use client";
 
-export const metadata: Metadata = {
-    title: "My Listings | Medialane",
-    description: "Manage your active IP marketplace listings on Medialane.",
-};
+import { useSessionKey } from "@/hooks/use-session-key";
+import { ListingsTable } from "@/components/portfolio/listings-table";
 
-export default function ListingsPage() {
-    return <ListingsClientPage />;
+export default function PortfolioListingsPage() {
+  const { walletAddress } = useSessionKey();
+  return <ListingsTable address={walletAddress!} />;
 }

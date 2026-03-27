@@ -1,531 +1,739 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { FileText, Loader, Settings2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { AssetPreview } from "@/components/asset-creation/asset-preview";
-import { AssetBasicInfo } from "@/components/asset-creation/asset-basic-info";
-import { TemplateSelector } from "@/components/asset-creation/template-selector";
-import { AssetDetails } from "@/components/asset-creation/asset-details";
-import { LicensingOptions } from "@/components/asset-creation/licensing-options";
-import { TemplateSpecificFields } from "@/components/asset-creation/template-specific-fields";
-import { TemplateInfoCard } from "@/components/asset-creation/template-info-card";
-import { Card, CardContent } from "@/components/ui/card";
-import { useAssetForm } from "@/hooks/use-asset-form";
-import { templates, getTemplateById } from "@/lib/templates";
-import { useIpfsUpload } from "@/hooks/use-ipfs";
-import { useCreateAsset } from "@/hooks/use-create-asset";
-import { useAccount } from "@starknet-react/core";
-import { useToast } from "@/hooks/use-toast";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import {
-  useGetCollections,
-  useIsCollectionOwner,
-} from "@/hooks/use-collection";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { MintSuccessDrawer, MintDrawerStep } from "@/components/mint-success-drawer";
-import dynamic from "next/dynamic";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useTx } from "@/hooks/use-tx";
+import { useSessionKey } from "@/hooks/use-session-key";
+import { useMedialaneClient } from "@/hooks/use-medialane-client";
+import { useCollectionsByOwner } from "@/hooks/use-collections";
+import { usePostMintListing } from "@/hooks/use-post-mint-listing";
+import { MintProgressDialog } from "@/components/marketplace/mint-progress-dialog";
+import type { MintStep } from "@/components/marketplace/mint-progress-dialog";
+import { invalidatePortfolioCache } from "@/lib/portfolio-cache";
+import { cn } from "@/lib/utils";
+import { DURATION_OPTIONS } from "@/lib/constants";
+import { getListableTokens } from "@medialane/sdk";
+import {
+  IP_TYPES,
+  LICENSE_TYPES,
+  GEOGRAPHIC_SCOPES,
+  AI_POLICIES,
+  DERIVATIVES_OPTIONS,
+  type IPType,
+} from "@/types/ip";
+import { IPTypeFields } from "@/components/create/ip-type-fields";
+import {
+  Upload,
+  ChevronDown,
+  ShieldCheck,
+  Boxes,
+  Plus,
+  ImagePlus,
+  Tag,
+  Layers,
+} from "lucide-react";
+import { toast } from "sonner";
+import Link from "next/link";
+import type { Call } from "starknet";
 
-const CreateCollectionView = dynamic(() => import("@/components/collections/create-collection"), {
-  loading: () => <div className="h-96 flex items-center justify-center">Loading...</div>
+const LISTING_CURRENCIES = getListableTokens().map((t) => t.symbol);
+
+const schema = z.object({
+  collectionId: z.string().min(1, "Select a collection"),
+  name: z.string().min(1, "Name required").max(100),
+  description: z.string().max(1000).optional(),
+  external_url: z
+    .string()
+    .max(500)
+    .refine((v) => !v || v.startsWith("http://") || v.startsWith("https://"), {
+      message: "Must start with http:// or https://",
+    })
+    .optional(),
+  ipType: z.enum(IP_TYPES),
+  licenseType: z.string().min(1, "License required"),
+  commercialUse: z.enum(["Yes", "No"]),
+  derivatives: z.enum(["Allowed", "Not Allowed", "Share-Alike"]),
+  attribution: z.enum(["Required", "Not Required"]),
+  geographicScope: z.string(),
+  aiPolicy: z.enum(["Allowed", "Not Allowed", "Training Only"]),
+  royalty: z.coerce.number().min(0).max(50),
+  image: z.instanceof(File).optional(),
 });
-import { IMintResult } from "@/hooks/use-create-asset";
-import { normalizeStarknetAddress } from "@/lib/utils";
-import { useProvider } from "@starknet-react/core";
-import { num, hash } from "starknet";
-import { useMarketplace } from "@/hooks/use-marketplace";
-import { ItemType } from "@/types/marketplace";
-import { SUPPORTED_TOKENS } from "@/lib/constants";
-import { PageHeader } from "@/components/page-header"
+
+type FormValues = z.infer<typeof schema>;
+
+function ToggleGroup({
+  value,
+  options,
+  onChange,
+}: {
+  value: string;
+  options: readonly string[];
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex rounded-lg border border-border overflow-hidden w-full">
+      {options.map((opt, i) => (
+        <button
+          key={opt}
+          type="button"
+          onClick={() => onChange(opt)}
+          className={cn(
+            "flex-1 px-3 py-2 text-sm transition-colors",
+            i > 0 && "border-l border-border",
+            value === opt
+              ? "bg-primary text-primary-foreground font-medium"
+              : "bg-background hover:bg-muted text-muted-foreground"
+          )}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function CreateAssetPage() {
-  const { toast } = useToast();
-  const { provider } = useProvider();
-  const [openCollection, setOpenCollection] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [showMobilePreview, setShowMobilePreview] = useState(false);
+  const { execute: executeTransaction, status, txHash, error, statusMessage } = useTx();
+  const { walletAddress } = useSessionKey();
+  const client = useMedialaneClient();
+  const { listingStep, listingError, runPostMintListing, resetListing } = usePostMintListing();
 
-  // Drawer State
-  const [showSuccessDrawer, setShowSuccessDrawer] = useState(false);
-  const [mintStep, setMintStep] = useState<MintDrawerStep>("idle");
-  const [mintProgress, setMintProgress] = useState(0);
+  // Fetch user's collections from the API (collectionId field contains onchain registry ID)
+  const { collections: allCollections, isLoading: collectionsLoading } = useCollectionsByOwner(walletAddress ?? null);
+  // Only show collections that have been indexed with their onchain ID (required for minting)
+  const collections = allCollections.filter((c) => c.collectionId != null);
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [listingOpen, setListingOpen] = useState(false);
+  const [licensingOpen, setLicensingOpen] = useState(false);
+  const [ipTypeOpen, setIpTypeOpen] = useState(false);
+  const [listPrice, setListPrice] = useState("");
+  const [listCurrency, setListCurrency] = useState<string>(LISTING_CURRENCIES[0] ?? "USDC");
+  const [listDuration, setListDuration] = useState<number>(DURATION_OPTIONS[0]?.seconds ?? 86400);
+  const [mintStep, setMintStep] = useState<MintStep>("idle");
   const [mintError, setMintError] = useState<string | null>(null);
-  const [drawerPreviewImage, setDrawerPreviewImage] = useState<string | null>(null);
+  const [templateFields, setTemplateFields] = useState<Record<string, string>>({});
+  const previewUrlRef = useRef<string | null>(null);
 
-  const [mintResult, setMintResult] = useState<IMintResult | null>(null);
-  const [hasUserEditedCreator, setHasUserEditedCreator] = useState(false);
-  const { address: walletAddress } = useAccount();
-  const { uploadToIpfs, loading: upload_loading } = useIpfsUpload();
-  const { createAsset, isCreating } = useCreateAsset();
-  const { checkOwnership } = useIsCollectionOwner();
-  // Initialize form
-  const { formState, updateFormField, handleFileChange, handleFeaturedImageChange, canSubmit } =
-    useAssetForm();
-  const { createListing } = useMarketplace();
-  const usdcToken = SUPPORTED_TOKENS.find(t => t.symbol === "USDC");
-  const {
-    collections,
-    loading: collection_loading,
-    error: collection_error,
-    reload,
-  } = useGetCollections(walletAddress);
-
-  // Auto-populate creator field with wallet address
   useEffect(() => {
-    if (walletAddress && formState.creator === "" && !hasUserEditedCreator) {
-      updateFormField("creator", walletAddress);
-    }
-  }, [walletAddress, updateFormField, hasUserEditedCreator]);
+    return () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    };
+  }, []);
 
-  const handleCreatorFieldChange = (field: "creator", value: string) => {
-    if (field === "creator") {
-      setHasUserEditedCreator(true);
+  const hasWallet = !!walletAddress;
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      collectionId: "",
+      name: "",
+      description: "",
+      external_url: "",
+      ipType: "NFT",
+      licenseType: "All Rights Reserved",
+      commercialUse: "No",
+      derivatives: "Not Allowed",
+      attribution: "Required",
+      geographicScope: "Worldwide",
+      aiPolicy: "Not Allowed",
+      royalty: 0,
+    },
+  });
+
+  // When a collection is selected, pre-fill external_url with the collection page URL
+  const selectedCollectionId = form.watch("collectionId");
+  useEffect(() => {
+    const col = collections.find((c) => c.collectionId === selectedCollectionId);
+    if (col?.contractAddress && !form.getValues("external_url")) {
+      form.setValue("external_url", `https://medialane.io/collections/${col.contractAddress}`);
     }
-    updateFormField(field, value);
+  }, [selectedCollectionId, collections, form]);
+
+  const handleLicenseChange = (value: string) => {
+    form.setValue("licenseType", value);
+    const def = LICENSE_TYPES.find((l) => l.value === value);
+    if (def) {
+      form.setValue("commercialUse", def.commercialUse);
+      form.setValue("derivatives", def.derivatives);
+      form.setValue("attribution", def.attribution);
+    }
   };
 
-  // Get selected template
-  const selectedTemplate = getTemplateById(formState.assetType);
-
-  const handleTemplateChange = (templateId: string) => {
-    updateFormField("assetType", templateId);
-    // Clear metadata fields when changing template
-    updateFormField("metadataFields", {});
-  };
-
-  const handleSubmit = async () => {
-    // Only proceed if wallet is connected
-    if (!walletAddress) {
-      toast({
-        title: "Wallet not connected",
-        description: "Please connect your wallet to create an asset.",
-        variant: "destructive",
-      });
+  const onSubmit = async (values: FormValues) => {
+    if (!hasWallet) {
+      toast.error("Connect your wallet first");
       return;
     }
-    if (!canSubmit()) return;
+    if (!walletAddress) return;
 
-    // Prepare Review State
-    setMintStep("idle");
     setMintError(null);
-
-    // Create local preview URL
-    if (formState.mediaFile) {
-      setDrawerPreviewImage(URL.createObjectURL(formState.mediaFile));
-    } else {
-      setDrawerPreviewImage(null);
-    }
-
-    // Open Drawer for Review
-    setShowSuccessDrawer(true);
-  };
-
-  const handleConfirmMint = async () => {
-    setLoading(true);
-
-    // START DRAWER PROCESS
+    resetListing();
     setMintStep("uploading");
-    setMintProgress(0);
-
-    // Create metadata object (in production, this would be uploaded to IPFS)
-    const metadata = {
-      name: formState.title,
-      description: formState.description,
-      external_url: formState.externalUrl,
-      image: "", // Will be filled by IPFS upload result
-      attributes: [
-        { trait_type: "Type", value: formState.assetType },
-        { trait_type: "Creator", value: formState.creator },
-        { trait_type: "License", value: formState.licenseType },
-        {
-          trait_type: "Geographic Scope",
-          value: formState.geographicScope === "custom" || formState.geographicScope === "other" || formState.geographicScope === "eu"
-            ? `${formState.geographicScope} - ${formState.territory}`
-            : formState.geographicScope,
-        },
-        { trait_type: "License Duration", value: formState.licenseDuration || "Perpetual" },
-        { trait_type: "Field of Use", value: formState.fieldOfUse || "Unrestricted" },
-        { trait_type: "Grant-back Clause", value: formState.grantBack || "None" },
-        { trait_type: "AI & Data Mining Policy", value: formState.aiRights || "Unspecified" },
-        { trait_type: "Tags", value: formState.tags.join(", ") },
-        // Add template specific fields as attributes
-        ...Object.entries(formState.metadataFields).map(([key, value]) => ({
-          trait_type: key,
-          value: value
-        }))
-      ],
-    };
-
-    const collectionNftAddress = collections.find(collection => parseInt(collection.id.toString()) === parseInt(formState?.collection))?.nftAddress;
-
-    const contractHex = collectionNftAddress
-      ? normalizeStarknetAddress(String(collectionNftAddress))
-      : "N/A";
 
     try {
-      //Extra Check for collection ownership
-      const isOwner = await checkOwnership(
-        formState.collection,
-        walletAddress as string
-      );
-      if (!isOwner) {
-        throw new Error("You are not the owner of this collection");
+      // 1. Upload image + metadata to IPFS via /api/pinata
+      const formData = new FormData();
+      formData.set("name", values.name);
+      formData.set("description", values.description ?? "");
+      if (values.external_url) formData.set("external_url", values.external_url);
+      formData.set("creator", walletAddress);
+      formData.set("ipType", values.ipType);
+      formData.set("licenseType", values.licenseType);
+      formData.set("commercialUse", values.commercialUse);
+      formData.set("derivatives", values.derivatives);
+      formData.set("attribution", values.attribution);
+      formData.set("geographicScope", values.geographicScope);
+      formData.set("aiPolicy", values.aiPolicy);
+      formData.set("royalty", String(values.royalty));
+      if (imageFile) formData.set("file", imageFile);
+
+      // Forward template-specific fields — keyed as "tmpl_{trait_type}"
+      Object.entries(templateFields).forEach(([key, value]) => {
+        if (value?.trim()) formData.set(`tmpl_${key}`, value.trim());
+      });
+
+      const uploadRes = await fetch("/api/pinata", { method: "POST", body: formData });
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok || uploadData.error) {
+        throw new Error(uploadData.error ?? "IPFS upload failed");
       }
+      const tokenUri: string = uploadData.uri;
+      if (!tokenUri) throw new Error("IPFS upload returned no URI");
 
-      //Upload media and metadata.
-      setMintProgress(10);
-
-      // Upload featured image if available, otherwise media file
-      // Note: We need to handle this logic in useIpfsUpload or here
-      const result = await uploadToIpfs(formState?.mediaFile as File, metadata);
-      setMintProgress(50);
-
-      // Then make contract call.
       setMintStep("processing");
-      setMintProgress(60);
 
-      const mintResultData = await createAsset({
-        collection_id: formState?.collection,
-        recipient: walletAddress as string,
-        token_uri: result?.metadataUrl,
-        collection_nft_address: contractHex,
+      // 2. Create mint intent — backend validates ownership onchain + encodes Cairo calldata
+      const intentRes = await client.api.createMintIntent({
+        owner: walletAddress,
+        collectionId: values.collectionId,
+        recipient: walletAddress,
+        tokenUri,
       });
 
-      if (mintResultData?.transactionHash) {
-        // Wait for transaction to be accepted to get the event
-        const receipt = await provider.waitForTransaction(mintResultData.transactionHash);
-
-        const tokenMintedSelector = hash.getSelectorFromName("TokenMinted");
-
-        // Default to a fallback if we can't parse
-        let parsedId = mintResultData.tokenId || "0";
-
-        if (receipt.isSuccess() && 'events' in receipt) {
-          const events = receipt.events;
-          const mintEvent = events.find(
-            (e: any) => e.keys[0] === tokenMintedSelector
-          );
-
-          if (mintEvent && mintEvent.data) {
-            // token_id is u256 at index 2 and 3 of data array
-            // data layout: [collection_id_low, collection_id_high, token_id_low, token_id_high, ...]
-            const low = mintEvent.data[2];
-            parsedId = num.toBigInt(low).toString();
-
-            // Update mint result data with accurate ID
-            mintResultData.tokenId = parsedId;
-            mintResultData.assetSlug = `${contractHex}-${parsedId}`;
-          }
-        }
+      const intentData = intentRes.data as { calls?: { contractAddress: string; [key: string]: unknown }[] } | undefined;
+      if (!intentData?.calls?.length) {
+        throw new Error("Mint intent returned no calls");
       }
 
-      setMintProgress(90);
+      // 3. Execute via paymaster
+      const result = await executeTransaction(intentData.calls as Call[]);
 
-      // --- AUTO-LIST ON MARKETPLACE ---
-      if (formState.listOnMarketplace && formState.listingPrice && parseFloat(formState.listingPrice) > 0) {
-        try {
-          setMintStep("listing");
-          setMintProgress(92);
-
-          const tokenId = mintResultData.tokenId;
-          const nftAddress = contractHex;
-          const listingCurrency = formState.listingCurrency || "USDC";
-          const duration = formState.listingDuration || 30 * 24 * 60 * 60; // Form duration or 30 days default
-
-          setMintProgress(95);
-          const listingTxHash = await createListing(
-            nftAddress,
-            tokenId,
-            formState.listingPrice,
-            listingCurrency,
-            duration
-          );
-
-          if (listingTxHash) {
-            toast({
-              title: "🏷️ Listed on Marketplace!",
-              description: `Your asset is now listed for ${formState.listingPrice} ${listingCurrency}.`,
-            });
-          }
-        } catch (listingError) {
-          // Listing failed but mint succeeded — non-fatal
-          console.error("Auto-listing failed:", listingError);
-          toast({
-            title: "Mint succeeded, listing failed",
-            description: "Your NFT was minted but couldn't be listed. You can list it manually from the asset page.",
-            variant: "destructive",
-          });
-        }
+      if (result === null) {
+        throw new Error("Mint transaction reverted on chain");
       }
 
-      // Show success drawer with mint result
-      setMintResult(mintResultData);
       setMintStep("success");
-      setMintProgress(100);
+      invalidatePortfolioCache(walletAddress);
 
-      // Show success toast
-      toast({
-        title: "🎉 IP Minted Successfully!",
-        description: "Your Programmable IP is now onchain.",
-      });
-    } catch (error) {
-      console.error("Error minting asset:", error);
-      const errorMsg = error instanceof Error
-        ? error.message
-        : "Failed to mint Programmable IP";
-
-      setMintError(errorMsg);
-
-      toast({
-        title: "Error",
-        description: errorMsg,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      // ── Optional listing after mint ──────────────────────────────────────
+      const col = collections.find((c) => c.collectionId === values.collectionId);
+      const wantListing = listingOpen && listPrice && parseFloat(listPrice) > 0 && col?.contractAddress;
+      if (wantListing) {
+        await runPostMintListing({
+          walletAddress,
+          collectionContract: col!.contractAddress,
+          price: listPrice,
+          currencySymbol: listCurrency,
+          durationSeconds: listDuration,
+          tokenName: values.name,
+        });
+      }
+    } catch (err: unknown) {
+      setMintError(err instanceof Error ? err.message : "Something went wrong");
+      setMintStep("error");
     }
+  };
+
+  const handleMintAnother = () => {
+    setMintStep("idle");
+    setMintError(null);
+    resetListing();
+    form.reset();
+    setTemplateFields({});
+    setImageFile(null);
+    setImagePreview(null);
+    setListPrice("");
   };
 
   return (
     <>
-      {openCollection && (
-        <Dialog open={openCollection} onOpenChange={setOpenCollection}>
-          <DialogContent className="max-w-none overflow-y-auto w-[calc(100vw-2rem)] h-[calc(100vh-2rem)] max-h-none p-0 gap-0 border-0 shadow-2xl">
-            <CreateCollectionView isModalMode={true} />
-          </DialogContent>
-        </Dialog>
-      )}
-      <div className="min-h-screen text-foreground py-10">
-        {/* Mobile Preview Modal */}
-        {showMobilePreview && (
-          <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm lg:hidden">
-            <div className="fixed inset-x-4 top-4 bottom-4 bg-background border rounded-lg shadow-lg overflow-auto">
-              <div className="bg-background border-b p-4 flex items-center justify-between">
-                <h2 className="font-semibold">Preview</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowMobilePreview(false)}
-                >
-                  ✕
-                </Button>
-              </div>
-              <div className="p-4">
-                <AssetPreview
-                  formState={formState}
-                  template={selectedTemplate}
+      <MintProgressDialog
+        open={mintStep !== "idle"}
+        mintStep={mintStep}
+        txStatus={status}
+        assetName={form.getValues("name") ?? ""}
+        imagePreview={imagePreview}
+        txHash={txHash}
+        error={mintError}
+        onMintAnother={handleMintAnother}
+        listingStep={listingStep}
+        listingError={listingError}
+      />
+
+      <div className="container max-w-2xl mx-auto px-4 pt-14 pb-8 space-y-8">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-primary">
+            <ImagePlus className="h-5 w-5" />
+            <span className="text-sm font-semibold uppercase tracking-wider">Create</span>
+          </div>
+          <h1 className="text-3xl font-bold">Create IP Asset</h1>
+          <p className="text-muted-foreground">
+            Mint your creative work as a programmable NFT on Starknet with immutable licensing embedded in IPFS metadata.
+          </p>
+        </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+            {/* Collection selector */}
+            <FormField
+              control={form.control}
+              name="collectionId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-1.5">
+                    <Boxes className="h-4 w-4" />
+                    Collection *
+                  </FormLabel>
+                  {collectionsLoading ? (
+                    <Skeleton className="h-10 w-full rounded-md" />
+                  ) : collections.length === 0 ? (
+                    <div className="rounded-lg border border-dashed border-border p-4 text-center space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        You don&apos;t have any collections yet. Create one first.
+                      </p>
+                      <Button size="sm" variant="outline" asChild>
+                        <Link href="/create/collection">
+                          <Plus className="h-3.5 w-3.5 mr-1.5" />
+                          Create collection
+                        </Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a collection" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {collections.map((col) => (
+                          <SelectItem key={col.collectionId!} value={col.collectionId!}>
+                            {col.name || col.symbol || `Collection #${col.collectionId}`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Cover image */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Cover image</label>
+              <div
+                className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                role="button"
+                tabIndex={0}
+                aria-label="Upload image"
+                onClick={() => document.getElementById("image-upload")?.click()}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); document.getElementById("image-upload")?.click(); } }}
+              >
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Preview" className="mx-auto max-h-48 rounded-lg object-contain" />
+                ) : (
+                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <Upload className="h-8 w-8" />
+                    <p className="text-sm">Click to upload (JPG, PNG, GIF, SVG, WebP · max 4 MB)</p>
+                  </div>
+                )}
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const ALLOWED = ["image/jpeg", "image/png", "image/gif", "image/svg+xml", "image/webp"];
+                    if (file.size > 4 * 1024 * 1024) {
+                      toast.error("File too large", { description: "Maximum file size is 4 MB." });
+                      e.target.value = "";
+                      return;
+                    }
+                    if (!ALLOWED.includes(file.type)) {
+                      toast.error("Unsupported format", { description: "Please upload a JPG, PNG, GIF, SVG, or WebP image." });
+                      e.target.value = "";
+                      return;
+                    }
+                    setImageFile(file);
+                    form.setValue("image", file);
+                    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+                    const objectUrl = URL.createObjectURL(file);
+                    previewUrlRef.current = objectUrl;
+                    setImagePreview(objectUrl);
+                  }}
                 />
               </div>
             </div>
-          </div>
-        )}
 
-        <main className="w-full mx-auto">
-          <PageHeader
-            title="Create Asset"
-            description="Mint unique assets and build your intellectual property portfolio."
-          />
+            {/* Name */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="My Creative Work" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div className="w-full px-6 sm:px-10 lg:px-16 mt-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Main Content */}
-            <div className="lg:col-span-3 space-y-8">
-
-              <Accordion type="multiple" defaultValue={["basic-info"]} className="w-full space-y-4">
-
-                {/* 1. Basic Information (Top Priority) */}
-                <AccordionItem value="basic-info" className="relative group rounded-m3-2xl border border-m3-outline-variant/30 bg-m3-surface shadow-m3-1 overflow-hidden transition-all duration-m3-medium hover:shadow-m3-2 hover:border-m3-primary/40">
-                  <div className="absolute inset-x-0 top-0 h-1 bg-m3-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-m3-medium" />
-                  <AccordionTrigger className="hover:no-underline px-6 py-5 text-lg font-medium transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-m3-md bg-m3-primary-container/50 border border-m3-primary/20 text-m3-primary shadow-m3-1">
-                        <FileText className="h-5 w-5" />
-                      </div>
-                      <span className="text-foreground/90">Asset Info</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-6 pb-6 pt-6 border-t border-m3-outline-variant/20 bg-m3-surface-container-low/50">
-                    <AssetBasicInfo
-                      formState={formState}
-                      updateFormField={updateFormField}
-                      handleFileChange={handleFileChange}
-                      collections={collections || []}
-                      isLoadingCollections={collection_loading}
-                      collectionError={collection_error}
-                      refetchCollections={reload}
-                      openCollectionModal={() => setOpenCollection(true)}
+            {/* Description */}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Describe your work, its story, and any context for buyers…"
+                      rows={4}
+                      {...field}
                     />
-                  </AccordionContent>
-                </AccordionItem>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                {/* 2. Asset Type Selection */}
-                <AccordionItem value="ip-type" className="relative group rounded-m3-2xl border border-m3-outline-variant/30 bg-m3-surface shadow-m3-1 overflow-hidden transition-all duration-m3-medium hover:shadow-m3-2 hover:border-m3-primary/40">
-                  <div className="absolute inset-x-0 top-0 h-1 bg-m3-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-m3-medium" />
-                  <AccordionTrigger className="hover:no-underline px-6 py-5 text-lg font-medium transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-m3-md bg-m3-primary-container/50 border border-m3-primary/20 text-m3-primary shadow-m3-1">
-                        <Settings2 className="h-5 w-5" />
-                      </div>
-                      <span className="text-foreground/90">IP Type</span>
+            {/* External URL */}
+            <FormField
+              control={form.control}
+              name="external_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>External link <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://yourwebsite.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Optional listing section */}
+            <Collapsible open={listingOpen} onOpenChange={setListingOpen}>
+              <div className="rounded-xl border border-border overflow-hidden">
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-semibold">List on marketplace after minting</span>
+                      <span className="text-xs text-muted-foreground font-normal">Optional</span>
                     </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-6 pb-6 pt-6 border-t border-m3-outline-variant/20 bg-m3-surface-container-low/50">
-                    <TemplateSelector
-                      templates={templates}
-                      selectedTemplateId={formState.assetType}
-                      onTemplateChange={handleTemplateChange}
-                    />
-                    {selectedTemplate && (
-                      <div id="template-fields" className="pt-4 border-t mt-4">
-                        <h3 className="text-lg font-medium mb-4 flex items-center gap-2 text-muted-foreground">
-                          {selectedTemplate.name} Metadata
-                        </h3>
-                        <TemplateSpecificFields
-                          template={selectedTemplate}
-                          formState={formState}
-                          updateFormField={updateFormField}
+                    <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", listingOpen && "rotate-180")} />
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="px-5 pb-5 space-y-4 border-t border-border/60 pt-4">
+                    <p className="text-xs text-muted-foreground">
+                      Set a price and your asset will be listed on the marketplace immediately after it&apos;s minted. One PIN, two actions.
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium">Price</label>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={listPrice}
+                          onChange={(e) => setListPrice(e.target.value)}
                         />
                       </div>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-
-                {/* 3. Advanced Configuration */}
-                <AccordionItem value="advanced-info" className="relative group rounded-m3-2xl border border-m3-outline-variant/30 bg-m3-surface shadow-m3-1 overflow-hidden transition-all duration-m3-medium hover:shadow-m3-2 hover:border-m3-primary/40">
-                  <div className="absolute inset-x-0 top-0 h-1 bg-m3-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-m3-medium" />
-                  <AccordionTrigger className="hover:no-underline px-6 py-5 text-lg font-medium transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-m3-md bg-m3-primary-container/50 border border-m3-primary/20 text-m3-primary shadow-m3-1">
-                        <Settings2 className="h-5 w-5" />
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium">Currency</label>
+                        <Select value={listCurrency} onValueChange={setListCurrency}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {LISTING_CURRENCIES.map((c) => (
+                              <SelectItem key={c} value={c}>{c}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <span className="text-foreground/90">Advanced Information</span>
                     </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-6 pb-6 pt-6 border-t border-m3-outline-variant/20 bg-m3-surface-container-low/50 space-y-8">
-                    {/* 3.1 Asset Details (Categorization) */}
-                    <div id="asset-details" className="pt-2">
-                      <h3 className="text-lg font-medium mb-4 flex items-center gap-2 text-muted-foreground">
-                        Categorization
-                      </h3>
-                      <AssetDetails
-                        formState={formState}
-                        updateFormField={updateFormField}
-                      />
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">Duration</label>
+                      <Select value={String(listDuration)} onValueChange={(v) => setListDuration(Number(v))}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DURATION_OPTIONS.map((d) => (
+                            <SelectItem key={d.seconds} value={String(d.seconds)}>{d.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-
-
-                  </AccordionContent>
-                </AccordionItem>
-
-                {/* 4. Licensing Options */}
-                <AccordionItem value="licensing" className="relative group rounded-m3-2xl border border-m3-outline-variant/30 bg-m3-surface shadow-m3-1 overflow-hidden transition-all duration-m3-medium hover:shadow-m3-2 hover:border-m3-primary/40">
-                  <div className="absolute inset-x-0 top-0 h-1 bg-m3-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-m3-medium" />
-                  <AccordionTrigger className="hover:no-underline px-6 py-5 text-lg font-medium transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-m3-md bg-m3-primary-container/50 border border-m3-primary/20 text-m3-primary shadow-m3-1">
-                        <Settings2 className="h-5 w-5" />
-                      </div>
-                      <span className="text-foreground/90">Programmable Licensing</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-6 pb-6 pt-6 border-t border-m3-outline-variant/20 bg-m3-surface-container-low/50">
-                    <LicensingOptions
-                      formState={formState}
-                      updateFormField={updateFormField}
-                    />
-                  </AccordionContent>
-                </AccordionItem>
-
-              </Accordion>
-
-              {/* Submit Button */}
-              <div className="flex justify-end pt-4">
-                <Button
-                  onClick={handleSubmit}
-                  disabled={
-                    !canSubmit() ||
-                    isCreating ||
-                    upload_loading ||
-                    !walletAddress ||
-                    !formState.collection ||
-                    loading
-                  }
-                  size="lg"
-                  variant="premium"
-                  className="px-10 h-14 text-lg font-bold tracking-wider w-full sm:w-auto"
-                >
-                  {loading && <Loader className="animate-spin h-5 w-5 mr-3" />}
-                  {loading ? (upload_loading ? "Uploading..." : isCreating ? "Minting..." : "Processing") : "Create Asset"}
-                </Button>
+                  </div>
+                </CollapsibleContent>
               </div>
-            </div>
+            </Collapsible>
 
-            {/* Desktop Sidebar */}
-            <div className="hidden lg:block lg:col-span-1">
-              <div className="space-y-6">
-                {/* Template Info */}
-                {selectedTemplate && (
-                  <TemplateInfoCard template={selectedTemplate} />
-                )}
-
-                {/* Live Preview */}
-                <AssetPreview
-                  formState={formState}
-                  template={selectedTemplate}
-                />
-
-                {/* Help Card */}
-                <Card className="relative bg-m3-surface-container border border-m3-outline-variant/30 shadow-m3-1 rounded-m3-xl overflow-hidden">
-                  <CardContent className="p-5">
-                    <h4 className="font-bold mb-3 flex items-center gap-2 text-m3-on-surface">
-                      <div className="p-1.5 rounded-m3-sm bg-m3-primary/10 ring-1 ring-m3-primary/30">
-                        <FileText className="h-4 w-4 text-m3-primary" />
-                      </div>
-                      Need Help?
-                    </h4>
-                    <p className="text-sm text-m3-on-surface-variant mb-4 leading-relaxed">
-                      Learn more about creating and protecting your intellectual
-                      property assets.
+            {/* Licensing Terms — optional, collapsed by default */}
+            <Collapsible open={licensingOpen} onOpenChange={setLicensingOpen}>
+              <div className="rounded-xl border border-border overflow-hidden">
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-semibold">Licensing Terms</span>
+                      <span className="text-xs text-muted-foreground font-normal">Optional · Berne Convention</span>
+                    </div>
+                    <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", licensingOpen && "rotate-180")} />
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="px-5 pb-5 space-y-4 border-t border-border/60 pt-4">
+                    <p className="text-xs text-muted-foreground">
+                      Set licensing terms for your work. These are embedded as immutable IPFS metadata and Berne Convention-compatible.
                     </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                    >
-                      View Documentation
-                    </Button>
-                  </CardContent>
-                </Card>
+                    <FormField
+                      control={form.control}
+                      name="licenseType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>License</FormLabel>
+                          <Select value={field.value} onValueChange={handleLicenseChange}>
+                            <FormControl>
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {LICENSE_TYPES.map((l) => (
+                                <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {(() => {
+                            const def = LICENSE_TYPES.find((l) => l.value === field.value);
+                            return def ? (
+                              <p className="text-xs text-muted-foreground mt-1">{def.description}</p>
+                            ) : null;
+                          })()}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="commercialUse"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Commercial Use</FormLabel>
+                          <ToggleGroup value={field.value} options={["Yes", "No"]} onChange={field.onChange} />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="derivatives"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Derivatives</FormLabel>
+                          <ToggleGroup value={field.value} options={DERIVATIVES_OPTIONS} onChange={field.onChange} />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="attribution"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Attribution</FormLabel>
+                          <ToggleGroup value={field.value} options={["Required", "Not Required"]} onChange={field.onChange} />
+                        </FormItem>
+                      )}
+                    />
+                    <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+                      <CollapsibleTrigger asChild>
+                        <button
+                          type="button"
+                          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", advancedOpen && "rotate-180")} />
+                          Advanced options
+                        </button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="space-y-4 pt-3">
+                        <FormField
+                          control={form.control}
+                          name="geographicScope"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Territory</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger><SelectValue /></SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {GEOGRAPHIC_SCOPES.map((s) => (
+                                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="aiPolicy"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>AI &amp; Data Mining</FormLabel>
+                              <ToggleGroup value={field.value} options={AI_POLICIES} onChange={field.onChange} />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="royalty"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Royalty % (0–50)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min={0}
+                                  max={50}
+                                  step={0.5}
+                                  placeholder="0"
+                                  {...field}
+                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </div>
+                </CollapsibleContent>
               </div>
-            </div>
-          </div>
-        </main>
-      </div>
+            </Collapsible>
 
-      {/* Mint Success Drawer */}
-      <MintSuccessDrawer
-        isOpen={showSuccessDrawer}
-        onOpenChange={setShowSuccessDrawer}
-        step={mintStep}
-        progress={mintProgress}
-        mintResult={mintResult}
-        assetTitle={formState.title}
-        assetDescription={formState.description}
-        assetType={selectedTemplate?.name}
-        error={mintError}
-        onConfirm={handleConfirmMint}
-        cost="0.001 STRK" /* Estimate */
-        previewImage={drawerPreviewImage}
-        data={{
-          "License Type": formState.licenseType,
-          "Collection": collections.find(c => c.id.toString() === formState.collection)?.name || "Unknown",
-          ...(formState.listOnMarketplace && formState.listingPrice ? { "Listing Price": `${formState.listingPrice} ${formState.listingCurrency || "USDC"}` } : {}),
-        }}
-      />
+            {/* IP Type & template fields — optional, collapsed by default */}
+            <Collapsible open={ipTypeOpen} onOpenChange={setIpTypeOpen}>
+              <div className="rounded-xl border border-border overflow-hidden">
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Layers className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-semibold">IP Type &amp; Metadata</span>
+                      <span className="text-xs text-muted-foreground font-normal">Optional</span>
+                    </div>
+                    <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", ipTypeOpen && "rotate-180")} />
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="px-5 pb-5 space-y-4 border-t border-border/60 pt-4">
+                    <p className="text-xs text-muted-foreground">
+                      Choose a content type to unlock optional metadata fields tailored to your work — artist credits, embed links, technical specs, and more.
+                    </p>
+                    <FormField
+                      control={form.control}
+                      name="ipType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>IP Type</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {IP_TYPES.map((t) => (
+                                <SelectItem key={t} value={t}>{t}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                    <IPTypeFields
+                      ipType={form.watch("ipType") as IPType}
+                      onChange={setTemplateFields}
+                    />
+                  </div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
+
+            <div className={`btn-border-animated p-[1px] rounded-xl ${mintStep !== "idle" || collectionsLoading || collections.length === 0 ? "opacity-40 pointer-events-none" : ""}`}>
+              <button
+                type="submit"
+                disabled={mintStep !== "idle" || collectionsLoading || collections.length === 0}
+                className="w-full h-12 text-base font-semibold text-white rounded-[11px] flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-[0.98] bg-brand-blue"
+              >
+                {listingOpen && listPrice && parseFloat(listPrice) > 0 ? "Mint & List" : "Mint asset"}
+              </button>
+            </div>
+            <p className="text-xs text-center text-muted-foreground">
+              Gas is free. Your PIN signs the mint{listingOpen && listPrice ? " and listing" : ""} transaction.
+            </p>
+          </form>
+        </Form>
+      </div>
     </>
   );
 }

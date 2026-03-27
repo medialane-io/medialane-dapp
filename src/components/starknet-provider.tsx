@@ -23,12 +23,18 @@ interface NetworkContextType {
 
 const NetworkContext = createContext<NetworkContextType | undefined>(undefined);
 
+const NETWORK_DEFAULT: NetworkContextType = {
+  currentNetwork: 'mainnet',
+  networkConfig: {
+    chainId: '23448594291968334',
+    name: 'Starknet Mainnet',
+    explorerUrl: 'https://voyager.online',
+  },
+};
+
 export const useNetwork = () => {
   const context = useContext(NetworkContext);
-  if (!context) {
-    throw new Error('useNetwork must be used within StarknetProvider');
-  }
-  return context;
+  return context ?? NETWORK_DEFAULT;
 };
 
 export function StarknetProvider({ children }: { children: React.ReactNode }) {

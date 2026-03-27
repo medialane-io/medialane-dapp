@@ -1,36 +1,33 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { FEATURED_COLLECTION_IDS } from "./constants";
+import { SUPPORTED_TOKENS } from "./constants";
+import { FEATURED_COLLECTIONS } from "./featured-collections";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-import { SUPPORTED_TOKENS } from "./constants";
+export function shortenAddress(address: string, chars = 4): string {
+  if (!address || address.length < 10) return address || "";
+  return `${address.slice(0, chars + 2)}...${address.slice(-chars)}`;
+}
 
-// Helper function to shorten address
-export const shortenAddress = (address: string) => {
-  if (!address || address === "N/A" || address.length < 10) return address || "N/A";
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
-};
+export function normalizeAddress(address: string): string {
+  if (!address) return address;
+  const hex = address.startsWith("0x") ? address.slice(2) : address;
+  return "0x" + hex.padStart(64, "0").toLowerCase();
+}
 
-// Helper function to convert hex to decimal and format it
-export const formatAmount = (hex: string) => {
-  const decimal = parseInt(hex, 16);
-  return decimal.toString();
-};
-
-export const getCurrency = (tokenAddress: string) => {
+export function getCurrency(tokenAddress: string) {
   if (!tokenAddress) return { symbol: "TOKEN", decimals: 18 };
-  const normalized = normalizeStarknetAddress(tokenAddress).toLowerCase();
+  const norm = normalizeAddress(tokenAddress).toLowerCase();
   for (const token of SUPPORTED_TOKENS) {
-    const tokenNormalized = normalizeStarknetAddress(token.address).toLowerCase();
-    if (tokenNormalized === normalized) {
+    if (normalizeAddress(token.address).toLowerCase() === norm) {
       return { symbol: token.symbol, decimals: token.decimals };
     }
   }
   return { symbol: "TOKEN", decimals: 18 };
-};
+}
 
 function adaptiveDecimals(num: number): number {
   if (num === 0 || num >= 1) return 2;
@@ -40,176 +37,110 @@ function adaptiveDecimals(num: number): number {
   return leadingZeros + 2;
 }
 
-export const formatPrice = (amount: string | number, decimals: number = 18) => {
-  if (amount === undefined || amount === null) return "0.00";
+export function formatPrice(amount: string, decimals: number): string {
+  if (!amount) return "0";
   try {
-    let num: number;
-    if (typeof amount === "number") {
-      num = amount;
-    } else {
-      const val = BigInt(amount);
-      num = Number(val) / Math.pow(10, decimals);
-    }
-    
-    if (num === 0) return "0.00";
-    
-    // Determine min/max fraction digits based on the number's magnitude
-    const maxFractions = Math.min(20, adaptiveDecimals(num));
-    const minFractions = num >= 1 ? 2 : undefined;
-    
-    return num.toLocaleString("en-US", {
-      minimumFractionDigits: minFractions,
-      maximumFractionDigits: maxFractions,
+    const val = BigInt(amount);
+    const num = Number(val) / Math.pow(10, decimals);
+    return num.toLocaleString(undefined, {
+      maximumFractionDigits: adaptiveDecimals(num),
     });
   } catch {
-    return "0.00";
+    return "0";
   }
-};
+}
 
-// Helper function to truncate long strings
-export const truncateString = (str: string, maxLength: number = 30) => {
-  if (str.length <= maxLength) return str;
-  return `${str.substring(0, maxLength)}...`;
-};
+export function formatDisplayPrice(price: string | number | null | undefined): string {
+  if (price === null || price === undefined) return "";
 
-export function formatDate(dateString: string) {
-  const date = new Date(dateString);
+  const priceStr = String(price);
+  const parts = priceStr.split(" ");
+  const numericPart = parts[0];
+  const currencyPart = parts.length > 1 ? parts.slice(1).join(" ") : "";
 
-  // Check if the date is today
-  const today = new Date();
-  if (date.toDateString() === today.toDateString()) {
-    return "Today";
-  }
+  const num = Number(numericPart);
+  if (isNaN(num)) return priceStr;
 
-  // Check if the date is yesterday
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  if (date.toDateString() === yesterday.toDateString()) {
-    return "Yesterday";
-  }
-
-  // If within the last 7 days, show the day name
-  const oneWeekAgo = new Date(today);
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  if (date > oneWeekAgo) {
-    return date.toLocaleDateString("en-US", { weekday: "long" });
-  }
-
-  // Otherwise, show the date
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+  const maxDecimals = adaptiveDecimals(num);
+  const formatted = num.toLocaleString(undefined, {
+    minimumFractionDigits: Math.min(2, maxDecimals),
+    maximumFractionDigits: maxDecimals,
   });
+
+  return currencyPart ? `${formatted} ${currencyPart}` : formatted;
 }
 
-export function normalizeStarknetAddress(address: string): string {
-  if (!address || address === "N/A") return address;
-  try {
-    const bigIntAddr = BigInt(address);
-    return "0x" + bigIntAddr.toString(16).toLowerCase();
-  } catch {
-    return address;
+export function ipfsToHttp(uri: string | null | undefined): string {
+  if (!uri) return "/placeholder.svg";
+  if (uri.startsWith("ipfs://")) {
+    // Route through our server-side proxy (/api/ipfs/[...cid]) to avoid:
+    //  - Pinata's CORP header blocking cross-origin image loads on free plans
+    //  - Client-visible 429 rate-limit errors from the public gateway
+    const cid = uri.slice(7); // strips "ipfs://"
+    return `/api/ipfs/${cid}`;
   }
-}
-export function toHexString(value: string | number | bigint): string {
-  try {
-    const num = BigInt(value);
-    return "0x" + num.toString(16);
-  } catch {
-    throw new Error(`Invalid input for hex conversion: ${value}`);
-  }
+  return uri;
 }
 
-export function toEpochTime(date: string | Date): number {
-  const d = typeof date === "string" ? new Date(date) : date;
-  return Math.floor(d.getTime() / 1000);
+export function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const seconds = Math.floor(diff / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString();
 }
 
-export function delay(ms: number) {
-  return new Promise((res) => setTimeout(res, ms));
-}
-
-export async function withRetry<T>(
-  fn: () => Promise<T>,
-  retries = 3,
-  delay = 300
-): Promise<T> {
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      return await fn();
-    } catch (e) {
-      if (attempt === retries) throw e;
-      await new Promise((r) => setTimeout(r, delay));
-    }
-  }
-  throw new Error("Max retry attempts reached");
-}
-
-export async function fetchInBatches<T>(
-  tasks: (() => Promise<T>)[],
-  batchSize = 5,
-  delayMs = 300
-): Promise<T[]> {
-  const results: T[] = [];
-
-  for (let i = 0; i < tasks.length; i += batchSize) {
-    const batch = tasks.slice(i, i + batchSize);
-    const batchResults = await Promise.allSettled(batch.map((t) => t()));
-
-    for (const res of batchResults) {
-      if (res.status === "fulfilled") {
-        results.push(res.value);
-      } else {
-        console.warn("Data fetch failed:", res.reason);
-      }
-    }
-
-    if (i + batchSize < tasks.length) {
-      await delay(delayMs);
-    }
-  }
-
-  return results;
-}
-
-// Enhanced rate limiting with exponential backoff
+/**
+ * Executes an array of async factory functions in series with a rate-limit
+ * delay between each call. Returns all settled results (errors are logged and
+ * skipped so one failing fetch doesn't abort the rest).
+ */
 export async function fetchWithRateLimit<T>(
-  tasks: (() => Promise<T>)[],
-  baseDelayMs = 1500,
-  maxDelayMs = 10000
+  factories: Array<() => Promise<T>>,
+  delayMs = 500
 ): Promise<T[]> {
   const results: T[] = [];
-  let currentDelay = baseDelayMs;
-
-  for (const task of tasks) {
+  for (const factory of factories) {
     try {
-      const result = await task();
-      results.push(result);
-      // Reset delay on success
-      currentDelay = baseDelayMs;
+      results.push(await factory());
     } catch (err) {
-      console.warn("Fetch failed:", err);
-
-      // If it's a rate limit error, use exponential backoff
-      if (err instanceof Error && (err.message.includes('429') || err.message.includes('Too Many Requests'))) {
-        await new Promise((res) => setTimeout(res, currentDelay));
-        // Exponential backoff: double the delay, but cap it
-        currentDelay = Math.min(currentDelay * 2, maxDelayMs);
-
-        // Retry logic could be added here if needed, but for now we just skip and log
-      }
+      console.warn("[fetchWithRateLimit] fetch failed, skipping:", err);
     }
-
-    // Always wait between requests to be polite
-    await new Promise((res) => setTimeout(res, baseDelayMs));
+    if (delayMs > 0) await new Promise((r) => setTimeout(r, delayMs));
   }
-
   return results;
 }
 
-export function isCollectionFeatured(collectionId: string | bigint): boolean {
-  const idString = String(collectionId);
-  return FEATURED_COLLECTION_IDS.includes(idString);
+/** Converts a bigint or numeric string to a 0x-prefixed hex string. */
+export function toHexString(value: bigint | string | number): string {
+  return "0x" + BigInt(value).toString(16);
 }
 
+/** Returns true if the given collection address/id is in the featured list. */
+export function isCollectionFeatured(addressOrId: string): boolean {
+  if (!addressOrId) return false;
+  const norm = normalizeAddress(addressOrId).toLowerCase();
+  return FEATURED_COLLECTIONS.some(
+    (c) => normalizeAddress(c.contractAddress).toLowerCase() === norm
+  );
+}
+
+export function timeUntil(dateStr: string | number): string {
+  // Accept Unix seconds as number, numeric string (BigInt serialized), or ISO date string.
+  const raw = typeof dateStr === "string" && /^\d+$/.test(dateStr.trim())
+    ? Number(dateStr)
+    : dateStr;
+  const ms = typeof raw === "number" ? raw * 1000 : new Date(raw).getTime();
+  const diff = ms - Date.now();
+  if (diff <= 0) return "Expired";
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  if (days > 0) return `${days}d ${hours}h`;
+  const mins = Math.floor((diff % 3600000) / 60000);
+  return `${hours}h ${mins}m`;
+}

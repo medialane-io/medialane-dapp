@@ -1,5 +1,5 @@
-import { useActivities } from "@/hooks/use-activities";
+import { useActivitiesByAddress } from "@/hooks/use-activities";
 
 export function useUserActivities(walletAddress: string, pageSize?: number) {
-    return useActivities(walletAddress, pageSize);
+    return useActivitiesByAddress(walletAddress);
 }

@@ -109,7 +109,7 @@ export async function executeSponsoredTransaction(
   account: Account,
   calls: Call[]
 ): Promise<PaymasterResponse> {
-  const apiKey = AVNU_PAYMASTER_CONFIG.API_KEY;
+  const apiKey = AVNU_PAYMASTER_CONFIG.apiKey;
   if (!apiKey) {
     return {
       transactionHash: "",
@@ -126,7 +126,7 @@ export async function executeSponsoredTransaction(
     );
     return { transactionHash: response.transactionHash, success: true };
   } catch (error) {
-    console.error("[paymaster] executeSponsoredTransaction:", error);
+    console.warn("[paymaster] Sponsored tx rejected (falling back to traditional):", error instanceof Error ? error.message : error);
     return {
       transactionHash: "",
       success: false,
@@ -143,7 +143,7 @@ export async function executeSponsoredTransaction(
  * Returns true if the AVNU API key is configured, meaning sponsored txs are possible.
  */
 export function canSponsor(): boolean {
-  return !!AVNU_PAYMASTER_CONFIG.API_KEY;
+  return !!AVNU_PAYMASTER_CONFIG.apiKey;
 }
 
 /**

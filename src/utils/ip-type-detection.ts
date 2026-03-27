@@ -7,7 +7,7 @@ const normalize = (s: unknown): string => (typeof s === "string" ? s.toLowerCase
 
 export function determineIPType(asset: AssetType, metadata?: IPFSMetadata | null): IPType {
   // Prefer asset.type if valid
-  const allowed: IPType[] = ALLOWED_IP_TYPES
+  const allowed = ALLOWED_IP_TYPES as readonly IPType[]
   if (asset?.type && allowed.includes(asset.type as IPType)) {
     return asset.type as IPType
   }

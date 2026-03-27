@@ -159,7 +159,9 @@ export function getAssetsByCollection(collectionSlug: string): Asset[] {
   if (!collection) return []
 
   return assets.filter((asset) => {
-    const assetCollectionSlug = asset.collection?.toLowerCase().replace(/\s+/g, "-")
+    const col = asset.collection;
+    const colStr = typeof col === "string" ? col : (col as any)?.name ?? "";
+    const assetCollectionSlug = colStr.toLowerCase().replace(/\s+/g, "-")
     return assetCollectionSlug === collectionSlug
   })
 }
@@ -169,7 +171,12 @@ export function getAssetsByCreator(creatorName: string): Asset[] {
 }
 
 export function getCollectionsByCreator(creatorName: string): Collection[] {
-  return collections.filter((collection) => collection.creator.name === creatorName)
+  return collections.filter((collection) => {
+    const c = collection.creator;
+    if (!c) return false;
+    if (typeof c === "string") return c === creatorName;
+    return (c as any).name === creatorName;
+  });
 }
 
 export function getAssetProvenance(assetId: string) {
@@ -182,7 +189,7 @@ export function getUserByAddress(address: string): User | undefined {
 
 export function getRemixAssetsByCreator(creatorName: string): Asset[] {
   return assets.filter(
-    (asset) => asset.creator === creatorName && (asset.templateType === "Remix Art" || asset.metadata?.originalAsset),
+    (asset) => asset.creator === creatorName && (asset.templateType === "Remix Art" || (asset.metadata as any)?.originalAsset),
   )
 }
 
