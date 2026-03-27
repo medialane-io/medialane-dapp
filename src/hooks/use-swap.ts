@@ -30,66 +30,14 @@ import {
   formatTokenAmount,
   parseTokenAmount,
   parseToBigInt,
+  SWAP_TOKENS,
   type SwapQuote,
+  type SwapToken,
 } from "@/utils/avnu-swap";
 import type { StarkZapTokenKey } from "@/lib/starkzap";
 
-// ---------------------------------------------------------------------------
-// Token definitions for swap UI
-// ---------------------------------------------------------------------------
-
-export interface SwapToken {
-  symbol: string;
-  name: string;
-  address: string;
-  decimals: number;
-  color: string;
-  /** Key for useTokenBalance hook (null for WBTC which isn't in StarkZap preset) */
-  balanceKey: StarkZapTokenKey | null;
-}
-
-export const SWAP_TOKENS: SwapToken[] = [
-  {
-    symbol: "ETH",
-    name: "Ether",
-    address: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-    decimals: 18,
-    color: "#627EEA",
-    balanceKey: "ETH",
-  },
-  {
-    symbol: "STRK",
-    name: "Starknet Token",
-    address: "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
-    decimals: 18,
-    color: "#FF875B",
-    balanceKey: "STRK",
-  },
-  {
-    symbol: "USDC",
-    name: "USD Coin",
-    address: "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
-    decimals: 6,
-    color: "#2775CA",
-    balanceKey: "USDC",
-  },
-  {
-    symbol: "USDT",
-    name: "Tether USD",
-    address: "0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8",
-    decimals: 6,
-    color: "#26A17B",
-    balanceKey: "USDT",
-  },
-  {
-    symbol: "WBTC",
-    name: "Wrapped Bitcoin",
-    address: "0x03fe2b97c1fd336e750087d68b9b867997fd64a2661ff3ca5a7c771641e8e7ac",
-    decimals: 8,
-    color: "#F7931A",
-    balanceKey: null,
-  },
-];
+export type { SwapToken };
+export { SWAP_TOKENS };
 
 // ---------------------------------------------------------------------------
 // Types
@@ -160,18 +108,20 @@ export function useSwap(): UseSwapReturn {
 
   // ---- Balances -----------------------------------------------------------
 
-  const sellBalanceHook = useTokenBalance(
-    sellToken.balanceKey ?? "ETH", // fallback; won't match for WBTC
-    address
-  );
-  const buyBalanceHook = useTokenBalance(
-    buyToken.balanceKey ?? "ETH",
-    address
-  );
+  // StarkZap balance hook only supports STRK/ETH/USDC/USDT
+  const BALANCE_TOKENS = new Set<string>(["STRK", "ETH", "USDC", "USDT"]);
+  const sellBalanceKey = BALANCE_TOKENS.has(sellToken.symbol)
+    ? (sellToken.symbol as StarkZapTokenKey)
+    : "ETH"; // fallback key — result is ignored when symbol not in set
+  const buyBalanceKey = BALANCE_TOKENS.has(buyToken.symbol)
+    ? (buyToken.symbol as StarkZapTokenKey)
+    : "ETH";
 
-  // For WBTC (no StarkZap preset), we can't use the hook — return null
-  const sellBalance = sellToken.balanceKey ? sellBalanceHook.raw : null;
-  const buyBalance = buyToken.balanceKey ? buyBalanceHook.raw : null;
+  const sellBalanceHook = useTokenBalance(sellBalanceKey, address);
+  const buyBalanceHook = useTokenBalance(buyBalanceKey, address);
+
+  const sellBalance = BALANCE_TOKENS.has(sellToken.symbol) ? sellBalanceHook.raw : null;
+  const buyBalance = BALANCE_TOKENS.has(buyToken.symbol) ? buyBalanceHook.raw : null;
 
   const sellBalanceFormatted = sellBalance !== null
     ? formatTokenAmount(sellBalance, sellToken.decimals)
@@ -279,8 +229,9 @@ export function useSwap(): UseSwapReturn {
 
   // ---- Price info ---------------------------------------------------------
 
+  // priceRatioUsd = buyValueUsd / sellValueUsd (e.g. 0.98 = 2% impact)
   const priceImpact = quote?.priceRatioUsd != null
-    ? `${(quote.priceRatioUsd * 100).toFixed(2)}%`
+    ? `${((1 - quote.priceRatioUsd) * 100).toFixed(2)}%`
     : null;
 
   const exchangeRate = quote && sellAmount
@@ -395,7 +346,7 @@ export function useSwap(): UseSwapReturn {
     quoteError,
     sellBalance: sellBalanceFormatted,
     buyBalance: buyBalanceFormatted,
-    isSellBalanceLoading: sellToken.balanceKey ? sellBalanceHook.isLoading : false,
+    isSellBalanceLoading: BALANCE_TOKENS.has(sellToken.symbol) ? sellBalanceHook.isLoading : false,
     priceImpact,
     exchangeRate,
     executeSwap,
