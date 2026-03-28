@@ -215,7 +215,22 @@ export default function CreateAssetPage() {
       formData.set("geographicScope", values.geographicScope);
       formData.set("aiPolicy", values.aiPolicy);
       formData.set("royalty", String(values.royalty));
-      if (imageFile) formData.set("file", imageFile);
+      if (imageFile) {
+        // Upload image directly to Pinata via signed URL (bypasses Next.js 4 MB body limit)
+        const signedRes = await fetch("/api/pinata/signed-url", { method: "POST" });
+        const signedData = await signedRes.json();
+        if (!signedRes.ok || !signedData.url) throw new Error("Failed to get upload URL");
+        const imgFormData = new FormData();
+        imgFormData.append("file", imageFile, imageFile.name);
+        imgFormData.append("network", "public");
+        imgFormData.append("name", imageFile.name);
+        const uploadRes2 = await fetch(signedData.url, { method: "POST", body: imgFormData });
+        if (!uploadRes2.ok) throw new Error("Image upload to IPFS failed");
+        const uploadJson = await uploadRes2.json();
+        const cid = uploadJson.data?.cid;
+        if (!cid) throw new Error("Image upload returned no CID");
+        formData.set("imageUri", `ipfs://${cid}`);
+      }
 
       // Forward template-specific fields — keyed as "tmpl_{trait_type}"
       Object.entries(templateFields).forEach(([key, value]) => {
@@ -376,7 +391,7 @@ export default function CreateAssetPage() {
                 ) : (
                   <div className="flex flex-col items-center gap-2 text-muted-foreground">
                     <Upload className="h-8 w-8" />
-                    <p className="text-sm">Click to upload (JPG, PNG, GIF, SVG, WebP · max 4 MB)</p>
+                    <p className="text-sm">Click to upload (JPG, PNG, GIF, SVG, WebP · max 10 MB)</p>
                   </div>
                 )}
                 <input
@@ -388,8 +403,8 @@ export default function CreateAssetPage() {
                     const file = e.target.files?.[0];
                     if (!file) return;
                     const ALLOWED = ["image/jpeg", "image/png", "image/gif", "image/svg+xml", "image/webp"];
-                    if (file.size > 4 * 1024 * 1024) {
-                      toast.error("File too large", { description: "Maximum file size is 4 MB." });
+                    if (file.size > 10 * 1024 * 1024) {
+                      toast.error("File too large", { description: "Maximum file size is 10 MB." });
                       e.target.value = "";
                       return;
                     }

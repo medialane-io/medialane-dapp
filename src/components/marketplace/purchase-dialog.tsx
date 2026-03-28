@@ -103,9 +103,13 @@ export function PurchaseDialog({ order, open, onOpenChange, onSuccess }: Purchas
               </div>
             )}
             {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
-            <Button className="w-full h-11" onClick={handleBuy} disabled={isProcessing || !isConnected}>
+            
+            <div className="btn-border-animated p-[1px] rounded-xl">
+            <Button className="w-full h-12 text-base font-semibold text-white rounded-[11px] flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-[0.98] bg-background/30" onClick={handleBuy} disabled={isProcessing || !isConnected}>
               <ShoppingCart className="h-4 w-4 mr-2" />Buy now
             </Button>
+            </div>
+
           </div>
         )}
       </DialogContent>
