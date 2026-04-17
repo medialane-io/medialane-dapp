@@ -91,7 +91,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         } finally {
             setIsProcessing(false);
         }
-    }, [toast]);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Executes calls with AVNU-sponsored gas; falls back to direct account.execute() on failure.
     const executeWithSponsor = useCallback(async (calls: any[]): Promise<string> => {
