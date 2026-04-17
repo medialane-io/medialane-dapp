@@ -34,10 +34,11 @@ interface ListingDialogProps {
   assetContract: string;
   tokenId: string;
   tokenName?: string;
+  tokenStandard?: string;
   onSuccess?: () => void;
 }
 
-export function ListingDialog({ open, onOpenChange, assetContract, tokenId, tokenName, onSuccess }: ListingDialogProps) {
+export function ListingDialog({ open, onOpenChange, assetContract, tokenId, tokenName, tokenStandard, onSuccess }: ListingDialogProps) {
   const { isConnected } = useUnifiedWallet();
   const { createListing, isProcessing, txHash, error, resetState } = useMarketplace();
   const confettiFired = useRef(false);
@@ -50,7 +51,7 @@ export function ListingDialog({ open, onOpenChange, assetContract, tokenId, toke
 
   const onSubmit = async (values: FormValues) => {
     if (!isConnected) { toast.error("Connect your wallet first"); return; }
-    const hash = await createListing(assetContract, tokenId, values.price, values.currency, values.durationSeconds);
+    const hash = await createListing(assetContract, tokenId, values.price, values.currency, values.durationSeconds, tokenStandard);
     if (hash) setTxStatus("confirmed");
   };
 

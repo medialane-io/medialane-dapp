@@ -34,10 +34,11 @@ interface OfferDialogProps {
   assetContract: string;
   tokenId: string;
   tokenName?: string;
+  tokenStandard?: string;
   onSuccess?: () => void;
 }
 
-export function OfferDialog({ open, onOpenChange, assetContract, tokenId, tokenName, onSuccess }: OfferDialogProps) {
+export function OfferDialog({ open, onOpenChange, assetContract, tokenId, tokenName, tokenStandard, onSuccess }: OfferDialogProps) {
   const { isConnected } = useUnifiedWallet();
   const { makeOffer, isProcessing, txHash, error, resetState } = useMarketplace();
   const confettiFired = useRef(false);
@@ -50,7 +51,7 @@ export function OfferDialog({ open, onOpenChange, assetContract, tokenId, tokenN
 
   const onSubmit = async (values: FormValues) => {
     if (!isConnected) { toast.error("Connect your wallet first"); return; }
-    const hash = await makeOffer(assetContract, tokenId, values.price, values.currency, values.durationSeconds);
+    const hash = await makeOffer(assetContract, tokenId, values.price, values.currency, values.durationSeconds, tokenStandard);
     if (hash) setTxStatus("confirmed");
   };
 
