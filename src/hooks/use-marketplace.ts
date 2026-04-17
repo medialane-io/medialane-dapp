@@ -3,7 +3,7 @@ import { useAccount, useContract, useNetwork, useProvider } from "@starknet-reac
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { Abi, shortString, constants } from "starknet";
 import { IPMarketplaceABI } from "@/abis/ip_market";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { getOrderParametersTypedData, getOrderCancellationTypedData, getOrderFulfillmentTypedData, stringifyBigInts } from "@/utils/marketplace-utils";
 import { executeSponsoredTransaction, canSponsor } from "@/utils/paymaster";
 
@@ -52,7 +52,6 @@ const toWei = (price: string, currencySymbol: string): string =>
 export function useMarketplace(): UseMarketplaceReturn {
     const { account } = useAccount();
     const { chain } = useNetwork();
-    const { toast } = useToast();
     const { provider } = useProvider();
 
     const [isProcessing, setIsProcessing] = useState(false);
@@ -67,7 +66,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         address: MARKETPLACE_1155_CONTRACT,
         abi: IPMarketplaceABI as any[],
     });
-    const { address: walletAddress, walletType } = useUnifiedWallet();
+    const { address: walletAddress } = useUnifiedWallet();
 
     const resetState = useCallback(() => {
         setTxHash(null);
@@ -87,7 +86,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             console.error("[marketplace] error:", JSON.stringify(err, null, 2), err);
             const msg = err?.message || (err?.code ? `Wallet error ${err.code}` : "An unexpected error occurred");
             setError(msg);
-            toast({ title: "Error", description: msg, variant: "destructive" });
+            toast.error(msg);
             return undefined;
         } finally {
             setIsProcessing(false);
@@ -186,13 +185,13 @@ export function useMarketplace(): UseMarketplaceReturn {
         if (!walletAddress || !contract || !chain) {
             const msg = "Account, contract, or network not available";
             setError(msg);
-            toast({ title: "Error", description: msg, variant: "destructive" });
+            toast.error(msg);
             return undefined;
         }
         if (!account) {
             const msg = "Marketplace listing requires Argent X or Braavos wallet";
             setError(msg);
-            toast({ title: "Error", description: msg, variant: "destructive" });
+            toast.error(msg);
             return undefined;
         }
 
@@ -273,10 +272,10 @@ export function useMarketplace(): UseMarketplaceReturn {
             if ((receipt as any).execution_status === "REVERTED") {
                 throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
             }
-            toast({ title: "Listing Created", description: "Your asset has been listed successfully." });
+            toast.success("Listing Created", { description: "Your asset has been listed successfully." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeWithSponsor]);
 
     const makeOffer = useCallback(async (
         assetContractAddress: string,
@@ -292,13 +291,13 @@ export function useMarketplace(): UseMarketplaceReturn {
         if (!walletAddress || !contract || !chain) {
             const msg = "Account, contract, or network not available";
             setError(msg);
-            toast({ title: "Error", description: msg, variant: "destructive" });
+            toast.error(msg);
             return undefined;
         }
         if (!account) {
             const msg = "Making offers requires Argent X or Braavos wallet";
             setError(msg);
-            toast({ title: "Error", description: msg, variant: "destructive" });
+            toast.error(msg);
             return undefined;
         }
 
@@ -348,22 +347,22 @@ export function useMarketplace(): UseMarketplaceReturn {
             if ((receipt as any).execution_status === "REVERTED") {
                 throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
             }
-            toast({ title: "Offer Placed", description: "Your offer has been submitted and is now live." });
+            toast.success("Offer Placed", { description: "Your offer has been submitted and is now live." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeWithSponsor]);
 
     const checkoutCart = useCallback(async (items: any[]) => {
         if (!walletAddress || !medialaneContract || !chain || items.length === 0) {
             const msg = "Account, contract, network not available, or cart empty";
             setError(msg);
-            toast({ title: "Error", description: msg, variant: "destructive" });
+            toast.error(msg);
             return undefined;
         }
         if (!account) {
             const msg = "Checkout requires Argent X or Braavos wallet";
             setError(msg);
-            toast({ title: "Error", description: msg, variant: "destructive" });
+            toast.error(msg);
             return undefined;
         }
 
@@ -406,8 +405,7 @@ export function useMarketplace(): UseMarketplaceReturn {
 
                 const typedData = stringifyBigInts(getOrderFulfillmentTypedData(fulfillmentParams, chainId));
 
-                toast({
-                    title: `Signature Required (${i + 1}/${items.length})`,
+                toast.info(`Signature Required (${i + 1}/${items.length})`, {
                     description: `Please sign the request for ${item.offerIdentifier}`,
                 });
 
@@ -424,7 +422,7 @@ export function useMarketplace(): UseMarketplaceReturn {
                 );
             }
 
-            toast({ title: "Executing Purchase", description: "Approve the final transaction to sweep the cart." });
+            toast.info("Executing Purchase", { description: "Approve the final transaction to sweep the cart." });
 
             // Single atomic multicall: all approvals + all fulfillments
             const hash = await executeWithSponsor([...approveCalls, ...fulfillCalls]);
@@ -433,10 +431,10 @@ export function useMarketplace(): UseMarketplaceReturn {
             if ((receipt as any).execution_status === "REVERTED") {
                 throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
             }
-            toast({ title: "Purchase Successful", description: `Successfully purchased ${items.length} item(s).` });
+            toast.success("Purchase Successful", { description: `Successfully purchased ${items.length} item(s).` });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, chain, provider, withProcessing, executeWithSponsor]);
 
     const cancelOrder = useCallback(async (orderHash: string, tokenStandard?: string) => {
         const is1155 = tokenStandard === "ERC1155";
@@ -445,13 +443,13 @@ export function useMarketplace(): UseMarketplaceReturn {
         if (!walletAddress || !contract || !chain) {
             const msg = "Account, contract, or network not available";
             setError(msg);
-            toast({ title: "Error", description: msg, variant: "destructive" });
+            toast.error(msg);
             return undefined;
         }
         if (!account) {
             const msg = "Cancelling orders requires Argent X or Braavos wallet";
             setError(msg);
-            toast({ title: "Error", description: msg, variant: "destructive" });
+            toast.error(msg);
             return undefined;
         }
 
@@ -484,10 +482,10 @@ export function useMarketplace(): UseMarketplaceReturn {
             if ((receipt as any).execution_status === "REVERTED") {
                 throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
             }
-            toast({ title: "Listing Cancelled", description: "The listing has been successfully cancelled on-chain." });
+            toast.success("Listing Cancelled", { description: "The listing has been successfully cancelled on-chain." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, toast, provider, withProcessing, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeWithSponsor]);
 
     /**
      * Asset owner accepts an incoming bid. Signs OrderFulfillment typed data,
@@ -506,13 +504,13 @@ export function useMarketplace(): UseMarketplaceReturn {
         if (!walletAddress || !contract || !chain) {
             const msg = "Account, contract, or network not available";
             setError(msg);
-            toast({ title: "Error", description: msg, variant: "destructive" });
+            toast.error(msg);
             return undefined;
         }
         if (!account) {
             const msg = "Accepting offers requires Argent X or Braavos wallet";
             setError(msg);
-            toast({ title: "Error", description: msg, variant: "destructive" });
+            toast.error(msg);
             return undefined;
         }
 
@@ -562,10 +560,10 @@ export function useMarketplace(): UseMarketplaceReturn {
             if ((receipt as any).execution_status === "REVERTED") {
                 throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
             }
-            toast({ title: "Offer Accepted", description: "The offer has been accepted and the asset transferred." });
+            toast.success("Offer Accepted", { description: "The offer has been accepted and the asset transferred." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, toast, provider, withProcessing, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeWithSponsor]);
 
     return {
         createListing,
