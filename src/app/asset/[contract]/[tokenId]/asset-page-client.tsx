@@ -15,9 +15,12 @@ import { PurchaseDialog } from "@/components/marketplace/purchase-dialog";
 import { ListingDialog } from "@/components/marketplace/listing-dialog";
 import { OfferDialog } from "@/components/marketplace/offer-dialog";
 import { TransferDialog } from "@/components/marketplace/transfer-dialog";
+import { CancelOrderDialog } from "@/components/marketplace/cancel-order-dialog";
+import { FloatingCommentsButton } from "@/components/asset/floating-comments-button";
+import { ShareButton } from "@/components/shared/share-button";
 import { AddressDisplay } from "@/components/shared/address-display";
 import { ipfsToHttp, timeUntil, timeAgo, formatDisplayPrice } from "@/lib/utils";
-import { ShoppingCart, Tag, ExternalLink, Clock, HandCoins, ArrowRightLeft, X, CheckCircle, DollarSign, GitBranch, UserCheck, Globe, Bot, Percent, Shield, Calendar, ChevronRight, Flag, Loader2, MessageSquare } from "lucide-react";
+import { ShoppingCart, Tag, ExternalLink, Clock, HandCoins, ArrowRightLeft, X, CheckCircle, DollarSign, GitBranch, UserCheck, Globe, Bot, Percent, Shield, Calendar, ChevronRight, Flag, Loader2 } from "lucide-react";
 import { useConnect } from "@starknet-react/core";
 import { StarknetkitConnector, useStarknetkitConnectModal } from "starknetkit";
 import { ReportDialog } from "@/components/report-dialog";
@@ -27,7 +30,7 @@ import type { IPType } from "@/types/ip";
 import { IP_TEMPLATES } from "@/lib/ip-templates";
 import { IPTypeDisplay } from "@/components/ip-type-display";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { ApiActivity, ApiOrder } from "@medialane/sdk";
 import { PriceHistoryChart } from "@/components/asset/price-history-chart";
 import { CommentsSection } from "@/components/asset/comments-section";
@@ -59,7 +62,7 @@ export default function AssetPageClient() {
   const { token, isLoading } = useToken(contract, tokenId);
   const { listings, mutate: mutateListings } = useTokenListings(contract, tokenId);
   const { history } = useTokenHistory(contract, tokenId);
-  const { cancelOrder, checkoutCart, isProcessing } = useMarketplace();
+  const { checkoutCart, isProcessing } = useMarketplace();
 
   const { connectAsync, connectors } = useConnect();
   const { starknetkitConnectModal } = useStarknetkitConnectModal({
@@ -85,9 +88,7 @@ export default function AssetPageClient() {
   const [listOpen, setListOpen] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState<ApiOrder | null>(null);
-  const [cancelPinOpen, setCancelPinOpen] = useState(false);
-  const [cancelStep, setCancelStep] = useState<"idle" | "processing" | "success" | "error">("idle");
-  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
   const [orderToAccept, setOrderToAccept] = useState<ApiOrder | null>(null);
   const [acceptPinOpen, setAcceptPinOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
@@ -147,22 +148,7 @@ export default function AssetPageClient() {
 
   const handleCancelClick = (order: ApiOrder) => {
     setOrderToCancel(order);
-    setCancelPinOpen(true);
-  };
-
-  const handleCancelPin = async (pin: string) => {
-    setCancelPinOpen(false);
-    if (!orderToCancel) return;
-    setCancelStep("processing");
-    setCancelError(null);
-    try {
-      await cancelOrder(orderToCancel.orderHash);
-      setCancelStep("success");
-      mutateListings();
-    } catch (err: unknown) {
-      setCancelStep("error");
-      setCancelError(err instanceof Error ? err.message : "Cancellation failed");
-    }
+    setCancelOpen(true);
   };
 
   const handleAcceptClick = (order: ApiOrder) => {
@@ -595,6 +581,7 @@ export default function AssetPageClient() {
                   <span className="text-xs font-medium truncate group-hover:text-primary transition-colors max-w-[120px]">{collection.name}</span>
                 </Link>
               )}
+              <ShareButton title={name} size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground" />
               <Button
                 variant="ghost"
                 size="icon"
@@ -841,23 +828,7 @@ export default function AssetPageClient() {
       </div>
 
 
-      {/* Floating comments button */}
-      <div className="fixed bottom-6 right-6 z-40">
-        <button
-          onClick={() => setCommentOpen(true)}
-          aria-label="Open on-chain comments"
-          className="relative flex flex-col items-center justify-center gap-0.5 h-14 w-14 rounded-2xl border border-border bg-card/95 backdrop-blur-sm shadow-md hover:shadow-lg hover:bg-accent transition-all active:scale-95"
-        >
-          <MessageSquare className="h-5 w-5 text-foreground" />
-          <span className="text-[9px] font-medium text-muted-foreground leading-none">comments</span>
-          {commentTotal > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold text-white"
-              style={{ background: "hsl(var(--brand-blue))" }}>
-              {commentTotal}
-            </span>
-          )}
-        </button>
-      </div>
+      <FloatingCommentsButton onClick={() => setCommentOpen(true)} commentTotal={commentTotal} />
 
       {/* Comments Sheet — bottom drawer on mobile, right panel on desktop */}
       <Sheet open={commentOpen} onOpenChange={setCommentOpen}>
@@ -918,53 +889,12 @@ export default function AssetPageClient() {
         tokenName={name}
       />
 
-      {/* Cancel listing status dialog */}
-      <Dialog
-        open={cancelStep !== "idle"}
-        onOpenChange={(v) => { if (!v) { setCancelStep("idle"); setCancelError(null); } }}
-      >
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>
-              {cancelStep === "processing" && "Cancelling listing…"}
-              {cancelStep === "success" && "Listing cancelled"}
-              {cancelStep === "error" && "Cancellation failed"}
-            </DialogTitle>
-            {cancelStep === "processing" && (
-              <DialogDescription>
-                Submitting your cancellation to the network. Please wait.
-              </DialogDescription>
-            )}
-          </DialogHeader>
-          <div className="flex flex-col items-center gap-4 py-4">
-            {cancelStep === "processing" && (
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            )}
-            {cancelStep === "success" && (
-              <>
-                <CheckCircle className="h-10 w-10 text-green-500" />
-                <p className="text-sm text-center text-muted-foreground">
-                  Your listing has been cancelled successfully.
-                </p>
-                <Button className="w-full" onClick={() => { setCancelStep("idle"); setCancelError(null); }}>
-                  Done
-                </Button>
-              </>
-            )}
-            {cancelStep === "error" && (
-              <>
-                <X className="h-10 w-10 text-destructive" />
-                <p className="text-sm text-center text-muted-foreground">
-                  {cancelError ?? "Something went wrong. Please try again."}
-                </p>
-                <Button variant="outline" className="w-full" onClick={() => { setCancelStep("idle"); setCancelError(null); }}>
-                  Dismiss
-                </Button>
-              </>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <CancelOrderDialog
+        order={orderToCancel}
+        open={cancelOpen}
+        onOpenChange={(v) => { setCancelOpen(v); if (!v) setOrderToCancel(null); }}
+        onSuccess={mutateListings}
+      />
 
       <TransferDialog
         open={transferOpen}
