@@ -13,22 +13,25 @@ interface UseMarketplaceReturn {
         tokenId: string,
         price: string,
         currencySymbol: string,
-        durationSeconds: number
+        durationSeconds: number,
+        tokenStandard?: string
     ) => Promise<string | undefined>;
     makeOffer: (
         assetContractAddress: string,
         tokenId: string,
         price: string,
         currencySymbol: string,
-        durationSeconds: number
+        durationSeconds: number,
+        tokenStandard?: string
     ) => Promise<string | undefined>;
     checkoutCart: (items: any[]) => Promise<string | undefined>;
-    cancelOrder: (orderHash: string) => Promise<string | undefined>;
-    cancelListing: (orderHash: string) => Promise<string | undefined>;
+    cancelOrder: (orderHash: string, tokenStandard?: string) => Promise<string | undefined>;
+    cancelListing: (orderHash: string, tokenStandard?: string) => Promise<string | undefined>;
     acceptOffer: (
         orderHash: string,
         nftContractAddress: string,
-        tokenId: string
+        tokenId: string,
+        tokenStandard?: string
     ) => Promise<string | undefined>;
 
     isProcessing: boolean;
