@@ -39,7 +39,7 @@ interface UseMarketplaceReturn {
 }
 
 // Module-level helpers
-import { SUPPORTED_TOKENS } from "@/lib/constants";
+import { SUPPORTED_TOKENS, MARKETPLACE_CONTRACT, MARKETPLACE_1155_CONTRACT } from "@/lib/constants";
 const getDecimals = (currencySymbol: string) =>
     SUPPORTED_TOKENS.find((t) => t.symbol === currencySymbol)?.decimals ?? 18;
 
@@ -57,7 +57,11 @@ export function useMarketplace(): UseMarketplaceReturn {
     const [error, setError] = useState<string | null>(null);
 
     const { contract: medialaneContract } = useContract({
-        address: process.env.NEXT_PUBLIC_MEDIALANE_CONTRACT_ADDRESS as `0x${string}`,
+        address: MARKETPLACE_CONTRACT,
+        abi: IPMarketplaceABI as any[],
+    });
+    const { contract: medialane1155Contract } = useContract({
+        address: MARKETPLACE_1155_CONTRACT,
         abi: IPMarketplaceABI as any[],
     });
     const { address: walletAddress, walletType } = useUnifiedWallet();
@@ -103,7 +107,8 @@ export function useMarketplace(): UseMarketplaceReturn {
     // Builds shared timing/nonce/currency fields for an order.
     const buildBaseOrderParams = useCallback(async (
         currencySymbol: string,
-        durationSeconds: number
+        durationSeconds: number,
+        contract: NonNullable<typeof medialaneContract>
     ) => {
         const now = Math.floor(Date.now() / 1000);
         const startTime = (now + 300).toString(); // 5-min future buffer
@@ -114,15 +119,18 @@ export function useMarketplace(): UseMarketplaceReturn {
         const currencyAddress = SUPPORTED_TOKENS.find((t: any) => t.symbol === currencySymbol)?.address;
         if (!currencyAddress) throw new Error("Unsupported currency selected");
 
-        const currentNonce = await medialaneContract!.nonces(walletAddress!);
+        const currentNonce = await contract.nonces(walletAddress!);
         const nonce = currentNonce.toString();
 
         return { startTime, endTime, salt, currencyAddress, nonce };
-    }, [walletAddress, medialaneContract]);
+    }, [walletAddress]);
 
     // Signs the orderParams, verifies the hash against the contract, and returns a
     // populated register_order call ready to include in a multicall.
-    const signAndBuildRegisterCall = useCallback(async (orderParams: any) => {
+    const signAndBuildRegisterCall = useCallback(async (
+        orderParams: any,
+        contract: NonNullable<typeof medialaneContract>
+    ) => {
         const chainId = chain!.id as any as constants.StarknetChainId;
         const typedData = stringifyBigInts(getOrderParametersTypedData(orderParams, chainId));
 
@@ -149,7 +157,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         // Hash verification
         try {
             const localHash = await account!.hashMessage(typedData);
-            const contractHash = await medialaneContract!.get_order_hash(registerPayload.parameters, walletAddress!);
+            const contractHash = await contract.get_order_hash(registerPayload.parameters, walletAddress!);
             const contractHashHex = "0x" + BigInt(contractHash).toString(16);
             if (localHash !== contractHashHex) {
                 console.warn("[marketplace] Hash mismatch — signature may be rejected by contract");
@@ -158,17 +166,21 @@ export function useMarketplace(): UseMarketplaceReturn {
             console.warn("Could not verify hash:", hashErr);
         }
 
-        return medialaneContract!.populate("register_order", [registerPayload]);
-    }, [account, chain, medialaneContract, walletAddress]);
+        return contract.populate("register_order", [registerPayload]);
+    }, [account, chain, walletAddress]);
 
     const createListing = useCallback(async (
         assetContractAddress: string,
         tokenId: string,
         price: string,
         currencySymbol: string,
-        durationSeconds: number
+        durationSeconds: number,
+        tokenStandard?: string
     ) => {
-        if (!walletAddress || !medialaneContract || !chain) {
+        const is1155 = tokenStandard === "ERC1155";
+        const contract = is1155 ? medialane1155Contract : medialaneContract;
+
+        if (!walletAddress || !contract || !chain) {
             const msg = "Account, contract, or network not available";
             setError(msg);
             toast({ title: "Error", description: msg, variant: "destructive" });
@@ -184,12 +196,12 @@ export function useMarketplace(): UseMarketplaceReturn {
         return withProcessing(async () => {
             const priceWei = toWei(price, currencySymbol);
             const { startTime, endTime, salt, currencyAddress, nonce } =
-                await buildBaseOrderParams(currencySymbol, durationSeconds);
+                await buildBaseOrderParams(currencySymbol, durationSeconds, contract);
 
             const orderParams = {
                 offerer: walletAddress,
                 offer: {
-                    item_type: "ERC721",
+                    item_type: is1155 ? "ERC1155" : "ERC721",
                     token: assetContractAddress,
                     identifier_or_criteria: tokenId,
                     start_amount: "1",
@@ -209,30 +221,47 @@ export function useMarketplace(): UseMarketplaceReturn {
                 nonce,
             };
 
-            const registerCall = await signAndBuildRegisterCall(orderParams);
+            const registerCall = await signAndBuildRegisterCall(orderParams, contract);
 
             const { cairo } = await import("starknet");
-            const tokenIdUint256 = cairo.uint256(tokenId);
-
-            // Avoid a redundant wallet prompt if the NFT is already approved
+            let approveCall: any;
             let isAlreadyApproved = false;
-            try {
-                const isApprovedRes = await provider.callContract({
-                    contractAddress: assetContractAddress,
-                    entrypoint: "get_approved",
-                    calldata: [tokenIdUint256.low.toString(), tokenIdUint256.high.toString()],
-                });
-                isAlreadyApproved =
-                    BigInt(isApprovedRes[0]).toString() === BigInt(medialaneContract.address).toString();
-            } catch (err) {
-                console.warn("Failed to check approval status", err);
-            }
 
-            const approveCall = {
-                contractAddress: assetContractAddress,
-                entrypoint: "approve",
-                calldata: [medialaneContract.address, tokenIdUint256.low.toString(), tokenIdUint256.high.toString()],
-            };
+            if (is1155) {
+                try {
+                    const res = await provider.callContract({
+                        contractAddress: assetContractAddress,
+                        entrypoint: "is_approved_for_all",
+                        calldata: [walletAddress!, contract.address],
+                    });
+                    isAlreadyApproved = BigInt(res[0]) !== 0n;
+                } catch (err) {
+                    console.warn("Failed to check ERC1155 approval status", err);
+                }
+                approveCall = {
+                    contractAddress: assetContractAddress,
+                    entrypoint: "set_approval_for_all",
+                    calldata: [contract.address, "1"],
+                };
+            } else {
+                const tokenIdUint256 = cairo.uint256(tokenId);
+                try {
+                    const res = await provider.callContract({
+                        contractAddress: assetContractAddress,
+                        entrypoint: "get_approved",
+                        calldata: [tokenIdUint256.low.toString(), tokenIdUint256.high.toString()],
+                    });
+                    isAlreadyApproved =
+                        BigInt(res[0]).toString() === BigInt(contract.address).toString();
+                } catch (err) {
+                    console.warn("Failed to check ERC721 approval status", err);
+                }
+                approveCall = {
+                    contractAddress: assetContractAddress,
+                    entrypoint: "approve",
+                    calldata: [contract.address, tokenIdUint256.low.toString(), tokenIdUint256.high.toString()],
+                };
+            }
 
             const calls = isAlreadyApproved ? [registerCall] : [approveCall, registerCall];
             const hash = await executeWithSponsor(calls);
@@ -244,16 +273,20 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Listing Created", description: "Your asset has been listed successfully." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeWithSponsor]);
 
     const makeOffer = useCallback(async (
         assetContractAddress: string,
         tokenId: string,
         price: string,
         currencySymbol: string,
-        durationSeconds: number
+        durationSeconds: number,
+        tokenStandard?: string
     ) => {
-        if (!walletAddress || !medialaneContract || !chain) {
+        const is1155 = tokenStandard === "ERC1155";
+        const contract = is1155 ? medialane1155Contract : medialaneContract;
+
+        if (!walletAddress || !contract || !chain) {
             const msg = "Account, contract, or network not available";
             setError(msg);
             toast({ title: "Error", description: msg, variant: "destructive" });
@@ -269,9 +302,9 @@ export function useMarketplace(): UseMarketplaceReturn {
         return withProcessing(async () => {
             const priceWei = toWei(price, currencySymbol);
             const { startTime, endTime, salt, currencyAddress, nonce } =
-                await buildBaseOrderParams(currencySymbol, durationSeconds);
+                await buildBaseOrderParams(currencySymbol, durationSeconds, contract);
 
-            // Inverted vs. listing: offerer sends ERC20, receives ERC721
+            // Inverted vs. listing: offerer sends ERC20, receives the NFT
             const orderParams = {
                 offerer: walletAddress,
                 offer: {
@@ -282,7 +315,7 @@ export function useMarketplace(): UseMarketplaceReturn {
                     end_amount: priceWei,
                 },
                 consideration: {
-                    item_type: "ERC721",
+                    item_type: is1155 ? "ERC1155" : "ERC721",
                     token: assetContractAddress,
                     identifier_or_criteria: tokenId,
                     start_amount: "1",
@@ -295,14 +328,14 @@ export function useMarketplace(): UseMarketplaceReturn {
                 nonce,
             };
 
-            const registerCall = await signAndBuildRegisterCall(orderParams);
+            const registerCall = await signAndBuildRegisterCall(orderParams, contract);
 
             const { cairo } = await import("starknet");
             const amountUint256 = cairo.uint256(priceWei);
             const approveCall = {
                 contractAddress: currencyAddress,
                 entrypoint: "approve",
-                calldata: [medialaneContract.address, amountUint256.low.toString(), amountUint256.high.toString()],
+                calldata: [contract.address, amountUint256.low.toString(), amountUint256.high.toString()],
             };
 
             // ERC20 approve + register_order as atomic multicall
@@ -315,7 +348,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Offer Placed", description: "Your offer has been submitted and is now live." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, toast, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeWithSponsor]);
 
     const checkoutCart = useCallback(async (items: any[]) => {
         if (!walletAddress || !medialaneContract || !chain || items.length === 0) {
@@ -402,8 +435,11 @@ export function useMarketplace(): UseMarketplaceReturn {
         });
     }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, executeWithSponsor]);
 
-    const cancelOrder = useCallback(async (orderHash: string) => {
-        if (!walletAddress || !medialaneContract || !chain) {
+    const cancelOrder = useCallback(async (orderHash: string, tokenStandard?: string) => {
+        const is1155 = tokenStandard === "ERC1155";
+        const contract = is1155 ? medialane1155Contract : medialaneContract;
+
+        if (!walletAddress || !contract || !chain) {
             const msg = "Account, contract, or network not available";
             setError(msg);
             toast({ title: "Error", description: msg, variant: "destructive" });
@@ -417,7 +453,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         }
 
         return withProcessing(async () => {
-            const currentNonce = await medialaneContract.nonces(walletAddress);
+            const currentNonce = await contract.nonces(walletAddress);
 
             const cancelParams = {
                 order_hash: orderHash,
@@ -438,7 +474,7 @@ export function useMarketplace(): UseMarketplaceReturn {
                 signature: signatureArray,
             });
 
-            const call = medialaneContract.populate("cancel_order", [cancelRequest]);
+            const call = contract.populate("cancel_order", [cancelRequest]);
             const hash = await executeWithSponsor([call]);
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
@@ -448,7 +484,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Listing Cancelled", description: "The listing has been successfully cancelled on-chain." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, toast, provider, withProcessing, executeWithSponsor]);
 
     /**
      * Asset owner accepts an incoming bid. Signs OrderFulfillment typed data,
@@ -458,9 +494,13 @@ export function useMarketplace(): UseMarketplaceReturn {
     const acceptOffer = useCallback(async (
         orderHash: string,
         nftContractAddress: string,
-        tokenId: string
+        tokenId: string,
+        tokenStandard?: string
     ) => {
-        if (!walletAddress || !medialaneContract || !chain) {
+        const is1155 = tokenStandard === "ERC1155";
+        const contract = is1155 ? medialane1155Contract : medialaneContract;
+
+        if (!walletAddress || !contract || !chain) {
             const msg = "Account, contract, or network not available";
             setError(msg);
             toast({ title: "Error", description: msg, variant: "destructive" });
@@ -474,7 +514,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         }
 
         return withProcessing(async () => {
-            const currentNonce = await medialaneContract.nonces(walletAddress);
+            const currentNonce = await contract.nonces(walletAddress);
 
             const fulfillmentParams = {
                 order_hash: orderHash,
@@ -490,19 +530,28 @@ export function useMarketplace(): UseMarketplaceReturn {
                 ? signature
                 : [signature.r.toString(), signature.s.toString()];
 
-            const fulfillCall = medialaneContract.populate("fulfill_order", [{
+            const fulfillCall = contract.populate("fulfill_order", [{
                 fulfillment: fulfillmentParams,
                 signature: signatureArray,
             }]);
 
             // Owner must approve the NFT transfer before fulfilling
             const { cairo } = await import("starknet");
-            const tokenIdUint256 = cairo.uint256(tokenId);
-            const approveCall = {
-                contractAddress: nftContractAddress,
-                entrypoint: "approve",
-                calldata: [medialaneContract.address, tokenIdUint256.low.toString(), tokenIdUint256.high.toString()],
-            };
+            let approveCall: any;
+            if (is1155) {
+                approveCall = {
+                    contractAddress: nftContractAddress,
+                    entrypoint: "set_approval_for_all",
+                    calldata: [contract.address, "1"],
+                };
+            } else {
+                const tokenIdUint256 = cairo.uint256(tokenId);
+                approveCall = {
+                    contractAddress: nftContractAddress,
+                    entrypoint: "approve",
+                    calldata: [contract.address, tokenIdUint256.low.toString(), tokenIdUint256.high.toString()],
+                };
+            }
 
             const hash = await executeWithSponsor([approveCall, fulfillCall]);
             setTxHash(hash);
@@ -513,7 +562,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast({ title: "Offer Accepted", description: "The offer has been accepted and the asset transferred." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, chain, toast, provider, withProcessing, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, toast, provider, withProcessing, executeWithSponsor]);
 
     return {
         createListing,
