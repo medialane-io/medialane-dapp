@@ -29,16 +29,20 @@ function HeroSlide({
         active ? "opacity-100" : "opacity-0 pointer-events-none"
       )}
     >
-      {/* Background image */}
+      {/* Background image with continuous Ken Burns CSS animation */}
       {imageUrl ? (
-        <Image
-          src={imageUrl}
-          alt={name}
-          fill
-          className="object-cover scale-105"
-          priority={active}
-          unoptimized
-        />
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="animate-kenburns absolute inset-0">
+            <Image
+              src={imageUrl}
+              alt={name}
+              fill
+              className="object-cover"
+              priority={active}
+              unoptimized
+            />
+          </div>
+        </div>
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/40 via-brand-blue/20 to-brand-navy/60" />
       )}
@@ -114,7 +118,7 @@ export function HeroSlider() {
   // Auto-advance every 5s
   useEffect(() => {
     if (count <= 1) return;
-    const id = setInterval(next, 5000);
+    const id = setInterval(next, 7000);
     return () => clearInterval(id);
   }, [count, next]);
 
