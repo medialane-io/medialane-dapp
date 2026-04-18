@@ -21,28 +21,28 @@ const SORT_OPTIONS: { label: string; value: CollectionSort }[] = [
 
 export default function CollectionsPageClient() {
   const { stats } = usePlatformStats();
-  const [sort, setSort]       = useState<CollectionSort>("recent");
-  const [verified, setVerified] = useState(false);
-  const [page, setPage]       = useState(1);
+  const [sort, setSort]         = useState<CollectionSort>("recent");
+  const [featured, setFeatured] = useState(false);
+  const [page, setPage]         = useState(1);
   const [allCollections, setAllCollections] = useState<ApiCollection[]>([]);
 
   const { collections, meta, isLoading } = useCollections(
     page,
     PAGE_SIZE,
-    verified ? true : undefined,
+    featured ? true : undefined,
     sort
   );
 
   // Reset accumulated list whenever filters change
-  const prevFilters = useRef({ sort, verified });
+  const prevFilters = useRef({ sort, featured });
   useEffect(() => {
     const f = prevFilters.current;
-    if (f.sort !== sort || f.verified !== verified) {
-      prevFilters.current = { sort, verified };
+    if (f.sort !== sort || f.featured !== featured) {
+      prevFilters.current = { sort, featured };
       setPage(1);
       setAllCollections([]);
     }
-  }, [sort, verified]);
+  }, [sort, featured]);
 
   // Append new page to accumulated list
   useEffect(() => {
@@ -113,16 +113,16 @@ export default function CollectionsPageClient() {
 
         {/* Verified toggle */}
         <button
-          onClick={() => setVerified((v) => !v)}
+          onClick={() => setFeatured((v) => !v)}
           className={cn(
             "flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap",
-            verified
+            featured
               ? "border-primary bg-primary/10 text-primary font-medium"
               : "border-border text-muted-foreground hover:border-primary/50"
           )}
         >
           <BadgeCheck className="h-3.5 w-3.5" />
-          Verified only
+          Featured only
         </button>
       </div>
 
@@ -136,12 +136,12 @@ export default function CollectionsPageClient() {
           <Layers className="h-12 w-12 text-muted-foreground/30" />
           <p className="text-2xl font-bold">No collections found</p>
           <p className="text-muted-foreground max-w-sm">
-            {verified
-              ? "No verified collections match the current sort. Try removing the Verified filter."
+            {featured
+              ? "No featured collections match the current sort. Try removing the Featured filter."
               : "Deploy the first collection on Medialane."}
           </p>
-          {verified && (
-            <Button variant="outline" size="sm" onClick={() => setVerified(false)}>
+          {featured && (
+            <Button variant="outline" size="sm" onClick={() => setFeatured(false)}>
               Remove filter
             </Button>
           )}

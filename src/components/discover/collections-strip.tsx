@@ -39,7 +39,7 @@ function CollectionChip({ collection }: { collection: ApiCollection }) {
         <div className="p-3 space-y-0.5">
           <div className="flex items-center gap-1 min-w-0">
             <p className="text-sm font-semibold truncate">{collection.name ?? "Unnamed"}</p>
-            {collection.isKnown && (
+            {collection.isFeatured && (
               <CheckCircle2 className="h-3 w-3 text-blue-400 shrink-0" />
             )}
           </div>

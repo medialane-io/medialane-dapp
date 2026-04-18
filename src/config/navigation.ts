@@ -40,7 +40,7 @@ export const navigation = {
     marketplace: [
         { title: "Marketplace", href: "/marketplace", icon: ShoppingBag, description: "Trade onchain assets" },
         { title: "Explore NFTs", href: "/assets", icon: Box, description: "Browse all IP assets" },
-        { title: "Collections", href: "/collections", icon: Layers, description: "View verified collections" },
+        { title: "Collections", href: "/collections", icon: Layers, description: "View all collections" },
         { title: "Community", href: "/activities", icon: BarChart, description: "Protocol activity" },
     ],
     launchpad: [

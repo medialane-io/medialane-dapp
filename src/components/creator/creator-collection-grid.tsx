@@ -57,10 +57,10 @@ function CollectionCover({
           ) : (
             <p className="font-bold text-sm text-white leading-tight truncate flex items-center gap-1.5">
               {collection.name ?? "Unnamed Collection"}
-              {collection.isKnown && (
+              {collection.isFeatured && (
                 <>
                   <CheckCircle2 className="h-3 w-3 text-blue-400 shrink-0" />
-                  <HelpIcon content="Verified collection" side="top" className="text-white/60" />
+                  <HelpIcon content="Featured collection" side="top" className="text-white/60" />
                 </>
               )}
             </p>
