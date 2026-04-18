@@ -5,44 +5,61 @@ import { useCollections, type CollectionSort } from "@/hooks/use-collections";
 import { usePlatformStats } from "@/hooks/use-stats";
 import { CollectionCard, CollectionCardSkeleton } from "@/components/shared/collection-card";
 import { Button } from "@/components/ui/button";
-import { Layers, Loader2, BadgeCheck } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { HelpIcon } from "@/components/ui/help-icon";
+import { Layers, Loader2, BadgeCheck, Eye, SlidersHorizontal, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ApiCollection } from "@medialane/sdk";
 
 const PAGE_SIZE = 18;
 
 const SORT_OPTIONS: { label: string; value: CollectionSort }[] = [
-  { label: "Recent",     value: "recent"  },
-  { label: "Most assets", value: "supply"  },
-  { label: "Top volume",  value: "volume"  },
-  { label: "Floor ↑",    value: "floor"   },
-  { label: "A → Z",      value: "name"    },
+  { label: "Recent",      value: "recent" },
+  { label: "Most assets", value: "supply" },
+  { label: "Top volume",  value: "volume" },
+  { label: "Floor ↑",    value: "floor"  },
+  { label: "A → Z",      value: "name"   },
 ];
+
+const SOURCE_TABS = [
+  { label: "All",        value: undefined      },
+  { label: "POP Events", value: "POP_PROTOCOL" },
+] as const;
 
 export default function CollectionsPageClient() {
   const { stats } = usePlatformStats();
-  const [sort, setSort]         = useState<CollectionSort>("recent");
-  const [featured, setFeatured] = useState(false);
-  const [page, setPage]         = useState(1);
+  const [sort, setSort]               = useState<CollectionSort>("recent");
+  const [featured, setFeatured]       = useState(false);
+  const [hideEmpty, setHideEmpty]     = useState(true);
+  const [source, setSource]           = useState<string | undefined>(undefined);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [page, setPage]               = useState(1);
   const [allCollections, setAllCollections] = useState<ApiCollection[]>([]);
 
   const { collections, meta, isLoading } = useCollections(
     page,
     PAGE_SIZE,
     featured ? true : undefined,
-    sort
+    sort,
+    source === "POP_PROTOCOL" ? false : hideEmpty,
+    source
   );
 
   // Reset accumulated list whenever filters change
-  const prevFilters = useRef({ sort, featured });
+  const prevFilters = useRef({ sort, featured, hideEmpty, source });
   useEffect(() => {
     const f = prevFilters.current;
-    if (f.sort !== sort || f.featured !== featured) {
-      prevFilters.current = { sort, featured };
+    if (
+      f.sort !== sort ||
+      f.featured !== featured ||
+      f.hideEmpty !== hideEmpty ||
+      f.source !== source
+    ) {
+      prevFilters.current = { sort, featured, hideEmpty, source };
       setPage(1);
       setAllCollections([]);
     }
-  }, [sort, featured]);
+  }, [sort, featured, hideEmpty, source]);
 
   // Append new page to accumulated list
   useEffect(() => {
@@ -56,6 +73,15 @@ export default function CollectionsPageClient() {
 
   const hasMore = meta?.total != null ? allCollections.length < meta.total : false;
   const isInitialLoading = isLoading && allCollections.length === 0;
+
+  const activeFilters = [sort !== "recent", featured, !hideEmpty].filter(Boolean).length;
+  const totalBadge = activeFilters + (source !== undefined ? 1 : 0);
+
+  const resetAll = () => {
+    setSort("recent");
+    setFeatured(false);
+    setHideEmpty(true);
+  };
 
   return (
     <div className="container mx-auto px-4 pt-14 pb-8 space-y-8">
@@ -89,42 +115,165 @@ export default function CollectionsPageClient() {
         </div>
       </div>
 
-      {/* Filter toolbar */}
-      <div className="flex items-center gap-2 flex-wrap pb-2 border-b border-border/60">
-        {/* Sort chips */}
-        <div className="flex items-center gap-1 flex-wrap">
-          {SORT_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setSort(opt.value)}
-              className={cn(
-                "text-xs px-3 py-1.5 rounded-md transition-colors whitespace-nowrap",
-                sort === opt.value
-                  ? "bg-primary/10 text-primary font-medium"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              )}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="w-px h-5 bg-border hidden sm:block" />
-
-        {/* Verified toggle */}
+      {/* Toolbar */}
+      <div className="flex items-center gap-2 pb-3 border-b border-border/60 flex-wrap">
         <button
-          onClick={() => setFeatured((v) => !v)}
+          onClick={() => setFiltersOpen(true)}
           className={cn(
-            "flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap",
-            featured
-              ? "border-primary bg-primary/10 text-primary font-medium"
-              : "border-border text-muted-foreground hover:border-primary/50"
+            "relative flex items-center gap-1.5 h-9 px-3 rounded-lg border text-xs font-medium transition-colors",
+            totalBadge > 0
+              ? "border-primary bg-primary/10 text-primary"
+              : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
           )}
         >
-          <BadgeCheck className="h-3.5 w-3.5" />
-          Featured only
+          <SlidersHorizontal className="h-3.5 w-3.5" />
+          Filters
+          {totalBadge > 0 && (
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+              {totalBadge}
+            </span>
+          )}
         </button>
+
+        {/* Active filter pills — quick-clear */}
+        {source !== undefined && (
+          <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
+            <Award className="h-3 w-3" />
+            POP Events
+            <button onClick={() => setSource(undefined)} className="ml-0.5 hover:text-primary/60">×</button>
+          </span>
+        )}
+        {sort !== "recent" && (
+          <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
+            {SORT_OPTIONS.find((o) => o.value === sort)?.label}
+            <button onClick={() => setSort("recent")} className="ml-0.5 hover:text-primary/60">×</button>
+          </span>
+        )}
+        {featured && (
+          <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
+            <BadgeCheck className="h-3 w-3" />
+            Featured
+            <button onClick={() => setFeatured(false)} className="ml-0.5 hover:text-primary/60">×</button>
+          </span>
+        )}
+        {!hideEmpty && (
+          <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
+            Show empty
+            <button onClick={() => setHideEmpty(true)} className="ml-0.5 hover:text-primary/60">×</button>
+          </span>
+        )}
       </div>
+
+      {/* Filters dialog */}
+      <Dialog open={filtersOpen} onOpenChange={setFiltersOpen}>
+        <DialogContent className="w-full max-w-sm sm:max-w-md p-0 overflow-hidden gap-0 flex flex-col max-h-[85svh]">
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border/60 pr-12">
+            <DialogTitle className="text-base font-bold flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4 text-primary" />
+              Filters
+            </DialogTitle>
+            {totalBadge > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs text-muted-foreground"
+                onClick={() => { resetAll(); setSource(undefined); }}
+              >
+                Clear all
+              </Button>
+            )}
+          </div>
+
+          {/* Scrollable body */}
+          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+
+            {/* Source */}
+            <div className="space-y-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Source</p>
+              <div className="flex flex-wrap gap-1.5">
+                {SOURCE_TABS.map(({ label, value }) => (
+                  <button
+                    key={label}
+                    onClick={() => setSource(value)}
+                    className={cn(
+                      "flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap",
+                      source === value
+                        ? "border-primary bg-primary/10 text-primary font-medium"
+                        : "border-border text-muted-foreground hover:border-primary/50"
+                    )}
+                  >
+                    {value === "POP_PROTOCOL" && <Award className="h-3 w-3" />}
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Sort */}
+            <div className="space-y-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Sort</p>
+              <div className="flex flex-wrap gap-1.5">
+                {SORT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSort(opt.value)}
+                    className={cn(
+                      "text-xs px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap",
+                      sort === opt.value
+                        ? "border-primary bg-primary/10 text-primary font-medium"
+                        : "border-border text-muted-foreground hover:border-primary/50"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Show */}
+            <div className="space-y-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Show</p>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => setFeatured((v) => !v)}
+                  className={cn(
+                    "flex items-center gap-2 text-sm px-3 py-2 rounded-lg border transition-colors text-left",
+                    featured
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:border-primary/50"
+                  )}
+                >
+                  <BadgeCheck className="h-4 w-4 shrink-0" />
+                  Featured only
+                  <HelpIcon content="Show only collections featured by Medialane" side="right" />
+                </button>
+                <button
+                  onClick={() => setHideEmpty((v) => !v)}
+                  className={cn(
+                    "flex items-center gap-2 text-sm px-3 py-2 rounded-lg border transition-colors text-left",
+                    !hideEmpty
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:border-primary/50"
+                  )}
+                >
+                  <Eye className="h-4 w-4 shrink-0" />
+                  Show empty collections
+                  <HelpIcon content="Include collections with no minted assets yet — hidden by default to keep the feed clean" side="right" />
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Footer */}
+          <div className="px-5 py-3 border-t border-border/60">
+            <Button className="w-full" onClick={() => setFiltersOpen(false)}>
+              Apply filters
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Grid */}
       {isInitialLoading ? (
@@ -137,12 +286,14 @@ export default function CollectionsPageClient() {
           <p className="text-2xl font-bold">No collections found</p>
           <p className="text-muted-foreground max-w-sm">
             {featured
-              ? "No featured collections match the current sort. Try removing the Featured filter."
+              ? "No featured collections match the current filters."
+              : hideEmpty
+              ? "No collections with assets yet."
               : "Deploy the first collection on Medialane."}
           </p>
-          {featured && (
-            <Button variant="outline" size="sm" onClick={() => setFeatured(false)}>
-              Remove filter
+          {totalBadge > 0 && (
+            <Button variant="outline" size="sm" onClick={() => { resetAll(); setSource(undefined); }}>
+              Clear filters
             </Button>
           )}
         </div>
@@ -154,7 +305,6 @@ export default function CollectionsPageClient() {
             ))}
           </div>
 
-          {/* Load more */}
           {hasMore && (
             <div className="flex justify-center">
               <Button
