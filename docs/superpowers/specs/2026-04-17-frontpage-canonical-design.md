@@ -357,6 +357,78 @@ Add `activity-row.tsx`, `activity-ticker.tsx`, `activity-feed-shell.tsx` re-expo
 
 ---
 
+## CSS Unification — `@medialane/ui/styles`
+
+Both apps' `globals.css` files are **100% identical** from line 99 onward. All shared CSS moves into the package as a standalone stylesheet. Apps replace ~200 lines of duplicated CSS with a single import.
+
+### What moves to the package
+
+**New file: `src/styles/medialane.css`** — all shared, pure-CSS classes:
+- Scrollbar styling (`::-webkit-scrollbar`, `.scrollbar-hide`, `.scrollbar-none`)
+- Glass effects (`.glass`, `.glass-light`)
+- Typography gradients (`.gradient-text`, `.gradient-text-warm`, `.gradient-text-gold`)
+- Price value (`.price-value`)
+- Section label (`.section-label`)
+- Pill badge (`.pill-badge`)
+- Aurora blobs (`.aurora-purple/blue/rose/orange` + dark variants)
+- Card primitives (`.card-base`, `.bento-cell`, `.bg-grid`)
+- Snap scroll utilities (`.snap-x-mandatory`, `.snap-start`)
+- All keyframes: `float`, `blob-pulse`, `blob-pulse-slow`, `shimmer`, `pulse-glow`, `spin-slow`, `digit-in`, `scroll-strip`, `kenburns`, `border-flow`
+- All animate utilities: `.animate-float`, `.animate-blob`, `.animate-blob-slow`, `.animate-pulse-glow`, `.animate-spin-slow`, `.animate-sparkle`, `.animate-kenburns`
+- Reduced motion override block
+- Input number spinner suppression
+- `btn-border-animated`
+
+### tsup config change
+
+Add CSS entry to `tsup.config.ts`:
+```ts
+entry: ["src/index.ts", "src/styles/medialane.css"],
+```
+Output: `dist/medialane.css`
+
+### package.json exports addition
+
+```json
+"exports": {
+  ".": { "import": "./dist/index.js", "require": "./dist/index.cjs", "types": "./dist/index.d.ts" },
+  "./styles": "./dist/medialane.css"
+}
+```
+
+### What stays in each app's globals.css
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "@medialane/ui/styles";   /* ← replaces ~200 lines */
+
+@layer base {
+  :root { /* app-specific HSL theme tokens */ }
+  .dark { /* app-specific dark tokens */ }
+  * { @apply border-border; }
+  html, body { overflow-x: clip; max-width: 100%; }
+  body { @apply bg-background text-foreground; font-feature-settings: "rlig" 1, "calt" 1; }
+  h1, h2, h3, h4 { @apply tracking-tight; }
+}
+```
+
+---
+
+## Pre-implementation Fixes (incorporated into plan)
+
+### Fix A: ActivityRow N+1 fetch elimination
+`ActivityRow` in io currently calls `useToken(contract, tokenId)` internally — 10 API calls for 10 activity rows on the community section. The package version accepts `token?: { name?: string; image?: string }` as an optional prop. Homepage wrapper passes `undefined`; fallback shows `#tokenId`. Zero extra API calls. Significant performance improvement.
+
+### Fix B: ActivityTicker data decoupling
+`ActivityTicker` in io calls `useOrders()` internally. Package version accepts `orders: ApiOrder[]` as a prop. App wrapper calls `useOrders` and passes down. Keeps hook logic in the app.
+
+### Fix C: ListingCard hook decoupling
+`ListingCard` in io embeds `useCart()`, `useRouter()`, and `ReportDialog`. Package version uses callback pattern matching `TokenCard`: `inCart`, `onCart`, `onBuy`, `overflowMenu` slot. App constructs the dropdown and passes it in. No cart state, no router, no dialogs inside the package.
+
+---
+
 ## Version & Publishing
 
 - `@medialane/ui` bumped: `0.2.0` → `0.3.0`
