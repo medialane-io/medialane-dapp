@@ -77,10 +77,11 @@ export default function CollectionsPageClient() {
   const activeFilters = [sort !== "recent", featured, !hideEmpty].filter(Boolean).length;
   const totalBadge = activeFilters + (source !== undefined ? 1 : 0);
 
-  const resetAll = () => {
+  const clearAll = () => {
     setSort("recent");
     setFeatured(false);
     setHideEmpty(true);
+    setSource(undefined);
   };
 
   return (
@@ -178,7 +179,7 @@ export default function CollectionsPageClient() {
                 variant="ghost"
                 size="sm"
                 className="h-7 text-xs text-muted-foreground"
-                onClick={() => { resetAll(); setSource(undefined); }}
+                onClick={clearAll}
               >
                 Clear all
               </Button>
@@ -292,7 +293,7 @@ export default function CollectionsPageClient() {
               : "Deploy the first collection on Medialane."}
           </p>
           {totalBadge > 0 && (
-            <Button variant="outline" size="sm" onClick={() => { resetAll(); setSource(undefined); }}>
+            <Button variant="outline" size="sm" onClick={clearAll}>
               Clear filters
             </Button>
           )}
