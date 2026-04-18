@@ -2,8 +2,7 @@
 
 import { TrendingUp } from "lucide-react";
 import { useCollections } from "@/hooks/use-collections";
-import { CollectionCard, CollectionCardSkeleton } from "@/components/shared/collection-card";
-import { ScrollSection } from "@/components/shared/scroll-section";
+import { CollectionCard, CollectionCardSkeleton, ScrollSection } from "@medialane/ui";
 
 export function TrendingCollections() {
   const { collections, isLoading } = useCollections(1, 10, undefined, "recent");
@@ -23,11 +22,7 @@ export function TrendingCollections() {
             </div>
           ))
         : collections.length === 0
-        ? (
-            <p className="text-sm text-muted-foreground py-4">
-              No collections yet. Be the first to create one!
-            </p>
-          )
+        ? <p className="text-sm text-muted-foreground py-4">No collections yet. Be the first to create one!</p>
         : collections.map((col) => (
             <div key={col.contractAddress} className="w-64 snap-start shrink-0">
               <CollectionCard collection={col} />
