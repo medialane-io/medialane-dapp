@@ -13,7 +13,11 @@ import { ipfsToHttp } from "@/lib/utils";
 import { BRAND } from "@/lib/brand";
 import type { ApiCollection } from "@medialane/sdk";
 
-function PopCollectionCard({ collection }: { collection: ApiCollection }) {
+interface PopCollection extends ApiCollection {
+  attributes?: Array<{ trait_type: string; value: string }>;
+}
+
+function PopCollectionCard({ collection }: { collection: PopCollection }) {
   const [imgError, setImgError] = useState(false);
   const imageUrl = collection.image ? ipfsToHttp(collection.image) : null;
   const showImage = imageUrl && !imgError;
@@ -112,10 +116,8 @@ const POP_FEATURES = [
 export function PopContent() {
   const { collections, isLoading } = usePopCollections();
 
-  const publicCollections = collections.filter(
-    (c) =>
-      (c as ApiCollection & { attributes?: Array<{ trait_type: string; value: string }> })
-        .attributes?.find((a) => a.trait_type === "Visibility")?.value !== "Private"
+  const publicCollections = (collections as PopCollection[]).filter(
+    (c) => c.attributes?.find((a) => a.trait_type === "Visibility")?.value !== "Private"
   );
 
   return (

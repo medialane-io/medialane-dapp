@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { Loader2, CheckCircle2, Ban, Award } from "lucide-react";
+import { Loader2, CheckCircle2, Ban, Award, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
@@ -14,7 +14,7 @@ interface PopClaimButtonProps {
 
 export function PopClaimButton({ collectionAddress }: PopClaimButtonProps) {
   const { address, isConnected } = useUnifiedWallet();
-  const { claimStatus, isLoading, mutate } = usePopClaimStatus(
+  const { claimStatus, isLoading, error, mutate } = usePopClaimStatus(
     collectionAddress,
     address ?? null
   );
@@ -29,6 +29,15 @@ export function PopClaimButton({ collectionAddress }: PopClaimButtonProps) {
       <Button variant="outline" size="sm" disabled className="w-full">
         <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
         Checking eligibility…
+      </Button>
+    );
+  }
+
+  if (error) {
+    return (
+      <Button variant="ghost" size="sm" className="w-full text-muted-foreground gap-1.5" onClick={() => mutate()}>
+        <RefreshCw className="h-3.5 w-3.5" />
+        Retry
       </Button>
     );
   }

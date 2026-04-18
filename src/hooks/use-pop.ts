@@ -4,6 +4,8 @@ import useSWR from "swr";
 import { MEDIALANE_BACKEND_URL, MEDIALANE_API_KEY } from "@/lib/constants";
 import type { ApiCollection } from "@medialane/sdk";
 
+const BASE = MEDIALANE_BACKEND_URL.replace(/\/$/, "");
+
 // ── Shared fetch helper ───────────────────────────────────────────────────────
 
 async function backendFetch<T>(url: string): Promise<T> {
@@ -21,7 +23,7 @@ export function usePopCollections() {
     "pop-collections",
     () => {
       const params = new URLSearchParams({ source: "POP_PROTOCOL", hideEmpty: "false", limit: "50" });
-      const url = `${MEDIALANE_BACKEND_URL.replace(/\/$/, "")}/v1/collections?${params}`;
+      const url = `${BASE}/v1/collections?${params}`;
       return backendFetch(url);
     },
     { revalidateOnFocus: false }
@@ -50,7 +52,7 @@ export function usePopClaimStatus(collection: string | null, wallet: string | nu
   const { data, error, isLoading, mutate } = useSWR<{ data: PopClaimStatus }>(
     key,
     () => {
-      const url = `${MEDIALANE_BACKEND_URL.replace(/\/$/, "")}/v1/pop/eligibility/${collection}/${wallet}`;
+      const url = `${BASE}/v1/pop/eligibility/${collection}/${wallet}`;
       return backendFetch(url);
     },
     { revalidateOnFocus: false, shouldRetryOnError: false }
@@ -66,7 +68,7 @@ export function useMyEvents(ownerAddress: string | null) {
     ownerAddress ? `my-pop-events-${ownerAddress}` : null,
     () => {
       const params = new URLSearchParams({ source: "POP_PROTOCOL", owner: ownerAddress!, limit: "50" });
-      const url = `${MEDIALANE_BACKEND_URL.replace(/\/$/, "")}/v1/collections?${params}`;
+      const url = `${BASE}/v1/collections?${params}`;
       return backendFetch(url);
     },
     { revalidateOnFocus: false }
