@@ -8,7 +8,7 @@ export function getMedialaneClient(): MedialaneClient {
     _client = new MedialaneClient({
       backendUrl: MEDIALANE_BACKEND_URL,
       apiKey: MEDIALANE_API_KEY || undefined,
-      rpcUrl: STARKNET_RPC_URL,
+      rpcUrl: STARKNET_RPC_URL || undefined,
       marketplaceContract: MARKETPLACE_CONTRACT,
       network: "mainnet",
     });
