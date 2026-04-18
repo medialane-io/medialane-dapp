@@ -11,9 +11,12 @@ import { CollectionCard, CollectionCardSkeleton } from "@/components/shared/coll
 import { FadeIn, Stagger, StaggerItem } from "@/components/ui/motion-primitives";
 import { BRAND } from "@/lib/brand";
 import {
-  Zap, ImagePlus, Layers, ArrowRight,
-  Package, Tag, ShoppingCart, Star, Rocket,
-  GitBranch, Users, RefreshCw, Ticket, Coins, TrendingUp, Lock,
+  LaunchpadServicesGrid,
+  LAUNCHPAD_SERVICE_DEFINITIONS,
+} from "@medialane/ui";
+import type { ServiceCardProps } from "@medialane/ui";
+import {
+  Zap, Package, Tag, ShoppingCart, Star, Rocket, ArrowRight,
 } from "lucide-react";
 
 function HeroStats({ address }: { address: string }) {
@@ -43,50 +46,21 @@ function HeroStats({ address }: { address: string }) {
   );
 }
 
-const ACTIVE_TOOLS = [
-  {
-    title: "Mint IP Asset",
-    description: "Register any creative work as a programmable IP NFT. Gasless, permanent, immutable.",
-    icon: ImagePlus,
-    href: "/create/asset",
-    gradient: `${BRAND.blue.from} ${BRAND.blue.to}`,
-    iconBg: BRAND.blue.bgSolid,
-    iconColor: BRAND.blue.text,
-    buttonColor: "bg-brand-blue",
-    badge: "~1 min",
-  },
-  {
-    title: "Create Collection",
-    description: "Deploy a named ERC-721 collection and build your IP catalog on Starknet.",
-    icon: Layers,
-    href: "/create/collection",
-    gradient: `${BRAND.purple.from} ${BRAND.purple.to}`,
-    iconBg: BRAND.purple.bgSolid,
-    iconColor: BRAND.purple.text,
-    buttonColor: "bg-brand-purple",
-    badge: "~2 min",
-  },
-  {
-    title: "Remix an Asset",
-    description: "Create a derivative work with on-chain attribution and programmable license terms.",
-    icon: GitBranch,
-    href: "/marketplace",
-    gradient: `${BRAND.rose.from} ${BRAND.rose.to}`,
-    iconBg: BRAND.rose.bgSolid,
-    iconColor: BRAND.rose.text,
-    buttonColor: "bg-brand-rose",
-    badge: "~3 min",
-  },
-] as const;
+// Inject dapp-specific hrefs for each service key
+const DAPP_HREFS: Record<string, Pick<ServiceCardProps, "href" | "buttonLabel" | "browseHref">> = {
+  "mint-ip-asset":      { href: "/create/asset",          buttonLabel: "Mint asset"         },
+  "create-collection":  { href: "/create/collection",     buttonLabel: "Create collection"  },
+  "remix-asset":        { href: "/marketplace",           buttonLabel: "Browse to remix"    },
+  "pop-protocol":       { href: "/launchpad/pop/create",  buttonLabel: "Create Event",      browseHref: "/launchpad/pop"  },
+  "collection-drop":    { href: "/launchpad/drop/create", buttonLabel: "Launch Drop",       browseHref: "/launchpad/drop" },
+  "ip-collection-1155": { href: "/launchpad/ip1155/create", buttonLabel: "Create Collection" },
+  "mint-editions":      { href: "/launchpad/ip1155",      buttonLabel: "Mint editions"      },
+};
 
-const COMING_SOON = [
-  { title: "Collection Drop", description: "Limited edition timed releases",   icon: Package    },
-  { title: "Membership",      description: "Token-gated access passes",         icon: Users      },
-  { title: "Subscriptions",   description: "Recurring revenue streams",         icon: RefreshCw  },
-  { title: "IP Tickets",      description: "Event and experience NFTs",         icon: Ticket     },
-  { title: "IP Coins",        description: "Fungible tokens backed by IP",      icon: Coins      },
-  { title: "Creator Coins",   description: "Personal social tokens",            icon: TrendingUp },
-] as const;
+const SERVICES: ServiceCardProps[] = LAUNCHPAD_SERVICE_DEFINITIONS.map((def) => ({
+  ...def,
+  ...(DAPP_HREFS[def.key] ?? {}),
+}));
 
 export function LaunchpadContent() {
   const { isConnected: isSignedIn, address: walletAddress } = useUnifiedWallet();
@@ -95,7 +69,7 @@ export function LaunchpadContent() {
   return (
     <div className="pb-16 space-y-10">
 
-      {/* ── Section 1: Hero ───────────────────────────────────── */}
+      {/* ── Hero ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b border-border/50">
         <div className="px-4 py-14 sm:py-20">
           <FadeIn>
@@ -124,69 +98,12 @@ export function LaunchpadContent() {
         </div>
       </section>
 
-      {/* ── Section 2: Active Tools ───────────────────────────── */}
-      <section className="px-4 space-y-3">
-        <FadeIn>
-          <p className="section-label">Active Tools</p>
-          <h2 className="text-xl font-bold mt-0.5">What do you want to build?</h2>
-        </FadeIn>
-        <Stagger className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {ACTIVE_TOOLS.map(({ title, description, icon: Icon, href, gradient, iconBg, iconColor, buttonColor, badge }) => (
-            <StaggerItem key={href}>
-              <div className={`bento-cell p-5 bg-gradient-to-br ${gradient} min-h-[200px] flex flex-col justify-between`}>
-                <div className="flex items-start justify-between">
-                  <div className={`h-10 w-10 rounded-xl ${iconBg} flex items-center justify-center`}>
-                    <Icon className={`h-5 w-5 ${iconColor}`} />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-background/60 rounded-full px-2.5 py-0.5">
-                    {badge}
-                  </span>
-                </div>
-                <div className="mt-4 flex-1">
-                  <p className="font-bold text-base">{title}</p>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{description}</p>
-                </div>
-                <div className="btn-border-animated p-[1px] rounded-xl mt-4">
-                  <Link href={href}>
-                    <button className={`w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] ${buttonColor}`}>
-                      Get started
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            </StaggerItem>
-          ))}
-        </Stagger>
+      {/* ── Services grid (from @medialane/ui) ───────────────── */}
+      <section className="px-4">
+        <LaunchpadServicesGrid services={SERVICES} />
       </section>
 
-      {/* ── Section 3: Revenue Streams ────────────────────────── */}
-      <section className="px-4 space-y-3">
-        <FadeIn>
-          <p className="section-label">Coming Soon</p>
-          <h2 className="text-xl font-bold mt-0.5">Unlock New Revenue Streams</h2>
-          <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-            Medialane is building the complete financial toolkit for creator capital markets.
-          </p>
-        </FadeIn>
-        <Stagger className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {COMING_SOON.map(({ title, description, icon: Icon }) => (
-            <StaggerItem key={title}>
-              <div className="rounded-xl border border-border/40 bg-muted/10 p-4 text-center opacity-70 cursor-default select-none">
-                <Icon className="h-8 w-8 mx-auto text-muted-foreground/50 mb-3" />
-                <p className="font-semibold text-sm">{title}</p>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{description}</p>
-                <div className="flex items-center justify-center gap-1 mt-3">
-                  <Lock className="h-3 w-3 text-muted-foreground/50" />
-                  <span className="text-[10px] text-muted-foreground/70 font-medium uppercase tracking-wide">Coming Soon</span>
-                </div>
-              </div>
-            </StaggerItem>
-          ))}
-        </Stagger>
-      </section>
-
-      {/* ── Section 4: Portfolio shortcut (signed in only) ────── */}
+      {/* ── Portfolio shortcut (signed in only) ──────────────── */}
       {isSignedIn && (
         <section className="px-4">
           <FadeIn>
@@ -206,7 +123,7 @@ export function LaunchpadContent() {
         </section>
       )}
 
-      {/* ── Section 5: Featured drops ─────────────────────────── */}
+      {/* ── Featured drops ────────────────────────────────────── */}
       <section className="px-4 space-y-4">
         <FadeIn>
           <div className="flex items-center justify-between">
