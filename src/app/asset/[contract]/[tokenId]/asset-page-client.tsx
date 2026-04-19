@@ -9,7 +9,8 @@ import { useToken, useTokenHistory } from "@/hooks/use-tokens";
 import { useTokenListings } from "@/hooks/use-orders";
 import { useCollection } from "@/hooks/use-collections";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { IpTypeBadge } from "@/components/shared/ip-type-badge";
+import { CurrencyIcon } from "@/components/shared/currency-icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PurchaseDialog } from "@/components/marketplace/purchase-dialog";
 import { ListingDialog } from "@/components/marketplace/listing-dialog";
@@ -19,8 +20,8 @@ import { CancelOrderDialog } from "@/components/marketplace/cancel-order-dialog"
 import { FloatingCommentsButton } from "@/components/asset/floating-comments-button";
 import { ShareButton } from "@/components/shared/share-button";
 import { AddressDisplay } from "@/components/shared/address-display";
-import { ipfsToHttp, timeUntil, timeAgo, formatDisplayPrice } from "@/lib/utils";
-import { ShoppingCart, Tag, ExternalLink, Clock, HandCoins, ArrowRightLeft, X, CheckCircle, DollarSign, GitBranch, UserCheck, Globe, Bot, Percent, Shield, Calendar, ChevronRight, Flag, Loader2 } from "lucide-react";
+import { ipfsToHttp, timeUntil, formatDisplayPrice, checkIsOwner } from "@/lib/utils";
+import { ShoppingCart, Tag, ExternalLink, Clock, HandCoins, ArrowRightLeft, X, CheckCircle, DollarSign, GitBranch, UserCheck, Globe, Bot, Percent, Shield, Calendar, ChevronRight, Flag, Loader2, Layers } from "lucide-react";
 import { useConnect } from "@starknet-react/core";
 import { StarknetkitConnector, useStarknetkitConnectModal } from "starknetkit";
 import { ReportDialog } from "@/components/report-dialog";
@@ -32,11 +33,8 @@ import { IPTypeDisplay } from "@/components/ip-type-display";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { ApiActivity, ApiOrder } from "@medialane/sdk";
-import { PriceHistoryChart } from "@/components/asset/price-history-chart";
 import { CommentsSection } from "@/components/asset/comments-section";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useComments } from "@/hooks/use-comments";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { EXPLORER_URL } from "@/lib/constants";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { useMarketplace } from "@/hooks/use-marketplace";
@@ -45,14 +43,9 @@ import { toast } from "sonner";
 import { useDominantColor } from "@/hooks/use-dominant-color";
 import { RemixesTab, ParentAttributionBanner } from "@/components/asset/remixes-tab";
 import { useTokenRemixes } from "@/hooks/use-remix-offers";
-
-const TYPE_LABEL: Record<string, string> = {
-  transfer: "Transfer",
-  listing: "Listed",
-  sale: "Sale",
-  offer: "Offer",
-  cancelled: "Cancelled",
-};
+import { HelpIcon } from "@/components/ui/help-icon";
+import { AssetMarketsTab } from "./asset-markets-tab";
+import { AssetProvenanceTab } from "./asset-provenance-tab";
 
 export default function AssetPageClient() {
   const { contract, tokenId } = useParams<{ contract: string; tokenId: string }>();
@@ -62,7 +55,7 @@ export default function AssetPageClient() {
   const { token, isLoading } = useToken(contract, tokenId);
   const { listings, mutate: mutateListings } = useTokenListings(contract, tokenId);
   const { history } = useTokenHistory(contract, tokenId);
-  const { checkoutCart, isProcessing } = useMarketplace();
+  const { acceptOffer, isProcessing } = useMarketplace();
 
   const { connectAsync, connectors } = useConnect();
   const { starknetkitConnectModal } = useStarknetkitConnectModal({
@@ -90,18 +83,16 @@ export default function AssetPageClient() {
   const [orderToCancel, setOrderToCancel] = useState<ApiOrder | null>(null);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [orderToAccept, setOrderToAccept] = useState<ApiOrder | null>(null);
-  const [acceptPinOpen, setAcceptPinOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [commentOpen, setCommentOpen] = useState(false);
 
-  const isMobile = useIsMobile();
-  const { comments, total: commentTotal } = useComments(contract, tokenId);
+  const { total: commentTotal } = useComments(contract, tokenId);
   const { total: remixCount } = useTokenRemixes(contract, tokenId);
 
-  // Listings = ERC721 in offer (someone selling the NFT)
+  // Listings = NFT in offer (ERC721 or ERC1155 — someone selling the token)
   const activeListings = listings.filter(
-    (l) => l.status === "ACTIVE" && l.offer.itemType === "ERC721"
+    (l) => l.status === "ACTIVE" && (l.offer.itemType === "ERC721" || l.offer.itemType === "ERC1155")
   );
   // Bids = ERC20 in offer (someone bidding to buy the NFT)
   const activeBids = listings.filter(
@@ -112,10 +103,8 @@ export default function AssetPageClient() {
     BigInt(a.consideration.startAmount) < BigInt(b.consideration.startAmount) ? -1 : 1
   )[0];
 
-  const isOwner = !!(
-    token && walletAddress &&
-    token.owner.toLowerCase() === walletAddress.toLowerCase()
-  );
+  const isOwner = checkIsOwner(token as any, walletAddress);
+  const isERC1155 = collection?.standard === "ERC1155";
 
   const myListing = isOwner
     ? activeListings.find((l) => l.offerer.toLowerCase() === walletAddress!.toLowerCase())
@@ -151,15 +140,9 @@ export default function AssetPageClient() {
     setCancelOpen(true);
   };
 
-  const handleAcceptClick = (order: ApiOrder) => {
+  const handleAcceptClick = async (order: ApiOrder) => {
     setOrderToAccept(order);
-    setAcceptPinOpen(true);
-  };
-
-  const handleAcceptPin = async (pin: string) => {
-    setAcceptPinOpen(false);
-    if (!orderToAccept) return;
-    await checkoutCart([orderToAccept as any]);
+    await acceptOffer(order.orderHash, contract, tokenId, order.offer.itemType);
     setOrderToAccept(null);
     mutateListings();
   };
@@ -322,37 +305,63 @@ export default function AssetPageClient() {
                   />
                 </div>
               )}
-              {token.metadata?.ipType && (
-                <Badge variant="secondary" className="mb-2">{token.metadata.ipType}</Badge>
-              )}
+              <div className="flex items-center gap-2 flex-wrap mb-2">
+                {token.metadata?.ipType && (
+                  <IpTypeBadge ipType={token.metadata.ipType} size="md" />
+                )}
+                {isERC1155 && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-500">
+                    <Layers className="h-3 w-3" />
+                    Multi-edition
+                  </span>
+                )}
+              </div>
+              {/* Ownership label */}
+              {isERC1155 ? (
+                (token as any).balances && (token as any).balances.length > 0 && (
+                  <div className="mb-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      {(token as any).balances.length === 1 ? "Owner" : `${(token as any).balances.length} owners`}
+                    </span>
+                    {(token as any).balances.slice(0, 3).map((b: { owner: string; amount: string }) => (
+                      <span key={b.owner} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Link href={`/creator/${b.owner}`} className="hover:text-primary transition-colors font-medium">
+                          <AddressDisplay address={b.owner} />
+                        </Link>
+                        <span className="text-muted-foreground/50">× {b.amount}</span>
+                      </span>
+                    ))}
+                    {(token as any).balances.length > 3 && (
+                      <span className="text-xs text-muted-foreground/50">+{(token as any).balances.length - 3} more</span>
+                    )}
+                  </div>
+                )
+              ) : ((token as any).balances?.[0]?.owner ?? token.owner) ? (
+                <div className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="font-semibold uppercase tracking-wider">Owner</span>
+                  <Link href={`/creator/${(token as any).balances?.[0]?.owner ?? token.owner}`} className="hover:text-primary transition-colors font-medium">
+                    <AddressDisplay address={((token as any).balances?.[0]?.owner ?? token.owner)!} />
+                  </Link>
+                </div>
+              ) : null}
               <h1 className="text-3xl lg:text-5xl font-bold">{name}</h1>
               {description && (
-              <div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
-              </div>
-            )}
-              <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                <span>Owned by</span>
-                <Link href={`/creator/${token.owner}`} className="hover:text-primary transition-colors">
-                  <AddressDisplay address={token.owner} />
-                </Link>
-              </div>
+                <p className="text-sm text-muted-foreground leading-relaxed mt-1">{description}</p>
+              )}
             </div>
 
             {/* Price / action box */}
             {cheapest ? (
-              <div className="rounded-xl border border-border p-5 space-y-4">
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">
-                    {isOwner ? "Your listing" : "Current price"}
-                  </p>
-                  <p className="text-3xl font-bold mt-1">
-                    {formatDisplayPrice(cheapest.price.formatted)} {cheapest.price.currency}
-                  </p>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                    <Clock className="h-3 w-3" />
-                    Expires {timeUntil(cheapest.endTime)}
-                  </div>
+              <div className="rounded-2xl border border-border p-5 space-y-4">
+                <div className="flex items-center gap-2">
+                  <CurrencyIcon symbol={cheapest.price.currency ?? ""} size={22} />
+                  <span className="text-3xl font-bold">
+                    {formatDisplayPrice(cheapest.price.formatted)}
+                  </span>
+                  <HelpIcon
+                    content={`${isOwner ? "Your listing" : "Current price"} · Expires ${timeUntil(cheapest.endTime)}`}
+                    side="top"
+                  />
                 </div>
 
                 {isOwner ? (
@@ -375,7 +384,7 @@ export default function AssetPageClient() {
                         onClick={() => setListOpen(true)}
                       >
                         <Tag className="h-4 w-4" />
-                        Create new listing
+                        {isERC1155 ? "List edition for sale" : "Create new listing"}
                       </button>
                     </div>
                     <div className="btn-border-animated p-[1px] rounded-xl">
@@ -394,23 +403,24 @@ export default function AssetPageClient() {
                       >
                         <GitBranch className="h-4 w-4" />
                         Create a Remix
+                        <HelpIcon content="Build a licensed derivative of this IP asset — your remix is minted as a new onchain NFT linked to the original" side="top" />
                       </button>
                     </div>
                   </div>
                 ) : isSignedIn ? (
                   <div className="space-y-2">
-                    {/* Buy Now — bg/30, animated gradient border */}
+                    {/* Buy Now */}
                     <div className="btn-border-animated p-[1px] rounded-xl">
                       <button
                         className="w-full h-12 text-base font-semibold text-white rounded-[11px] flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-[0.98] bg-background/30"
                         onClick={() => setPurchaseOrder(cheapest)}
                       >
                         <ShoppingCart className="h-5 w-5" />
-                        Buy now
+                        {isERC1155 ? "Buy Edition" : "Buy Asset"}
                       </button>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      {/* Add to cart — flat brand-blue, animated gradient border */}
+                      {/* Add to cart */}
                       <div className={`btn-border-animated p-[1px] rounded-xl ${inCart ? "opacity-40 pointer-events-none" : ""}`}>
                         <button
                           className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-blue"
@@ -421,7 +431,7 @@ export default function AssetPageClient() {
                           {inCart ? "In cart" : "Add to cart"}
                         </button>
                       </div>
-                      {/* Make offer — flat brand-orange, animated gradient border */}
+                      {/* Make offer */}
                       <div className="btn-border-animated p-[1px] rounded-xl">
                         <button
                           className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-orange"
@@ -463,7 +473,7 @@ export default function AssetPageClient() {
                         onClick={() => setListOpen(true)}
                       >
                         <Tag className="h-4 w-4" />
-                        List for sale
+                        {isERC1155 ? "List edition for sale" : "List for sale"}
                       </button>
                     </div>
                     <div className="btn-border-animated p-[1px] rounded-xl">
@@ -477,11 +487,12 @@ export default function AssetPageClient() {
                     </div>
                     <div className="btn-border-animated p-[1px] rounded-xl">
                       <button
-                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-rose"
+                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-purple"
                         onClick={() => router.push(`/create/remix/${contract}/${tokenId}`)}
                       >
                         <GitBranch className="h-4 w-4" />
                         Create a Remix
+                        <HelpIcon content="Build a licensed derivative of this IP asset — your remix is minted as a new onchain NFT linked to the original" side="top" />
                       </button>
                     </div>
                   </div>
@@ -489,7 +500,7 @@ export default function AssetPageClient() {
                   <div className="space-y-2">
                     <div className="btn-border-animated p-[1px] rounded-xl">
                       <button
-                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-purple"
+                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-orange"
                         onClick={() => setOfferOpen(true)}
                       >
                         <HandCoins className="h-4 w-4" />
@@ -498,11 +509,12 @@ export default function AssetPageClient() {
                     </div>
                     <div className="btn-border-animated p-[1px] rounded-xl">
                       <button
-                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-rose disabled:opacity-50"
+                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-purple"
                         onClick={handleAutoRemix}
                       >
                         <GitBranch className="h-4 w-4" />
                         Create a Remix
+                        <HelpIcon content="Build a licensed derivative of this IP asset — your remix is minted as a new onchain NFT linked to the original" side="top" />
                       </button>
                     </div>
                   </div>
@@ -513,6 +525,40 @@ export default function AssetPageClient() {
                 )}
               </div>
             )}
+
+            {/* My active offer banner — visible to the bidder only */}
+            {!isOwner && walletAddress && (() => {
+              const myBid = activeBids.find(
+                (b) => b.offerer.toLowerCase() === walletAddress.toLowerCase()
+              );
+              if (!myBid) return null;
+              return (
+                <div className="rounded-xl border border-amber-500/30 bg-amber-500/8 px-4 py-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex items-center gap-2.5">
+                    <HandCoins className="h-4 w-4 text-amber-500 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-amber-500">Your active offer</p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                        <span className="font-bold text-foreground inline-flex items-center gap-1">
+                          {formatDisplayPrice(myBid.price.formatted)}
+                          <CurrencyIcon symbol={myBid.price.currency ?? ""} size={12} />
+                        </span>
+                        <span>·</span>
+                        <Clock className="h-3 w-3" />
+                        {timeUntil(myBid.endTime)}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    className="shrink-0 text-xs font-semibold text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
+                    onClick={() => handleCancelClick(myBid)}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                    Cancel
+                  </button>
+                </div>
+              );
+            })()}
 
             {/* Incoming offers — visible to owner only */}
             {isOwner && activeBids.length > 0 && (
@@ -528,7 +574,7 @@ export default function AssetPageClient() {
                     >
                       <div className="min-w-0">
                         <p className="text-sm font-bold">
-                          {formatDisplayPrice(bid.price.formatted)} {bid.price.currency}
+                          <span className="inline-flex items-center gap-1.5">{formatDisplayPrice(bid.price.formatted)} <CurrencyIcon symbol={bid.price.currency ?? ""} size={14} /></span>
                         </p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <AddressDisplay
@@ -581,7 +627,7 @@ export default function AssetPageClient() {
                   <span className="text-xs font-medium truncate group-hover:text-primary transition-colors max-w-[120px]">{collection.name}</span>
                 </Link>
               )}
-              <ShareButton title={name} size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground" />
+              <ShareButton title={name ?? `Token #${token?.tokenId}`} variant="ghost" size="icon" />
               <Button
                 variant="ghost"
                 size="icon"
@@ -610,11 +656,13 @@ export default function AssetPageClient() {
         <Tabs defaultValue="overview">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="markets">
+            <TabsTrigger value="markets" className="flex items-center gap-1">
               Markets {(activeListings.length + activeBids.length) > 0 && `(${activeListings.length + activeBids.length})`}
+              <HelpIcon content="Active listings for sale and open offers on this asset" side="bottom" />
             </TabsTrigger>
-            <TabsTrigger value="provenance">
+            <TabsTrigger value="provenance" className="flex items-center gap-1">
               Provenance {history.length > 0 && `(${history.length})`}
+              <HelpIcon content="Full transfer and sale history recorded onchain — immutable proof of ownership" side="bottom" />
             </TabsTrigger>
           </TabsList>
 
@@ -663,14 +711,12 @@ export default function AssetPageClient() {
                       </div>
                     </div>
                   )}
-                  <div className="rounded-xl border border-border divide-y divide-border">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {rows.map(({ icon, label, value }) => (
-                      <div key={label} className="flex items-center justify-between px-4 py-3 gap-4">
-                        <div className="flex items-center gap-2.5 text-muted-foreground min-w-0">
-                          {icon}
-                          <span className="text-sm">{label}</span>
-                        </div>
-                        <span className="text-sm font-medium text-right">{value}</span>
+                      <div key={label} className="rounded-lg border border-border bg-muted/20 p-3 text-center overflow-hidden">
+                        <div className="flex justify-center text-muted-foreground mb-1">{icon}</div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">{label}</p>
+                        <p className="text-sm font-semibold mt-0.5 truncate" title={value}>{value}</p>
                       </div>
                     ))}
                   </div>
@@ -704,163 +750,73 @@ export default function AssetPageClient() {
             )}
           </TabsContent>
 
-
           {/* Markets tab — listings + offers */}
-          <TabsContent value="markets" className="mt-4 space-y-6">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Listings</p>
-              {activeListings.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-4 text-center">No active listings.</p>
-              ) : (
-                <div className="rounded-xl border border-border divide-y divide-border">
-                  {activeListings.map((order) => {
-                    const isMyOrder = walletAddress && order.offerer.toLowerCase() === walletAddress.toLowerCase();
-                    return (
-                      <div key={order.orderHash} className="flex items-center justify-between px-4 py-3 gap-4">
-                        <div className="min-w-0">
-                          <p className="font-bold text-sm">{formatDisplayPrice(order.price.formatted)} {order.price.currency}</p>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                            <Clock className="h-3 w-3" />
-                            {timeUntil(order.endTime)}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <AddressDisplay address={order.offerer} chars={4} showCopy={false} className="text-xs text-muted-foreground" />
-                          {isMyOrder ? (
-                            <Button size="sm" variant="destructive" disabled={isProcessing} onClick={() => handleCancelClick(order)}>
-                              Cancel
-                            </Button>
-                          ) : (
-                            <Button size="sm" onClick={() => setPurchaseOrder(order)}>Buy</Button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Offers</p>
-              {activeBids.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-4 text-center">No active offers.</p>
-              ) : (
-                <div className="rounded-xl border border-border divide-y divide-border">
-                  {activeBids.map((bid) => (
-                    <div key={bid.orderHash} className="flex items-center justify-between px-4 py-3 gap-4">
-                      <div className="min-w-0">
-                        <p className="font-bold text-sm">{formatDisplayPrice(bid.price.formatted)} {bid.price.currency}</p>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                          <Clock className="h-3 w-3" />
-                          {timeUntil(bid.endTime)}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <AddressDisplay address={bid.offerer} chars={4} showCopy={false} className="text-xs text-muted-foreground" />
-                        {isOwner && (
-                          <Button size="sm" disabled={isProcessing} onClick={() => handleAcceptClick(bid)}>
-                            <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
-                            Accept
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+          <TabsContent value="markets">
+            <AssetMarketsTab
+              activeListings={activeListings}
+              activeBids={activeBids}
+              walletAddress={walletAddress ?? undefined}
+              isOwner={isOwner}
+              isProcessing={isProcessing}
+              onBuyClick={setPurchaseOrder}
+              onCancelClick={handleCancelClick}
+              onAcceptClick={handleAcceptClick}
+            />
           </TabsContent>
 
           {/* Provenance tab — history + remixes */}
-          <TabsContent value="provenance" className="mt-4">
-            <div className="space-y-6">
-            {remixCount > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Remixes</p>
-                <RemixesTab contractAddress={contract} tokenId={tokenId} />
-              </div>
-            )}
-            <div className="space-y-4">
-              <PriceHistoryChart history={history as ApiActivity[]} />
-              {history.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-6 text-center">No activity recorded yet.</p>
-              ) : (
-                <div className="rounded-xl border border-border divide-y divide-border">
-                  {(history as ApiActivity[]).map((event, i) => {
-                    const actor = event.offerer ?? event.fulfiller ?? event.from ?? "";
-                    const txLink = event.txHash ? `${EXPLORER_URL}/tx/${event.txHash}` : null;
-                    return (
-                      <div key={i} className="flex items-center justify-between px-4 py-3 gap-4">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <ArrowRightLeft className="h-4 w-4 text-muted-foreground shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium">{TYPE_LABEL[event.type] ?? event.type}</p>
-                            {actor && (
-                              <AddressDisplay address={actor} chars={4} showCopy={false} className="text-xs text-muted-foreground" />
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3 shrink-0">
-                          {event.price?.formatted && (
-                            <span className="text-sm font-bold">
-                              {formatDisplayPrice(event.price.formatted)} {event.price.currency}
-                            </span>
-                          )}
-                          <span className="text-xs text-muted-foreground" title={new Date(event.timestamp).toLocaleString()}>
-                            {timeAgo(event.timestamp)}
-                          </span>
-                          {txLink && (
-                            <a href={txLink} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-            </div>
+          <TabsContent value="provenance">
+            <AssetProvenanceTab
+              history={history as ApiActivity[]}
+              contract={contract}
+              tokenId={tokenId}
+              remixCount={remixCount}
+            />
           </TabsContent>
 
         </Tabs>
       </div>
 
-
       <FloatingCommentsButton onClick={() => setCommentOpen(true)} commentTotal={commentTotal} />
 
-      {/* Comments Sheet — bottom drawer on mobile, right panel on desktop */}
-      <Sheet open={commentOpen} onOpenChange={setCommentOpen}>
-        <SheetContent
-          side={isMobile ? "bottom" : "right"}
-          className="h-[85svh] sm:h-full sm:max-w-md p-0 flex flex-col"
-          overlayClassName="bg-black/20 backdrop-blur-[2px]"
-        >
-          <SheetHeader className="px-4 pt-4 pb-3 shrink-0 border-b border-brand-blue/20" style={{ background: "linear-gradient(135deg, hsl(var(--brand-blue) / 0.10), hsl(var(--brand-purple) / 0.08))" }}>
-            <SheetTitle className="flex items-center gap-3 text-sm font-semibold">
-              {/* Asset avatar */}
-              <div className="relative h-9 w-9 rounded-full overflow-hidden shrink-0 ring-2 ring-white/20" style={{ background: "linear-gradient(135deg, hsl(var(--brand-blue) / 0.3), hsl(var(--brand-purple) / 0.3))" }}>
-                {imageUrl && (
-                  <Image src={imageUrl} alt={name} fill className="object-cover" unoptimized />
-                )}
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "hsl(var(--brand-blue))" }}>Comments</p>
-                <p className="text-sm font-semibold truncate text-foreground">{name}</p>
-              </div>
-              {commentTotal > 0 && (
-                <span className="ml-auto shrink-0 text-xs font-bold rounded-full px-2 py-0.5 text-white" style={{ background: "hsl(var(--brand-blue))" }}>
-                  {commentTotal}
-                </span>
+      {/* Comments Dialog — centered panel with blurred backdrop */}
+      <Dialog open={commentOpen} onOpenChange={setCommentOpen}>
+        <DialogContent className="w-full max-w-md p-0 overflow-hidden gap-0 flex flex-col max-h-[85svh]">
+          {/* Header */}
+          <div
+            className="flex items-center gap-3 pr-10 pl-4 pt-4 pb-3 shrink-0 border-b border-brand-blue/20"
+            style={{ background: "linear-gradient(135deg, hsl(var(--brand-blue) / 0.10), hsl(var(--brand-purple) / 0.08))" }}
+          >
+            {/* Asset avatar */}
+            <div
+              className="relative h-9 w-9 rounded-full overflow-hidden shrink-0 ring-2 ring-white/20"
+              style={{ background: "linear-gradient(135deg, hsl(var(--brand-blue) / 0.3), hsl(var(--brand-purple) / 0.3))" }}
+            >
+              {imageUrl && (
+                <Image src={imageUrl} alt={name} fill className="object-cover" unoptimized />
               )}
-            </SheetTitle>
-          </SheetHeader>
+            </div>
+            <div className="min-w-0 flex-1">
+              <DialogTitle asChild>
+                <p className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "hsl(var(--brand-blue))" }}>Comments</p>
+              </DialogTitle>
+              <p className="text-sm font-semibold truncate text-foreground">{name}</p>
+            </div>
+            {commentTotal > 0 && (
+              <span
+                className="shrink-0 text-xs font-bold rounded-full px-2 py-0.5 text-white"
+                style={{ background: "hsl(var(--brand-blue))" }}
+              >
+                {commentTotal}
+              </span>
+            )}
+          </div>
+          {/* Body */}
           <div className="flex-1 overflow-hidden">
             <CommentsSection contract={contract} tokenId={tokenId} className="h-full rounded-none border-0" />
           </div>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialogs */}
       {purchaseOrder && (
@@ -878,6 +834,7 @@ export default function AssetPageClient() {
         assetContract={contract}
         tokenId={tokenId}
         tokenName={name}
+        tokenStandard={collection?.standard}
         onSuccess={mutateListings}
       />
 
