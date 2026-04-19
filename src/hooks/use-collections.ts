@@ -74,11 +74,11 @@ export function useCollectionsByOwner(owner: string | null) {
 export function useCollectionTokens(contract: string | null, page = 1, limit = 24) {
   const client = useMedialaneClient();
 
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR(
     contract ? `collection-tokens-${contract}-${page}` : null,
     () => client.api.getCollectionTokens(contract!, page, limit),
     { revalidateOnFocus: false }
   );
 
-  return { tokens: data?.data ?? [], meta: data?.meta, isLoading, error };
+  return { tokens: data?.data ?? [], meta: data?.meta, isLoading, error, mutate };
 }
