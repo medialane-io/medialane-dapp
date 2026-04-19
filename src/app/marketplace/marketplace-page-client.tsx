@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ListingsGrid } from "@/components/marketplace/listings-grid";
 import { useMedialaneClient } from "@/hooks/use-medialane-client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Search, X, Store, SlidersHorizontal } from "lucide-react";
+import { ActivityTicker } from "@/components/shared/activity-ticker";
 import type { ApiSearchResult } from "@medialane/sdk";
 import { getTokenBySymbol, parseAmount, SUPPORTED_TOKENS } from "@medialane/sdk";
 import { ipfsToHttp, cn } from "@/lib/utils";
@@ -15,6 +17,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { usePlatformStats } from "@/hooks/use-stats";
 import { IP_TYPES } from "@/types/ip";
+import { HelpIcon } from "@/components/ui/help-icon";
 
 const SORT_OPTIONS = [
   { label: "Recent", value: "recent" },
@@ -36,7 +39,6 @@ function SearchBar() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ApiSearchResult | null>(null);
   const [open, setOpen] = useState(false);
-  // Use a nullable type so React infers MutableRefObject (not RefObject with readonly `current`)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleChange = (value: string) => {
@@ -67,7 +69,7 @@ function SearchBar() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search tokens, collections…"
+          placeholder="Search creative works"
           value={query}
           onChange={(e) => handleChange(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -202,7 +204,6 @@ export default function MarketplacePageClient() {
     setMinInput(min);
     setMaxInput(max);
     if (priceDebounce.current) clearTimeout(priceDebounce.current);
-    // Capture decimals at call time to avoid stale closure inside the timeout
     const decimals = getTokenBySymbol(currency)?.decimals ?? 18;
     priceDebounce.current = setTimeout(() => {
       try {
@@ -220,7 +221,6 @@ export default function MarketplacePageClient() {
 
   const handleCurrencyChange = (c: string) => {
     setCurrency(currency === c ? "" : c);
-    // Clear price inputs when currency changes — decimals differ between tokens
     setMinInput("");
     setMaxInput("");
     setMinPrice(undefined);
@@ -229,7 +229,7 @@ export default function MarketplacePageClient() {
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const hasFilters = sort !== "recent" || currency || orderType || minPrice || maxPrice;
-  const filterCount = [currency, orderType, minPrice || maxPrice].filter(Boolean).length;
+  const filterCount = [sort !== "recent" ? "sort" : "", currency, orderType, minPrice || maxPrice ? "price" : ""].filter(Boolean).length;
 
   const resetAll = () => {
     setSort("recent");
@@ -247,27 +247,26 @@ export default function MarketplacePageClient() {
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-primary">
           <Store className="h-5 w-5" />
-          <span className="text-sm font-semibold uppercase tracking-wider">Marketplace</span>
+          <span className="text-sm font-semibold uppercase tracking-wider">NFT Marketplace</span>
         </div>
-        <h1 className="text-3xl font-bold">Discover IP Assets</h1>
-        <p className="text-muted-foreground">
-          Browse, buy, and license creative works on Starknet — gasless for everyone.
-        </p>
+        <h1 className="text-3xl font-bold">Discover and trade</h1>
         <PlatformStatsBar />
       </div>
 
+      {/* Live activity ticker */}
+      <ActivityTicker limit={12} />
+
       {/* Filter toolbar */}
-      <div className="space-y-3 pb-3 border-b border-border/60">
-        {/* Row 1: search + filter toggle */}
-        <div className="flex items-center gap-2">
-          <div className="flex-1">
+      <div className="space-y-2 pb-3 border-b border-border/60">
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex-1 min-w-0">
             <SearchBar />
           </div>
           <button
-            onClick={() => setFiltersOpen((v) => !v)}
+            onClick={() => setFiltersOpen(true)}
             className={cn(
               "relative flex items-center gap-1.5 h-9 px-3 rounded-lg border text-xs font-medium transition-colors shrink-0",
-              filtersOpen || filterCount > 0
+              filterCount > 0
                 ? "border-primary bg-primary/10 text-primary"
                 : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
             )}
@@ -282,39 +281,91 @@ export default function MarketplacePageClient() {
           </button>
         </div>
 
-        {/* Row 2: sort tabs — always visible */}
-        <div className="flex items-center gap-1">
-          {SORT_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setSort(opt.value)}
-              className={`text-xs px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
-                sort === opt.value
-                  ? "bg-primary/10 text-primary font-medium"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
+        {/* Active filter pills — quick-clear */}
+        {hasFilters && (
+          <div className="flex flex-wrap gap-1.5">
+            {sort !== "recent" && (
+              <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
+                {SORT_OPTIONS.find((o) => o.value === sort)?.label}
+                <button onClick={() => setSort("recent")} className="ml-0.5 hover:text-primary/60">×</button>
+              </span>
+            )}
+            {orderType && (
+              <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
+                {TYPE_OPTIONS.find((o) => o.value === orderType)?.label}
+                <button onClick={() => setOrderType("")} className="ml-0.5 hover:text-primary/60">×</button>
+              </span>
+            )}
+            {currency && (
+              <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
+                {currency}
+                <button onClick={() => handleCurrencyChange(currency)} className="ml-0.5 hover:text-primary/60">×</button>
+              </span>
+            )}
+            {(minPrice || maxPrice) && (
+              <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
+                {minInput || "0"} – {maxInput || "∞"}
+                <button onClick={() => { setMinInput(""); setMaxInput(""); setMinPrice(undefined); setMaxPrice(undefined); }} className="ml-0.5 hover:text-primary/60">×</button>
+              </span>
+            )}
+          </div>
+        )}
+      </div>
 
-        {/* Expandable filter panel */}
-        {filtersOpen && (
-          <div className="rounded-xl border border-border bg-muted/20 p-3 space-y-3">
+      {/* Filters dialog */}
+      <Dialog open={filtersOpen} onOpenChange={setFiltersOpen}>
+        <DialogContent className="w-full max-w-sm sm:max-w-md p-0 overflow-hidden gap-0 flex flex-col max-h-[85svh]">
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border/60 pr-12">
+            <DialogTitle className="text-base font-bold flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4 text-primary" />
+              Filters
+            </DialogTitle>
+            {hasFilters && (
+              <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={() => { resetAll(); }}>
+                Clear all
+              </Button>
+            )}
+          </div>
+
+          {/* Scrollable body */}
+          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+
+            {/* Sort */}
+            <div className="space-y-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Sort</p>
+              <div className="flex flex-wrap gap-1.5">
+                {SORT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSort(opt.value)}
+                    className={cn(
+                      "text-xs px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap",
+                      sort === opt.value
+                        ? "border-primary bg-primary/10 text-primary font-medium"
+                        : "border-border text-muted-foreground hover:border-primary/50"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Type */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 shrink-0">Type</span>
-              <div className="flex items-center gap-1 flex-wrap">
+            <div className="space-y-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Order type</p>
+              <div className="flex flex-wrap gap-1.5">
                 {TYPE_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
                     onClick={() => setOrderType(opt.value)}
-                    className={`text-xs px-3 py-1 rounded-full border transition-colors whitespace-nowrap ${
+                    className={cn(
+                      "text-xs px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap",
                       orderType === opt.value
-                        ? "border-primary bg-primary/10 text-primary"
+                        ? "border-primary bg-primary/10 text-primary font-medium"
                         : "border-border text-muted-foreground hover:border-primary/50"
-                    }`}
+                    )}
                   >
                     {opt.label}
                   </button>
@@ -323,18 +374,19 @@ export default function MarketplacePageClient() {
             </div>
 
             {/* Currency */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 shrink-0">Token</span>
-              <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="space-y-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Currency</p>
+              <div className="flex flex-wrap gap-1.5">
                 {CURRENCY_OPTIONS.map((c) => (
                   <button
                     key={c}
                     onClick={() => handleCurrencyChange(c)}
-                    className={`text-xs px-2.5 py-1 rounded-full border transition-colors whitespace-nowrap ${
+                    className={cn(
+                      "text-xs px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap",
                       currency === c
-                        ? "border-primary bg-primary/10 text-primary"
+                        ? "border-primary bg-primary/10 text-primary font-medium"
                         : "border-border text-muted-foreground hover:border-primary/50"
-                    }`}
+                    )}
                   >
                     {c}
                   </button>
@@ -343,23 +395,23 @@ export default function MarketplacePageClient() {
             </div>
 
             {/* Price range */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 shrink-0">Price</span>
-              <div className="flex items-center gap-1.5">
+            <div className="space-y-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Price range</p>
+              <div className="flex items-center gap-2">
                 <Input
                   placeholder="Min"
                   value={minInput}
                   onChange={(e) => handlePriceInput(e.target.value, maxInput)}
-                  className="h-7 w-20 text-xs px-2"
+                  className="h-9 text-sm"
                   type="number"
                   min="0"
                 />
-                <span className="text-xs text-muted-foreground">–</span>
+                <span className="text-sm text-muted-foreground shrink-0">–</span>
                 <Input
                   placeholder="Max"
                   value={maxInput}
                   onChange={(e) => handlePriceInput(minInput, e.target.value)}
-                  className="h-7 w-20 text-xs px-2"
+                  className="h-9 text-sm"
                   type="number"
                   min="0"
                 />
@@ -367,8 +419,11 @@ export default function MarketplacePageClient() {
             </div>
 
             {/* IP Type */}
-            <div className="flex flex-wrap items-start gap-2 pt-1 border-t border-border/60">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 shrink-0 pt-1">IP Type</span>
+            <div className="space-y-2 pt-1 border-t border-border/60">
+              <p className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                IP Type
+                <HelpIcon content="Filter by intellectual property category — Art, Audio, Video, Software, and more" side="right" />
+              </p>
               <div className="flex flex-wrap gap-1.5">
                 <IpTypeChip href="/marketplace" label="All" />
                 {IP_TYPES.map((type) => (
@@ -377,16 +432,17 @@ export default function MarketplacePageClient() {
               </div>
             </div>
 
-            {hasFilters && (
-              <div className="pt-1 border-t border-border/60">
-                <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={resetAll}>
-                  Clear all filters
-                </Button>
-              </div>
-            )}
           </div>
-        )}
-      </div>
+
+          {/* Footer */}
+          <div className="px-5 py-3 border-t border-border/60">
+            <Button className="w-full" onClick={() => setFiltersOpen(false)}>
+              Apply filters
+            </Button>
+          </div>
+
+        </DialogContent>
+      </Dialog>
 
       {/* Grid */}
       <ListingsGrid
