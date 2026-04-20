@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { useCreatorProfile } from "@/hooks/use-profiles";
 import { useMyUsernameClaim, submitUsernameClaim, checkUsernameAvailability } from "@/hooks/use-username-claims";
@@ -12,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { AtSign, CheckCircle2, Clock, XCircle, Loader2 } from "lucide-react";
+import { AtSign, CheckCircle2, Clock, XCircle, Loader2, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type CheckState = "idle" | "checking" | "available" | "taken";
@@ -77,7 +78,8 @@ function UsernameClaimInput({
 }
 
 export default function ProfileSettingsPage() {
-  const { address: walletAddress } = useUnifiedWallet();
+  const { address: walletAddress, disconnect } = useUnifiedWallet();
+  const router = useRouter();
   const { profile, isLoading: profileLoading, mutate } = useCreatorProfile(walletAddress ?? undefined);
   const { username: approvedUsername, claim, mutate: mutateClaim } = useMyUsernameClaim();
   const [saving, setSaving] = useState(false);
@@ -366,6 +368,22 @@ export default function ProfileSettingsPage() {
       <Button onClick={handleSave} disabled={saving || !walletAddress || profileLoading}>
         {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving…</> : "Save Changes"}
       </Button>
+
+      {/* Account */}
+      <div className="space-y-4 pt-4 border-t border-border">
+        <div>
+          <h3 className="text-sm font-semibold">Account</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Manage your wallet connection</p>
+        </div>
+        <Button
+          variant="outline"
+          className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
+          onClick={() => { disconnect(); router.push("/"); }}
+        >
+          <LogOut className="h-4 w-4" />
+          Disconnect wallet
+        </Button>
+      </div>
     </div>
   );
 }
