@@ -1,36 +1,37 @@
 # Medialane Dapp
 
-Medialane permissionless dapp for programmable IP monetization and financial infrastructure for the Creators Capital Markets. 
+Permissionless dApp for programmable IP monetization on Starknet — Creator Launchpad + IP Marketplace with full wallet sovereignty.
 
-Medialane Creator Launchpad and IP Marketplace is engineered for the integrity web, enabling trustless, verifiable financial activity. 
-
-Our vision is to ensure that creators, businesses, and AI can fully own, trade, and generate capital from intellectual property with sovereignty, control, and transparency.
-
-Our ecosystem is engineered to support the next generation of finance: a verifiable engine that allows humans and autonomous AI agents to generate value and revenue streams from creative work.
-
-**Medialane Dapp (Starknet Mainnet):** https://dapp.medialane.io
-**Medialane App with Social Login (Starknet Mainnet):** https://medialane.io
+**Dapp (Starknet Mainnet):** https://dapp.medialane.io  
+**Consumer App (social login):** https://medialane.io
 
 ---
 
 ## Core Features
 
 ### Creator Launchpad
-The engine for capital structuring — create financial assets and structured revenue products:
-- **IP Coins** — tokenize intellectual property into tradeable assets
-- **Creator Coins** — personal creator economy tokens
-- **Collection Drops** — curated NFT collection launches
-- **IP Clubs** — gated creator communities
-- **Memberships & Subscriptions** — recurring revenue streams
-- **IP Tickets** — tokenized access and event passes
+Deploy and manage tokenized IP assets on-chain:
+- **Collection Drops** — ERC721 curated NFT launches with mint pages
+- **IP1155** — ERC1155 multi-edition IP tokens
+- **Proof of Purchase (POP)** — on-chain purchase receipts and access passes
 
 ### NFT Marketplace
-The High-Integrity Exchange — the central secondary market for licensing and trading all tokenized creator assets:
-- List, buy, and auction IP NFTs
-- Make and accept offers
+The high-integrity exchange for all tokenized creator assets:
+- List, buy, make and accept offers
 - Cart-based multi-asset checkout
 - On-chain provenance and ownership verification
 - Programmable licensing terms enforced by smart contracts
+
+### Creator Profiles
+- Profile by wallet address (`/creator/[address]`) and by username slug (`/creator/[username]`)
+- 4-tab layout: Collections · Listings · Analytics · Activity
+- Cinematic gradient banner with dominant-color extraction
+
+### Claims Hub (`/claim`)
+- Genesis NFT claim
+- Collection ownership claim (on-chain verified, no auth token required)
+- Username claim (DAO-reviewed)
+- Branded creator page claim
 
 ---
 
@@ -38,10 +39,10 @@ The High-Integrity Exchange — the central secondary market for licensing and t
 
 | Service | Fee |
 |---|---|
-| Creator Launchpad revenue products | 1% |
-| NFT Marketplace trading, auctions, remix & licensing | 1% |
+| Creator Launchpad | 1% |
+| NFT Marketplace | 1% |
 
-Gas fees are sponsored for all users via the AVNU Paymaster — the protocol fee covers these costs, so users transact with zero friction.
+Gas fees are sponsored for all users via the AVNU Paymaster.
 
 ---
 
@@ -59,16 +60,17 @@ Gas fees are sponsored for all users via the AVNU Paymaster — the protocol fee
 | Gasless Transactions | AVNU Paymaster |
 | IP Tokenization | Mediolano Protocol (zero-fee) |
 | Marketplace Protocol | Medialane Protocol (SNIP-12 signed orders) |
+| Backend API | medialane-backend via `@medialane/sdk` |
+| Shared UI | `@medialane/ui` v0.4.0 |
 | Styling | Tailwind CSS + shadcn/ui |
-| Language | TypeScript |
 | IPFS | Pinata |
-| Deployment | Vercel |
+| Deployment | Vercel (autodeploy on push to main) |
 
 ---
 
-## Wallet Options
+## Wallet System
 
-Medialane supports three wallet strategies side by side — users choose what suits them:
+All three strategies are unified under `useUnifiedWallet` — one hook, one interface:
 
 | Strategy | Best for | Gas |
 |---|---|---|
@@ -76,7 +78,35 @@ Medialane supports three wallet strategies side by side — users choose what su
 | **Cartridge Controller** | Gamers, power users | Auto-gasless (session keys) |
 | **Privy (Email / Social)** | Web2 onboarding | Sponsored via AVNU |
 
-All strategies are unified under a single `useUnifiedWallet` hook. The connected wallet type is shown as a badge in the account panel.
+No Clerk. No ChipiPay. Disconnect: `const { disconnect } = useUnifiedWallet()`.
+
+---
+
+## Route Map
+
+| Route | Page |
+|---|---|
+| `/` | Home / discover |
+| `/marketplace` | NFT marketplace grid |
+| `/collections` | Collection explorer |
+| `/launchpad` | Launchpad hub |
+| `/launchpad/drop/create` | Deploy new ERC721 drop |
+| `/launchpad/drop/[contract]` | Drop detail + mint |
+| `/launchpad/ip1155/create` | Deploy new ERC1155 collection |
+| `/launchpad/ip1155/[contract]/mint` | ERC1155 mint page |
+| `/launchpad/pop/[contract]` | Proof of Purchase page |
+| `/create` | Asset creation hub |
+| `/asset/[contract]/[tokenId]` | Token detail + buy/offer/remix |
+| `/collections/[contract]` | Collection detail |
+| `/creator/[address]` | Creator profile by wallet address |
+| `/creator/[username]` | Creator profile by username slug |
+| `/claim` | Claims hub |
+| `/portfolio` | Portfolio overview |
+| `/portfolio/settings` | Profile settings + disconnect wallet |
+| `/portfolio/activity` | On-chain activity |
+| `/account/[address]` | Public account view |
+| `/provenance/[contract]/[tokenId]` | On-chain provenance |
+| `/licensing` | Licensing info |
 
 ---
 
@@ -88,54 +118,72 @@ src/
 │   ├── api/
 │   │   ├── wallet/sign/        # Privy server-side signing
 │   │   ├── wallet/starknet/    # Privy wallet provisioning
-│   │   ├── pinata/             # IPFS upload endpoints
-│   │   └── forms-ipfs/         # Form-based IPFS uploads
-│   ├── marketplace/            # NFT Marketplace
-│   ├── launchpad/              # Creator Launchpad
-│   ├── create/                 # Asset & collection creation
-│   ├── portfolio/              # User portfolio & activity
-│   ├── collections/            # Collection explorer
-│   ├── creator/[slug]/         # Creator profiles
-│   ├── asset/[slug]/           # Asset detail pages
-│   ├── provenance/             # On-chain provenance
-│   └── licensing/              # IP licensing
+│   │   └── pinata/             # IPFS upload endpoints
+│   ├── marketplace/
+│   ├── launchpad/
+│   │   ├── drop/[contract]/    # ERC721 drop pages
+│   │   ├── ip1155/             # ERC1155 pages
+│   │   └── pop/[contract]/     # POP pages
+│   ├── create/
+│   ├── portfolio/
+│   ├── collections/
+│   ├── claim/                  # Claims hub
+│   ├── creator/[address]/      # Creator profiles (address + username routing)
+│   ├── asset/[contract]/[tokenId]/
+│   ├── account/[address]/
+│   ├── provenance/
+│   └── licensing/
 ├── components/
-│   ├── providers.tsx           # PrivyProvider + StarkZapWalletProvider
-│   ├── starknet-provider.tsx   # StarknetConfig (starknet-react)
-│   ├── header/
-│   │   └── wallet-connect.tsx  # 3-option connect dialog + account sheet
+│   ├── claim/                  # WalletGate, ClaimCollectionPanel, UsernameClaimPanel
+│   ├── creator/                # ActivityRow, ACTIVITY_META, CreatorAnalytics
+│   ├── marketplace/            # ListingCard, OrderCard
+│   ├── shared/                 # CollectionCard, TokenCard (from @medialane/ui)
 │   └── ui/                     # shadcn/ui base components
-├── contexts/
-│   └── starkzap-wallet-context.tsx  # Cartridge + Privy wallet state
 ├── hooks/
 │   ├── use-unified-wallet.ts        # Single interface across all wallet types
 │   ├── use-paymaster-transaction.ts # Core AVNU paymaster hook (executeAuto)
-│   ├── use-paymaster-minting.ts     # Sponsored minting
-│   ├── use-paymaster-marketplace.ts # Sponsored marketplace ops
-│   ├── use-tx-tracker.ts           # Real-time transaction monitoring
-│   ├── use-token-balance.ts        # ERC20 balance reads
-│   ├── use-staking.ts              # STRK delegation staking
-│   ├── use-marketplace.ts          # SNIP-12 order creation & fulfillment
-│   ├── use-activities.ts           # On-chain activity feed
-│   └── ...                         # Collection, asset, portfolio hooks
+│   ├── use-marketplace.ts           # SNIP-12 order creation & fulfillment
+│   ├── use-collections.ts           # Collection data
+│   ├── use-orders.ts                # Order / listing data
+│   ├── use-activities.ts            # On-chain activity feed
+│   ├── use-profiles.ts              # Creator profile data
+│   ├── use-username-claims.ts       # Username claim + resolution
+│   └── use-drops.ts                 # Drop contract data
 ├── lib/
-│   ├── starkzap.ts             # StarkZap SDK singleton + token presets
 │   ├── constants.ts            # Contract addresses, tokens, AVNU config
-│   └── types.ts                # Core domain types
-├── abis/                       # Starknet contract ABIs
-├── types/
-│   └── paymaster.ts            # AVNU Paymaster types
-└── utils/
-    ├── paymaster.ts            # AVNU SDK wrappers
-    ├── marketplace-utils.ts    # SNIP-12 typed data helpers
-    └── ...
+│   ├── creator-utils.ts        # addressPalette() — deterministic color from address
+│   ├── medialane-client.ts     # @medialane/sdk singleton
+│   └── utils.ts                # cn, ipfsToHttp, normalizeAddress, timeAgo, formatDisplayPrice
+└── abis/                       # Starknet contract ABIs
+```
+
+---
+
+## Key Patterns
+
+### Transactions
+Always use `executeAuto` — tries AVNU sponsored gas, falls back silently:
+```ts
+const { executeAuto } = usePaymasterTransaction();
+await executeAuto([{ contractAddress, entrypoint, calldata }]);
+```
+
+### Backend API calls
+Empty JWT string — backend verifies on-chain ownership:
+```ts
+const client = getMedialaneClient();
+await client.api.claimCollection(contract, wallet, "");
+```
+
+### Lazy tab data loading
+Pass `null` as SWR key when a tab isn't active:
+```ts
+const { orders } = useUserOrders(activeTab === "listings" ? walletAddress : null);
 ```
 
 ---
 
 ## Environment Variables
-
-Copy `.env.example` to `.env.local` and fill in the values:
 
 ```bash
 cp .env.example .env.local
@@ -146,75 +194,48 @@ cp .env.example .env.local
 | `NEXT_PUBLIC_STARKNET_NETWORK` | `mainnet` or `sepolia` |
 | `NEXT_PUBLIC_RPC_URL` | Alchemy or custom RPC endpoint |
 | `NEXT_PUBLIC_COLLECTION_CONTRACT_ADDRESS` | Mediolano collection registry |
-| `NEXT_PUBLIC_MEDIALANE_CONTRACT_ADDRESS` | Medialane marketplace contract |
+| `NEXT_PUBLIC_MEDIALANE_CONTRACT_ADDRESS` | Marketplace contract |
 | `NEXT_PUBLIC_COLLECTIONS_CONTRACT_START_BLOCK` | Starting block for event queries |
 | `NEXT_PUBLIC_EXPLORER_URL` | Block explorer base URL |
 | `NEXT_PUBLIC_GATEWAY_URL` | IPFS gateway URL |
 | `PINATA_JWT` | Pinata JWT for server-side uploads |
 | `NEXT_PUBLIC_PRIVY_APP_ID` | Privy app ID (public) |
-| `PRIVY_APP_SECRET` | Privy app secret (**server only, never expose**) |
+| `PRIVY_APP_SECRET` | Privy app secret (**server only**) |
 | `NEXT_PUBLIC_AVNU_PAYMASTER_API_KEY` | AVNU API key for sponsored gas |
+| `NEXT_PUBLIC_MEDIALANE_API_URL` | Backend API base URL |
+| `NEXT_PUBLIC_MEDIALANE_API_KEY` | Backend API key |
 
 ---
 
 ## Development
 
 ```bash
-# Install dependencies
 npm install
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Type-check (zero-error target)
-npx tsc --noEmit
-
-# Lint
-npm run lint
+npm run dev          # Start dev server (http://localhost:3000)
+npm run build        # Production build
+npx tsc --noEmit    # Type-check
+npm run lint         # ESLint
 ```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
 ## Protocol Integrations
 
-### Mediolano Protocol
-Zero-fee IP tokenization layer. Provides the collection registry contract, on-chain provenance tracking, and ERC721 asset ownership.
+**Mediolano Protocol** — Zero-fee IP tokenization. Provides collection registry, on-chain provenance, ERC721/ERC1155 ownership.
 
-### Medialane Protocol
-Marketplace smart contracts built on SNIP-12 typed data signing. Order flow:
+**Medialane Protocol** — Marketplace smart contracts on SNIP-12 typed data signing:
 1. Seller signs order parameters off-chain
 2. ERC721 `approve` + `register_order` multicall submitted on-chain
-3. Buyer fulfills via signed `fulfill_order` data + `approve` + execute multicall
-4. Cancellations signed off-chain → `cancel_order`
+3. Buyer fulfills via signed `fulfill_order` + `approve` + execute multicall
+4. Cancellations: signed off-chain → `cancel_order`
 
-### AVNU Paymaster
-All transactions attempt sponsored execution first (`executeAuto`), falling back silently to traditional gas if AVNU rejects. Users never need to hold ETH/STRK to interact with the protocol.
+**AVNU Paymaster** — All transactions attempt sponsored execution first (`executeAuto`), falling back silently if AVNU rejects. Users never need ETH/STRK.
 
-### StarkZap SDK
-Abstracts Cartridge Controller (session keys, gaming UX) and Privy (email/social, server-managed keys) wallet strategies. Transaction monitoring (`useTxTracker`), ERC20 balance reads (`useTokenBalance`), and STRK staking (`useStaking`) are all powered by StarkZap.
+**StarkZap SDK** — Abstracts Cartridge Controller (session keys) and Privy (email/social, server-managed keys). Transaction monitoring, ERC20 balances, and STRK staking all powered by StarkZap.
 
 ---
 
-## Roadmap
+## Medialane DAO
 
-| Milestone | Date |
-|---|---|
-| Medialane Protocol @ Starknet Sepolia | Nov 2025 |
-| Medialane Dapp @ Starknet Sepolia | Nov 2025 |
-| Medialane Onboarding @ Starknet Mainnet | Jan 2026 |
-| Medialane Protocol @ Starknet Mainnet | Feb 2026 |
-| Medialane Creator Launchpad @ Starknet Mainnet | Mar 2026 |
-| Medialane Marketplace @ Starknet Mainnet | Mar 2026 |
-
----
-
-## Medialane Dao
-
-
-[dao@medialane.org](mailto:dao@medialane.org)
+[dao@medialane.org](mailto:dao@medialane.org)  
 [@integrityweb](https://t.me/integrityweb)
