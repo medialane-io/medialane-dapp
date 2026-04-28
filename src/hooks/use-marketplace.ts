@@ -3,8 +3,17 @@ import { useAccount, useContract, useNetwork, useProvider } from "@starknet-reac
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { Abi, shortString, constants } from "starknet";
 import { IPMarketplaceABI } from "@/abis/ip_market";
+import { IPMarketplace1155ABI } from "@/abis/ip_market_1155";
 import { toast } from "sonner";
-import { getOrderParametersTypedData, getOrderCancellationTypedData, getOrderFulfillmentTypedData, stringifyBigInts } from "@/utils/marketplace-utils";
+import {
+    getOrderParametersTypedData,
+    getOrderCancellationTypedData,
+    getOrderFulfillmentTypedData,
+    get1155OrderParametersTypedData,
+    get1155OrderFulfillmentTypedData,
+    get1155OrderCancellationTypedData,
+    stringifyBigInts,
+} from "@/utils/marketplace-utils";
 import { executeSponsoredTransaction, canSponsor } from "@/utils/paymaster";
 
 interface UseMarketplaceReturn {
@@ -14,7 +23,8 @@ interface UseMarketplaceReturn {
         price: string,
         currencySymbol: string,
         durationSeconds: number,
-        tokenStandard?: string
+        tokenStandard?: string,
+        amount?: string
     ) => Promise<string | undefined>;
     makeOffer: (
         assetContractAddress: string,
@@ -42,7 +52,7 @@ interface UseMarketplaceReturn {
 }
 
 // Module-level helpers
-import { SUPPORTED_TOKENS, MARKETPLACE_CONTRACT, MARKETPLACE_1155_CONTRACT } from "@/lib/constants";
+import { SUPPORTED_TOKENS, MARKETPLACE_721_CONTRACT, MARKETPLACE_1155_CONTRACT } from "@/lib/constants";
 const getDecimals = (currencySymbol: string) =>
     SUPPORTED_TOKENS.find((t) => t.symbol === currencySymbol)?.decimals ?? 18;
 
@@ -59,12 +69,12 @@ export function useMarketplace(): UseMarketplaceReturn {
     const [error, setError] = useState<string | null>(null);
 
     const { contract: medialaneContract } = useContract({
-        address: MARKETPLACE_CONTRACT,
+        address: MARKETPLACE_721_CONTRACT,
         abi: IPMarketplaceABI as any[],
     });
     const { contract: medialane1155Contract } = useContract({
         address: MARKETPLACE_1155_CONTRACT,
-        abi: IPMarketplaceABI as any[],
+        abi: IPMarketplace1155ABI as any[],
     });
     const { address: walletAddress } = useUnifiedWallet();
 
@@ -177,7 +187,8 @@ export function useMarketplace(): UseMarketplaceReturn {
         price: string,
         currencySymbol: string,
         durationSeconds: number,
-        tokenStandard?: string
+        tokenStandard?: string,
+        amount?: string
     ) => {
         const is1155 = tokenStandard === "ERC1155";
         const contract = is1155 ? medialane1155Contract : medialaneContract;
@@ -200,10 +211,65 @@ export function useMarketplace(): UseMarketplaceReturn {
             const { startTime, endTime, salt, currencyAddress, nonce } =
                 await buildBaseOrderParams(currencySymbol, durationSeconds, contract);
 
+            // ── ERC-1155 path ─────────────────────────────────────────────────
+            if (is1155) {
+                const listAmount = amount ?? "1";
+                const orderParams1155 = {
+                    offerer: walletAddress,
+                    nft_contract: assetContractAddress,
+                    token_id: tokenId,
+                    amount: listAmount,
+                    payment_token: currencyAddress,
+                    price_per_unit: priceWei,
+                    start_time: startTime,
+                    end_time: endTime,
+                    salt,
+                    nonce,
+                };
+                const chainId = chain!.id as any as constants.StarknetChainId;
+                const typedData1155 = stringifyBigInts(
+                    get1155OrderParametersTypedData(orderParams1155 as Record<string, unknown>, chainId)
+                );
+                const signature1155 = await account!.signMessage(typedData1155);
+                const signatureArray1155 = Array.isArray(signature1155)
+                    ? signature1155
+                    : [signature1155.r.toString(), signature1155.s.toString()];
+                const registerCall1155 = contract.populate("register_order", [{
+                    parameters: orderParams1155,
+                    signature: signatureArray1155,
+                }]);
+                let isAlreadyApproved1155 = false;
+                try {
+                    const res = await provider.callContract({
+                        contractAddress: assetContractAddress,
+                        entrypoint: "is_approved_for_all",
+                        calldata: [walletAddress!, contract.address],
+                    });
+                    isAlreadyApproved1155 = BigInt(res[0]) !== 0n;
+                } catch (err) {
+                    console.warn("Failed to check ERC1155 approval status", err);
+                }
+                const approveCall1155 = {
+                    contractAddress: assetContractAddress,
+                    entrypoint: "set_approval_for_all",
+                    calldata: [contract.address, "1"],
+                };
+                const calls1155 = isAlreadyApproved1155 ? [registerCall1155] : [approveCall1155, registerCall1155];
+                const hash1155 = await executeWithSponsor(calls1155);
+                setTxHash(hash1155);
+                const receipt1155 = await provider.waitForTransaction(hash1155);
+                if ((receipt1155 as any).execution_status === "REVERTED") {
+                    throw new Error((receipt1155 as any).revert_reason || "Transaction reverted on-chain.");
+                }
+                toast.success("Listing Created", { description: "Your edition has been listed successfully." });
+                return hash1155;
+            }
+            // ── ERC-721 path — unchanged below ────────────────────────────────
+
             const orderParams = {
                 offerer: walletAddress,
                 offer: {
-                    item_type: is1155 ? "ERC1155" : "ERC721",
+                    item_type: "ERC721",
                     token: assetContractAddress,
                     identifier_or_criteria: tokenId,
                     start_amount: "1",
@@ -229,41 +295,23 @@ export function useMarketplace(): UseMarketplaceReturn {
             let approveCall: any;
             let isAlreadyApproved = false;
 
-            if (is1155) {
-                try {
-                    const res = await provider.callContract({
-                        contractAddress: assetContractAddress,
-                        entrypoint: "is_approved_for_all",
-                        calldata: [walletAddress!, contract.address],
-                    });
-                    isAlreadyApproved = BigInt(res[0]) !== 0n;
-                } catch (err) {
-                    console.warn("Failed to check ERC1155 approval status", err);
-                }
-                approveCall = {
+            const tokenIdUint256 = cairo.uint256(tokenId);
+            try {
+                const res = await provider.callContract({
                     contractAddress: assetContractAddress,
-                    entrypoint: "set_approval_for_all",
-                    calldata: [contract.address, "1"],
-                };
-            } else {
-                const tokenIdUint256 = cairo.uint256(tokenId);
-                try {
-                    const res = await provider.callContract({
-                        contractAddress: assetContractAddress,
-                        entrypoint: "get_approved",
-                        calldata: [tokenIdUint256.low.toString(), tokenIdUint256.high.toString()],
-                    });
-                    isAlreadyApproved =
-                        BigInt(res[0]).toString() === BigInt(contract.address).toString();
-                } catch (err) {
-                    console.warn("Failed to check ERC721 approval status", err);
-                }
-                approveCall = {
-                    contractAddress: assetContractAddress,
-                    entrypoint: "approve",
-                    calldata: [contract.address, tokenIdUint256.low.toString(), tokenIdUint256.high.toString()],
-                };
+                    entrypoint: "get_approved",
+                    calldata: [tokenIdUint256.low.toString(), tokenIdUint256.high.toString()],
+                });
+                isAlreadyApproved =
+                    BigInt(res[0]).toString() === BigInt(contract.address).toString();
+            } catch (err) {
+                console.warn("Failed to check ERC721 approval status", err);
             }
+            approveCall = {
+                contractAddress: assetContractAddress,
+                entrypoint: "approve",
+                calldata: [contract.address, tokenIdUint256.low.toString(), tokenIdUint256.high.toString()],
+            };
 
             const calls = isAlreadyApproved ? [registerCall] : [approveCall, registerCall];
             const hash = await executeWithSponsor(calls);
@@ -367,16 +415,21 @@ export function useMarketplace(): UseMarketplaceReturn {
         }
 
         return withProcessing(async () => {
-            // Group required ERC20 approvals by token address
-            const tokenTotals = new Map<string, bigint>();
+            // Group required ERC20 approvals by token address, split by standard
+            const tokenTotals721 = new Map<string, bigint>();
+            const tokenTotals1155 = new Map<string, bigint>();
             items.forEach((item) => {
                 const token = item.considerationToken;
-                const amount = BigInt(item.considerationAmount);
-                tokenTotals.set(token, (tokenTotals.get(token) || 0n) + amount);
+                const amt = BigInt(item.considerationAmount);
+                if (item.isERC1155) {
+                    tokenTotals1155.set(token, (tokenTotals1155.get(token) || 0n) + amt);
+                } else {
+                    tokenTotals721.set(token, (tokenTotals721.get(token) || 0n) + amt);
+                }
             });
 
             const { cairo } = await import("starknet");
-            const approveCalls = Array.from(tokenTotals.entries()).map(([token, totalWei]) => {
+            const approveCalls721 = Array.from(tokenTotals721.entries()).map(([token, totalWei]) => {
                 const amountUint256 = cairo.uint256(totalWei.toString());
                 return {
                     contractAddress: token,
@@ -384,48 +437,83 @@ export function useMarketplace(): UseMarketplaceReturn {
                     calldata: [medialaneContract.address, amountUint256.low.toString(), amountUint256.high.toString()],
                 };
             });
+            const approveCalls1155 = Array.from(tokenTotals1155.entries()).map(([token, totalWei]) => {
+                const amountUint256 = cairo.uint256(totalWei.toString());
+                return {
+                    contractAddress: token,
+                    entrypoint: "approve",
+                    calldata: [medialane1155Contract!.address, amountUint256.low.toString(), amountUint256.high.toString()],
+                };
+            });
 
-            // Fetch base nonce; each fulfillment increments it sequentially
-            const currentNonce = await medialaneContract.nonces(walletAddress);
-            const baseNonce = BigInt(currentNonce);
+            // Fetch base nonces per contract — each fulfillment increments sequentially
+            const baseNonce721 = BigInt(await medialaneContract.nonces(walletAddress));
+            const baseNonce1155 = medialane1155Contract
+                ? BigInt(await medialane1155Contract.nonces(walletAddress))
+                : 0n;
 
             const chainId = chain.id as any as constants.StarknetChainId;
-            const fulfillCalls = [];
+            const fulfillCalls: any[] = [];
+            let counter721 = 0;
+            let counter1155 = 0;
 
             // Prompt one signature per item — must be sequential per SNIP-12
             for (let i = 0; i < items.length; i++) {
                 const item = items[i];
-                const executionNonce = baseNonce + BigInt(i);
 
-                const fulfillmentParams = {
-                    order_hash: item.orderHash,
-                    fulfiller: walletAddress,
-                    nonce: executionNonce.toString(),
-                };
-
-                const typedData = stringifyBigInts(getOrderFulfillmentTypedData(fulfillmentParams, chainId));
-
-                toast.info(`Signature Required (${i + 1}/${items.length})`, {
-                    description: `Please sign the request for ${item.offerIdentifier}`,
-                });
-
-                const signature = await account.signMessage(typedData);
-                const signatureArray = Array.isArray(signature)
-                    ? signature
-                    : [signature.r.toString(), signature.s.toString()];
-
-                fulfillCalls.push(
-                    medialaneContract.populate("fulfill_order", [{
-                        fulfillment: fulfillmentParams,
-                        signature: signatureArray,
-                    }])
-                );
+                if (item.isERC1155) {
+                    const executionNonce = baseNonce1155 + BigInt(counter1155++);
+                    const quantity = item.quantity ?? "1";
+                    const fulfillmentParams = {
+                        order_hash: item.orderHash,
+                        fulfiller: walletAddress,
+                        quantity,
+                        nonce: executionNonce.toString(),
+                    };
+                    const typedData = stringifyBigInts(
+                        get1155OrderFulfillmentTypedData(fulfillmentParams as Record<string, unknown>, chainId)
+                    );
+                    toast.info(`Signature Required (${i + 1}/${items.length})`, {
+                        description: `Please sign the purchase for edition ${item.offerIdentifier}`,
+                    });
+                    const signature = await account.signMessage(typedData);
+                    const signatureArray = Array.isArray(signature)
+                        ? signature
+                        : [signature.r.toString(), signature.s.toString()];
+                    fulfillCalls.push(
+                        medialane1155Contract!.populate("fulfill_order", [{
+                            fulfillment: fulfillmentParams,
+                            signature: signatureArray,
+                        }])
+                    );
+                } else {
+                    const executionNonce = baseNonce721 + BigInt(counter721++);
+                    const fulfillmentParams = {
+                        order_hash: item.orderHash,
+                        fulfiller: walletAddress,
+                        nonce: executionNonce.toString(),
+                    };
+                    const typedData = stringifyBigInts(getOrderFulfillmentTypedData(fulfillmentParams, chainId));
+                    toast.info(`Signature Required (${i + 1}/${items.length})`, {
+                        description: `Please sign the request for ${item.offerIdentifier}`,
+                    });
+                    const signature = await account.signMessage(typedData);
+                    const signatureArray = Array.isArray(signature)
+                        ? signature
+                        : [signature.r.toString(), signature.s.toString()];
+                    fulfillCalls.push(
+                        medialaneContract.populate("fulfill_order", [{
+                            fulfillment: fulfillmentParams,
+                            signature: signatureArray,
+                        }])
+                    );
+                }
             }
 
             toast.info("Executing Purchase", { description: "Approve the final transaction to sweep the cart." });
 
             // Single atomic multicall: all approvals + all fulfillments
-            const hash = await executeWithSponsor([...approveCalls, ...fulfillCalls]);
+            const hash = await executeWithSponsor([...approveCalls721, ...approveCalls1155, ...fulfillCalls]);
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
@@ -434,7 +522,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.success("Purchase Successful", { description: `Successfully purchased ${items.length} item(s).` });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, chain, provider, withProcessing, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeWithSponsor]);
 
     const cancelOrder = useCallback(async (orderHash: string, tokenStandard?: string) => {
         const is1155 = tokenStandard === "ERC1155";
@@ -463,7 +551,11 @@ export function useMarketplace(): UseMarketplaceReturn {
             };
 
             const chainId = chain.id as any as constants.StarknetChainId;
-            const typedData = stringifyBigInts(getOrderCancellationTypedData(cancelParams, chainId));
+            const typedData = stringifyBigInts(
+                is1155
+                    ? get1155OrderCancellationTypedData(cancelParams as Record<string, unknown>, chainId)
+                    : getOrderCancellationTypedData(cancelParams, chainId)
+            );
 
             const signature = await account.signMessage(typedData);
             const signatureArray = Array.isArray(signature)
@@ -517,14 +609,19 @@ export function useMarketplace(): UseMarketplaceReturn {
         return withProcessing(async () => {
             const currentNonce = await contract.nonces(walletAddress);
 
-            const fulfillmentParams = {
+            const fulfillmentParams: Record<string, unknown> = {
                 order_hash: orderHash,
                 fulfiller: walletAddress,
                 nonce: currentNonce.toString(),
+                ...(is1155 ? { quantity: "1" } : {}),
             };
 
             const chainId = chain.id as any as constants.StarknetChainId;
-            const typedData = stringifyBigInts(getOrderFulfillmentTypedData(fulfillmentParams, chainId));
+            const typedData = stringifyBigInts(
+                is1155
+                    ? get1155OrderFulfillmentTypedData(fulfillmentParams, chainId)
+                    : getOrderFulfillmentTypedData(fulfillmentParams, chainId)
+            );
 
             const signature = await account.signMessage(typedData);
             const signatureArray = Array.isArray(signature)

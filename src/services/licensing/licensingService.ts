@@ -1,11 +1,12 @@
 import { useContract, useAccount, useReadContract } from "@starknet-react/core";
+import { MARKETPLACE_721_CONTRACT } from "@/lib/constants";
 import { useCallback, useMemo } from "react";
 import { IPMarketplaceABI } from "@/abis/ip_market";
 import { shortString, type Call } from "starknet";
 import { stringifyBigInts, getOrderParametersTypedData } from "@/utils/marketplace-utils";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 
-const MARKETPLACE_ADDRESS = process.env.NEXT_PUBLIC_MEDIALANE_CONTRACT_ADDRESS as `0x${string}`;
+const MARKETPLACE_ADDRESS = MARKETPLACE_721_CONTRACT;
 const STRK_ADDRESS = process.env.NEXT_PUBLIC_STARKNET_STRK as string;
 
 export interface LicensingTerms {

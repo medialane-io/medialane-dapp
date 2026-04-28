@@ -1,5 +1,5 @@
 import { pinata } from "@/services/config/server.config";
-import { IPFS_URL } from "@/lib/constants";
+import { PINATA_GATEWAY } from "@/lib/constants";
 import { useState, useCallback } from "react";
 
 export interface IpfsMetadata {
@@ -104,7 +104,7 @@ export function useIpfsUpload() {
           .file(file)
           .url(fileSignedUrl);
         const uploadedFileUrl = `ipfs://${fileUpload.cid}`;
-        const assetUrl = `${IPFS_URL}/ipfs/${fileUpload.cid}`;
+        const assetUrl = `${PINATA_GATEWAY}/ipfs/${fileUpload.cid}`;
         setFileUrl(uploadedFileUrl);
 
         let uploadedFeaturedImageUrl = null;

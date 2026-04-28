@@ -27,12 +27,18 @@ The app is deployed at [medialane.io](https://medialane.io) on Starknet Mainnet.
 ```
 # Network
 NEXT_PUBLIC_STARKNET_NETWORK          # "mainnet" or "sepolia" (defaults to mainnet)
-NEXT_PUBLIC_RPC_URL                   # Alchemy/custom RPC endpoint
+NEXT_PUBLIC_RPC_URL                   # Starknet RPC endpoint (for write/execution only)
 
-# Contracts
-NEXT_PUBLIC_COLLECTION_CONTRACT_ADDRESS  # Mediolano collection registry contract
-NEXT_PUBLIC_MEDIALANE_CONTRACT_ADDRESS   # Marketplace contract
-NEXT_PUBLIC_COLLECTIONS_CONTRACT_START_BLOCK  # Starting block for event queries
+# Contracts (all default to mainnet values from @medialane/sdk if unset)
+NEXT_PUBLIC_MARKETPLACE_CONTRACT      # ERC-721 marketplace contract
+NEXT_PUBLIC_MARKETPLACE_1155_CONTRACT # ERC-1155 marketplace contract
+NEXT_PUBLIC_COLLECTION_CONTRACT       # ERC-721 collection registry
+NEXT_PUBLIC_COLLECTION_1155_CONTRACT  # ERC-1155 collection registry
+NEXT_PUBLIC_NFTCOMMENTS_CONTRACT      # NFT comments contract
+
+# Medialane Backend API (indexed on-chain data — used for all reads)
+NEXT_PUBLIC_MEDIALANE_BACKEND_URL     # Backend base URL (default: http://localhost:3001)
+NEXT_PUBLIC_MEDIALANE_API_KEY         # API key for authenticated endpoints
 
 # IPFS
 NEXT_PUBLIC_GATEWAY_URL               # Pinata IPFS gateway URL
@@ -87,9 +93,9 @@ ThemeProvider
 - Cart checkout: approve per-currency totals + sequential `fulfill_order` signatures, then one atomic multicall
 - Cancellations: sign typed cancellation data → `cancel_order`
 
-**Event/provenance queries** (`src/hooks/use-events.ts`): queries the registry contract for `TokenMinted`/`TokenTransferred` events plus the asset contract's standard ERC721 `Transfer` events, deduplicating across sources. Block timestamps are fetched in parallel.
+**Event/provenance queries** (`src/hooks/use-events.ts`): `useAssetProvenanceEvents` fetches transfer/mint history from the Medialane backend API (`client.api.getTokenHistory()`). Lower-level `useAssetTransferEvents` / `useMyTransferEvents` still use starknet-react `useEvents` for real-time transfer monitoring.
 
-**Constants** (`src/lib/constants.ts`): contract addresses, supported tokens (USDC, USDT, ETH, STRK with decimals), start blocks, and `AVNU_PAYMASTER_CONFIG`.
+**Constants** (`src/lib/constants.ts`): contract addresses, supported tokens (USDC, USDT, ETH, STRK with decimals), and `AVNU_PAYMASTER_CONFIG`.
 
 ## AVNU Paymaster (Gasless Transactions)
 
@@ -117,9 +123,10 @@ Medialane collects a 1% fee on all marketplace and launchpad transactions, so ga
 ## Data Flow
 
 1. **IPFS/Pinata**: Asset metadata and images are uploaded via server actions (`src/app/api/pinata/`, `src/app/api/forms-ipfs/`). Server-side Pinata SDK is configured in `src/services/config/server.config.ts`.
-2. **On-chain reads**: Hooks in `src/hooks/` call Starknet contracts directly using `useContract`/`useProvider` from `@starknet-react/core`.
-3. **Zustand stores**: Used for cart state and mint state (`src/hooks/use-mint.ts`).
-4. **User profiles**: Stored/fetched via `src/services/user_settings.ts` (off-chain).
+2. **Indexed data (primary read path)**: `getMedialaneClient()` from `src/lib/medialane-client.ts` wraps the Medialane backend REST API (`NEXT_PUBLIC_MEDIALANE_BACKEND_URL`). Use `client.api.*` for tokens, collections, orders, activities, and provenance. Available methods: `getOrders`, `getActiveOrdersForToken`, `getOrdersByUser`, `getToken`, `getTokensByOwner`, `getTokenHistory`, `getCollections`, `getCollection`, `getCollectionTokens`, `getCollectionsByOwner`, `getActivities`, `getActivitiesByAddress`.
+3. **On-chain reads (writes + approvals only)**: Direct RPC calls are reserved for: approval checks (`get_approved`, `is_approved_for_all`), nonce reads, and transaction execution. Never scan events or enumerate tokens on-chain — use the backend API instead.
+4. **Zustand stores**: Used for cart state and mint state (`src/hooks/use-mint.ts`).
+5. **User profiles**: Stored/fetched via `src/services/user_settings.ts` (off-chain).
 
 ## Directory Structure
 
@@ -166,9 +173,6 @@ Multi-gateway fallback: Pinata → ipfs.io → Cloudflare → dweb.link. 24h loc
 - Token metadata: `{ name, description, image, external_url, attributes: [{ trait_type, value }] }`
 - Collection metadata: `{ name, description, image, external_link }`
 - `IPFSMetadata` interface in `src/utils/ipfs.ts` includes all standard OpenSea collection and token fields
-
-### Design constraint
-This dapp MUST remain fully permissionless — no backend API calls, no Clerk, no ChipiPay. All data comes from on-chain reads (starknet.js direct contract calls) and IPFS. This enables anti-censorship self-hosting for AI agents and autonomous actors.
 
 ---
 

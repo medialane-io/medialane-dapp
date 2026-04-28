@@ -1,4 +1,5 @@
 import { PinataSDK } from "pinata-web3";
+import { COLLECTION_721_CONTRACT } from "@/lib/constants";
 
 export const pinataClient = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT || "",
@@ -10,7 +11,7 @@ export async function uploadMetadataToPinata(metadata: Record<string, any>): Pro
 
   const combinedMetadata = {
     ...metadata,
-    contractAddress: process.env.NEXT_PUBLIC_COLLECTION_CONTRACT_ADDRESS || "",
+    contractAddress: COLLECTION_721_CONTRACT,
     timestamp: new Date().toISOString(),
   };
 

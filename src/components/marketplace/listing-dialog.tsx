@@ -25,6 +25,7 @@ const schema = z.object({
   price: z.string().min(1, "Price required").refine((v) => !isNaN(parseFloat(v)) && parseFloat(v) > 0, "Must be positive"),
   currency: z.string().refine((v) => getListableTokens().some((t) => t.symbol === v), "Invalid currency"),
   durationSeconds: z.number().min(86400),
+  amount: z.string().optional(),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -51,7 +52,15 @@ export function ListingDialog({ open, onOpenChange, assetContract, tokenId, toke
 
   const onSubmit = async (values: FormValues) => {
     if (!isConnected) { toast.error("Connect your wallet first"); return; }
-    const hash = await createListing(assetContract, tokenId, values.price, values.currency, values.durationSeconds, tokenStandard);
+    const hash = await createListing(
+      assetContract,
+      tokenId,
+      values.price,
+      values.currency,
+      values.durationSeconds,
+      tokenStandard,
+      values.amount?.trim() || undefined
+    );
     if (hash) setTxStatus("confirmed");
   };
 
@@ -101,7 +110,7 @@ export function ListingDialog({ open, onOpenChange, assetContract, tokenId, toke
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField control={form.control} name="price" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price</FormLabel>
+                    <FormLabel>{tokenStandard === "ERC1155" ? "Price per edition" : "Price"}</FormLabel>
                     <div className="relative">
                       <FormControl>
                         <Input type="number" step="any" placeholder="0.00" className="pr-20" {...field} />
@@ -114,6 +123,17 @@ export function ListingDialog({ open, onOpenChange, assetContract, tokenId, toke
                     <FormMessage />
                   </FormItem>
                 )} />
+                {tokenStandard === "ERC1155" && (
+                  <FormField control={form.control} name="amount" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quantity to list</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="1" min="1" placeholder="1" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                )}
                 <FormField control={form.control} name="currency" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Currency</FormLabel>

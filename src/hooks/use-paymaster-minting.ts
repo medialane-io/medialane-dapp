@@ -29,6 +29,7 @@ import { usePaymasterTransaction } from "@/hooks/use-paymaster-transaction";
 import { useTxTracker } from "@/hooks/use-tx-tracker";
 import { shouldSponsorTransaction } from "@/utils/paymaster";
 import { useToast } from "@/components/ui/use-toast";
+import { COLLECTION_721_CONTRACT } from "@/lib/constants";
 
 export interface UsePaymasterMintingResult {
   /**
@@ -84,8 +85,7 @@ export function usePaymasterMinting(
 
   const { status: txStatus, explorerUrl, isConfirmed } = useTxTracker(txHash);
 
-  const finalContractAddress =
-    contractAddress ?? process.env.NEXT_PUBLIC_COLLECTION_CONTRACT_ADDRESS;
+  const finalContractAddress = contractAddress ?? COLLECTION_721_CONTRACT;
 
   const { contract } = useContract({
     abi: ipCollectionAbi as Abi,

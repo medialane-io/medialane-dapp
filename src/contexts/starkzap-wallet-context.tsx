@@ -9,27 +9,24 @@ import React, {
 import { OnboardStrategy } from "starkzap";
 import type { WalletInterface } from "starkzap";
 import { getStarkZapSdk } from "@/lib/starkzap";
+import { COLLECTION_721_CONTRACT, MARKETPLACE_721_CONTRACT, MARKETPLACE_1155_CONTRACT } from "@/lib/constants";
 
 // ---------------------------------------------------------------------------
 // Cartridge session policies for Medialane contracts
 // ---------------------------------------------------------------------------
 
-const COLLECTION_CONTRACT =
-  process.env.NEXT_PUBLIC_COLLECTION_CONTRACT_ADDRESS ||
-  process.env.NEXT_PUBLIC_COLLECTION_CONTRACT;
-const MARKETPLACE_CONTRACT =
-  process.env.NEXT_PUBLIC_MEDIALANE_CONTRACT_ADDRESS ||
-  process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT;
-
 const CARTRIDGE_POLICIES = [
-  COLLECTION_CONTRACT && { target: COLLECTION_CONTRACT, method: "mint" },
-  COLLECTION_CONTRACT && { target: COLLECTION_CONTRACT, method: "create_collection" },
-  COLLECTION_CONTRACT && { target: COLLECTION_CONTRACT, method: "burn" },
-  COLLECTION_CONTRACT && { target: COLLECTION_CONTRACT, method: "transfer_token" },
-  MARKETPLACE_CONTRACT && { target: MARKETPLACE_CONTRACT, method: "register_order" },
-  MARKETPLACE_CONTRACT && { target: MARKETPLACE_CONTRACT, method: "fulfill_order" },
-  MARKETPLACE_CONTRACT && { target: MARKETPLACE_CONTRACT, method: "cancel_order" },
-].filter(Boolean) as { target: string; method: string }[];
+  { target: COLLECTION_721_CONTRACT, method: "mint" },
+  { target: COLLECTION_721_CONTRACT, method: "create_collection" },
+  { target: COLLECTION_721_CONTRACT, method: "burn" },
+  { target: COLLECTION_721_CONTRACT, method: "transfer_token" },
+  { target: MARKETPLACE_721_CONTRACT, method: "register_order" },
+  { target: MARKETPLACE_721_CONTRACT, method: "fulfill_order" },
+  { target: MARKETPLACE_721_CONTRACT, method: "cancel_order" },
+  { target: MARKETPLACE_1155_CONTRACT, method: "register_order" },
+  { target: MARKETPLACE_1155_CONTRACT, method: "fulfill_order" },
+  { target: MARKETPLACE_1155_CONTRACT, method: "cancel_order" },
+] as { target: string; method: string }[];
 
 // ---------------------------------------------------------------------------
 // Context types

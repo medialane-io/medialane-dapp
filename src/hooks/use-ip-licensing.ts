@@ -1,11 +1,12 @@
 import { useContract } from '@starknet-react/core';
 import { useCallback } from 'react';
 import IPLicensingABI from '../abis/ip_licensing';
+import { COLLECTION_721_CONTRACT } from '@/lib/constants';
 
 export const useIPLicensing = () => {
     // Initialize contract
     const { contract } = useContract({
-        address: process.env.NEXT_PUBLIC_COLLECTION_CONTRACT_ADDRESS as `0x${string}`,
+        address: COLLECTION_721_CONTRACT,
         abi: IPLicensingABI,
     });
 

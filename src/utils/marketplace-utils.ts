@@ -1,4 +1,9 @@
 import { type TypedData, TypedDataRevision, constants } from "starknet";
+import {
+    build1155OrderTypedData,
+    build1155FulfillmentTypedData,
+    build1155CancellationTypedData,
+} from "@medialane/sdk";
 
 export const getOrderParametersTypedData = (
     message: any,
@@ -105,6 +110,24 @@ export const getOrderFulfillmentTypedData = (
         message,
     };
 };
+
+/** SNIP-12 typed data for ERC-1155 OrderParameters. Domain: "Medialane1155". Flat struct. */
+export const get1155OrderParametersTypedData = (
+    message: Record<string, unknown>,
+    chainId: constants.StarknetChainId
+): TypedData => build1155OrderTypedData(message, chainId);
+
+/** SNIP-12 typed data for ERC-1155 OrderFulfillment. Includes `quantity` field. */
+export const get1155OrderFulfillmentTypedData = (
+    message: Record<string, unknown>,
+    chainId: constants.StarknetChainId
+): TypedData => build1155FulfillmentTypedData(message, chainId);
+
+/** SNIP-12 typed data for ERC-1155 OrderCancellation. Domain: "Medialane1155". */
+export const get1155OrderCancellationTypedData = (
+    message: Record<string, unknown>,
+    chainId: constants.StarknetChainId
+): TypedData => build1155CancellationTypedData(message, chainId);
 
 export const stringifyBigInts = (obj: any): any => {
     if (typeof obj === "bigint") {

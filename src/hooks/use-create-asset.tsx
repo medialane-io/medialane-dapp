@@ -7,7 +7,7 @@ import {
 import { Abi } from "starknet";
 import { ipCollectionAbi } from "@/abis/ip_collection";
 import {
-  COLLECTION_CONTRACT_ADDRESS,
+  COLLECTION_721_CONTRACT,
 } from "@/lib/constants";
 import { useToast } from "./use-toast";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
@@ -44,7 +44,7 @@ export function useCreateAsset(): IMintReturnType {
 
   const { contract } = useContract({
     abi: COLLECTION_CONTRACT_ABI as Abi,
-    address: COLLECTION_CONTRACT_ADDRESS as `0x${string}`,
+    address: COLLECTION_721_CONTRACT as `0x${string}`,
   });
 
   const createAsset = useCallback(

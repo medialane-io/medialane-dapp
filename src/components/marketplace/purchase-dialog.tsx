@@ -6,6 +6,7 @@ import { CheckCircle2, AlertCircle, ShoppingCart, ExternalLink, Loader2, Sparkle
 import { fireConfetti } from "@/lib/confetti";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { useMarketplace } from "@/hooks/use-marketplace";
@@ -26,6 +27,9 @@ export function PurchaseDialog({ order, open, onOpenChange, onSuccess }: Purchas
   const { checkoutCart, isProcessing, txHash, error, resetState } = useMarketplace();
   const confettiFired = useRef(false);
   const [txStatus, setTxStatus] = useState<"idle" | "confirmed">("idle");
+  const isERC1155 = order.offer.itemType === "ERC1155";
+  const maxQty = isERC1155 && order.remainingAmount ? parseInt(order.remainingAmount, 10) : 1;
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     if (txStatus === "confirmed" && !confettiFired.current) { confettiFired.current = true; fireConfetti(); }
@@ -33,19 +37,25 @@ export function PurchaseDialog({ order, open, onOpenChange, onSuccess }: Purchas
   }, [txStatus]);
 
   useEffect(() => {
-    if (open) { resetState(); setTxStatus("idle"); }
+    if (open) { resetState(); setTxStatus("idle"); setQuantity(1); }
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBuy = async () => {
     if (!isConnected) { toast.error("Connect your wallet first"); return; }
     try {
-      // checkoutCart expects flat fields (considerationToken, considerationAmount)
-      // but ApiOrder has them nested under consideration.token / consideration.startAmount
+      let considerationAmount = order.consideration.startAmount;
+      if (isERC1155 && quantity > 1) {
+        const totalUnits = parseInt(order.offer.startAmount || "1", 10) || 1;
+        const perUnitRaw = BigInt(order.consideration.startAmount) / BigInt(totalUnits);
+        considerationAmount = (perUnitRaw * BigInt(quantity)).toString();
+      }
       const item = {
         orderHash: order.orderHash,
         considerationToken: order.consideration.token,
-        considerationAmount: order.consideration.startAmount,
+        considerationAmount,
         offerIdentifier: order.offer.identifier,
+        isERC1155,
+        quantity: quantity.toString(),
       };
       const hash = await checkoutCart([item as any]);
       if (hash) setTxStatus("confirmed");
@@ -94,11 +104,32 @@ export function PurchaseDialog({ order, open, onOpenChange, onSuccess }: Purchas
             )}
             {price && (
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                <span className="text-sm text-muted-foreground">Price</span>
+                <span className="text-sm text-muted-foreground">{isERC1155 ? "Price per edition" : "Price"}</span>
                 <div className="flex items-center gap-1.5 font-semibold">
                   <CurrencyIcon symbol={price.currency} size={14} />
                   <span>{price.formatted ?? formatDisplayPrice(price.raw ?? "")}</span>
                   <span className="text-xs text-muted-foreground">{price.currency}</span>
+                </div>
+              </div>
+            )}
+            {isERC1155 && maxQty > 1 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Quantity</span>
+                  <span className="text-muted-foreground">{order.remainingAmount} available</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))} disabled={quantity <= 1}>
+                    <span className="text-lg leading-none">−</span>
+                  </Button>
+                  <Input type="number" min={1} max={maxQty} value={quantity}
+                    onChange={(e) => setQuantity(Math.max(1, Math.min(maxQty, parseInt(e.target.value, 10) || 1)))}
+                    className="h-8 text-center" />
+                  <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0"
+                    onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))} disabled={quantity >= maxQty}>
+                    <span className="text-lg leading-none">+</span>
+                  </Button>
                 </div>
               </div>
             )}

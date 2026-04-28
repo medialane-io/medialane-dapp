@@ -1,6 +1,6 @@
 import { useReadContract } from "@starknet-react/core";
 import { Abi } from "starknet";
-import { CONTRACT_ADDRESS } from "@/lib/constants";
+import { COLLECTION_721_CONTRACT } from "@/lib/constants";
 import { useEffect, useState } from "react";
 import { NFTMetadata } from "@/lib/types";
 import { abi } from "@/abis/abi";
@@ -30,7 +30,7 @@ export function useNFTDetails(tokenId: number) {
   const { data: nftSymbol } = useReadContract({
     abi: abi as Abi,
     functionName: "symbol",
-    address: CONTRACT_ADDRESS,
+    address: COLLECTION_721_CONTRACT,
     args: [],
   });
 
@@ -38,7 +38,7 @@ export function useNFTDetails(tokenId: number) {
   const { data: nftName } = useReadContract({
     abi: abi as Abi,
     functionName: "name",
-    address: CONTRACT_ADDRESS,
+    address: COLLECTION_721_CONTRACT,
     args: [],
   });
 
@@ -46,7 +46,7 @@ export function useNFTDetails(tokenId: number) {
   const { data: tokenURI } = useReadContract({
     abi: abi as Abi,
     functionName: "tokenURI",
-    address: CONTRACT_ADDRESS,
+    address: COLLECTION_721_CONTRACT,
     args: [tokenId],
   });
 
@@ -54,7 +54,7 @@ export function useNFTDetails(tokenId: number) {
   const { data: tokenOwner } = useReadContract({
     abi: abi as Abi,
     functionName: "ownerOf",
-    address: CONTRACT_ADDRESS,
+    address: COLLECTION_721_CONTRACT,
     args: [tokenId],
   });
 
@@ -88,7 +88,7 @@ export function useNFTDetails(tokenId: number) {
     creator: (metadata?.author || tokenOwner || "Unknown").toString(),
     imageUrl: metadata?.image || "/background.jpg",
     blockchain: "Starknet",
-    contractAddress: CONTRACT_ADDRESS || "",
+    contractAddress: COLLECTION_721_CONTRACT || "",
     ipfsUrl: tokenURI || "",
     externalUrl: metadata?.externalUrl || ""
   };

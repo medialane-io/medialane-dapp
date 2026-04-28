@@ -44,11 +44,19 @@ export function AssetMarketsTab({
                     <p className="font-bold text-sm inline-flex items-center gap-1.5">
                       {formatDisplayPrice(order.price.formatted)}
                       <CurrencyIcon symbol={order.price.currency ?? ""} size={14} />
+                      {order.offer.itemType === "ERC1155" && (
+                        <span className="text-xs font-normal text-muted-foreground">/ edition</span>
+                      )}
                     </p>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
                       <Clock className="h-3 w-3" />
                       {timeUntil(order.endTime)}
                     </div>
+                    {order.offer.itemType === "ERC1155" && order.remainingAmount !== null && (
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {order.remainingAmount} of {order.offer.startAmount} available
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <AddressDisplay address={order.offerer} chars={4} showCopy={false} className="text-xs text-muted-foreground" />
