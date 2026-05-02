@@ -58,4 +58,10 @@ export interface CartItem {
   offerer: string;
   considerationToken: string;
   considerationAmount: string;
+  /** True when the order is an ERC-1155 listing — routes checkout to the 1155 contract. */
+  isERC1155?: boolean;
+  /** Display identifier shown in signing toasts (e.g. token name or ID). */
+  offerIdentifier?: string;
+  /** ERC-1155 only: number of units to purchase. Defaults to "1" in checkoutCart. */
+  quantity?: string;
 }

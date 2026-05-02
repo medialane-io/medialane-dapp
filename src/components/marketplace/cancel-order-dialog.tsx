@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
-import { CheckCircle2, AlertCircle, X, Loader2 } from "lucide-react";
+import { CheckCircle2, AlertCircle, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CurrencyIcon } from "@/components/shared/currency-icon";
 import { useMarketplace } from "@/hooks/use-marketplace";
 import { ipfsToHttp, formatDisplayPrice } from "@/lib/utils";
+import { MarketplaceProcessingState } from "@/components/marketplace/marketplace-dialog-primitives";
 import type { ApiOrder } from "@medialane/sdk";
 
 interface CancelOrderDialogProps {
@@ -114,10 +115,7 @@ export function CancelOrderDialog({
 
         ) : isProcessing ? (
           /* ── Processing ── */
-          <div className="flex flex-col items-center gap-4 p-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Submitting cancellation…</p>
-          </div>
+          <MarketplaceProcessingState title="Submitting cancellation…" />
 
         ) : (
           /* ── Confirm ── */

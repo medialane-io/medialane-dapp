@@ -8,7 +8,7 @@ import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import {
   Telescope, Compass, Briefcase, Zap, Activity,
   LayoutGrid, Users, Search, Sun, Moon, ShoppingBag,
-  BookOpen, FileCode2, Mail, ChevronRight,
+  BookOpen, ChevronRight,
 } from "lucide-react";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { useUnreadOffers } from "@/hooks/use-unread-offers";
@@ -43,11 +43,6 @@ const EXPLORE_SUB = [
   { href: "/collections", label: "Collections", icon: LayoutGrid, external: false },
   { href: "/creators",    label: "Creators",    icon: Users,      external: false },
   { href: "/activities",  label: "Activity",    icon: Activity,   external: false },
-];
-
-const RESOURCES_SUB = [
-  { href: "https://docs.medialane.io", label: "Docs",    icon: FileCode2, external: true  },
-  { href: "/contact",                  label: "Contact", icon: Mail,      external: false },
 ];
 
 // ── Collapsible nav group ────────────────────────────────────────────────────
@@ -191,8 +186,6 @@ export function AppSidebar() {
     pathname?.startsWith("/creators") ||
     pathname === "/activities"
   );
-  const onResources = !!(pathname === "/contact" || pathname?.startsWith("/contact/"));
-
   return (
     <Sidebar collapsible="icon">
 
@@ -297,17 +290,17 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* ── Resources (Docs, Contact) ────────────────────── */}
+        {/* ── Docs ─────────────────────────────────────────── */}
         <SidebarGroup>
           <SidebarMenu>
-            <CollapsibleNavItem
-              label="Resources"
-              icon={BookOpen}
-              sub={RESOURCES_SUB}
-              defaultOpen={onResources}
-              tooltip="Resources"
-              onClose={closeSidebar}
-            />
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Docs">
+                <a href="https://docs.medialane.io" target="_blank" rel="noopener noreferrer">
+                  <BookOpen />
+                  <span>Docs</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
 

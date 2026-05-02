@@ -216,11 +216,21 @@ export function useMarketplace(): UseMarketplaceReturn {
                 const listAmount = amount ?? "1";
                 const orderParams1155 = {
                     offerer: walletAddress,
-                    nft_contract: assetContractAddress,
-                    token_id: tokenId,
-                    amount: listAmount,
-                    payment_token: currencyAddress,
-                    price_per_unit: priceWei,
+                    offer: {
+                        item_type: "ERC1155",
+                        token: assetContractAddress,
+                        identifier_or_criteria: tokenId,
+                        start_amount: listAmount,
+                        end_amount: listAmount,
+                    },
+                    consideration: {
+                        item_type: "ERC20",
+                        token: currencyAddress,
+                        identifier_or_criteria: "0",
+                        start_amount: priceWei,
+                        end_amount: priceWei,
+                        recipient: walletAddress,
+                    },
                     start_time: startTime,
                     end_time: endTime,
                     salt,
@@ -235,7 +245,17 @@ export function useMarketplace(): UseMarketplaceReturn {
                     ? signature1155
                     : [signature1155.r.toString(), signature1155.s.toString()];
                 const registerCall1155 = contract.populate("register_order", [{
-                    parameters: orderParams1155,
+                    parameters: {
+                        ...orderParams1155,
+                        offer: {
+                            ...orderParams1155.offer,
+                            item_type: shortString.encodeShortString(orderParams1155.offer.item_type),
+                        },
+                        consideration: {
+                            ...orderParams1155.consideration,
+                            item_type: shortString.encodeShortString(orderParams1155.consideration.item_type),
+                        },
+                    },
                     signature: signatureArray1155,
                 }]);
                 let isAlreadyApproved1155 = false;
@@ -378,7 +398,33 @@ export function useMarketplace(): UseMarketplaceReturn {
                 nonce,
             };
 
-            const registerCall = await signAndBuildRegisterCall(orderParams, contract);
+            let registerCall: any;
+            if (is1155) {
+                const chainId = chain!.id as any as constants.StarknetChainId;
+                const typedData = stringifyBigInts(
+                    get1155OrderParametersTypedData(orderParams as Record<string, unknown>, chainId)
+                );
+                const signature = await account!.signMessage(typedData);
+                const signatureArray = Array.isArray(signature)
+                    ? signature
+                    : [signature.r.toString(), signature.s.toString()];
+                registerCall = contract.populate("register_order", [{
+                    parameters: {
+                        ...orderParams,
+                        offer: {
+                            ...orderParams.offer,
+                            item_type: shortString.encodeShortString(orderParams.offer.item_type),
+                        },
+                        consideration: {
+                            ...orderParams.consideration,
+                            item_type: shortString.encodeShortString(orderParams.consideration.item_type),
+                        },
+                    },
+                    signature: signatureArray,
+                }]);
+            } else {
+                registerCall = await signAndBuildRegisterCall(orderParams, contract);
+            }
 
             const { cairo } = await import("starknet");
             const amountUint256 = cairo.uint256(priceWei);

@@ -26,6 +26,8 @@ function orderToCartItem(order: ApiOrder) {
     offerer: order.offerer,
     considerationToken: order.consideration.token ?? "",
     considerationAmount: order.consideration.startAmount ?? "",
+    isERC1155: order.offer?.itemType === "ERC1155",
+    offerIdentifier: order.token?.name ?? `Token #${order.nftTokenId}`,
   };
 }
 

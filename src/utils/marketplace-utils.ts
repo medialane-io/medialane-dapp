@@ -111,7 +111,7 @@ export const getOrderFulfillmentTypedData = (
     };
 };
 
-/** SNIP-12 typed data for ERC-1155 OrderParameters. Domain: "Medialane1155". Flat struct. */
+/** SNIP-12 typed data for ERC-1155 V2 OrderParameters. Domain: "Medialane" v2. Nested OfferItem/ConsiderationItem. */
 export const get1155OrderParametersTypedData = (
     message: Record<string, unknown>,
     chainId: constants.StarknetChainId
@@ -123,7 +123,7 @@ export const get1155OrderFulfillmentTypedData = (
     chainId: constants.StarknetChainId
 ): TypedData => build1155FulfillmentTypedData(message, chainId);
 
-/** SNIP-12 typed data for ERC-1155 OrderCancellation. Domain: "Medialane1155". */
+/** SNIP-12 typed data for ERC-1155 V2 OrderCancellation. Domain: "Medialane" v2. */
 export const get1155OrderCancellationTypedData = (
     message: Record<string, unknown>,
     chainId: constants.StarknetChainId

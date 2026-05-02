@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { CheckCircle2, AlertCircle, ArrowLeftRight, ExternalLink, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowLeftRight } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -14,6 +14,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { useMarketplace } from "@/hooks/use-marketplace";
 import { EXPLORER_URL, DURATION_OPTIONS } from "@/lib/constants";
+import {
+  DurationPicker,
+  MarketplaceSuccessState,
+  MarketplaceProcessingState,
+} from "@/components/marketplace/marketplace-dialog-primitives";
 
 const schema = z.object({
   price: z.string().min(1, "Price required").refine((v) => !isNaN(parseFloat(v)) && parseFloat(v) > 0, "Must be positive"),
@@ -25,7 +30,6 @@ type FormValues = z.infer<typeof schema>;
 interface CounterOfferDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** The NFT contract address (needed to place the counter-offer on-chain) */
   nftContract: string;
   tokenId: string;
   originalOrderHash: string;
@@ -66,61 +70,49 @@ export function CounterOfferDialog({
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!isProcessing) onOpenChange(v); }}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Counter offer</DialogTitle>
-          {currentBid && <DialogDescription>Current bid: {currentBid}</DialogDescription>}
-        </DialogHeader>
         {done ? (
-          <div className="flex flex-col items-center gap-5 py-2">
-            <div className="h-16 w-16 rounded-full bg-emerald-500/15 flex items-center justify-center">
-              <CheckCircle2 className="h-9 w-9 text-emerald-500" />
-            </div>
-            <p className="font-bold text-xl">Counter-offer submitted!</p>
-            {txHash && (
-              <a href={`${EXPLORER_URL}/tx/${txHash}`} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
-                <span className="font-mono">{txHash.slice(0, 10)}…{txHash.slice(-8)}</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
-            <Button className="w-full" onClick={() => { onOpenChange(false); onSuccess?.(); }}>Done</Button>
-          </div>
+          <MarketplaceSuccessState
+            title="Counter-offer submitted!"
+            description={`Your counter on ${tokenName || `#${tokenId}`} is live.`}
+            txHash={txHash}
+            explorerUrl={EXPLORER_URL}
+            name={tokenName || `#${tokenId}`}
+            onDone={() => { onOpenChange(false); onSuccess?.(); }}
+          />
         ) : isProcessing ? (
-          <div className="flex flex-col items-center gap-4 py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Submitting counter-offer…</p>
-          </div>
+          <MarketplaceProcessingState title="Submitting counter-offer…" />
         ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField control={form.control} name="price" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Your offer ({currencySymbol})</FormLabel>
-                  <FormControl>
-                    <Input type="number" step="any" placeholder="0.00" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <FormField control={form.control} name="durationSeconds" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Duration</FormLabel>
-                  <FormControl>
-                    <div className="grid grid-cols-4 gap-2">
-                      {DURATION_OPTIONS.map((opt) => (
-                        <Button key={opt.label} type="button" variant={field.value === opt.seconds ? "default" : "outline"}
-                          size="sm" onClick={() => field.onChange(opt.seconds)} className="text-xs">{opt.label}</Button>
-                      ))}
-                    </div>
-                  </FormControl>
-                </FormItem>
-              )} />
-              {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
-              <Button type="submit" className="w-full h-11" disabled={isProcessing || !isConnected}>
-                <ArrowLeftRight className="h-4 w-4 mr-2" />Submit counter-offer
-              </Button>
-            </form>
-          </Form>
+          <>
+            <DialogHeader>
+              <DialogTitle>Counter offer</DialogTitle>
+              {currentBid && <DialogDescription>Current bid: {currentBid}</DialogDescription>}
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField control={form.control} name="price" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Your offer ({currencySymbol})</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="any" placeholder="0.00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="durationSeconds" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Duration</FormLabel>
+                    <FormControl>
+                      <DurationPicker options={DURATION_OPTIONS} value={field.value} onChange={field.onChange} disabled={isProcessing} cols={4} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
+                <Button type="submit" className="w-full h-11" disabled={isProcessing || !isConnected}>
+                  <ArrowLeftRight className="h-4 w-4 mr-2" />Submit counter-offer
+                </Button>
+              </form>
+            </Form>
+          </>
         )}
       </DialogContent>
     </Dialog>

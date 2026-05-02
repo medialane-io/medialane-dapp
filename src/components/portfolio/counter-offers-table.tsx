@@ -5,21 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyOrError } from "@/components/ui/empty-or-error";
 import { useMarketplace } from "@/hooks/use-marketplace";
-import { ipfsToHttp, formatDisplayPrice, cn } from "@/lib/utils";
+import { ipfsToHttp, formatDisplayPrice, formatOrderExpiry, cn } from "@/lib/utils";
 import { ArrowLeftRight, ExternalLink, Inbox } from "lucide-react";
 import { EXPLORER_URL } from "@/lib/constants";
-import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
 import Link from "next/link";
 import type { ApiOrder } from "@medialane/sdk";
-
-function formatExpiry(endTime: string | bigint) {
-  const expiry = new Date(Number(endTime) * 1000);
-  const now = new Date();
-  if (expiry < now) return { label: "Expired", urgent: false, expired: true };
-  const urgent = expiry.getTime() - now.getTime() < 86400000;
-  return { label: formatDistanceToNow(expiry, { addSuffix: true }), urgent, expired: false };
-}
 
 /**
  * Fetches and renders a single counter-offer row for one original bid.
@@ -40,7 +31,7 @@ function CounterOfferFetcher({
 
   const name = counter.token?.name || `#${counter.nftTokenId}`;
   const image = counter.token?.image ? ipfsToHttp(counter.token.image) : null;
-  const expiry = formatExpiry(counter.endTime);
+  const expiry = formatOrderExpiry(counter.endTime);
   const isExpiredOrFilled = counter.status !== "ACTIVE" || expiry.expired;
 
   return (
@@ -124,7 +115,21 @@ export function CounterOffersTable({ address }: { address: string }) {
   );
 
   const handleAccept = async (counter: ApiOrder, _original: ApiOrder) => {
-    await checkoutCart([counter as any]);
+    await checkoutCart([{
+      orderHash: counter.orderHash,
+      nftContract: counter.nftContract ?? "",
+      nftTokenId: counter.nftTokenId ?? "",
+      name: counter.token?.name ?? `#${counter.nftTokenId}`,
+      image: counter.token?.image ?? "",
+      price: counter.price?.formatted ?? "0",
+      currency: counter.price?.currency ?? "",
+      currencyDecimals: counter.price?.decimals ?? 18,
+      offerer: counter.offerer,
+      considerationToken: counter.consideration?.token ?? "",
+      considerationAmount: counter.consideration?.startAmount ?? "",
+      isERC1155: counter.offer?.itemType === "ERC1155",
+      offerIdentifier: counter.token?.name ?? `#${counter.nftTokenId}`,
+    }]);
     mutate();
   };
 

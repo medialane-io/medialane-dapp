@@ -51,6 +51,8 @@ export function ListingCard({ order, onBuy, compact = false }: ListingCardProps)
       offerer: o.offerer ?? "",
       considerationToken: o.consideration?.token ?? "",
       considerationAmount: o.consideration?.startAmount ?? "",
+      isERC1155: o.offer?.itemType === "ERC1155",
+      offerIdentifier: name,
     });
   };
 

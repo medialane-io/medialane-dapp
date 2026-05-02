@@ -127,6 +127,8 @@ export default function AssetPageClient() {
         offerer: cheapest.offerer,
         considerationToken: cheapest.consideration.token,
         considerationAmount: cheapest.consideration.startAmount,
+        isERC1155,
+        offerIdentifier: name || `#${tokenId}`,
       },
       walletAddress ?? undefined
     );
@@ -142,7 +144,7 @@ export default function AssetPageClient() {
 
   const handleAcceptClick = async (order: ApiOrder) => {
     setOrderToAccept(order);
-    await acceptOffer(order.orderHash, contract, tokenId, order.offer.itemType);
+    await acceptOffer(order.orderHash, contract, tokenId, order.consideration.itemType);
     setOrderToAccept(null);
     mutateListings();
   };

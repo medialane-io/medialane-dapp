@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { CheckCircle2, AlertCircle, Tag, ExternalLink, Loader2, Sparkles } from "lucide-react";
+import { AlertCircle, Tag } from "lucide-react";
 import { fireConfetti } from "@/lib/confetti";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -18,6 +18,12 @@ import { useMarketplace } from "@/hooks/use-marketplace";
 import { EXPLORER_URL, DURATION_OPTIONS } from "@/lib/constants";
 import { getListableTokens } from "@medialane/sdk";
 import { CurrencyIcon } from "@/components/shared/currency-icon";
+import {
+  CurrencyPicker,
+  DurationPicker,
+  MarketplaceSuccessState,
+  MarketplaceProcessingState,
+} from "@/components/marketplace/marketplace-dialog-primitives";
 
 const CURRENCIES = getListableTokens().map((t) => t.symbol);
 
@@ -76,99 +82,77 @@ export function ListingDialog({ open, onOpenChange, assetContract, tokenId, toke
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!isProcessing) onOpenChange(v); }}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader><DialogTitle>List for sale</DialogTitle></DialogHeader>
         {txStatus === "confirmed" ? (
-          <div className="flex flex-col items-center gap-5 py-2">
-            <div className="relative">
-              <div className="h-16 w-16 rounded-full bg-emerald-500/15 flex items-center justify-center">
-                <CheckCircle2 className="h-9 w-9 text-emerald-500" />
-              </div>
-              <Sparkles className="absolute -top-1 -right-1 h-5 w-5 text-yellow-400" />
-            </div>
-            <p className="font-bold text-xl">Listing live!</p>
-            {txHash && (
-              <a href={`${EXPLORER_URL}/tx/${txHash}`} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
-                <span className="font-mono">{txHash.slice(0, 10)}…{txHash.slice(-8)}</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
-            <Button className="w-full" onClick={() => { onOpenChange(false); onSuccess?.(); }}>Done</Button>
-          </div>
+          <MarketplaceSuccessState
+            title="Listing live!"
+            description={`${tokenName || `#${tokenId}`} is now listed for sale.`}
+            txHash={txHash}
+            explorerUrl={EXPLORER_URL}
+            name={tokenName || `#${tokenId}`}
+            onDone={() => { onOpenChange(false); onSuccess?.(); }}
+          />
         ) : isProcessing ? (
-          <div className="flex flex-col items-center gap-4 py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Submitting listing…</p>
-          </div>
+          <MarketplaceProcessingState title="Submitting listing…" />
         ) : (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-              <Badge variant="outline" className="font-mono">#{tokenId}</Badge>
-              <span className="text-sm font-medium truncate">{tokenName || `Token #${tokenId}`}</span>
-            </div>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField control={form.control} name="price" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{tokenStandard === "ERC1155" ? "Price per edition" : "Price"}</FormLabel>
-                    <div className="relative">
-                      <FormControl>
-                        <Input type="number" step="any" placeholder="0.00" className="pr-20" {...field} />
-                      </FormControl>
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
-                        <CurrencyIcon symbol={form.watch("currency")} size={14} />
-                        <span className="text-xs font-bold">{form.watch("currency")}</span>
-                      </div>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                {tokenStandard === "ERC1155" && (
-                  <FormField control={form.control} name="amount" render={({ field }) => (
+          <>
+            <DialogHeader><DialogTitle>List for sale</DialogTitle></DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                <Badge variant="outline" className="font-mono">#{tokenId}</Badge>
+                <span className="text-sm font-medium truncate">{tokenName || `Token #${tokenId}`}</span>
+              </div>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField control={form.control} name="price" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Quantity to list</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="1" min="1" placeholder="1" {...field} />
-                      </FormControl>
+                      <FormLabel>{tokenStandard === "ERC1155" ? "Price per edition" : "Price"}</FormLabel>
+                      <div className="relative">
+                        <FormControl>
+                          <Input type="number" step="any" placeholder="0.00" className="pr-20" {...field} />
+                        </FormControl>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
+                          <CurrencyIcon symbol={form.watch("currency")} size={14} />
+                          <span className="text-xs font-bold">{form.watch("currency")}</span>
+                        </div>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )} />
-                )}
-                <FormField control={form.control} name="currency" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Currency</FormLabel>
-                    <FormControl>
-                      <div className="grid grid-cols-5 gap-1.5">
-                        {CURRENCIES.map((c) => (
-                          <Button key={c} type="button" variant={field.value === c ? "default" : "outline"} size="sm"
-                            onClick={() => field.onChange(c)} className="gap-1 px-2 text-xs w-full">
-                            <CurrencyIcon symbol={c} size={13} className="shrink-0" /><span className="truncate">{c}</span>
-                          </Button>
-                        ))}
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="durationSeconds" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Duration</FormLabel>
-                    <FormControl>
-                      <div className="grid grid-cols-4 gap-2">
-                        {DURATION_OPTIONS.map((opt) => (
-                          <Button key={opt.label} type="button" variant={field.value === opt.seconds ? "default" : "outline"}
-                            size="sm" onClick={() => field.onChange(opt.seconds)} className="text-xs">{opt.label}</Button>
-                        ))}
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                )} />
-                {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
-                <Button type="submit" className="w-full h-11" disabled={isProcessing || !isConnected}>
-                  <Tag className="h-4 w-4 mr-2" />List for sale
-                </Button>
-              </form>
-            </Form>
-          </div>
+                  {tokenStandard === "ERC1155" && (
+                    <FormField control={form.control} name="amount" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Quantity to list</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="1" min="1" placeholder="1" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  )}
+                  <FormField control={form.control} name="currency" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Currency</FormLabel>
+                      <FormControl>
+                        <CurrencyPicker currencies={CURRENCIES} value={field.value} onChange={field.onChange} disabled={isProcessing} />
+                      </FormControl>
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="durationSeconds" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Duration</FormLabel>
+                      <FormControl>
+                        <DurationPicker options={DURATION_OPTIONS} value={field.value} onChange={field.onChange} disabled={isProcessing} cols={4} />
+                      </FormControl>
+                    </FormItem>
+                  )} />
+                  {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
+                  <Button type="submit" className="w-full h-11" disabled={isProcessing || !isConnected}>
+                    <Tag className="h-4 w-4 mr-2" />List for sale
+                  </Button>
+                </form>
+              </Form>
+            </div>
+          </>
         )}
       </DialogContent>
     </Dialog>

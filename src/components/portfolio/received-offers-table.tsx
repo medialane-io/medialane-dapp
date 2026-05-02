@@ -5,10 +5,9 @@ import { useUserOrders } from "@/hooks/use-orders";
 import { Button } from "@/components/ui/button";
 import { EmptyOrError } from "@/components/ui/empty-or-error";
 import { useMarketplace } from "@/hooks/use-marketplace";
-import { ipfsToHttp, formatDisplayPrice, cn } from "@/lib/utils";
+import { ipfsToHttp, formatDisplayPrice, formatOrderExpiry, cn } from "@/lib/utils";
 import { ExternalLink, Inbox } from "lucide-react";
 import { EXPLORER_URL, SUPPORTED_TOKENS } from "@/lib/constants";
-import { formatDistanceToNow } from "date-fns";
 import { getSeenOffers } from "@/hooks/use-unread-offers";
 import { CounterOfferDialog } from "@/components/marketplace/counter-offer-dialog";
 import Image from "next/image";
@@ -17,14 +16,6 @@ import type { ApiOrder } from "@medialane/sdk";
 
 interface ReceivedOffersTableProps {
   address: string;
-}
-
-function formatExpiry(endTime: string | bigint) {
-  const expiry = new Date(Number(endTime) * 1000);
-  const now = new Date();
-  if (expiry < now) return { label: "Expired", urgent: false, expired: true };
-  const urgent = expiry.getTime() - now.getTime() < 86400000;
-  return { label: formatDistanceToNow(expiry, { addSuffix: true }), urgent, expired: false };
 }
 
 function ReceivedOfferRow({
@@ -42,7 +33,7 @@ function ReceivedOfferRow({
 }) {
   const name = order.token?.name || `#${order.nftTokenId}`;
   const image = order.token?.image ? ipfsToHttp(order.token.image) : null;
-  const expiry = formatExpiry(order.endTime);
+  const expiry = formatOrderExpiry(order.endTime);
 
   return (
     <div className={cn(
@@ -126,7 +117,7 @@ function ReceivedOfferRow({
 
 export function ReceivedOffersTable({ address }: ReceivedOffersTableProps) {
   const { orders, isLoading, error, mutate } = useUserOrders(address);
-  const { checkoutCart, isProcessing } = useMarketplace();
+  const { acceptOffer, isProcessing } = useMarketplace();
   const [counterOrder, setCounterOrder] = useState<ApiOrder | null>(null);
 
   const seenHashes = getSeenOffers();
@@ -139,7 +130,12 @@ export function ReceivedOffersTable({ address }: ReceivedOffersTableProps) {
   );
 
   const handleAccept = async (order: ApiOrder) => {
-    await checkoutCart([order as any]);
+    await acceptOffer(
+      order.orderHash,
+      order.nftContract ?? "",
+      order.nftTokenId ?? "",
+      order.consideration.itemType
+    );
     mutate();
   };
 

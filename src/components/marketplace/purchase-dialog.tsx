@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, AlertCircle, ShoppingCart, ExternalLink, Loader2, Sparkles } from "lucide-react";
+import { AlertCircle, ShoppingCart } from "lucide-react";
 import { fireConfetti } from "@/lib/confetti";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,10 @@ import { useMarketplace } from "@/hooks/use-marketplace";
 import { EXPLORER_URL } from "@/lib/constants";
 import { formatDisplayPrice, ipfsToHttp } from "@/lib/utils";
 import { CurrencyIcon } from "@/components/shared/currency-icon";
+import {
+  MarketplaceSuccessState,
+  MarketplaceProcessingState,
+} from "@/components/marketplace/marketplace-dialog-primitives";
 import type { ApiOrder } from "@medialane/sdk";
 
 interface PurchaseDialogProps {
@@ -65,83 +69,77 @@ export function PurchaseDialog({ order, open, onOpenChange, onSuccess }: Purchas
   };
 
   const price = order.price;
-  const tokenImg = (order as any).token?.metadata?.image;
+  const tokenName = order.token?.name || `Token #${order.nftTokenId}`;
+  const tokenImg = order.token?.image ? ipfsToHttp(order.token.image) : null;
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!isProcessing) onOpenChange(v); }}>
       <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>Complete purchase</DialogTitle>
-          <DialogDescription>Confirm the details below to buy this asset.</DialogDescription>
-        </DialogHeader>
         {txStatus === "confirmed" ? (
-          <div className="flex flex-col items-center gap-5 py-2">
-            <div className="relative">
-              <div className="h-16 w-16 rounded-full bg-emerald-500/15 flex items-center justify-center">
-                <CheckCircle2 className="h-9 w-9 text-emerald-500" />
-              </div>
-              <Sparkles className="absolute -top-1 -right-1 h-5 w-5 text-yellow-400" />
-            </div>
-            <p className="font-bold text-xl">Purchase confirmed!</p>
-            {txHash && (
-              <a href={`${EXPLORER_URL}/tx/${txHash}`} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
-                <span className="font-mono">{txHash.slice(0, 10)}…{txHash.slice(-8)}</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
-            <Button className="w-full" onClick={() => { onOpenChange(false); onSuccess?.(); }}>Done</Button>
-          </div>
+          <MarketplaceSuccessState
+            title="Purchase confirmed!"
+            description="The asset is now yours."
+            txHash={txHash}
+            explorerUrl={EXPLORER_URL}
+            tokenImage={tokenImg}
+            name={tokenName}
+            onDone={() => { onOpenChange(false); onSuccess?.(); }}
+          />
         ) : isProcessing ? (
-          <div className="flex flex-col items-center gap-4 py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Processing purchase…</p>
-          </div>
+          <MarketplaceProcessingState title="Processing purchase…" imageUrl={tokenImg} imageAlt={tokenName} />
         ) : (
-          <div className="space-y-4">
-            {tokenImg && (
-              <img src={ipfsToHttp(tokenImg)} alt="Asset" className="w-full aspect-square object-cover rounded-lg" />
-            )}
-            {price && (
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                <span className="text-sm text-muted-foreground">{isERC1155 ? "Price per edition" : "Price"}</span>
-                <div className="flex items-center gap-1.5 font-semibold">
-                  <CurrencyIcon symbol={price.currency} size={14} />
-                  <span>{price.formatted ?? formatDisplayPrice(price.raw ?? "")}</span>
-                  <span className="text-xs text-muted-foreground">{price.currency}</span>
+          <>
+            <DialogHeader>
+              <DialogTitle>Complete purchase</DialogTitle>
+              <DialogDescription>Confirm the details below to buy this asset.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {tokenImg && (
+                <img src={tokenImg} alt={tokenName} className="w-full aspect-square object-cover rounded-xl" />
+              )}
+              {price && (
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                  <span className="text-sm text-muted-foreground">{isERC1155 ? "Price per edition" : "Price"}</span>
+                  <div className="flex items-center gap-1.5 font-semibold">
+                    <CurrencyIcon symbol={price.currency} size={14} />
+                    <span>{price.formatted ?? formatDisplayPrice(price.raw ?? "")}</span>
+                    <span className="text-xs text-muted-foreground">{price.currency}</span>
+                  </div>
                 </div>
+              )}
+              {isERC1155 && maxQty > 1 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Quantity</span>
+                    <span className="text-muted-foreground">{order.remainingAmount} available</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0"
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))} disabled={quantity <= 1}>
+                      <span className="text-lg leading-none">−</span>
+                    </Button>
+                    <Input type="number" min={1} max={maxQty} value={quantity}
+                      onChange={(e) => setQuantity(Math.max(1, Math.min(maxQty, parseInt(e.target.value, 10) || 1)))}
+                      className="h-8 text-center" />
+                    <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0"
+                      onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))} disabled={quantity >= maxQty}>
+                      <span className="text-lg leading-none">+</span>
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
+              <div className="btn-border-animated p-[1px] rounded-xl">
+                <Button
+                  className="w-full h-12 text-base font-semibold text-white rounded-[11px] flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-[0.98] bg-background/30"
+                  onClick={handleBuy}
+                  disabled={isProcessing || !isConnected}
+                >
+                  <ShoppingCart className="h-4 w-4 mr-2" />Buy now
+                </Button>
               </div>
-            )}
-            {isERC1155 && maxQty > 1 && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Quantity</span>
-                  <span className="text-muted-foreground">{order.remainingAmount} available</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0"
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))} disabled={quantity <= 1}>
-                    <span className="text-lg leading-none">−</span>
-                  </Button>
-                  <Input type="number" min={1} max={maxQty} value={quantity}
-                    onChange={(e) => setQuantity(Math.max(1, Math.min(maxQty, parseInt(e.target.value, 10) || 1)))}
-                    className="h-8 text-center" />
-                  <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0"
-                    onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))} disabled={quantity >= maxQty}>
-                    <span className="text-lg leading-none">+</span>
-                  </Button>
-                </div>
-              </div>
-            )}
-            {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
-            
-            <div className="btn-border-animated p-[1px] rounded-xl">
-            <Button className="w-full h-12 text-base font-semibold text-white rounded-[11px] flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-[0.98] bg-background/30" onClick={handleBuy} disabled={isProcessing || !isConnected}>
-              <ShoppingCart className="h-4 w-4 mr-2" />Buy now
-            </Button>
             </div>
-
-          </div>
+          </>
         )}
       </DialogContent>
     </Dialog>

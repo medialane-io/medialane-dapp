@@ -4,13 +4,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { AlertCircle, ArrowRightLeft, Loader2 } from "lucide-react";
 import {
-  CheckCircle2,
-  AlertCircle,
-  ArrowRightLeft,
-  ExternalLink,
-  Loader2,
-} from "lucide-react";
+  MarketplaceProcessingState,
+  MarketplaceSuccessState,
+} from "@/components/marketplace/marketplace-dialog-primitives";
 import {
   Dialog,
   DialogContent,
@@ -122,46 +120,24 @@ export function TransferDialog({
           </DialogHeader>
 
           {isSuccess ? (
-            <div className="flex flex-col items-center gap-4 py-4">
-              <CheckCircle2 className="h-12 w-12 text-emerald-500" />
-              <p className="font-semibold text-lg">Transfer complete!</p>
-              <p className="text-sm text-muted-foreground text-center">
-                {displayName} has been sent successfully.
-              </p>
-              {txHash && (
-                <Button variant="outline" size="sm" asChild>
-                  <a
-                    href={`${EXPLORER_URL}/tx/${txHash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2"
-                  >
-                    View on Voyager <ExternalLink className="h-3 w-3" />
-                  </a>
-                </Button>
-              )}
-              <Button
-                className="w-full"
-                onClick={() => {
-                  resetState();
-                  form.reset();
-                  setPendingAddress(null);
-                  onOpenChange(false);
-                  onSuccess?.();
-                }}
-              >
-                Done
-              </Button>
-            </div>
+            <MarketplaceSuccessState
+              title="Transfer complete!"
+              description={`${displayName} has been sent successfully.`}
+              txHash={txHash}
+              explorerUrl={EXPLORER_URL}
+              name={displayName}
+              onDone={() => {
+                resetState();
+                form.reset();
+                setPendingAddress(null);
+                onOpenChange(false);
+                onSuccess?.();
+              }}
+            />
           ) : isProcessing ? (
-            <div className="flex flex-col items-center gap-4 py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground">
-                {txStatus === "submitting"
-                  ? "Submitting transfer…"
-                  : "Confirming on Starknet…"}
-              </p>
-            </div>
+            <MarketplaceProcessingState
+              title={txStatus === "submitting" ? "Submitting transfer…" : "Confirming on Starknet…"}
+            />
           ) : (
             <div className="space-y-4">
               {/* Asset info */}
