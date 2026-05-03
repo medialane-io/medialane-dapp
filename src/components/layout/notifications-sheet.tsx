@@ -1,46 +1,79 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
-import { Bell } from "lucide-react";
-
+import { Bell, ArrowRight, Inbox, CheckCheck } from "lucide-react";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { useNotifications } from "@/hooks/use-notifications";
+import { NotificationRow } from "@/components/shared/notification-row";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { Notification } from "@/types/notification";
 
-const ACTIVITY_LABEL: Record<string, string> = {
-  sale: "Sale",
-  listing: "Listed",
-  offer: "Offer",
-  transfer: "Transfer",
-  cancelled: "Cancelled",
-};
+// ── Day grouping helper ───────────────────────────────────────────────────────
 
-function formatTimestamp(ts: string | number): string {
-  const date = new Date(typeof ts === "number" ? ts * 1000 : ts);
-  const diff = Date.now() - date.getTime();
-  const seconds = Math.floor(diff / 1000);
-  if (seconds < 60) return "just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  return date.toLocaleDateString();
+function dayLabel(timestamp: string): string {
+  const d = new Date(timestamp);
+  const now = new Date();
+  const diffDays = Math.floor(
+    (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7)  return d.toLocaleDateString("en", { weekday: "long" });
+  return d.toLocaleDateString("en", { month: "short", day: "numeric" });
 }
+
+function groupByDay(notifications: Notification[]): [string, Notification[]][] {
+  const map = new Map<string, Notification[]>();
+  for (const n of notifications) {
+    const label = dayLabel(n.timestamp);
+    const existing = map.get(label) ?? [];
+    existing.push(n);
+    map.set(label, existing);
+  }
+  return [...map.entries()];
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-6 gap-4 text-center">
+      <div className="h-14 w-14 rounded-2xl bg-muted/40 border border-border/50 flex items-center justify-center">
+        <Inbox className="h-6 w-6 text-muted-foreground/40" />
+      </div>
+      <div className="space-y-1">
+        <p className="text-sm font-semibold">All caught up</p>
+        <p className="text-xs text-muted-foreground leading-relaxed max-w-[200px]">
+          Offers, activity, and announcements will appear here.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ── Main ─────────────────────────────────────────────────────────────────────
 
 export function NotificationsItem() {
   const [open, setOpen] = useState(false);
-  const { address: walletAddress, isConnected: isSignedIn } = useUnifiedWallet();
-  const { unreadCount, unseenOffers, recentActivities, markAllSeen } =
-    useNotifications(isSignedIn ? walletAddress : null);
+  const { address: walletAddress, isConnected } = useUnifiedWallet();
+  const { notifications, unreadCount, markAllRead } = useNotifications(
+    isConnected ? walletAddress : null
+  );
 
-  function handleOpen() {
+  const handleOpen = useCallback(() => {
     setOpen(true);
-    markAllSeen();
-  }
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setOpen(false);
+    if (unreadCount > 0) markAllRead();
+  }, [unreadCount, markAllRead]);
+
+  const groups = groupByDay(notifications.slice(0, 20));
 
   return (
     <>
@@ -61,85 +94,84 @@ export function NotificationsItem() {
               </span>
             )}
           </div>
-          <span>
-            Notifications{unreadCount > 0 ? ` (${unreadCount})` : ""}
-          </span>
+          <span>Notifications{unreadCount > 0 ? ` (${unreadCount})` : ""}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
 
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right" className="w-80 p-0 flex flex-col">
-          <SheetHeader className="px-4 py-3 border-b border-border shrink-0">
-            <SheetTitle className="text-sm">Notifications</SheetTitle>
-          </SheetHeader>
+      <Dialog open={open} onOpenChange={(v) => (v ? handleOpen() : handleClose())}>
+        <DialogContent
+          className={cn(
+            "w-full max-w-[calc(100%-12px)] sm:max-w-sm",
+            "p-0 gap-0 flex flex-col",
+            "max-h-[85svh] overflow-hidden",
+            "rounded-2xl border border-border/50",
+            "shadow-2xl shadow-black/30"
+          )}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border/50 shrink-0 pr-12">
+            <div className="flex items-center gap-2.5">
+              <Bell className="h-4 w-4 text-muted-foreground" />
+              <DialogTitle className="text-sm font-bold">Notifications</DialogTitle>
+              {unreadCount > 0 && (
+                <span className="inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
+            {unreadCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 gap-1 text-[11px] text-muted-foreground hover:text-foreground px-2"
+                onClick={markAllRead}
+              >
+                <CheckCheck className="h-3 w-3" />
+                Mark all read
+              </Button>
+            )}
+          </div>
 
+          {/* Body */}
           <div className="flex-1 overflow-y-auto">
-            {unseenOffers.length === 0 && recentActivities.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-2">
-                <Bell className="h-8 w-8 text-muted-foreground/30" />
-                <p className="text-sm text-muted-foreground">No notifications yet</p>
-              </div>
+            {notifications.length === 0 ? (
+              <EmptyState />
             ) : (
-              <div className="divide-y divide-border/50">
-                {unseenOffers.map((offer) => (
-                  <Link
-                    key={offer.orderHash}
-                    href={`/asset/${offer.consideration.token}/${offer.consideration.identifier}`}
-                    onClick={() => setOpen(false)}
-                    className="flex items-start gap-3 px-4 py-3 hover:bg-muted/50 transition-colors"
-                  >
-                    <span className="h-2 w-2 rounded-full bg-blue-500 mt-2 shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium leading-snug">
-                        New offer received
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                        {offer.token?.name ??
-                          `Token #${offer.consideration.identifier}`}
-                      </p>
-                      {offer.price?.formatted && (
-                        <p className="text-xs font-semibold text-foreground mt-0.5">
-                          {offer.price.formatted}{" "}
-                          {offer.price.currency ?? ""}
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-                {recentActivities.map((event, i) => (
-                  <div key={i} className="flex items-start gap-3 px-4 py-3">
-                    <span className="h-2 w-2 rounded-full bg-muted-foreground/30 mt-2 shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-sm text-muted-foreground leading-snug">
-                        {ACTIVITY_LABEL[event.type] ?? event.type}
-                      </p>
-                      {event.price?.formatted && (
-                        <p className="text-xs font-semibold text-foreground mt-0.5">
-                          {event.price.formatted}{" "}
-                          {event.price.currency ?? ""}
-                        </p>
-                      )}
-                      <p className="text-xs text-muted-foreground/60 mt-0.5">
-                        {formatTimestamp(event.timestamp)}
+              <div className="divide-y divide-border/30">
+                {groups.map(([label, items]) => (
+                  <div key={label}>
+                    <div className="px-5 py-2 bg-muted/20">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
+                        {label}
                       </p>
                     </div>
+                    {items.map((n) => (
+                      <NotificationRow
+                        key={n.id}
+                        notification={n}
+                        compact
+                        onNavigate={() => setOpen(false)}
+                      />
+                    ))}
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          <div className="px-4 py-3 border-t border-border shrink-0">
+          {/* Footer */}
+          <div className="px-5 py-3.5 border-t border-border/50 shrink-0 bg-muted/10">
             <Link
-              href="/portfolio/offers"
+              href="/notifications"
               onClick={() => setOpen(false)}
-              className="text-xs text-primary hover:underline underline-offset-2"
+              className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              View all offers →
+              View all notifications
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
