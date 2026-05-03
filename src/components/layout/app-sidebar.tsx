@@ -75,7 +75,7 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { address: walletAddress, isConnected } = useUnifiedWallet();
   const unreadOffers = useUnreadOffers(isConnected ? walletAddress : null);
-  const { setOpen, setOpenMobile, isMobile } = useSidebar();
+  const { setOpen, setOpenMobile, isMobile, state } = useSidebar();
 
   const closeSidebar = () => {
     if (isMobile) setOpenMobile(false);
@@ -89,7 +89,7 @@ export function AppSidebar() {
       <SidebarMenu className="p-2">
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" asChild onClick={closeSidebar}>
-            {isMobile ? <MedialaneLogo /> : <MedialaneIcon />}
+            {isMobile || state === "expanded" ? <MedialaneLogo /> : <MedialaneIcon />}
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
@@ -253,7 +253,7 @@ export function AppSidebar() {
             <div
               className={cn(
                 "flex items-center py-1.5",
-                !isMobile ? "justify-center px-0" : "px-1"
+                !isMobile && state === "collapsed" ? "justify-center px-0" : "px-1"
               )}
             >
               <ConnectWallet />
