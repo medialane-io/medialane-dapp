@@ -25,6 +25,17 @@ const nextConfig: NextConfig = {
         destination: "https://www.medialane.io/docs/:path*",
         permanent: true,
       },
+      // ── ip1155 → nfteditions ──────────────────────────────────────────────
+      {
+        source: "/launchpad/ip1155",
+        destination: "/launchpad/nfteditions",
+        permanent: true,
+      },
+      {
+        source: "/launchpad/ip1155/:path*",
+        destination: "/launchpad/nfteditions/:path*",
+        permanent: true,
+      },
       // ── Learn ─────────────────────────────────────────────────────────────
       {
         source: "/learn",

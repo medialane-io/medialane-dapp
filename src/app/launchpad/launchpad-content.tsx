@@ -53,8 +53,8 @@ const DAPP_HREFS: Record<string, Pick<ServiceCardProps, "href" | "buttonLabel" |
   "remix-asset":        { href: "/marketplace",           buttonLabel: "Browse to remix"    },
   "pop-protocol":       { href: "/launchpad/pop/create",  buttonLabel: "Create Event",      browseHref: "/launchpad/pop"  },
   "collection-drop":    { href: "/launchpad/drop/create", buttonLabel: "Launch Drop",       browseHref: "/launchpad/drop" },
-  "ip-collection-1155": { href: "/launchpad/ip1155/create", buttonLabel: "Create Collection" },
-  "mint-editions":      { href: "/launchpad/ip1155",      buttonLabel: "Mint editions"      },
+  "ip-collection-1155": { href: "/launchpad/nfteditions/create", buttonLabel: "Create Collection" },
+  "mint-editions":      { href: "/launchpad/nfteditions",      buttonLabel: "Mint editions"      },
 };
 
 const SERVICES: ServiceCardProps[] = LAUNCHPAD_SERVICE_DEFINITIONS.map((def) => ({
