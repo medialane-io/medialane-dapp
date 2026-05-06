@@ -238,7 +238,7 @@ export default function CreateRemixPage() {
         // Upload via /api/pinata (image + metadata)
         const formData = new FormData();
         // Upload image directly to Pinata via signed URL (bypasses Next.js 4 MB body limit)
-        const signedRes = await fetch("/api/pinata/signed-url", { method: "POST" });
+        const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth({ method: "POST" }));
         const signedData = await signedRes.json();
         if (!signedRes.ok || !signedData.url) throw new Error("Failed to get upload URL");
         const imgFormData = new FormData();
@@ -264,13 +264,13 @@ export default function CreateRemixPage() {
         formData.set("royalty", royalty || "0");
         formData.append("tmpl_Parent Contract", contract);
         formData.append("tmpl_Parent Token ID", tokenId);
-        const uploadRes = await fetch("/api/pinata", { method: "POST", body: formData });
+        const uploadRes = await fetch("/api/pinata", withSiwsAuth({ method: "POST", body: formData }));
         const uploadData = await uploadRes.json();
         if (!uploadRes.ok || !uploadData.uri) throw new Error(uploadData.error ?? "Upload failed");
         tokenUri = uploadData.uri;
       } else {
         // Upload metadata JSON only
-        const pinRes = await fetch("/api/pinata/json", {
+        const pinRes = await fetch("/api/pinata/json", withSiwsAuth({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(metadata),

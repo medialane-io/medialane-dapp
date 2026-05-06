@@ -104,7 +104,7 @@ export default function CreateCollectionPage() {
     setImageUploading(true);
     try {
       // Upload directly to Pinata via signed URL (bypasses Next.js 4 MB body limit)
-      const signedRes = await fetch("/api/pinata/signed-url", { method: "POST" });
+      const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth({ method: "POST" }));
       const signedData = await signedRes.json();
       if (!signedRes.ok || !signedData.url) throw new Error("Failed to get upload URL");
       const imgFormData = new FormData();
@@ -155,7 +155,7 @@ export default function CreateCollectionPage() {
       let baseUri: string | undefined;
       if (imageUri) {
         try {
-          const metaRes = await fetch("/api/pinata/json", {
+          const metaRes = await fetch("/api/pinata/json", withSiwsAuth({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

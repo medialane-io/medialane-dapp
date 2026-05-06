@@ -12,7 +12,7 @@ export interface IpfsMetadata {
 
 const getSignedUrl = async (): Promise<string> => {
   try {
-    const res = await fetch("/api/pinata");
+    const res = await fetch("/api/pinata", withSiwsAuth());
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {

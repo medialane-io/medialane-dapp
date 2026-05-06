@@ -27,6 +27,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { PinataSDK } from "pinata";
+import { getSiwsWallet } from "@/lib/siws-server";
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT!,
@@ -43,6 +44,10 @@ const ALLOWED_IMAGE_TYPES = new Set([
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB (server-side fallback guard)
 
 export async function POST(req: NextRequest) {
+  if (!getSiwsWallet(req.headers.get("authorization"))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const formData = await req.formData();
 

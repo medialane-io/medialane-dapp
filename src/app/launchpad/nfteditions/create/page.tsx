@@ -66,7 +66,7 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export default function CreateIP1155CollectionPage() {
+export default function CreateNFTEditionsCollectionPage() {
   const { isConnected, address: walletAddress } = useUnifiedWallet();
   const { executeAuto } = usePaymasterTransaction();
 
@@ -124,7 +124,7 @@ export default function CreateIP1155CollectionPage() {
     setImageUri(null);
     setImageUploading(true);
     try {
-      const signedRes = await fetch("/api/pinata/signed-url", { method: "POST" });
+      const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth({ method: "POST" }));
       const signedData = await signedRes.json();
       if (!signedRes.ok || !signedData.url) throw new Error("Failed to get upload URL");
       const fd = new FormData();
@@ -175,7 +175,7 @@ export default function CreateIP1155CollectionPage() {
       let collectionMetaUri: string | undefined;
       if (imageUri) {
         try {
-          const r = await fetch("/api/pinata/json", {
+          const r = await fetch("/api/pinata/json", withSiwsAuth({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

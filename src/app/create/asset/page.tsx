@@ -217,7 +217,7 @@ export default function CreateAssetPage() {
       formData.set("royalty", String(values.royalty));
       if (imageFile) {
         // Upload image directly to Pinata via signed URL (bypasses Next.js 4 MB body limit)
-        const signedRes = await fetch("/api/pinata/signed-url", { method: "POST" });
+        const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth({ method: "POST" }));
         const signedData = await signedRes.json();
         if (!signedRes.ok || !signedData.url) throw new Error("Failed to get upload URL");
         const imgFormData = new FormData();
@@ -237,7 +237,7 @@ export default function CreateAssetPage() {
         if (value?.trim()) formData.set(`tmpl_${key}`, value.trim());
       });
 
-      const uploadRes = await fetch("/api/pinata", { method: "POST", body: formData });
+      const uploadRes = await fetch("/api/pinata", withSiwsAuth({ method: "POST", body: formData }));
       const uploadData = await uploadRes.json();
       if (!uploadRes.ok || uploadData.error) {
         throw new Error(uploadData.error ?? "IPFS upload failed");

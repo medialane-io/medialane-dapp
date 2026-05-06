@@ -8,8 +8,9 @@
  * Response: { url: string }
  */
 
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { PinataSDK } from "pinata";
+import { getSiwsWallet } from "@/lib/siws-server";
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT!,
@@ -18,7 +19,11 @@ const pinata = new PinataSDK({
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB
 
-export async function POST() {
+export async function POST(req: NextRequest) {
+  if (!getSiwsWallet(req.headers.get("authorization"))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const url = await pinata.upload.public.createSignedURL({
       expires: 120, // 2 minutes — enough for slow connections

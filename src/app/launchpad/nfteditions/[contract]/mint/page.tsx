@@ -70,7 +70,7 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export default function MintIP1155Page() {
+export default function MintNFTEditionsPage() {
   const { contract: rawContract } = useParams<{ contract: string }>();
   const collectionAddress = normalizeAddress(rawContract ?? "");
 
@@ -147,7 +147,7 @@ export default function MintIP1155Page() {
     setImageUri(null);
     setImageUploading(true);
     try {
-      const signedRes = await fetch("/api/pinata/signed-url", { method: "POST" });
+      const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth({ method: "POST" }));
       const { url: uploadUrl } = await signedRes.json();
       const fd = new FormData();
       fd.append("file", file, file.name);
@@ -180,7 +180,7 @@ export default function MintIP1155Page() {
         image: imageUri,
       };
       if (values.description) metadata.description = values.description;
-      const r = await fetch("/api/pinata/json", {
+      const r = await fetch("/api/pinata/json", withSiwsAuth({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(metadata),

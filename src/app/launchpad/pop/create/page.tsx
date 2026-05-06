@@ -80,7 +80,7 @@ export default function CreatePOPPage() {
     setImageUri(null);
     setImageUploading(true);
     try {
-      const signedRes = await fetch("/api/pinata/signed-url", { method: "POST" });
+      const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth({ method: "POST" }));
       const { url: uploadUrl } = await signedRes.json();
       const fd = new FormData();
       fd.append("file", file, file.name);
@@ -114,7 +114,7 @@ export default function CreatePOPPage() {
         ],
       };
       if (imageUri) metadata.image = imageUri;
-      const r = await fetch("/api/pinata/json", {
+      const r = await fetch("/api/pinata/json", withSiwsAuth({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(metadata),

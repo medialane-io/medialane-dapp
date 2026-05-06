@@ -52,13 +52,22 @@ export async function GET(
     );
   }
 
-  const contentType = upstream.headers.get("content-type") ?? "application/octet-stream";
+  const upstreamContentType = upstream.headers.get("content-type") ?? "";
+  // Allowlist safe MIME type prefixes — reject text/html, text/javascript,
+  // image/svg+xml and other scriptable types that could execute in browser context.
+  const SAFE_PREFIXES = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif",
+    "video/", "audio/", "model/", "font/", "application/json", "application/octet-stream"];
+  const safeContentType = SAFE_PREFIXES.some((p) => upstreamContentType.startsWith(p))
+    ? upstreamContentType
+    : "application/octet-stream";
+
   const body = await upstream.arrayBuffer();
 
   return new NextResponse(body, {
     status: 200,
     headers: {
-      "Content-Type": contentType,
+      "Content-Type": safeContentType,
+      "X-Content-Type-Options": "nosniff",
       // Cache aggressively — IPFS content is immutable by CID
       "Cache-Control": "public, max-age=31536000, immutable",
       // Allow any origin to embed this content (images, etc.)

@@ -156,7 +156,7 @@ export function LaunchMint() {
           "Claim your exclusive Genesis NFT."
         );
         form.append("external_url", "https://medialane.io");
-        const res = await fetch("/api/pinata", { method: "POST", body: form });
+        const res = await fetch("/api/pinata", withSiwsAuth({ method: "POST", body: form }));
         const data = await res.json();
         if (data.error) throw new Error("Metadata upload failed: " + data.error);
         tokenUri = data.uri;

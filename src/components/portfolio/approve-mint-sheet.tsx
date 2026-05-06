@@ -102,7 +102,7 @@ export function ApproveMintSheet({ offer, open, onOpenChange, onSuccess }: Props
           { trait_type: "Creator", value: walletAddress },
         ],
       };
-      const pinRes = await fetch("/api/pinata/json", {
+      const pinRes = await fetch("/api/pinata/json", withSiwsAuth({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(metadata),

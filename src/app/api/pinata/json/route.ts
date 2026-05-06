@@ -10,6 +10,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { PinataSDK } from "pinata";
+import { getSiwsWallet } from "@/lib/siws-server";
 
 function getPinata() {
   const jwt = process.env.PINATA_JWT;
@@ -21,6 +22,10 @@ function getPinata() {
 }
 
 export async function POST(req: NextRequest) {
+  if (!getSiwsWallet(req.headers.get("authorization"))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return NextResponse.json({ error: "JSON object body required" }, { status: 400 });
