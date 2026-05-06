@@ -26,7 +26,7 @@ import { CollectionServiceAction } from "@/components/services/collection-servic
 import { ListingDialog } from "@/components/marketplace/listing-dialog";
 import { TransferDialog } from "@/components/marketplace/transfer-dialog";
 import { CancelOrderDialog } from "@/components/marketplace/cancel-order-dialog";
-import { useSessionKey } from "@/hooks/use-session-key";
+import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import type { ApiToken, ApiOrder } from "@medialane/sdk";
 
 const PAGE_SIZE = 24;
@@ -81,7 +81,7 @@ function CollectionItems({ contract, activeListings }: { contract: string; activ
   }, [activeListings]);
 
   // Ownership + dialogs
-  const { walletAddress } = useSessionKey();
+  const { address: walletAddress } = useUnifiedWallet();
   const [selectedToken, setSelectedToken] = useState<ApiToken | null>(null);
   const [listOpen, setListOpen] = useState(false);
   const [transferToken, setTransferToken] = useState<ApiToken | null>(null);
@@ -237,7 +237,7 @@ export default function CollectionPageClient() {
   const [descOverflows, setDescOverflows] = useState(false);
   const descRef = useRef<HTMLParagraphElement>(null);
 
-  const { walletAddress } = useSessionKey();
+  const { address: walletAddress } = useUnifiedWallet();
   const { collection, isLoading: colLoading } = useCollection(contract);
   const { orders, isLoading: ordersLoading } = useOrders({
     collection: contract,

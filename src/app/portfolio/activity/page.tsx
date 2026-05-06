@@ -1,9 +1,9 @@
 "use client";
 
-import { useSessionKey } from "@/hooks/use-session-key";
+import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { PortfolioActivity } from "@/components/portfolio/portfolio-activity";
 
 export default function PortfolioActivityPage() {
-  const { walletAddress } = useSessionKey();
+  const { address: walletAddress } = useUnifiedWallet();
   return <PortfolioActivity address={walletAddress ?? null} />;
 }

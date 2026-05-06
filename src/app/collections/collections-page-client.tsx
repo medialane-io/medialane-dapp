@@ -7,7 +7,7 @@ import { CollectionCard, CollectionCardSkeleton } from "@/components/shared/coll
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { HelpIcon } from "@/components/ui/help-icon";
-import { Layers, Loader2, BadgeCheck, Eye, SlidersHorizontal, Award } from "lucide-react";
+import { Layers, Loader2, BadgeCheck, Eye, SlidersHorizontal, Award, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ApiCollection } from "@medialane/sdk";
 
@@ -22,8 +22,9 @@ const SORT_OPTIONS: { label: string; value: CollectionSort }[] = [
 ];
 
 const SOURCE_TABS = [
-  { label: "All",        value: undefined      },
-  { label: "POP Events", value: "POP_PROTOCOL" },
+  { label: "All",   value: undefined           },
+  { label: "POP",   value: "POP_PROTOCOL"      },
+  { label: "Drops", value: "COLLECTION_DROP"   },
 ] as const;
 
 export default function CollectionsPageClient() {
@@ -41,7 +42,7 @@ export default function CollectionsPageClient() {
     PAGE_SIZE,
     featured ? true : undefined,
     sort,
-    source === "POP_PROTOCOL" ? false : hideEmpty,
+    (source === "POP_PROTOCOL" || source === "COLLECTION_DROP") ? false : hideEmpty,
     source
   );
 
@@ -137,10 +138,17 @@ export default function CollectionsPageClient() {
         </button>
 
         {/* Active filter pills — quick-clear */}
-        {source !== undefined && (
+        {source === "POP_PROTOCOL" && (
           <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
             <Award className="h-3 w-3" />
             POP Events
+            <button onClick={() => setSource(undefined)} className="ml-0.5 hover:text-primary/60">×</button>
+          </span>
+        )}
+        {source === "COLLECTION_DROP" && (
+          <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
+            <Package className="h-3 w-3" />
+            Drops
             <button onClick={() => setSource(undefined)} className="ml-0.5 hover:text-primary/60">×</button>
           </span>
         )}
@@ -205,6 +213,7 @@ export default function CollectionsPageClient() {
                     )}
                   >
                     {value === "POP_PROTOCOL" && <Award className="h-3 w-3" />}
+                    {value === "COLLECTION_DROP" && <Package className="h-3 w-3" />}
                     {label}
                   </button>
                 ))}

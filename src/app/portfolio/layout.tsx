@@ -54,7 +54,9 @@ export default function PortfolioLayout({ children }: { children: React.ReactNod
   ).length;
 
   const activeListingsCount = orders.filter(
-    (o) => o.offer.itemType === "ERC721" && o.status === "ACTIVE"
+    (o) =>
+      (o.offer.itemType === "ERC721" || o.offer.itemType === "ERC1155") &&
+      o.status === "ACTIVE"
   ).length;
 
   const pendingRemixCount = Array.isArray(remixOffers)

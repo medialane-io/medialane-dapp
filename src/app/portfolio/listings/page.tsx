@@ -1,9 +1,9 @@
 "use client";
 
-import { useSessionKey } from "@/hooks/use-session-key";
+import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { ListingsTable } from "@/components/portfolio/listings-table";
 
 export default function PortfolioListingsPage() {
-  const { walletAddress } = useSessionKey();
+  const { address: walletAddress } = useUnifiedWallet();
   return <ListingsTable address={walletAddress!} />;
 }

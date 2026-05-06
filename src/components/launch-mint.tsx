@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { withSiwsAuth } from "@/lib/pinata-fetch";
 import Image from "next/image";
 import Link from "next/link";
 import { useConnect } from "@starknet-react/core";

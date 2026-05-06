@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useCreators } from "@/hooks/use-creators";
 import { useCollectionsByOwner } from "@/hooks/use-collections";
@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FadeIn, Stagger, StaggerItem } from "@/components/ui/motion-primitives";
 import { ipfsToHttp } from "@/lib/utils";
 import { BRAND } from "@/lib/brand";
-import { AtSign, Search, Users, Palette, Globe, Twitter, X } from "lucide-react";
+import { AtSign, Search, Users, Palette, Globe, Twitter, X, Loader2 } from "lucide-react";
 import type { ApiCreatorProfile } from "@medialane/sdk";
 
 function CreatorCard({ creator }: { creator: ApiCreatorProfile }) {
@@ -113,6 +113,9 @@ export default function CreatorsPageClient() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [page, setPage] = useState(1);
+  const [allCreators, setAllCreators] = useState<ApiCreatorProfile[]>([]);
+  const prevSearch = useRef<string | undefined>(undefined);
 
   function handleSearch(value: string) {
     setSearch(value);
@@ -125,7 +128,28 @@ export default function CreatorsPageClient() {
     setDebouncedSearch("");
   }
 
-  const { creators, total, isLoading } = useCreators(debouncedSearch || undefined);
+  const { creators, total, isLoading } = useCreators(debouncedSearch || undefined, page, 20);
+
+  // Reset accumulated list when search query changes
+  useEffect(() => {
+    if (prevSearch.current !== debouncedSearch) {
+      prevSearch.current = debouncedSearch;
+      setPage(1);
+      setAllCreators([]);
+    }
+  }, [debouncedSearch]);
+
+  // Append newly loaded page to the accumulated list
+  useEffect(() => {
+    if (isLoading || creators.length === 0) return;
+    setAllCreators((prev) => {
+      const seen = new Set(prev.map((c) => c.walletAddress));
+      const next = creators.filter((c) => !seen.has(c.walletAddress));
+      return page === 1 ? creators : [...prev, ...next];
+    });
+  }, [creators, isLoading, page]);
+
+  const isInitialLoading = isLoading && allCreators.length === 0;
 
   return (
     <div className="pb-16">
@@ -153,7 +177,7 @@ export default function CreatorsPageClient() {
           {/* Stats + search row */}
           <FadeIn delay={0.22}>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              {!isLoading && total > 0 && (
+              {!isInitialLoading && total > 0 && (
                 <div className="flex items-center gap-2 rounded-full border border-border bg-card/80 px-4 py-1.5 text-sm">
                   <Palette className={`h-3.5 w-3.5 ${BRAND.purple.text}`} />
                   <span className="font-bold">{total}</span>
@@ -185,24 +209,37 @@ export default function CreatorsPageClient() {
 
       {/* Grid */}
       <section className="px-4 sm:px-6 lg:px-8 py-8">
-        {isLoading ? (
+        {isInitialLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 12 }).map((_, i) => <CreatorCardSkeleton key={i} />)}
           </div>
-        ) : creators.length > 0 ? (
+        ) : allCreators.length > 0 ? (
           <>
             {debouncedSearch && (
               <p className="text-sm text-muted-foreground mb-4">
-                {creators.length} result{creators.length !== 1 ? "s" : ""} for &ldquo;{debouncedSearch}&rdquo;
+                {allCreators.length} result{allCreators.length !== 1 ? "s" : ""} for &ldquo;{debouncedSearch}&rdquo;
               </p>
             )}
             <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {creators.map((c) => (
+              {allCreators.map((c) => (
                 <StaggerItem key={c.walletAddress}>
                   <CreatorCard creator={c} />
                 </StaggerItem>
               ))}
             </Stagger>
+            {allCreators.length < total && (
+              <div className="flex justify-center pt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={isLoading}
+                >
+                  {isLoading
+                    ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Loading…</>
+                    : `Load more (${total - allCreators.length} remaining)`}
+                </Button>
+              </div>
+            )}
           </>
         ) : (
           <div className="py-24 text-center space-y-4">

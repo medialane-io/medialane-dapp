@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSessionKey } from "@/hooks/use-session-key";
+import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { useRemixOffers } from "@/hooks/use-remix-offers";
 import { ApproveMintSheet } from "@/components/portfolio/approve-mint-sheet";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import type { RemixOffer } from "@/types/remix-offers";
 import Link from "next/link";
 
 export default function PortfolioRemixOffersPage() {
-  const { walletAddress } = useSessionKey();
+  const { address: walletAddress } = useUnifiedWallet();
   const { offers: incoming, isLoading: loadingIn, mutate: mutateIn } = useRemixOffers("creator");
   const { offers: outgoing, isLoading: loadingOut } = useRemixOffers("requester");
 

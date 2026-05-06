@@ -1,4 +1,7 @@
+"use client";
+
 import { pinata } from "@/services/config/server.config";
+import { withSiwsAuth } from "@/lib/pinata-fetch";
 import { PINATA_GATEWAY } from "@/lib/constants";
 import { useState, useCallback } from "react";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSessionKey } from "@/hooks/use-session-key";
+import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import Image from "next/image";
 import Link from "next/link";
 import { useCollectionsByOwner } from "@/hooks/use-collections";
@@ -80,7 +80,7 @@ function CollectionCard({ col }: { col: ApiCollection }) {
 }
 
 export default function PortfolioCollectionsPage() {
-  const { walletAddress } = useSessionKey();
+  const { address: walletAddress } = useUnifiedWallet();
   const { collections, isLoading, error, mutate } = useCollectionsByOwner(walletAddress ?? null);
 
   return (
