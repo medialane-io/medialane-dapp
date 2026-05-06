@@ -2,7 +2,7 @@
  * POST /api/pinata/image
  *
  * Uploads a single image file to Pinata/IPFS.
- * Requires an active Clerk session.
+ * Requires a valid SIWS wallet session.
  *
  * Accepts multipart/form-data:
  *   file  File  — image (JPG/PNG/GIF/SVG/WebP, max 10 MB)

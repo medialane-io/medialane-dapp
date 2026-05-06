@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { withSiwsAuth } from "@/lib/pinata-fetch";
 import Image from "next/image";
-import Link from "next/link";
 import { useConnect } from "@starknet-react/core";
 import { StarknetkitConnector, useStarknetkitConnectModal } from "starknetkit";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
@@ -21,8 +20,6 @@ import {
   Gift,
   Droplets,
   ArrowRight,
-  Wallet,
-  User,
 } from "lucide-react";
 import { PinInput, validatePin } from "@/components/ui/pin-input";
 import { Button } from "@/components/ui/button";
@@ -242,7 +239,7 @@ export function LaunchMint() {
               </div>
             )}
 
-            {/* ── Signed in, no wallet: redirect to onboarding ── */}
+            {/* ── Connected wallet, session wallet unavailable ── */}
             {isLoaded && !isLoadingWallet && isSignedIn && !hasWallet && (
               <div className="space-y-6">
                 <div className="space-y-3">
@@ -251,30 +248,27 @@ export function LaunchMint() {
                     <span className="text-emerald-400 font-medium">Wallet connected</span>
                   </div>
                   <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-[1.1]">
-                    Secure your{" "}
+                    Reconnect your{" "}
                     <span className="bg-gradient-to-r from-primary via-purple-400 to-pink-400 bg-clip-text text-transparent">
                       Starknet wallet
                     </span>
                   </h2>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    One quick step before minting — set up your invisible wallet with a passkey or PIN. No seed phrases, no gas fees.
+                    We could not find a wallet address for this minting session. Reconnect your Starknet wallet and try again.
                   </p>
                 </div>
 
                 <Button
                   size="lg"
                   className="w-full rounded-xl h-12 font-bold gap-2 bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 shadow-lg shadow-primary/25"
-                  asChild
+                  onClick={handleConnectWallet}
                 >
-                  <Link href="/onboarding?redirect_url=/">
-                    <Wallet className="h-4 w-4" />
-                    Set up your wallet
-                    <ArrowRight className="h-4 w-4 ml-auto" />
-                  </Link>
+                  <Sparkles className="h-4 w-4" />
+                  Connect Wallet to Mint
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">
-                  Takes less than a minute · Passkey or PIN
+                  Medialane uses wallet connection and SIWS. No separate app sign-up is required.
                 </p>
               </div>
             )}

@@ -2,7 +2,7 @@
  * POST /api/pinata
  *
  * Server-side IP asset upload endpoint.
- * Requires an active Clerk session — prevents unauthorized Pinata quota usage.
+ * Requires a valid SIWS wallet session — prevents unauthorized Pinata quota usage.
  *
  * Accepts multipart/form-data:
  *   file            File?    — cover image (JPG/PNG/GIF/SVG/WebP, max 10 MB)

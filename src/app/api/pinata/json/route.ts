@@ -2,7 +2,7 @@
  * POST /api/pinata/json
  *
  * Uploads a JSON document to Pinata/IPFS.
- * Requires an active Clerk session.
+ * Requires a valid SIWS wallet session.
  *
  * Accepts: application/json body (any JSON object)
  * Response: { uri: "ipfs://...", cid: string }

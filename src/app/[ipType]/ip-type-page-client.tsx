@@ -109,9 +109,7 @@ function TokenBrowseCard({ token }: { token: ApiToken }) {
           </>
         ) : (
           <p className="text-[10px] text-muted-foreground text-center w-full py-1.5">
-            <Link href="/sign-in" className="hover:text-foreground underline-offset-2 hover:underline">
-              Sign in
-            </Link>{" "}to trade
+            Connect wallet to trade
           </p>
         )}
       </div>

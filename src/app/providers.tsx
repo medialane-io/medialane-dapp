@@ -63,7 +63,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             // own error state and UI.
             if (
               msg.includes("401") || msg.includes("403") ||
-              msg.includes("Missing") || msg.includes("Clerk") ||
+              msg.includes("Missing") ||
               msg.includes("Failed to fetch") || msg.includes("Load failed") ||
               msg.includes("NetworkError") || msg.includes("network")
             ) return;
