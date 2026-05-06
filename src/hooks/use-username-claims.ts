@@ -22,12 +22,12 @@ export type { ApiCreatorProfile as CreatorByUsername };
 /** Fetch the current user's username claim status. */
 export function useMyUsernameClaim() {
   const { address, isConnected } = useUnifiedWallet();
-  const { getValidToken } = useSiwsToken();
+  const { token } = useSiwsToken();
 
+  // Gate on token so we never auto-prompt the wallet to sign on mount.
   const { data, error, isLoading, mutate } = useSWR(
-    isConnected && address ? `username-claim-me-${address}` : null,
+    isConnected && address && token ? `username-claim-me-${address}` : null,
     async () => {
-      const token = await getValidToken();
       const headers: Record<string, string> = { "x-api-key": MEDIALANE_API_KEY };
       if (token) headers["Authorization"] = `Bearer ${token}`;
       const res = await fetch(`${MEDIALANE_BACKEND_URL}/v1/username-claims/me`, { headers });

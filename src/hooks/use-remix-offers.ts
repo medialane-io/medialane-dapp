@@ -27,14 +27,14 @@ async function apiFetch(
 
 export function useRemixOffers(role: "creator" | "requester", status?: string) {
   const { address: walletAddress } = useUnifiedWallet();
-  const { getValidToken } = useSiwsToken();
+  const { token } = useSiwsToken();
 
-  const key = walletAddress ? `remix-offers-${role}-${status ?? "all"}-${walletAddress}` : null;
+  // Only fetch when a valid SIWS token is already stored — never auto-prompt.
+  const key = walletAddress && token ? `remix-offers-${role}-${status ?? "all"}-${walletAddress}` : null;
 
   const { data, error, isLoading, mutate } = useSWR<RemixOfferListResponse>(
     key,
     async () => {
-      const token = await getValidToken();
       const params = new URLSearchParams({ role, ...(status ? { status } : {}) });
       return apiFetch(
         `${MEDIALANE_BACKEND_URL}/v1/remix-offers?${params}`,
