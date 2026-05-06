@@ -1,9 +1,8 @@
 "use client";
 /**
- * Transaction execution adapter — sponsored gas first, falls back to direct
- * account.execute() if the paymaster rejects. Uses the local account object
- * from useAccount() to avoid the starknet-react async state race condition
- * that can make usePaymasterTransaction.executeAuto() fail on mount.
+ * Transaction execution adapter for connected wallets. Injected wallets execute
+ * directly through account.execute(); StarkZap Cartridge wallets use their
+ * session wallet execution.
  *
  * Usage:
  *   const { execute, status, txHash, error, statusMessage, reset } = useTx();
@@ -13,7 +12,6 @@ import { useState, useCallback } from "react";
 import type { Call } from "starknet";
 import { useAccount } from "@starknet-react/core";
 import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
-import { executeSponsoredTransaction, canSponsor } from "@/utils/paymaster";
 
 export type TxStatus =
   | "idle"
@@ -45,17 +43,6 @@ export function useTx() {
         hash = tx.hash;
       } else if (!account) {
         throw new Error("Wallet not connected");
-      } else if (canSponsor()) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const sponsored = await executeSponsoredTransaction(account as any, calls);
-        if (sponsored.success) {
-          hash = sponsored.transactionHash;
-        } else {
-          console.warn("[useTx] Sponsored tx rejected, falling back:", sponsored.error);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const tx = await account.execute(calls as any);
-          hash = tx.transaction_hash;
-        }
       } else {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tx = await account.execute(calls as any);

@@ -261,7 +261,7 @@ export default function CreateAssetPage() {
         throw new Error("Mint intent returned no calls");
       }
 
-      // 3. Execute via paymaster
+      // 3. Execute directly with the connected wallet
       const result = await executeTransaction(intentData.calls as Call[]);
 
       if (result === null) {

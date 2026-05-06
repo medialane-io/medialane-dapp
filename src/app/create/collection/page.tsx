@@ -197,7 +197,7 @@ export default function CreateCollectionPage() {
       const calls = intentRes.data.calls as Call[];
       if (!calls || calls.length === 0) throw new Error("No calls returned from intent");
 
-      // 3. Execute via paymaster (gasless → fallback to traditional)
+      // 3. Execute directly with the connected wallet
       const result = await executeTransaction(calls);
 
       if (result === null) {

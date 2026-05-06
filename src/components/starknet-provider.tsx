@@ -5,7 +5,6 @@ import {
   StarknetConfig,
   useInjectedConnectors,
   voyager,
-  avnuPaymasterProvider,
 } from "@starknet-react/core";
 import { RpcProvider } from "starknet";
 import { idResolvedBraavos, idResolvedReady } from "@/lib/starknet-connectors";
@@ -84,9 +83,6 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
         explorer={voyager}
         defaultChainId={currentNetwork === 'mainnet' ? mainnet.id : sepolia.id}
         autoConnect={true}
-        paymasterProvider={avnuPaymasterProvider({
-          apiKey: process.env.NEXT_PUBLIC_AVNU_PAYMASTER_API_KEY,
-        })}
       >
         {children}
       </StarknetConfig>
