@@ -13,6 +13,7 @@ import { useTx } from "@/hooks/use-tx";
 import { useMarketplace } from "@/hooks/use-marketplace";
 import { useCollectionsByOwner } from "@/hooks/use-collections";
 import { confirmRemixOffer } from "@/hooks/use-remix-offers";
+import { useSiwsToken } from "@/hooks/use-siws-token";
 import { formatDisplayPrice } from "@/lib/utils";
 import { getTokenByAddress } from "@medialane/sdk";
 import { Check, GitBranch, Loader2 } from "lucide-react";
@@ -29,6 +30,7 @@ interface Props {
 
 export function ApproveMintSheet({ offer, open, onOpenChange, onSuccess }: Props) {
   const { address: walletAddress } = useUnifiedWallet();
+  const { getValidToken } = useSiwsToken();
   const { execute: executeTransaction } = useTx();
   const { createListing } = useMarketplace();
   const client = useMedialaneClient();
@@ -177,7 +179,7 @@ export function ApproveMintSheet({ offer, open, onOpenChange, onSuccess }: Props
           approvedCollection: selectedCollection.contractAddress,
           orderHash,
         },
-        walletAddress
+        await getValidToken()
       );
 
       setNewAssetLink(`/asset/${selectedCollection.contractAddress}/${remixTokenId}`);

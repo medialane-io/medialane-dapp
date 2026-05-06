@@ -25,6 +25,7 @@ import {
   Collapsible, CollapsibleContent, CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { submitRemixOffer, confirmSelfRemix } from "@/hooks/use-remix-offers";
+import { useSiwsToken } from "@/hooks/use-siws-token";
 import { getListableTokens, getTokenBySymbol } from "@medialane/sdk";
 import { IP_TYPES, LICENSE_TYPES, type IPType } from "@/types/ip";
 import { ipfsToHttp, formatDisplayPrice } from "@/lib/utils";
@@ -89,8 +90,8 @@ function Section({ title, icon, children }: {
 export default function CreateRemixPage() {
   const { contract, tokenId } = useParams<{ contract: string; tokenId: string }>();
   const router = useRouter();
-  const getToken = async () => "";
   const { walletAddress } = useSessionKey();
+  const { getValidToken } = useSiwsToken();
   const { execute: executeTransaction, status: txStatus } = useTx();
   const client = useMedialaneClient();
   const { token, isLoading: tokenLoading } = useToken(contract, tokenId);
@@ -321,7 +322,7 @@ export default function CreateRemixPage() {
           commercial,
           derivatives,
         },
-        walletAddress
+        await getValidToken()
       );
 
       setMintStep("success");
@@ -355,7 +356,7 @@ export default function CreateRemixPage() {
         derivatives,
         royaltyPct: royalty ? parseInt(royalty) : undefined,
         message: message.trim() || undefined,
-      }, walletAddress);
+      }, await getValidToken());
       toast.success("Remix offer sent!", {
         description: "The creator will be notified and can approve your request.",
       });
