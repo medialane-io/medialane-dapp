@@ -14,7 +14,6 @@ import {
     get1155OrderCancellationTypedData,
     stringifyBigInts,
 } from "@/utils/marketplace-utils";
-import { executeSponsoredTransaction, canSponsor } from "@/utils/paymaster";
 
 interface UseMarketplaceReturn {
     createListing: (
@@ -133,14 +132,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Executes calls with AVNU-sponsored gas; falls back to direct account.execute() on failure.
-    const executeWithSponsor = useCallback(async (calls: any[]): Promise<string> => {
-        if (canSponsor()) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const sponsored = await executeSponsoredTransaction(account as any, calls);
-            if (sponsored.success) return sponsored.transactionHash;
-            console.warn("[marketplace] Sponsored tx rejected, using direct wallet:", sponsored.error);
-        }
+    const executeDirect = useCallback(async (calls: any[]): Promise<string> => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tx = await account!.execute(calls as any);
         return tx.transaction_hash;
@@ -153,7 +145,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         contract: NonNullable<typeof medialaneContract>
     ) => {
         const now = Math.floor(Date.now() / 1000);
-        const startTime = Math.max(0, now - 60).toString();
+        const startTime = (now + 300).toString();
         const endTime = (now + durationSeconds).toString();
         const salt = Math.floor(Math.random() * 1000000).toString();
 
@@ -305,7 +297,7 @@ export function useMarketplace(): UseMarketplaceReturn {
                     calldata: [contract.address, "1"],
                 };
                 const calls1155 = isAlreadyApproved1155 ? [registerCall1155] : [approveCall1155, registerCall1155];
-                const hash1155 = await executeWithSponsor(calls1155);
+                const hash1155 = await executeDirect(calls1155);
                 setTxHash(hash1155);
                 const receipt1155 = await provider.waitForTransaction(hash1155);
                 assertTransactionSucceeded(receipt1155);
@@ -363,7 +355,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             };
 
             const calls = isAlreadyApproved ? [registerCall] : [approveCall, registerCall];
-            const hash = await executeWithSponsor(calls);
+            const hash = await executeDirect(calls);
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             assertTransactionSucceeded(receipt);
@@ -371,7 +363,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.success("Listing Created", { description: "Your asset has been listed successfully." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeDirect]);
 
     const makeOffer = useCallback(async (
         assetContractAddress: string,
@@ -463,7 +455,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             };
 
             // ERC20 approve + register_order as atomic multicall
-            const hash = await executeWithSponsor([approveCall, registerCall]);
+            const hash = await executeDirect([approveCall, registerCall]);
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
@@ -472,7 +464,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.success("Offer Placed", { description: "Your offer has been submitted and is now live." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeDirect]);
 
     const checkoutCart = useCallback(async (items: any[]) => {
         if (!walletAddress || !medialaneContract || !chain || items.length === 0) {
@@ -587,7 +579,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.info("Executing Purchase", { description: "Approve the final transaction to sweep the cart." });
 
             // Single atomic multicall: all approvals + all fulfillments
-            const hash = await executeWithSponsor([...approveCalls721, ...approveCalls1155, ...fulfillCalls]);
+            const hash = await executeDirect([...approveCalls721, ...approveCalls1155, ...fulfillCalls]);
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
@@ -596,7 +588,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.success("Purchase Successful", { description: `Successfully purchased ${items.length} item(s).` });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeDirect]);
 
     const cancelOrder = useCallback(async (orderHash: string, tokenStandard?: string) => {
         const is1155 = tokenStandard === "ERC1155";
@@ -642,7 +634,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             });
 
             const call = contract.populate("cancel_order", [cancelRequest]);
-            const hash = await executeWithSponsor([call]);
+            const hash = await executeDirect([call]);
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
@@ -651,7 +643,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.success("Listing Cancelled", { description: "The listing has been successfully cancelled on-chain." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeDirect]);
 
     /**
      * Asset owner accepts an incoming bid. Signs OrderFulfillment typed data,
@@ -725,7 +717,7 @@ export function useMarketplace(): UseMarketplaceReturn {
                 };
             }
 
-            const hash = await executeWithSponsor([approveCall, fulfillCall]);
+            const hash = await executeDirect([approveCall, fulfillCall]);
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
@@ -734,7 +726,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.success("Offer Accepted", { description: "The offer has been accepted and the asset transferred." });
             return hash;
         });
-    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeWithSponsor]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeDirect]);
 
     return {
         createListing,
