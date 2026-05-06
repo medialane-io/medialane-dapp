@@ -59,6 +59,36 @@ const getDecimals = (currencySymbol: string) =>
 const toWei = (price: string, currencySymbol: string): string =>
     BigInt(Math.floor(parseFloat(price) * Math.pow(10, getDecimals(currencySymbol)))).toString();
 
+const ORDER_CREATED_SELECTOR = "0x3427759bfd3b941f14e687e129519da3c9b0046c5b9aaa290bb1dede63753b3";
+
+const sameAddress = (a?: string, b?: string) => {
+    if (!a || !b) return false;
+    try {
+        return BigInt(a).toString() === BigInt(b).toString();
+    } catch {
+        return a.toLowerCase() === b.toLowerCase();
+    }
+};
+
+const assertTransactionSucceeded = (receipt: any) => {
+    if (receipt?.execution_status === "REVERTED") {
+        throw new Error(receipt.revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
+    }
+};
+
+const assertOrderCreated = (receipt: any, marketplaceAddress: string) => {
+    const events = Array.isArray(receipt?.events) ? receipt.events : [];
+    const hasOrderCreated = events.some((event: any) =>
+        sameAddress(event?.from_address, marketplaceAddress) &&
+        Array.isArray(event?.keys) &&
+        event.keys[0] === ORDER_CREATED_SELECTOR
+    );
+
+    if (!hasOrderCreated) {
+        throw new Error("Transaction confirmed, but the marketplace did not emit an order-created event.");
+    }
+};
+
 export function useMarketplace(): UseMarketplaceReturn {
     const { account } = useAccount();
     const { chain } = useNetwork();
@@ -123,7 +153,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         contract: NonNullable<typeof medialaneContract>
     ) => {
         const now = Math.floor(Date.now() / 1000);
-        const startTime = (now + 300).toString(); // 5-min future buffer
+        const startTime = Math.max(0, now - 60).toString();
         const endTime = (now + durationSeconds).toString();
         const salt = Math.floor(Math.random() * 1000000).toString();
 
@@ -278,9 +308,8 @@ export function useMarketplace(): UseMarketplaceReturn {
                 const hash1155 = await executeWithSponsor(calls1155);
                 setTxHash(hash1155);
                 const receipt1155 = await provider.waitForTransaction(hash1155);
-                if ((receipt1155 as any).execution_status === "REVERTED") {
-                    throw new Error((receipt1155 as any).revert_reason || "Transaction reverted on-chain.");
-                }
+                assertTransactionSucceeded(receipt1155);
+                assertOrderCreated(receipt1155, contract.address);
                 toast.success("Listing Created", { description: "Your edition has been listed successfully." });
                 return hash1155;
             }
@@ -337,9 +366,8 @@ export function useMarketplace(): UseMarketplaceReturn {
             const hash = await executeWithSponsor(calls);
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
-            if ((receipt as any).execution_status === "REVERTED") {
-                throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
-            }
+            assertTransactionSucceeded(receipt);
+            assertOrderCreated(receipt, contract.address);
             toast.success("Listing Created", { description: "Your asset has been listed successfully." });
             return hash;
         });
