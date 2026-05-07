@@ -11,8 +11,8 @@
   "dependencies": {
     "@avnu/gasless-sdk": "^0.1.8",
     "@hookform/resolvers": "^3",
-    "@medialane/sdk": "^0.8.2",
-    "@medialane/ui": "^0.4.4",
+    "@medialane/sdk": "^0.10.0",
+    "@medialane/ui": "^0.4.5",
     "@radix-ui/react-accordion": "latest",
     "@radix-ui/react-alert-dialog": "latest",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
