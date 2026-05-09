@@ -4,15 +4,14 @@ import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { AlertCircle, HandCoins } from "lucide-react";
+import { AlertCircle, HandCoins, Layers, ShieldCheck, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { fireConfetti } from "@/lib/confetti";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { useMarketplace } from "@/hooks/use-marketplace";
 import { EXPLORER_URL, DURATION_OPTIONS } from "@/lib/constants";
@@ -23,6 +22,7 @@ import {
   DurationPicker,
   MarketplaceSuccessState,
   MarketplaceProcessingState,
+  MarketplaceDialogHero,
 } from "@/components/marketplace/marketplace-dialog-primitives";
 
 const CURRENCIES = getListableTokens().map((t) => t.symbol);
@@ -41,14 +41,16 @@ interface OfferDialogProps {
   tokenId: string;
   tokenName?: string;
   tokenStandard?: string;
+  tokenImage?: string | null;
   onSuccess?: () => void;
 }
 
-export function OfferDialog({ open, onOpenChange, assetContract, tokenId, tokenName, tokenStandard, onSuccess }: OfferDialogProps) {
+export function OfferDialog({ open, onOpenChange, assetContract, tokenId, tokenName, tokenStandard, tokenImage, onSuccess }: OfferDialogProps) {
   const { isConnected } = useUnifiedWallet();
   const { makeOffer, isProcessing, txHash, error, resetState } = useMarketplace();
   const confettiFired = useRef(false);
   const [txStatus, setTxStatus] = useState<"idle" | "confirmed">("idle");
+  const name = tokenName || `Token #${tokenId}`;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -72,25 +74,47 @@ export function OfferDialog({ open, onOpenChange, assetContract, tokenId, tokenN
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!isProcessing) onOpenChange(v); }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md p-0 overflow-hidden">
         {txStatus === "confirmed" ? (
           <MarketplaceSuccessState
             title="Offer submitted!"
-            description={`Your offer on ${tokenName || `#${tokenId}`} is live.`}
+            description={`Your offer on ${name} is live.`}
             txHash={txHash}
             explorerUrl={EXPLORER_URL}
-            name={tokenName || `#${tokenId}`}
+            tokenImage={tokenImage}
+            name={name}
             onDone={() => { onOpenChange(false); onSuccess?.(); }}
           />
         ) : isProcessing ? (
-          <MarketplaceProcessingState title="Submitting offer…" />
+          <MarketplaceProcessingState title="Submitting offer..." imageUrl={tokenImage} imageAlt={name} />
         ) : (
-          <>
-            <DialogHeader><DialogTitle>Make an offer</DialogTitle></DialogHeader>
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <Badge variant="outline" className="font-mono">#{tokenId}</Badge>
-                <span className="text-sm font-medium truncate">{tokenName || `Token #${tokenId}`}</span>
+          <div className="flex flex-col">
+            <MarketplaceDialogHero
+              tokenImage={tokenImage}
+              tokenName={tokenName}
+              tokenId={tokenId}
+              fallbackIcon={<Layers className="h-10 w-10 text-muted-foreground/35" />}
+              badge={
+                <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-white drop-shadow font-bold text-lg leading-tight truncate">{name}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Zap className="h-3 w-3 text-emerald-300 drop-shadow" />
+                      <span className="text-[11px] font-medium text-emerald-200 drop-shadow">Wallet offer</span>
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
+                    #{tokenId}
+                  </span>
+                </div>
+              }
+            />
+            <div className="px-5 py-5 space-y-4">
+              <div>
+                <DialogTitle>Make an offer</DialogTitle>
+                <DialogDescription>
+                  Choose an amount and expiry. The offer is signed from your wallet and visible to the owner.
+                </DialogDescription>
               </div>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -126,13 +150,21 @@ export function OfferDialog({ open, onOpenChange, assetContract, tokenId, tokenN
                     </FormItem>
                   )} />
                   {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
-                  <Button type="submit" className="w-full h-11" disabled={isProcessing || !isConnected}>
-                    <HandCoins className="h-4 w-4 mr-2" />Submit offer
-                  </Button>
+                  <div className="space-y-3">
+                    <Button type="submit" className="w-full h-11" disabled={isProcessing || !isConnected}>
+                      <HandCoins className="h-4 w-4 mr-2" />Submit offer
+                    </Button>
+                    <div className="flex items-start justify-center gap-1.5">
+                      <ShieldCheck className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
+                      <p className="text-[10px] text-center text-muted-foreground">
+                        Offers can be cancelled before acceptance and settle atomically if the owner accepts.
+                      </p>
+                    </div>
+                  </div>
                 </form>
               </Form>
             </div>
-          </>
+          </div>
         )}
       </DialogContent>
     </Dialog>

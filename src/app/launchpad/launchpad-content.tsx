@@ -1,44 +1,39 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTokensByOwner } from "@/hooks/use-tokens";
 import { useUserOrders } from "@/hooks/use-orders";
-import { useCollections } from "@/hooks/use-collections";
-import { CollectionCard, CollectionCardSkeleton } from "@/components/shared/collection-card";
-import { FadeIn, Stagger, StaggerItem } from "@/components/ui/motion-primitives";
+import { FadeIn } from "@/components/ui/motion-primitives";
 import { BRAND } from "@/lib/brand";
+import { cn } from "@/lib/utils";
+import { LAUNCHPAD_SERVICE_DEFINITIONS } from "@medialane/ui";
+import type { ServiceDefinition } from "@medialane/ui";
 import {
-  LaunchpadServicesGrid,
-  LAUNCHPAD_SERVICE_DEFINITIONS,
-} from "@medialane/ui";
-import type { ServiceCardProps } from "@medialane/ui";
-import {
-  Zap, Package, Tag, ShoppingCart, Star, Rocket, ArrowRight,
+  Zap, Package, Tag, ShoppingCart,
+  Layers, Globe, ExternalLink, ArrowRight, Lock,
 } from "lucide-react";
 
 function HeroStats({ address }: { address: string }) {
   const { tokens, isLoading: tl } = useTokensByOwner(address);
   const { orders, isLoading: ol } = useUserOrders(address);
-  const activeListings = orders.filter(
-    (o) => o.status === "ACTIVE" && o.offer.itemType === "ERC721"
-  );
+  const activeListings = orders.filter((o) => o.status === "ACTIVE" && o.offer.itemType === "ERC721");
   const totalSales = orders.filter((o) => o.status === "FULFILLED");
   const pills = [
-    { label: "Owned",  value: tl ? null : tokens.length,        icon: Package,      color: BRAND.purple.text },
-    { label: "Listed", value: ol ? null : activeListings.length, icon: Tag,          color: BRAND.blue.text   },
-    { label: "Sold",   value: ol ? null : totalSales.length,     icon: ShoppingCart, color: BRAND.orange.text },
+    { label: "Owned", value: tl ? null : tokens.length, icon: Package, color: BRAND.purple.text },
+    { label: "Listed", value: ol ? null : activeListings.length, icon: Tag, color: BRAND.blue.text },
+    { label: "Sold", value: ol ? null : totalSales.length, icon: ShoppingCart, color: BRAND.orange.text },
   ];
+
   return (
     <div className="flex flex-wrap gap-2 mt-5">
       {pills.map(({ label, value, icon: Icon, color }) => (
         <div key={label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/40 text-sm">
           <Icon className={`h-3.5 w-3.5 ${color}`} />
-          {value === null
-            ? <Skeleton className="h-4 w-6 inline-block" />
-            : <span className="font-bold">{value}</span>}
+          {value === null ? <Skeleton className="h-4 w-6 inline-block" /> : <span className="font-bold">{value}</span>}
           <span className="text-muted-foreground">{label}</span>
         </div>
       ))}
@@ -46,68 +41,286 @@ function HeroStats({ address }: { address: string }) {
   );
 }
 
-// Inject dapp-specific hrefs for each service key
-const DAPP_HREFS: Record<string, Pick<ServiceCardProps, "href" | "buttonLabel" | "browseHref">> = {
-  "mint-ip-asset":      { href: "/create/asset",          buttonLabel: "Mint asset"         },
-  "create-collection":  { href: "/create/collection",     buttonLabel: "Create collection"  },
-  "remix-asset":        { href: "/marketplace",           buttonLabel: "Browse to remix"    },
-  "pop-protocol":       { href: "/launchpad/pop/create",  buttonLabel: "Create Event",      browseHref: "/launchpad/pop"  },
-  "collection-drop":    { href: "/launchpad/drop/create", buttonLabel: "Launch Drop",       browseHref: "/launchpad/drop" },
-  "ip-collection-1155": { href: "/launchpad/nfteditions/create", buttonLabel: "Create Collection" },
-  "mint-editions":      { href: "/launchpad/nfteditions",      buttonLabel: "Mint editions"      },
+const SERVICE_COLORS: Record<string, { icon: string; button: string; chip: string; gradient: string }> = {
+  "mint-ip-asset": { icon: BRAND.blue.text, button: "bg-brand-blue", chip: "border-blue-500/30 text-blue-400 bg-blue-500/10", gradient: "from-blue-500/50 via-cyan-400/20 to-blue-600/30" },
+  "create-collection": { icon: BRAND.purple.text, button: "bg-brand-purple", chip: "border-purple-500/30 text-purple-400 bg-purple-500/10", gradient: "from-purple-500/50 via-violet-400/20 to-purple-700/30" },
+  "ip-collection-1155": { icon: BRAND.rose.text, button: "bg-brand-rose", chip: "border-rose-500/30 text-rose-400 bg-rose-500/10", gradient: "from-rose-500/50 via-pink-400/20 to-rose-700/30" },
+  "mint-editions": { icon: BRAND.orange.text, button: "bg-brand-orange", chip: "border-orange-500/30 text-orange-400 bg-orange-500/10", gradient: "from-orange-500/50 via-amber-400/20 to-orange-700/30" },
+  "remix-asset": { icon: BRAND.navy.text, button: "bg-brand-navy", chip: "border-indigo-700/30 text-indigo-300 bg-indigo-900/20", gradient: "from-blue-900/60 via-indigo-700/20 to-blue-800/30" },
+  "pop-protocol": { icon: BRAND.orange.text, button: "bg-brand-orange", chip: "border-orange-500/30 text-orange-400 bg-orange-500/10", gradient: "from-orange-500/50 via-amber-400/20 to-orange-700/30" },
+  "collection-drop": { icon: BRAND.rose.text, button: "bg-brand-rose", chip: "border-rose-500/30 text-rose-400 bg-rose-500/10", gradient: "from-rose-500/50 via-red-400/20 to-rose-700/30" },
+  "ip-tickets": { icon: BRAND.blue.text, button: "bg-brand-blue", chip: "border-blue-500/30 text-blue-400 bg-blue-500/10", gradient: "from-blue-500/50 via-cyan-400/20 to-blue-600/30" },
+  "membership": { icon: BRAND.purple.text, button: "bg-brand-purple", chip: "border-purple-500/30 text-purple-400 bg-purple-500/10", gradient: "from-purple-500/50 via-violet-400/20 to-purple-700/30" },
+  "subscriptions": { icon: BRAND.blue.text, button: "bg-brand-blue", chip: "border-blue-500/30 text-blue-400 bg-blue-500/10", gradient: "from-blue-500/50 via-cyan-400/20 to-blue-600/30" },
+  "ip-coins": { icon: BRAND.orange.text, button: "bg-brand-orange", chip: "border-orange-500/30 text-orange-400 bg-orange-500/10", gradient: "from-orange-500/50 via-amber-400/20 to-orange-700/30" },
+  "creator-coins": { icon: BRAND.rose.text, button: "bg-brand-rose", chip: "border-rose-500/30 text-rose-400 bg-rose-500/10", gradient: "from-rose-500/50 via-pink-400/20 to-rose-700/30" },
 };
 
-const SERVICES: ServiceCardProps[] = LAUNCHPAD_SERVICE_DEFINITIONS.map((def) => ({
-  ...def,
-  ...(DAPP_HREFS[def.key] ?? {}),
-}));
+interface ServiceContent {
+  title: string;
+  subtitle: string;
+  description: string;
+  features: string[];
+  example: string;
+}
+
+const SERVICE_CONTENT: Record<string, ServiceContent> = {
+  "mint-ip-asset": {
+    title: "Mint NFT",
+    subtitle: "Publish your creative work on Starknet",
+    description: "Upload any photo, video, audio, or document and mint it as an IP NFT with licensing, provenance, and ownership onchain.",
+    features: ["Starknet wallet", "IPFS metadata", "Programmable licensing"],
+    example: "e.g. A song, a photo, an ebook, a short film",
+  },
+  "create-collection": {
+    title: "Create NFT Collection",
+    subtitle: "Group your NFTs under a shared identity",
+    description: "Deploy a branded ERC-721 collection with its own page and onchain identity. Add assets to it at any time.",
+    features: ["Factory-deployed ERC-721", "Branded page", "Expandable catalog"],
+    example: "e.g. A photography portfolio, a music catalog, a comic series",
+  },
+  "ip-collection-1155": {
+    title: "Limited Editions",
+    subtitle: "Deploy a contract for multi-copy NFT releases",
+    description: "Create a collection built for editions. Release music tracks, art prints, or any IP in numbered multiples.",
+    features: ["Multi-edition ERC-1155", "Numbered tokens", "Tradeable on Medialane"],
+    example: "e.g. 50 copies of a limited print or 100 editions of an EP",
+  },
+  "mint-editions": {
+    title: "Mint Limited Edition",
+    subtitle: "Add new editions to an existing collection",
+    description: "Pick one of your Limited Edition contracts, upload artwork, set supply, and release to collectors.",
+    features: ["Choose collection", "Set edition supply", "IPFS metadata"],
+    example: "e.g. Drop 25 numbered prints from your art series",
+  },
+  "remix-asset": {
+    title: "Remix Asset",
+    subtitle: "Derivative works with onchain attribution",
+    description: "Create a licensed derivative of any IP asset with provenance and attribution flowing back to the original creator.",
+    features: ["Onchain attribution", "License-aware minting", "Creator royalties"],
+    example: "e.g. A remix of a song or derivative artwork inspired by an original",
+  },
+  "pop-protocol": {
+    title: "POP Protocol",
+    subtitle: "Proof-of-participation for events and communities",
+    description: "Issue soulbound credentials to your community. One non-transferable badge per wallet, permanently onchain.",
+    features: ["Soulbound", "One per wallet", "Optional allowlist"],
+    example: "e.g. Hackathon badge, community membership, conference pass",
+  },
+  "collection-drop": {
+    title: "Collection Drop",
+    subtitle: "Timed NFT releases with mint windows",
+    description: "Launch a time-gated mint campaign. Set price, supply cap, start and end time, then share a drop page.",
+    features: ["Timed mint window", "Price and supply cap", "Branded drop page"],
+    example: "e.g. A 48-hour drop of 200 NFTs at 5 USDC each",
+  },
+};
+
+const DAPP_HREFS: Record<string, { href?: string; buttonLabel?: string; browseHref?: string }> = {
+  "mint-ip-asset": { href: "/create/asset", buttonLabel: "Mint NFT" },
+  "create-collection": { href: "/create/collection", buttonLabel: "Create NFT Collection" },
+  "remix-asset": { href: "/marketplace", buttonLabel: "Browse to remix" },
+  "pop-protocol": { href: "/launchpad/pop/create", buttonLabel: "Create event", browseHref: "/launchpad/pop" },
+  "collection-drop": { href: "/launchpad/drop/create", buttonLabel: "Launch drop", browseHref: "/launchpad/drop" },
+  "ip-collection-1155": { href: "/launchpad/nfteditions/create", buttonLabel: "Create Limited Edition contract" },
+  "mint-editions": { href: "/launchpad/nfteditions", buttonLabel: "Mint Limited Edition" },
+};
+
+function ServiceCard({
+  def,
+  href,
+  buttonLabel,
+  browseHref,
+}: {
+  def: ServiceDefinition;
+  href?: string;
+  buttonLabel?: string;
+  browseHref?: string;
+}) {
+  const { key, icon: Icon, badge, status, browseLinkLabel } = def;
+  const content = SERVICE_CONTENT[key] ?? {
+    title: def.title,
+    subtitle: def.subtitle,
+    description: def.description,
+    features: def.features,
+    example: "",
+  };
+  const live = status === "live";
+  const building = status === "building";
+  const active = live || building;
+  const colors = SERVICE_COLORS[key] ?? {
+    icon: BRAND.blue.text,
+    button: "bg-brand-blue",
+    chip: "border-border/50 text-muted-foreground bg-muted/30",
+    gradient: "from-border/40 to-border/20",
+  };
+
+  const card = (
+    <div className={cn("rounded-[15px] bg-card flex flex-col overflow-hidden min-h-[420px] transition-all duration-200 flex-1", !active && "opacity-60")}>
+      <div className="flex flex-col flex-1 p-6 gap-5">
+        <div className="flex items-start justify-between">
+          <Icon className={cn("h-9 w-9 transition-transform duration-300", active ? colors.icon : "text-muted-foreground/25")} />
+          <span
+            className={cn(
+              "text-[10px] font-semibold tracking-widest uppercase rounded-full px-2.5 py-1 flex items-center gap-1.5",
+              live ? "text-emerald-500 bg-emerald-500/10" : building ? "text-amber-500 bg-amber-500/10" : "text-muted-foreground/40 bg-muted/30",
+            )}
+          >
+            {live && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />}
+            {!active && <Lock className="h-2.5 w-2.5" />}
+            {badge}
+          </span>
+        </div>
+
+        <div className="space-y-1.5">
+          <p className={cn("text-xl font-bold leading-snug tracking-tight", !active && "text-foreground/40")}>{content.title}</p>
+          <p className={cn("text-xs leading-relaxed", active ? "text-muted-foreground" : "text-muted-foreground/30")}>{content.subtitle}</p>
+        </div>
+
+        <div className="flex-1 space-y-2">
+          <p className={cn("text-sm leading-relaxed", active ? "text-muted-foreground" : "text-muted-foreground/30")}>{content.description}</p>
+          {content.example && active ? <p className="text-xs text-muted-foreground/60 italic">{content.example}</p> : null}
+        </div>
+
+        <div className="flex flex-wrap gap-1.5">
+          {content.features.map((feature) => (
+            <span
+              key={feature}
+              className={cn("text-[11px] px-2.5 py-1 rounded-full border font-medium", active ? colors.chip : "bg-muted/10 border-border/15 text-muted-foreground/25")}
+            >
+              {feature}
+            </span>
+          ))}
+        </div>
+
+        {live && href ? (
+          <div className="space-y-2">
+            <Link
+              href={href}
+              className={cn(
+                "flex items-center justify-between w-full h-10 px-4 rounded-xl text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98]",
+                colors.button,
+              )}
+            >
+              {buttonLabel ?? "Get started"}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            {browseHref && browseLinkLabel ? (
+              <Link href={browseHref} className="flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors py-1">
+                {browseLinkLabel}
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            ) : null}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 h-10 text-sm text-muted-foreground/30 font-medium">
+            <Lock className="h-3.5 w-3.5" />
+            {building ? "In development" : "Coming soon"}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return live ? (
+    <div className={cn("p-[1px] rounded-2xl bg-gradient-to-br transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/25 flex flex-col", colors.gradient)}>
+      {card}
+    </div>
+  ) : (
+    <div className="rounded-2xl border border-border/25 flex flex-col">{card}</div>
+  );
+}
 
 export function LaunchpadContent() {
-  const { isConnected: isSignedIn, address: walletAddress } = useUnifiedWallet();
-  const { collections: featured, isLoading: featuredLoading } = useCollections(1, 6, true);
+  const { isConnected, address: walletAddress } = useUnifiedWallet();
 
   return (
     <div className="pb-16 space-y-10">
-
-      {/* ── Hero ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b border-border/50">
         <div className="px-4 py-14 sm:py-20">
           <FadeIn>
             <span className="pill-badge mb-5 inline-flex">
               <Zap className="h-3 w-3" />
-              Creator Capital Markets
+              Creator
             </span>
           </FadeIn>
           <FadeIn delay={0.08}>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-3">
-              The Financial Hub for<br />
-              <span className="gradient-text">Creator IP on Starknet</span>
+              <span className="gradient-text">Launchpad</span>
             </h1>
           </FadeIn>
           <FadeIn delay={0.16}>
             <p className="text-muted-foreground text-base max-w-xl leading-relaxed">
-              Mint, structure, and monetize your intellectual property as programmable financial assets.
-              No intermediaries. Full sovereignty.
+              Permissionless smart contracts to create and generate new monetization revenues onchain, with full sovereignty and ownership.
             </p>
           </FadeIn>
-          {isSignedIn && walletAddress && (
+          {isConnected && walletAddress ? (
             <FadeIn delay={0.24}>
               <HeroStats address={walletAddress} />
             </FadeIn>
-          )}
+          ) : null}
         </div>
       </section>
 
-      {/* ── Services grid (from @medialane/ui) ───────────────── */}
       <section className="px-4">
-        <LaunchpadServicesGrid services={SERVICES} />
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
+          {LAUNCHPAD_SERVICE_DEFINITIONS.map((def) => {
+            const { href, buttonLabel, browseHref } = DAPP_HREFS[def.key] ?? {};
+            return <ServiceCard key={def.key} def={def} href={href} buttonLabel={buttonLabel} browseHref={browseHref} />;
+          })}
+        </motion.div>
       </section>
 
-      {/* ── Portfolio shortcut (signed in only) ──────────────── */}
-      {isSignedIn && (
+      <section className="px-4">
+        <FadeIn>
+          <div className="rounded-2xl border border-border/40 p-5 sm:p-8 bg-gradient-to-br from-brand-purple/[0.08] via-brand-blue/[0.05] to-transparent overflow-hidden relative">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden sm:flex items-center justify-center opacity-[0.05] select-none pointer-events-none">
+              <Layers className="h-52 w-52" />
+            </div>
+            <div className="relative z-10 max-w-lg space-y-4">
+              <div>
+                <p className="section-label">Drop Pages</p>
+                <h2 className="text-xl font-bold mt-0.5">Every collection gets a branded page</h2>
+                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                  Share your work as a standalone creator drop page, fully branded, shareable on social, and accessible to any Starknet wallet.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 bg-muted/50 border border-border/50 rounded-lg px-3 py-2 max-w-sm">
+                <Globe className={`h-3.5 w-3.5 shrink-0 ${BRAND.purple.text}`} />
+                <span className="font-mono text-xs text-muted-foreground">dapp.medialane.io/collections/</span>
+                <span className={`font-mono text-xs font-semibold ${BRAND.blue.text} truncate`}>your-collection</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href="/create/collection"
+                  className={cn(
+                    "h-9 px-4 rounded-xl flex items-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98]",
+                    BRAND.purple.bgSolid,
+                  )}
+                >
+                  Create a collection
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+                <Button variant="ghost" size="sm" asChild className="text-muted-foreground">
+                  <Link href="/collections">
+                    Browse collections <ExternalLink className="h-3 w-3 ml-1" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </FadeIn>
+      </section>
+
+      {isConnected ? (
         <section className="px-4">
           <FadeIn>
-            <div className="bento-cell p-5 bg-gradient-to-r from-brand-navy/10 to-brand-purple/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="rounded-2xl border border-border/40 p-5 bg-gradient-to-r from-brand-navy/10 to-brand-purple/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <p className="section-label">Manage</p>
                 <p className="font-bold text-base mt-0.5">Your portfolio</p>
@@ -121,51 +334,7 @@ export function LaunchpadContent() {
             </div>
           </FadeIn>
         </section>
-      )}
-
-      {/* ── Featured drops ────────────────────────────────────── */}
-      <section className="px-4 space-y-4">
-        <FadeIn>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="section-label">Curated</p>
-              <div className="flex items-center gap-2 mt-0.5">
-                <Star className={`h-4 w-4 ${BRAND.orange.text}`} />
-                <h2 className="text-xl font-bold">Featured drops</h2>
-              </div>
-            </div>
-            <Button variant="ghost" size="sm" asChild className="gap-1 text-muted-foreground">
-              <Link href="/collections">View all <ArrowRight className="h-3.5 w-3.5" /></Link>
-            </Button>
-          </div>
-        </FadeIn>
-        {featuredLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, i) => <CollectionCardSkeleton key={i} />)}
-          </div>
-        ) : featured.length > 0 ? (
-          <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {featured.map((col) => (
-              <StaggerItem key={col.contractAddress}>
-                <CollectionCard collection={col} />
-              </StaggerItem>
-            ))}
-          </Stagger>
-        ) : (
-          <FadeIn>
-            <div className="bento-cell border-dashed p-12 text-center space-y-3">
-              <div className="flex justify-center gap-2 text-muted-foreground/30">
-                <Star className="h-6 w-6" /><Rocket className="h-6 w-6" /><Star className="h-6 w-6" />
-              </div>
-              <p className="text-sm text-muted-foreground">Curated creator drops will appear here.</p>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/marketplace">Browse marketplace</Link>
-              </Button>
-            </div>
-          </FadeIn>
-        )}
-      </section>
-
+      ) : null}
     </div>
   );
 }

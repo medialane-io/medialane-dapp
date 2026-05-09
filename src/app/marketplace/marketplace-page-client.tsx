@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Search, X, Store, SlidersHorizontal } from "lucide-react";
 import { ActivityTicker } from "@/components/shared/activity-ticker";
+import { CurrencyIcon } from "@/components/shared/currency-icon";
 import type { ApiSearchResult } from "@medialane/sdk";
 import { getTokenBySymbol, parseAmount, SUPPORTED_TOKENS } from "@medialane/sdk";
 import { ipfsToHttp, cn } from "@/lib/utils";
@@ -18,6 +19,7 @@ import { usePathname } from "next/navigation";
 import { usePlatformStats } from "@/hooks/use-stats";
 import { IP_TYPES } from "@/types/ip";
 import { HelpIcon } from "@/components/ui/help-icon";
+import { PageContainer } from "@medialane/ui";
 
 const SORT_OPTIONS = [
   { label: "Recent", value: "recent" },
@@ -242,7 +244,7 @@ export default function MarketplacePageClient() {
   };
 
   return (
-    <div className="container mx-auto px-4 pt-14 pb-8 space-y-8">
+    <PageContainer className="box-border max-w-full pt-14 pb-8 space-y-8">
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-primary">
@@ -298,6 +300,7 @@ export default function MarketplacePageClient() {
             )}
             {currency && (
               <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
+                <CurrencyIcon symbol={currency} size={12} />
                 {currency}
                 <button onClick={() => handleCurrencyChange(currency)} className="ml-0.5 hover:text-primary/60">×</button>
               </span>
@@ -382,13 +385,14 @@ export default function MarketplacePageClient() {
                     key={c}
                     onClick={() => handleCurrencyChange(c)}
                     className={cn(
-                      "text-xs px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap",
+                      "inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap",
                       currency === c
                         ? "border-primary bg-primary/10 text-primary font-medium"
                         : "border-border text-muted-foreground hover:border-primary/50"
                     )}
                   >
-                    {c}
+                    <CurrencyIcon symbol={c} size={13} />
+                    <span>{c}</span>
                   </button>
                 ))}
               </div>
@@ -452,6 +456,6 @@ export default function MarketplacePageClient() {
         minPrice={minPrice}
         maxPrice={maxPrice}
       />
-    </div>
+    </PageContainer>
   );
 }

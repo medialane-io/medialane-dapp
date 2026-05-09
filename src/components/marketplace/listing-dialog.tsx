@@ -5,14 +5,13 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { AlertCircle, Tag } from "lucide-react";
+import { AlertCircle, Layers, ShieldCheck, Tag, Zap } from "lucide-react";
 import { fireConfetti } from "@/lib/confetti";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { useMarketplace } from "@/hooks/use-marketplace";
 import { EXPLORER_URL, DURATION_OPTIONS } from "@/lib/constants";
@@ -23,6 +22,7 @@ import {
   DurationPicker,
   MarketplaceSuccessState,
   MarketplaceProcessingState,
+  MarketplaceDialogHero,
 } from "@/components/marketplace/marketplace-dialog-primitives";
 
 const CURRENCIES = getListableTokens().map((t) => t.symbol);
@@ -42,22 +42,32 @@ interface ListingDialogProps {
   tokenId: string;
   tokenName?: string;
   tokenStandard?: string;
+  tokenImage?: string | null;
   onSuccess?: () => void;
 }
 
-export function ListingDialog({ open, onOpenChange, assetContract, tokenId, tokenName, tokenStandard, onSuccess }: ListingDialogProps) {
+export function ListingDialog({ open, onOpenChange, assetContract, tokenId, tokenName, tokenStandard, tokenImage, onSuccess }: ListingDialogProps) {
   const { isConnected } = useUnifiedWallet();
   const { createListing, isProcessing, txHash, error, resetState } = useMarketplace();
   const confettiFired = useRef(false);
   const [txStatus, setTxStatus] = useState<"idle" | "confirmed">("idle");
+  const is1155 = tokenStandard === "ERC1155";
+  const name = tokenName || `Token #${tokenId}`;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { price: "", currency: "USDC", durationSeconds: 2592000 },
+    defaultValues: { price: "", currency: "USDC", durationSeconds: 2592000, amount: "1" },
   });
 
   const onSubmit = async (values: FormValues) => {
     if (!isConnected) { toast.error("Connect your wallet first"); return; }
+    if (is1155) {
+      const qty = parseInt(values.amount ?? "", 10);
+      if (!values.amount || Number.isNaN(qty) || qty < 1) {
+        form.setError("amount", { message: "Enter a quantity of at least 1" });
+        return;
+      }
+    }
     const hash = await createListing(
       assetContract,
       tokenId,
@@ -65,7 +75,7 @@ export function ListingDialog({ open, onOpenChange, assetContract, tokenId, toke
       values.currency,
       values.durationSeconds,
       tokenStandard,
-      values.amount?.trim() || undefined
+      is1155 ? (values.amount?.trim() || "1") : undefined
     );
     if (hash) setTxStatus("confirmed");
   };
@@ -81,31 +91,53 @@ export function ListingDialog({ open, onOpenChange, assetContract, tokenId, toke
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!isProcessing) onOpenChange(v); }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md p-0 overflow-hidden">
         {txStatus === "confirmed" ? (
           <MarketplaceSuccessState
             title="Listing registered"
-            description={`${tokenName || `#${tokenId}`} will appear for sale shortly.`}
+            description={`${name} will appear for sale shortly.`}
             txHash={txHash}
             explorerUrl={EXPLORER_URL}
-            name={tokenName || `#${tokenId}`}
+            tokenImage={tokenImage}
+            name={name}
             onDone={() => { onOpenChange(false); onSuccess?.(); }}
           />
         ) : isProcessing ? (
-          <MarketplaceProcessingState title="Submitting listing…" />
+          <MarketplaceProcessingState title="Submitting listing..." imageUrl={tokenImage} imageAlt={name} />
         ) : (
-          <>
-            <DialogHeader><DialogTitle>List for sale</DialogTitle></DialogHeader>
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <Badge variant="outline" className="font-mono">#{tokenId}</Badge>
-                <span className="text-sm font-medium truncate">{tokenName || `Token #${tokenId}`}</span>
+          <div className="flex flex-col">
+            <MarketplaceDialogHero
+              tokenImage={tokenImage}
+              tokenName={tokenName}
+              tokenId={tokenId}
+              fallbackIcon={<Layers className="h-10 w-10 text-muted-foreground/35" />}
+              badge={
+                <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-white drop-shadow font-bold text-lg leading-tight truncate">{name}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Zap className="h-3 w-3 text-emerald-300 drop-shadow" />
+                      <span className="text-[11px] font-medium text-emerald-200 drop-shadow">Onchain listing</span>
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
+                    #{tokenId}
+                  </span>
+                </div>
+              }
+            />
+            <div className="px-5 py-5 space-y-4">
+              <div>
+                <DialogTitle>List for sale</DialogTitle>
+                <DialogDescription>
+                  Set a fixed price and duration. Your asset stays in your wallet until a buyer settles the trade.
+                </DialogDescription>
               </div>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField control={form.control} name="price" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{tokenStandard === "ERC1155" ? "Price per edition" : "Price"}</FormLabel>
+                      <FormLabel>{is1155 ? "Price per edition" : "Price"}</FormLabel>
                       <div className="relative">
                         <FormControl>
                           <Input type="number" step="any" placeholder="0.00" className="pr-20" {...field} />
@@ -118,7 +150,7 @@ export function ListingDialog({ open, onOpenChange, assetContract, tokenId, toke
                       <FormMessage />
                     </FormItem>
                   )} />
-                  {tokenStandard === "ERC1155" && (
+                  {is1155 && (
                     <FormField control={form.control} name="amount" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Quantity to list</FormLabel>
@@ -146,13 +178,21 @@ export function ListingDialog({ open, onOpenChange, assetContract, tokenId, toke
                     </FormItem>
                   )} />
                   {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
-                  <Button type="submit" className="w-full h-11" disabled={isProcessing || !isConnected}>
-                    <Tag className="h-4 w-4 mr-2" />List for sale
-                  </Button>
+                  <div className="space-y-3">
+                    <Button type="submit" className="w-full h-11" disabled={isProcessing || !isConnected}>
+                      <Tag className="h-4 w-4 mr-2" />List for sale
+                    </Button>
+                    <div className="flex items-start justify-center gap-1.5">
+                      <ShieldCheck className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
+                      <p className="text-[10px] text-center text-muted-foreground">
+                        Listings are signed onchain and can be cancelled from your portfolio at any time.
+                      </p>
+                    </div>
+                  </div>
                 </form>
               </Form>
             </div>
-          </>
+          </div>
         )}
       </DialogContent>
     </Dialog>
