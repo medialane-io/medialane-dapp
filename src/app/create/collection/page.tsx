@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { withSiwsAuth } from "@/lib/pinata-fetch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -108,10 +109,7 @@ export default function CreateCollectionPage() {
       const siwsToken = await getValidToken();
       if (!siwsToken) throw new Error("Please sign in with your wallet to upload images.");
       // Upload directly to Pinata via signed URL (bypasses Next.js 4 MB body limit)
-      const signedRes = await fetch("/api/pinata/signed-url", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${siwsToken}` },
-      });
+      const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth(siwsToken, { method: "POST" }));
       const signedData = await signedRes.json();
       if (!signedRes.ok || !signedData.url) throw new Error("Failed to get upload URL");
       const imgFormData = new FormData();
@@ -162,21 +160,18 @@ export default function CreateCollectionPage() {
       let baseUri: string | undefined;
       if (imageUri) {
         try {
-          const siwsToken = await getValidToken();
-          if (!siwsToken) throw new Error("Please sign in with your wallet to upload collection metadata.");
-          const metaRes = await fetch("/api/pinata/json", {
+          const metaToken = await getValidToken();
+          if (!metaToken) throw new Error("Please sign in with your wallet to upload collection metadata.");
+          const metaRes = await fetch("/api/pinata/json", withSiwsAuth(metaToken, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${siwsToken}`,
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               name: values.name,
               description: values.description || "",
               image: imageUri,
               external_link: values.external_link || "https://medialane.io",
             }),
-          });
+          }));
           const metaData = await metaRes.json().catch(() => ({}));
           if (metaRes.ok && metaData.uri) baseUri = metaData.uri;
         } catch {

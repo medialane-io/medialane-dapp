@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { withSiwsAuth } from "@/lib/pinata-fetch";
+import { useSiwsToken } from "@/hooks/use-siws-token";
 import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -77,6 +78,7 @@ export default function MintNFTEditionsPage() {
 
   const { isConnected, address: walletAddress } = useUnifiedWallet();
   const { executeAuto } = usePaymasterTransaction();
+  const { getValidToken } = useSiwsToken();
 
   const { connectAsync, connectors } = useConnect();
   const { starknetkitConnectModal } = useStarknetkitConnectModal({
@@ -148,7 +150,8 @@ export default function MintNFTEditionsPage() {
     setImageUri(null);
     setImageUploading(true);
     try {
-      const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth({ method: "POST" }));
+      const token = await getValidToken();
+      const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth(token, { method: "POST" }));
       const { url: uploadUrl } = await signedRes.json();
       const fd = new FormData();
       fd.append("file", file, file.name);
@@ -181,7 +184,8 @@ export default function MintNFTEditionsPage() {
         image: imageUri,
       };
       if (values.description) metadata.description = values.description;
-      const r = await fetch("/api/pinata/json", withSiwsAuth({
+      const token = await getValidToken();
+      const r = await fetch("/api/pinata/json", withSiwsAuth(token, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(metadata),

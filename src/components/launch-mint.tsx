@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { withSiwsAuth } from "@/lib/pinata-fetch";
+import { useSiwsToken } from "@/hooks/use-siws-token";
 import Image from "next/image";
 import { useConnect } from "@starknet-react/core";
 import { StarknetkitConnector, useStarknetkitConnectModal } from "starknetkit";
@@ -93,6 +94,7 @@ export function LaunchMint() {
   const isLoaded = true;
   const { walletAddress: sessionWalletAddress, hasWallet, isLoadingWallet } = useSessionKey();
   const { execute: executeTransaction, status, statusMessage, error: txError, reset } = useTx();
+  const { getValidToken } = useSiwsToken();
 
   const { connectAsync, connectors } = useConnect();
   const { starknetkitConnectModal } = useStarknetkitConnectModal({
@@ -154,7 +156,8 @@ export function LaunchMint() {
           "Claim your exclusive Genesis NFT."
         );
         form.append("external_url", "https://medialane.io");
-        const res = await fetch("/api/pinata", withSiwsAuth({ method: "POST", body: form }));
+        const token = await getValidToken();
+        const res = await fetch("/api/pinata", withSiwsAuth(token, { method: "POST", body: form }));
         const data = await res.json();
         if (data.error) throw new Error("Metadata upload failed: " + data.error);
         tokenUri = data.uri;

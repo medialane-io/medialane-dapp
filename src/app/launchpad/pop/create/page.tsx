@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { withSiwsAuth } from "@/lib/pinata-fetch";
+import { useSiwsToken } from "@/hooks/use-siws-token";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -54,6 +55,7 @@ type FormValues = z.infer<typeof schema>;
 export default function CreatePOPPage() {
   const { isConnected } = useUnifiedWallet();
   const { executeAuto, isLoading: isTxLoading } = usePaymasterTransaction();
+  const { getValidToken } = useSiwsToken();
 
   const [eventType, setEventType] = useState<PopEventType>("Conference");
   const [isPublic, setIsPublic] = useState(false);
@@ -81,7 +83,8 @@ export default function CreatePOPPage() {
     setImageUri(null);
     setImageUploading(true);
     try {
-      const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth({ method: "POST" }));
+      const token = await getValidToken();
+      const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth(token, { method: "POST" }));
       const { url: uploadUrl } = await signedRes.json();
       const fd = new FormData();
       fd.append("file", file, file.name);
@@ -115,7 +118,8 @@ export default function CreatePOPPage() {
         ],
       };
       if (imageUri) metadata.image = imageUri;
-      const r = await fetch("/api/pinata/json", withSiwsAuth({
+      const token = await getValidToken();
+      const r = await fetch("/api/pinata/json", withSiwsAuth(token, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(metadata),

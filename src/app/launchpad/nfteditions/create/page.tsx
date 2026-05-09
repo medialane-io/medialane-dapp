@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { withSiwsAuth } from "@/lib/pinata-fetch";
+import { useSiwsToken } from "@/hooks/use-siws-token";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -70,6 +71,7 @@ type FormValues = z.infer<typeof schema>;
 export default function CreateNFTEditionsCollectionPage() {
   const { isConnected, address: walletAddress } = useUnifiedWallet();
   const { executeAuto } = usePaymasterTransaction();
+  const { getValidToken } = useSiwsToken();
 
   const { connectAsync, connectors } = useConnect();
   const { starknetkitConnectModal } = useStarknetkitConnectModal({
@@ -125,7 +127,8 @@ export default function CreateNFTEditionsCollectionPage() {
     setImageUri(null);
     setImageUploading(true);
     try {
-      const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth({ method: "POST" }));
+      const token = await getValidToken();
+      const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth(token, { method: "POST" }));
       const signedData = await signedRes.json();
       if (!signedRes.ok || !signedData.url) throw new Error("Failed to get upload URL");
       const fd = new FormData();
@@ -176,7 +179,8 @@ export default function CreateNFTEditionsCollectionPage() {
       let collectionMetaUri: string | undefined;
       if (imageUri) {
         try {
-          const r = await fetch("/api/pinata/json", withSiwsAuth({
+          const token = await getValidToken();
+          const r = await fetch("/api/pinata/json", withSiwsAuth(token, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

@@ -87,6 +87,7 @@ export function ApproveMintSheet({ offer, open, onOpenChange, onSuccess }: Props
 
     try {
       // 1. Upload remix IPFS metadata
+      const token = await getValidToken();
       const royaltyStr = offer.royaltyPct != null ? `${offer.royaltyPct}%` : undefined;
       const metadata = {
         name: effectiveName,
@@ -103,7 +104,7 @@ export function ApproveMintSheet({ offer, open, onOpenChange, onSuccess }: Props
           { trait_type: "Creator", value: walletAddress },
         ],
       };
-      const pinRes = await fetch("/api/pinata/json", withSiwsAuth({
+      const pinRes = await fetch("/api/pinata/json", withSiwsAuth(token, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(metadata),

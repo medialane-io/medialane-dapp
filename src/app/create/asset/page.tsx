@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { withSiwsAuth } from "@/lib/pinata-fetch";
+import { useSiwsToken } from "@/hooks/use-siws-token";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -123,6 +124,7 @@ function ToggleGroup({
 export default function CreateAssetPage() {
   const { execute: executeTransaction, status, txHash, error, statusMessage } = useTx();
   const { walletAddress } = useSessionKey();
+  const { getValidToken } = useSiwsToken();
   const client = useMedialaneClient();
   const { listingStep, listingError, runPostMintListing, resetListing } = usePostMintListing();
 
@@ -216,9 +218,10 @@ export default function CreateAssetPage() {
       formData.set("geographicScope", values.geographicScope);
       formData.set("aiPolicy", values.aiPolicy);
       formData.set("royalty", String(values.royalty));
+      const token = await getValidToken();
       if (imageFile) {
         // Upload image directly to Pinata via signed URL (bypasses Next.js 4 MB body limit)
-        const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth({ method: "POST" }));
+        const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth(token, { method: "POST" }));
         const signedData = await signedRes.json();
         if (!signedRes.ok || !signedData.url) throw new Error("Failed to get upload URL");
         const imgFormData = new FormData();
@@ -238,7 +241,7 @@ export default function CreateAssetPage() {
         if (value?.trim()) formData.set(`tmpl_${key}`, value.trim());
       });
 
-      const uploadRes = await fetch("/api/pinata", withSiwsAuth({ method: "POST", body: formData }));
+      const uploadRes = await fetch("/api/pinata", withSiwsAuth(token, { method: "POST", body: formData }));
       const uploadData = await uploadRes.json();
       if (!uploadRes.ok || uploadData.error) {
         throw new Error(uploadData.error ?? "IPFS upload failed");

@@ -26,19 +26,36 @@ function getStoredSiwsToken(): string | null {
 }
 
 /**
- * Wraps a fetch RequestInit with an Authorization: Bearer header using the
- * current wallet's stored SIWS token. Drop-in replacement for fetch options.
+ * Wraps a fetch RequestInit with an Authorization: Bearer header.
  *
- * Usage:
+ * Preferred usage — pass an explicit token from getValidToken() so sign-in
+ * is triggered before the request if needed:
+ *   const token = await getValidToken();
+ *   const res = await fetch("/api/pinata/signed-url", withSiwsAuth(token, { method: "POST" }));
+ *
+ * Legacy usage (silent — no sign-in prompt, just reads localStorage):
  *   const res = await fetch("/api/pinata/signed-url", withSiwsAuth({ method: "POST" }));
  */
-export function withSiwsAuth(init?: RequestInit): RequestInit {
-  const token = getStoredSiwsToken();
-  if (!token) return init ?? {};
+export function withSiwsAuth(
+  tokenOrInit?: string | null | RequestInit,
+  init?: RequestInit,
+): RequestInit {
+  let token: string | null;
+  let options: RequestInit | undefined;
+
+  if (typeof tokenOrInit === "string" || tokenOrInit === null) {
+    token = tokenOrInit ?? null;
+    options = init;
+  } else {
+    token = getStoredSiwsToken();
+    options = tokenOrInit;
+  }
+
+  if (!token) return options ?? {};
   return {
-    ...init,
+    ...options,
     headers: {
-      ...(init?.headers as Record<string, string> ?? {}),
+      ...(options?.headers as Record<string, string> ?? {}),
       Authorization: `Bearer ${token}`,
     },
   };
