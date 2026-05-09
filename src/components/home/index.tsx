@@ -1,7 +1,7 @@
 "use client";
 
 import { HeroSlider } from "./hero-slider";
-import { ActivityTicker } from "./activity-ticker";
+import { ActivityTicker } from "@/components/shared/activity-ticker";
 import { TrendingCollections } from "./trending-collections";
 import { NewOnMarketplace } from "./new-on-marketplace";
 import { AirdropSection } from "./airdrop-section";
@@ -16,7 +16,7 @@ export function HomePage() {
 
       {/* Live market ticker */}
       <div className="container mx-auto px-4 sm:px-6 pt-6">
-        <ActivityTicker />
+        <ActivityTicker limit={14} />
       </div>
 
       {/* Padded content sections */}

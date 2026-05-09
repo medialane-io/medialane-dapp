@@ -1,12 +1,22 @@
 import type { MetadataRoute } from "next";
+import { APP_URL } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/", "/admin/", "/portfolio/", "/create/"],
+      disallow: [
+        "/api/",
+        "/admin/",
+        "/portfolio/",
+        "/create/",
+        "/notifications",
+        "/sign-in",
+        "/sign-up",
+        "/onboarding",
+      ],
     },
-    sitemap: `${process.env.NEXT_PUBLIC_APP_URL || "https://medialane.io"}/sitemap.xml`,
+    sitemap: `${APP_URL}/sitemap.xml`,
   };
 }

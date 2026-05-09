@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { IP_TYPE_MAP } from "@/lib/ip-type-config";
 import { IpTypePageClient } from "./ip-type-page-client";
+import { canonical } from "@/lib/seo";
 
 interface Props {
   params: Promise<{ ipType: string }>;
@@ -12,13 +13,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const config = IP_TYPE_MAP[ipType];
   if (!config) return {};
   const title = `${config.label} Assets`;
-  const description = `Browse all ${config.label} IP assets indexed on Medialane — the Starknet creator launchpad.`;
+  const description = `Browse all ${config.label} IP assets indexed on Medialane — Creator Launchpad + NFT Marketplace.`;
   return {
     title,
     description,
+    alternates: canonical(`/${ipType}`),
     openGraph: {
       title: `${title} | Medialane`,
       description,
+      url: `/${ipType}`,
       images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: `Medialane ${config.label} Assets` }],
     },
     twitter: {

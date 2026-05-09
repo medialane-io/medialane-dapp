@@ -28,7 +28,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       <AppSidebar />
       <SidebarInset>
         <SidebarTrigger className="absolute top-3 left-3 z-50" />
-        <main className="flex-1 bg-background overflow-x-hidden">{children}</main>
+        <main className="min-w-0 flex-1 bg-background overflow-x-hidden">{children}</main>
         <footer className="bg-background border-t border-border/60 px-6 py-8 mt-auto">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
