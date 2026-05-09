@@ -7,6 +7,7 @@ import { NewOnMarketplace } from "./new-on-marketplace";
 import { AirdropSection } from "./airdrop-section";
 import { CommunityActivity } from "./community-activity";
 import { LearnDocsCta } from "./learn-docs-cta";
+import { PageContainer } from "@medialane/ui";
 
 export function HomePage() {
   return (
@@ -15,18 +16,18 @@ export function HomePage() {
       <HeroSlider />
 
       {/* Live market ticker */}
-      <div className="container mx-auto px-4 sm:px-6 pt-6">
+      <PageContainer className="box-border max-w-full pt-6 pb-0">
         <ActivityTicker limit={14} />
-      </div>
+      </PageContainer>
 
       {/* Padded content sections */}
-      <div className="container mx-auto px-4 sm:px-6 space-y-20 mt-16">
+      <PageContainer className="box-border max-w-full pt-0 pb-0 space-y-20 mt-16">
         <TrendingCollections />
         <NewOnMarketplace />
         <AirdropSection />
         <CommunityActivity />
         <LearnDocsCta />
-      </div>
+      </PageContainer>
     </div>
   );
 }
