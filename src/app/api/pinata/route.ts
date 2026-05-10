@@ -8,7 +8,7 @@
  *   file            File?    — cover image (JPG/PNG/GIF/SVG/WebP, max 10 MB)
  *   name            string   — asset name (required)
  *   description     string?  — asset description
- *   external_url    string?  — canonical URL (default: https://medialane.io)
+ *   external_url    string?  — canonical URL (default: configured app URL)
  *   creator         string?  — creator wallet address (stored as attribute)
  *   ipType          string?  — e.g. "Art", "Music", "Video", …
  *   licenseType     string?  — e.g. "CC BY", "All Rights Reserved", …
@@ -28,6 +28,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PinataSDK } from "pinata";
 import { getSiwsWallet } from "@/lib/siws-server";
+import { APP_URL } from "@/lib/seo";
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT!,
@@ -42,9 +43,25 @@ const ALLOWED_IMAGE_TYPES = new Set([
   "image/webp",
 ]);
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB (server-side fallback guard)
+const MAX_TEMPLATE_FIELDS = 30;
+const RESERVED_TRAITS = new Set([
+  "creator",
+  "ip type",
+  "license",
+  "commercial use",
+  "derivatives",
+  "attribution",
+  "territory",
+  "ai policy",
+  "royalty",
+  "edition",
+  "standard",
+  "registration",
+]);
 
 export async function POST(req: NextRequest) {
-  if (!getSiwsWallet(req.headers.get("authorization"))) {
+  const authenticatedWallet = getSiwsWallet(req.headers.get("authorization"));
+  if (!authenticatedWallet) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -57,8 +74,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "name is required" }, { status: 400 });
     }
     const description = (formData.get("description") as string | null) ?? "";
-    const externalUrl = (formData.get("external_url") as string | null) ?? "https://medialane.io";
-    const creator = (formData.get("creator") as string | null) ?? null;
+    const externalUrl = (formData.get("external_url") as string | null) ?? APP_URL;
+    const creator = authenticatedWallet;
 
     // ── IP / licensing fields ─────────────────────────────────────────────────
     const ipType = formData.get("ipType") as string | null;
@@ -121,11 +138,23 @@ export async function POST(req: NextRequest) {
     // Edition (legacy genesis-mint field)
     if (edition) attributes.push({ trait_type: "Edition", value: edition });
 
-    // Template-specific fields — stored as standard NFT attributes
+    // Template-specific and custom fields — stored as standard NFT attributes.
+    // Skip reserved traits so callers cannot duplicate/override core licensing markers.
+    let templateFieldCount = 0;
+    const seenTemplateTraits = new Set<string>();
     for (const [key, value] of formData.entries()) {
       if (typeof key === "string" && key.startsWith("tmpl_") && value) {
+        if (templateFieldCount >= MAX_TEMPLATE_FIELDS) break;
         const traitType = key.slice(5); // strip "tmpl_" prefix → exact trait_type
-        attributes.push({ trait_type: traitType, value: String(value) });
+        const cleanTraitType = traitType.trim();
+        const cleanValue = String(value).trim();
+        const traitKey = cleanTraitType.toLowerCase();
+        if (!cleanTraitType || !cleanValue || RESERVED_TRAITS.has(traitKey) || seenTemplateTraits.has(traitKey)) {
+          continue;
+        }
+        seenTemplateTraits.add(traitKey);
+        templateFieldCount += 1;
+        attributes.push({ trait_type: cleanTraitType, value: cleanValue });
       }
     }
 
