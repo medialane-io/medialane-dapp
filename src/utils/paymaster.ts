@@ -103,7 +103,7 @@ export async function executeGaslessTransaction(
 /**
  * Execute calls with AVNU-sponsored gas via PaymasterRpc (SNIP-29).
  * Uses the JSON-RPC paymaster endpoint with x-paymaster-api-key — works for
- * both Argent X and Braavos, regardless of whether the connector natively
+ * both Ready and Braavos, regardless of whether the connector natively
  * supports avnuPaymasterProvider.
  */
 export async function executeSponsoredTransaction(

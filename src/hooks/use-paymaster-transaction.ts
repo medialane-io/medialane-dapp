@@ -229,7 +229,7 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
       }
 
       // Fallback: account.execute() — also routed through avnuPaymasterProvider for
-      // connectors that support it (Argent X), or direct wallet signing (Braavos).
+      // connectors that support it (Ready), or direct wallet signing (Braavos).
       try {
         const response = await account.execute(calls as any); // eslint-disable-line @typescript-eslint/no-explicit-any
         return response.transaction_hash;

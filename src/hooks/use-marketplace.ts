@@ -248,7 +248,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             return undefined;
         }
         if (!account) {
-            const msg = "Marketplace listing requires Argent X or Braavos wallet";
+            const msg = "Marketplace listing requires Ready or Braavos wallet";
             setError(msg);
             toast.error(msg);
             return undefined;
@@ -411,7 +411,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             return undefined;
         }
         if (!account) {
-            const msg = "Making offers requires Argent X or Braavos wallet";
+            const msg = "Making offers requires Ready or Braavos wallet";
             setError(msg);
             toast.error(msg);
             return undefined;
@@ -502,7 +502,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             return undefined;
         }
         if (!account) {
-            const msg = "Checkout requires Argent X or Braavos wallet";
+            const msg = "Checkout requires Ready or Braavos wallet";
             setError(msg);
             toast.error(msg);
             return undefined;
@@ -630,7 +630,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             return undefined;
         }
         if (!account) {
-            const msg = "Cancelling orders requires Argent X or Braavos wallet";
+            const msg = "Cancelling orders requires Ready or Braavos wallet";
             setError(msg);
             toast.error(msg);
             return undefined;
@@ -696,7 +696,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             return undefined;
         }
         if (!account) {
-            const msg = "Accepting offers requires Argent X or Braavos wallet";
+            const msg = "Accepting offers requires Ready or Braavos wallet";
             setError(msg);
             toast.error(msg);
             return undefined;

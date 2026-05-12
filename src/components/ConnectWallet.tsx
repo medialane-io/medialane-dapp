@@ -63,7 +63,7 @@ function getConnectorIconSrc(icon: ConnectorIconObj | string | undefined): strin
 
 function getConnectorDisplayName(id: string, fallback: string): string {
   const NAMES: Record<string, string> = {
-    argentX: "Argent X",
+    argentX: "Ready",
     braavos: "Braavos",
     webwallet: "Argent Web Wallet",
   };
@@ -437,7 +437,7 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
                   })
                 ) : (
                   <p className="text-xs text-muted-foreground py-2">
-                    No browser wallets detected. Install Argent X or Braavos to continue.
+                    No browser wallets detected. Install Ready or Braavos to continue.
                   </p>
                 )}
               </div>
