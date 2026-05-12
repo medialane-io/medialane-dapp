@@ -196,6 +196,7 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
         setError(null);
         try {
           const tx = await szWallet.execute(calls);
+          await tx.wait();
           return tx.hash;
         } catch (err) {
           const msg = err instanceof Error ? err.message : "Transaction failed";

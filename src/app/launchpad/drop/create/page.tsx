@@ -8,7 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Image from "next/image";
 import Link from "next/link";
-import { Contract } from "starknet";
+import { Contract, hash } from "starknet";
+import { normalizeAddress } from "@medialane/sdk";
 import { starknetProvider } from "@/lib/starknet";
 import {
   Package, Loader2, ImagePlus, X, CheckCircle2, ChevronDown,
@@ -135,7 +136,7 @@ export default function CreateDropPage() {
   };
 
   const persistDropConditions = async (
-    ownerAddress: string,
+    collectionAddress: string,
     maxSupply: bigint,
     claimConditions: {
       start_time: number;
@@ -148,29 +149,6 @@ export default function CreateDropPage() {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (MEDIALANE_API_KEY) headers["x-api-key"] = MEDIALANE_API_KEY;
     const base = MEDIALANE_BACKEND_URL.replace(/\/$/, "");
-
-    // Poll up to 30s for the newly indexed collection (indexer ~6s cycle)
-    let collectionAddress: string | null = null;
-    for (let attempt = 0; attempt < 10; attempt++) {
-      await new Promise((r) => setTimeout(r, 3000));
-      try {
-        const res = await fetch(
-          `${base}/v1/collections?source=COLLECTION_DROP&owner=${ownerAddress}&sort=recent&limit=1`,
-          { headers }
-        );
-        const json = await res.json();
-        const latest = json?.data?.[0];
-        if (latest?.contractAddress) {
-          collectionAddress = latest.contractAddress;
-          break;
-        }
-      } catch {
-        // keep polling
-      }
-    }
-
-    if (!collectionAddress) return;
-
     try {
       await fetch(`${base}/v1/drop/conditions`, {
         method: "POST",
@@ -229,7 +207,7 @@ export default function CreateDropPage() {
     };
 
     try {
-      const factory = new Contract(DropFactoryABI as any, DROP_FACTORY_CONTRACT, starknetProvider);
+      const factory = new Contract({ abi: DropFactoryABI as any, address: DROP_FACTORY_CONTRACT, providerOrAccount: starknetProvider });
       const call = factory.populate("create_drop", [
         values.name,
         values.symbol,
@@ -238,15 +216,35 @@ export default function CreateDropPage() {
         claimConditions,
       ]);
 
-      await executeAuto([{
+      const txHash = await executeAuto([{
         contractAddress: DROP_FACTORY_CONTRACT,
         entrypoint: "create_drop",
         calldata: call.calldata as string[],
       }]);
 
-      // Fire-and-forget: persist conditions once collection is indexed (~6-30s)
-      if (walletAddress) {
-        persistDropConditions(walletAddress, maxSupply, claimConditions);
+      if (!txHash) throw new Error("Transaction failed — no hash returned");
+
+      // Parse DropCreated event from receipt to get deployed collection address
+      let collectionAddress: string | null = null;
+      try {
+        const DROP_CREATED_SELECTOR = hash.getSelectorFromName("DropCreated");
+        let receipt: any = null;
+        for (let attempt = 0; attempt < 3 && !receipt; attempt++) {
+          try {
+            if (attempt > 0) await new Promise((r) => setTimeout(r, 2000));
+            receipt = await starknetProvider.getTransactionReceipt(txHash);
+          } catch { /* retry */ }
+        }
+        const events = receipt?.events ?? [];
+        const dropEvent = events.find((e: any) =>
+          e.keys?.[0] && BigInt(e.keys[0]) === BigInt(DROP_CREATED_SELECTOR)
+        );
+        if (dropEvent?.data?.[0]) collectionAddress = normalizeAddress(dropEvent.data[0]);
+      } catch { /* non-fatal */ }
+
+      // Fire-and-forget: persist drop conditions with the address from receipt
+      if (collectionAddress) {
+        persistDropConditions(collectionAddress, maxSupply, claimConditions);
       }
       setDone(true);
     } catch (err) {

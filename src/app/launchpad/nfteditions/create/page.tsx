@@ -24,6 +24,7 @@ import {
   CollectionProgressDialog,
   type CollectionStep,
 } from "@/components/marketplace/collection-progress-dialog";
+import type { TxStatus } from "@/hooks/use-tx";
 import { usePaymasterTransaction } from "@/hooks/use-paymaster-transaction";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { useConnect } from "@starknet-react/core";
@@ -73,6 +74,7 @@ export default function CreateNFTEditionsCollectionPage() {
   const [collectionStep, setCollectionStep] = useState<CollectionStep>("idle");
   const [collectionError, setCollectionError] = useState<string | null>(null);
   const [deployedAddress, setDeployedAddress] = useState<string | null>(null);
+  const [dialogTxStatus, setDialogTxStatus] = useState<TxStatus>("idle");
 
   // Image upload state
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -151,6 +153,7 @@ export default function CreateNFTEditionsCollectionPage() {
     setCollectionStep("idle");
     setCollectionError(null);
     setDeployedAddress(null);
+    setDialogTxStatus("idle");
     form.reset();
     clearImage();
   };
@@ -163,6 +166,7 @@ export default function CreateNFTEditionsCollectionPage() {
     }
 
     setCollectionError(null);
+    setDialogTxStatus("idle");
     setCollectionStep("processing");
 
     try {
@@ -189,6 +193,7 @@ export default function CreateNFTEditionsCollectionPage() {
       // 2. Execute deploy_collection on the factory.
       // Build calldata manually using byteArray.byteArrayFromString().
       // v2 factory signature: deploy_collection(name, symbol, base_uri)
+      setDialogTxStatus("submitting");
       const txHash = await executeAuto([{
         contractAddress: FACTORY,
         entrypoint: "deploy_collection",
@@ -200,6 +205,7 @@ export default function CreateNFTEditionsCollectionPage() {
       }]);
 
       if (!txHash) throw new Error("Transaction failed — no hash returned");
+      setDialogTxStatus("confirming");
 
       // 3. Extract deployed collection address from CollectionDeployed event in the receipt.
       // Best-effort: if event parsing fails the tx still succeeded — the collection will
@@ -240,9 +246,11 @@ export default function CreateNFTEditionsCollectionPage() {
 
       if (walletAddress) invalidatePortfolioCache(walletAddress);
       setDeployedAddress(addr);
+      setDialogTxStatus("confirmed");
       setCollectionStep("success");
     } catch (err) {
       setCollectionError(err instanceof Error ? err.message : "Something went wrong");
+      setDialogTxStatus("idle");
       setCollectionStep("error");
     }
   };
@@ -266,7 +274,7 @@ export default function CreateNFTEditionsCollectionPage() {
       <CollectionProgressDialog
         open={collectionStep !== "idle"}
         collectionStep={collectionStep}
-        txStatus="idle"
+        txStatus={dialogTxStatus}
         collectionName={form.getValues("name")}
         imagePreview={imagePreview}
         txHash={null}
