@@ -8,7 +8,7 @@ import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import {
   Telescope, Compass, Store, Briefcase, Plus, Activity,
   LayoutGrid, Users, Search, Sun, Moon, ShoppingBag,
-  BookOpen, ChevronRight, Music, Palette, Film, Camera, Gem,
+  BookOpen, ChevronRight, Music, Palette, Film, Camera, Gem, Trophy,
 } from "lucide-react";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { useUnreadOffers } from "@/hooks/use-unread-offers";
@@ -304,6 +304,21 @@ export function AppSidebar() {
                 <Link href="/activities">
                   <Activity />
                   <span>Activity</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            {/* Rewards */}
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={!!pathname?.startsWith("/rewards")}
+                tooltip="Rewards"
+                onClick={closeSidebar}
+              >
+                <Link href="/rewards">
+                  <Trophy />
+                  <span>Rewards</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

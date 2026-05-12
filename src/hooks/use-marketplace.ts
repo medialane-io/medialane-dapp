@@ -754,7 +754,6 @@ export function useMarketplace(): UseMarketplaceReturn {
                 throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
             }
             refreshMarketplaceCaches();
-            toast.success("Offer Accepted", { description: "The offer has been accepted and the asset transferred." });
             return hash;
         });
     }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeDirect, refreshMarketplaceCaches]);

@@ -10,6 +10,7 @@ import { ExternalLink, Inbox } from "lucide-react";
 import { EXPLORER_URL, SUPPORTED_TOKENS } from "@/lib/constants";
 import { getSeenOffers } from "@/hooks/use-unread-offers";
 import { CounterOfferDialog } from "@/components/marketplace/counter-offer-dialog";
+import { AcceptOfferDialog } from "@/components/marketplace/accept-offer-dialog";
 import Image from "next/image";
 import Link from "next/link";
 import type { ApiOrder } from "@medialane/sdk";
@@ -117,20 +118,11 @@ function ReceivedOfferRow({
 
 export function ReceivedOffersTable({ address }: ReceivedOffersTableProps) {
   const { orders: receivedOffers, isLoading, error, mutate } = useReceivedOffers(address);
-  const { acceptOffer, isProcessing } = useMarketplace();
+  const { isProcessing } = useMarketplace();
   const [counterOrder, setCounterOrder] = useState<ApiOrder | null>(null);
+  const [acceptOrder, setAcceptOrder] = useState<ApiOrder | null>(null);
 
   const seenHashes = getSeenOffers();
-
-  const handleAccept = async (order: ApiOrder) => {
-    await acceptOffer(
-      order.orderHash,
-      order.nftContract ?? "",
-      order.nftTokenId ?? "",
-      order.consideration.itemType
-    );
-    mutate();
-  };
 
   const handleCounter = (order: ApiOrder) => {
     setCounterOrder(order);
@@ -163,13 +155,20 @@ export function ReceivedOffersTable({ address }: ReceivedOffersTableProps) {
               key={order.orderHash}
               order={order}
               isProcessing={isProcessing}
-              onAccept={handleAccept}
+              onAccept={setAcceptOrder}
               onCounter={handleCounter}
               isNew={!seenHashes.has(order.orderHash)}
             />
           ))}
         </div>
       </EmptyOrError>
+
+      <AcceptOfferDialog
+        order={acceptOrder}
+        open={!!acceptOrder}
+        onOpenChange={(v) => { if (!v) setAcceptOrder(null); }}
+        onSuccess={mutate}
+      />
 
       {counterOrder && (() => {
         const token = SUPPORTED_TOKENS.find((t) => t.symbol === counterOrder.price.currency);

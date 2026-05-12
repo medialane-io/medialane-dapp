@@ -12,12 +12,14 @@ import { cn } from "@/lib/utils";
 import type { Notification, NotificationType } from "@/types/notification";
 
 const FILTERS: { label: string; value: NotificationType | "" }[] = [
-  { label: "All",           value: ""             },
-  { label: "Offers",        value: "offer"        },
-  { label: "Sales",         value: "sale"         },
-  { label: "Listings",      value: "listing"      },
-  { label: "Mints",         value: "mint"         },
-  { label: "Announcements", value: "announcement" },
+  { label: "All",           value: ""               },
+  { label: "Offers",        value: "offer"          },
+  { label: "Accepted",      value: "offer_accepted" },
+  { label: "Sales",         value: "sale"           },
+  { label: "Received",      value: "asset_received" },
+  { label: "Listings",      value: "listing"        },
+  { label: "Mints",         value: "mint"           },
+  { label: "Announcements", value: "announcement"   },
 ];
 
 function dayLabel(timestamp: string): string {

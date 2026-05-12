@@ -6,6 +6,7 @@ import { Toaster, toast } from "sonner";
 import Link from "next/link";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { CartDrawer } from "@/components/layout/cart-drawer";
+import { NotificationSpotlight } from "@/components/shared/notification-spotlight";
 import { Aurora } from "@/components/ui/aurora";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { MedialaneLogo } from "@/components/brand/medialane-logo";
@@ -76,6 +77,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <Aurora />
             <Shell>{children}</Shell>
             <CartDrawer />
+            <NotificationSpotlight />
             <Toaster richColors position="bottom-right" />
           </StarkZapWalletProvider>
         </StarknetProvider>
