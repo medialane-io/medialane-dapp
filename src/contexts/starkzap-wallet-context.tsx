@@ -113,7 +113,7 @@ export function StarkZapWalletProvider({
           },
         }),
       },
-      deploy: "if_needed",
+      deploy: "never",
     });
 
     setWallet(result.wallet);
