@@ -13,6 +13,8 @@
     "@hookform/resolvers": "^3",
     "@medialane/sdk": "^0.10.0",
     "@medialane/ui": "^0.4.5",
+    "@privy-io/node": "^0.18.0",
+    "@privy-io/react-auth": "^3.25.0",
     "@radix-ui/react-accordion": "latest",
     "@radix-ui/react-alert-dialog": "latest",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
