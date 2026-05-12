@@ -8,12 +8,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { EXPLORER_URL } from "@/lib/constants";
 import {
   Loader2,
   CheckCircle2,
   XCircle,
-  ExternalLink,
   Sparkles,
   Tag,
 } from "lucide-react";
@@ -221,49 +219,12 @@ export function MintProgressDialog({
                 <img src={imagePreview} alt={assetName} className="h-full w-full object-cover" />
               </div>
             )}
-            {(mintedTokenId || assetHref || explorerAssetHref) && (
-              <div className="w-full rounded-xl border border-border/60 bg-muted/30 p-3 text-left space-y-3">
-                {mintedTokenId && (
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground">Token ID</p>
-                    <p className="font-mono text-xs break-all text-foreground mt-1">{mintedTokenId}</p>
-                  </div>
-                )}
-                {(assetHref || explorerAssetHref) && (
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    {assetHref && (
-                      <Button size="sm" variant="outline" className="flex-1" onClick={() => router.push(assetHref)}>
-                        View asset
-                      </Button>
-                    )}
-                    {explorerAssetHref && (
-                      <Button asChild size="sm" variant="outline" className="flex-1">
-                        <a href={explorerAssetHref} target="_blank" rel="noopener noreferrer">
-                          View on Voyager <ExternalLink className="ml-1.5 h-3 w-3" />
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-            {txHash && (
-              <a
-                href={`${EXPLORER_URL}/tx/${txHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <span className="font-mono">{txHash.slice(0, 10)}…{txHash.slice(-8)}</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
             <div className="flex flex-col sm:flex-row gap-2 w-full pt-1">
               <Button variant="outline" className="flex-1" onClick={onMintAnother}>
                 Mint another
               </Button>
-              <Button className="flex-1" onClick={() => router.push("/marketplace")}>
-                View on market
+              <Button className="flex-1" onClick={() => router.push("/portfolio/assets")}>
+                View portfolio
               </Button>
             </div>
           </div>
@@ -291,43 +252,6 @@ export function MintProgressDialog({
               <div className="h-28 w-28 rounded-xl overflow-hidden border border-border shadow-md">
                 <img src={imagePreview} alt={assetName} className="h-full w-full object-cover" />
               </div>
-            )}
-            {(mintedTokenId || assetHref || explorerAssetHref) && (
-              <div className="w-full rounded-xl border border-border/60 bg-muted/30 p-3 text-left space-y-3">
-                {mintedTokenId && (
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground">Token ID</p>
-                    <p className="font-mono text-xs break-all text-foreground mt-1">{mintedTokenId}</p>
-                  </div>
-                )}
-                {(assetHref || explorerAssetHref) && (
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    {assetHref && (
-                      <Button size="sm" variant="outline" className="flex-1" onClick={() => router.push(assetHref)}>
-                        View asset
-                      </Button>
-                    )}
-                    {explorerAssetHref && (
-                      <Button asChild size="sm" variant="outline" className="flex-1">
-                        <a href={explorerAssetHref} target="_blank" rel="noopener noreferrer">
-                          View on Voyager <ExternalLink className="ml-1.5 h-3 w-3" />
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-            {txHash && (
-              <a
-                href={`${EXPLORER_URL}/tx/${txHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <span className="font-mono">{txHash.slice(0, 10)}…{txHash.slice(-8)}</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
             )}
             {listingError && (
               <div className="w-full rounded-xl border border-yellow-500/30 bg-yellow-500/5 px-4 py-3 flex items-start gap-2">
