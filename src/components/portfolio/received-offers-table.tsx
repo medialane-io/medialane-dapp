@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useUserOrders } from "@/hooks/use-orders";
+import { useReceivedOffers } from "@/hooks/use-orders";
 import { Button } from "@/components/ui/button";
 import { EmptyOrError } from "@/components/ui/empty-or-error";
 import { useMarketplace } from "@/hooks/use-marketplace";
@@ -116,18 +116,11 @@ function ReceivedOfferRow({
 }
 
 export function ReceivedOffersTable({ address }: ReceivedOffersTableProps) {
-  const { orders, isLoading, error, mutate } = useUserOrders(address);
+  const { orders: receivedOffers, isLoading, error, mutate } = useReceivedOffers(address);
   const { acceptOffer, isProcessing } = useMarketplace();
   const [counterOrder, setCounterOrder] = useState<ApiOrder | null>(null);
 
   const seenHashes = getSeenOffers();
-
-  const receivedOffers = orders.filter(
-    (o) =>
-      o.offer.itemType === "ERC20" &&
-      o.status === "ACTIVE" &&
-      o.offerer.toLowerCase() !== address.toLowerCase()
-  );
 
   const handleAccept = async (order: ApiOrder) => {
     await acceptOffer(
