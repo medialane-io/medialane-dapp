@@ -12,6 +12,7 @@ import type { User } from "@privy-io/react-auth";
 import { OnboardStrategy } from "starkzap";
 import type { WalletInterface } from "starkzap";
 import { getStarkZapSdk } from "@/lib/starkzap";
+import { starknetProvider } from "@/lib/starknet";
 import {
   COLLECTION_721_CONTRACT,
   MARKETPLACE_721_CONTRACT,
@@ -109,27 +110,21 @@ export function StarkZapWalletProvider({
       },
     });
 
-    let result;
+    let deployMode: "if_needed" | "never" = "if_needed";
     try {
-      result = await sdk.onboard({
-        strategy: OnboardStrategy.Privy,
-        accountPreset: "argentXV050",
-        feeMode: "sponsored",
-        privy: { resolve: privyResolve },
-        deploy: "if_needed",
-      });
-    } catch (deployErr) {
-      const msg = deployErr instanceof Error ? deployErr.message : String(deployErr);
-      if (!msg.includes("already deployed")) throw deployErr;
-      // Account is already on-chain — retry without attempting deploy
-      result = await sdk.onboard({
-        strategy: OnboardStrategy.Privy,
-        accountPreset: "argentXV050",
-        feeMode: "sponsored",
-        privy: { resolve: privyResolve },
-        deploy: "never",
-      });
+      await starknetProvider.getClassHashAt(walletData.address);
+      deployMode = "never";
+    } catch {
+      // account not yet deployed — proceed with deploy:"if_needed"
     }
+
+    const result = await sdk.onboard({
+      strategy: OnboardStrategy.Privy,
+      accountPreset: "argentXV050",
+      feeMode: "sponsored",
+      privy: { resolve: privyResolve },
+      deploy: deployMode,
+    });
 
     setWallet(result.wallet);
     setWalletType("privy");
