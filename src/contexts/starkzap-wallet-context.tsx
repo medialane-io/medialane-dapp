@@ -79,9 +79,12 @@ export function StarkZapWalletProvider({
   // Internal: initialise StarkZap wallet after Privy auth is established
   // ---------------------------------------------------------------------------
 
-  const initPrivyWallet = useCallback(async () => {
+  const initPrivyWallet = useCallback(async (silent = false) => {
     const token = await getAccessToken();
-    if (!token) throw new Error("No Privy access token");
+    if (!token) {
+      if (silent) return;
+      throw new Error("No Privy access token");
+    }
 
     const res = await fetch("/api/wallet/starknet", {
       method: "POST",
@@ -102,7 +105,7 @@ export function StarkZapWalletProvider({
         resolve: async () => ({
           walletId: walletData.id,
           publicKey: walletData.publicKey,
-          serverUrl: "/api/wallet/sign",
+          serverUrl: `${window.location.origin}/api/wallet/sign`,
           headers: async (): Promise<Record<string, string>> => {
             const freshToken = await getAccessToken();
             if (!freshToken) return {};
@@ -175,7 +178,7 @@ export function StarkZapWalletProvider({
 
   useEffect(() => {
     if (authenticated && !wallet && walletType !== "cartridge") {
-      initPrivyWallet().catch((err) => {
+      initPrivyWallet(true).catch((err) => {
         console.error("Privy auto-reconnect failed:", err);
       });
     }
