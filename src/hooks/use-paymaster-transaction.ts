@@ -214,27 +214,10 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
       setIsLoading(true);
       setError(null);
 
-      // Try sponsored via PaymasterRpc (SNIP-29 JSON-RPC paymaster — works for Argent & Braavos)
-      if (isSponsorAvailable) {
-        try {
-          const response = await executeSponsoredTransaction(account as any, calls); // eslint-disable-line @typescript-eslint/no-explicit-any
-          if (response.success) {
-            setIsLoading(false);
-            return response.transactionHash;
-          }
-          console.warn("[paymaster] Sponsored tx rejected, falling back:", response.error);
-        } catch (err) {
-          console.warn("[paymaster] Sponsored tx failed, falling back:", err);
-        }
-      }
-
-      // Fallback: account.execute() — also routed through avnuPaymasterProvider for
-      // connectors that support it (Ready), or direct wallet signing (Braavos).
       try {
         const response = await account.execute(calls as any); // eslint-disable-line @typescript-eslint/no-explicit-any
         return response.transaction_hash;
       } catch (err) {
-        console.error("[paymaster] Transaction failed:", err);
         const msg = err instanceof Error ? err.message : "Transaction failed";
         setError(msg);
         throw new Error(msg);
@@ -242,7 +225,7 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
         setIsLoading(false);
       }
     },
-    [szWallet, account, address, isSponsorAvailable]
+    [szWallet, account, address]
   );
 
   // ---------------------------------------------------------------------------
