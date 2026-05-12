@@ -7,7 +7,7 @@ import { LevelBadge } from "@/components/rewards/level-badge";
 import { BadgeShelf } from "@/components/rewards/badge-shelf";
 import { AddressDisplay } from "@/components/shared/address-display";
 import { ConnectWallet } from "@/components/ConnectWallet";
-import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
+import { useWallet } from "@/hooks/use-wallet";
 import { useRewards, useLeaderboard } from "@/hooks/use-rewards";
 import { Wallet, Trophy, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -213,7 +213,7 @@ function LeaderboardPanel({ myAddress }: { myAddress: string | null | undefined 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 
 export function RewardsDashboard() {
-  const { address, isConnected } = useUnifiedWallet();
+  const { address, isConnected } = useWallet();
 
   if (!isConnected) {
     return (
