@@ -2,6 +2,12 @@
 
 import { useEffect } from "react";
 import { ThemeProvider } from "next-themes";
+import { PrivyProvider } from "@privy-io/react-auth";
+
+const PRIVY_CONFIG = {
+  loginMethods: ["email", "google", "twitter"] as Array<"email" | "google" | "twitter">,
+  appearance: { theme: "dark" as const },
+};
 import { Toaster, toast } from "sonner";
 import Link from "next/link";
 import { AppSidebar } from "@/components/layout/app-sidebar";
@@ -53,6 +59,10 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
+    <PrivyProvider
+      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
+      config={PRIVY_CONFIG}
+    >
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
       <SWRConfig
         value={{
@@ -83,5 +93,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
         </StarknetProvider>
       </SWRConfig>
     </ThemeProvider>
+    </PrivyProvider>
   );
 }
