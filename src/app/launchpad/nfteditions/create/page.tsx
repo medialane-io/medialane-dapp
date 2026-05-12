@@ -30,20 +30,11 @@ import { useConnect } from "@starknet-react/core";
 import { StarknetkitConnector, useStarknetkitConnectModal } from "starknetkit";
 import { toast } from "sonner";
 import { normalizeAddress } from "@medialane/sdk";
-import { hash, byteArray as starkByteArray } from "starknet";
+import { hash } from "starknet";
 import { starknetProvider } from "@/lib/starknet";
+import { serializeByteArray } from "@/lib/cairo-calldata";
+import { invalidatePortfolioCache } from "@/lib/portfolio-cache";
 import { MEDIALANE_BACKEND_URL, MEDIALANE_API_KEY } from "@/lib/constants";
-
-/** Serialize a JS string into Cairo ByteArray calldata felts. */
-function serializeByteArray(str: string): string[] {
-  const ba = starkByteArray.byteArrayFromString(str);
-  return [
-    ba.data.length.toString(),
-    ...ba.data.map(String),
-    String(ba.pending_word),
-    ba.pending_word_len.toString(),
-  ];
-}
 
 // v2 ERC-1155 factory — hardcoded to avoid stale SDK npm cache
 const FACTORY = "0x006b2dc7ca7c4f466bb4575ba043d934310f052074f849caf853a86bcb819fd6" as `0x${string}`;
@@ -198,7 +189,7 @@ export default function CreateNFTEditionsCollectionPage() {
       // 2. Execute deploy_collection on the factory.
       // Build calldata manually using byteArray.byteArrayFromString().
       // v2 factory signature: deploy_collection(name, symbol, base_uri)
-      await executeAuto([{
+      const txHash = await executeAuto([{
         contractAddress: FACTORY,
         entrypoint: "deploy_collection",
         calldata: [
@@ -208,32 +199,46 @@ export default function CreateNFTEditionsCollectionPage() {
         ],
       }]);
 
-      // 3. Extract deployed collection address from CollectionDeployed event.
-      // Best-effort via latest tx receipt.
+      if (!txHash) throw new Error("Transaction failed — no hash returned");
+
+      // 3. Extract deployed collection address from CollectionDeployed event in the receipt.
+      // Best-effort: if event parsing fails the tx still succeeded — the collection will
+      // appear in portfolio once the indexer processes the event on the next poll cycle.
       let addr: string | null = null;
       try {
-        // Give the RPC a moment to index the receipt
-        await new Promise((r) => setTimeout(r, 2000));
-        // We don't have the txHash directly from executeAuto — poll backend for new collection
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (MEDIALANE_API_KEY) headers["x-api-key"] = MEDIALANE_API_KEY;
-        const base = MEDIALANE_BACKEND_URL.replace(/\/$/, "");
-        for (let attempt = 0; attempt < 8 && !addr; attempt++) {
-          await new Promise((r) => setTimeout(r, 3000));
+        let receipt: any = null;
+        for (let attempt = 0; attempt < 2 && !receipt; attempt++) {
           try {
-            const res = await fetch(
-              `${base}/v1/collections?source=ERC1155_FACTORY&owner=${walletAddress}&sort=recent&limit=1`,
-              { headers }
-            );
-            const json = await res.json();
-            const latest = json?.data?.[0];
-            if (latest?.contractAddress) {
-              addr = latest.contractAddress;
-            }
-          } catch { /* keep polling */ }
+            if (attempt > 0) await new Promise((r) => setTimeout(r, 2000));
+            receipt = await starknetProvider.getTransactionReceipt(txHash);
+          } catch { /* retry */ }
         }
+        const events = receipt?.events ?? [];
+        const deployEvent = events.find((e: any) =>
+          e.keys?.[0] && BigInt(e.keys[0]) === BigInt(COLLECTION_DEPLOYED_SELECTOR)
+        );
+        if (deployEvent?.keys?.[1]) addr = normalizeAddress(deployEvent.keys[1]);
       } catch { /* non-fatal */ }
 
+      // 4. Register with backend so the collection appears in portfolio immediately.
+      if (addr) {
+        try {
+          const headers: Record<string, string> = { "Content-Type": "application/json" };
+          if (MEDIALANE_API_KEY) headers["x-api-key"] = MEDIALANE_API_KEY;
+          await fetch(`${MEDIALANE_BACKEND_URL.replace(/\/$/, "")}/v1/collections/register`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              contractAddress: addr,
+              startBlock: 0,
+              standard: "ERC1155",
+              source: "ERC1155_FACTORY",
+            }),
+          });
+        } catch { /* non-fatal */ }
+      }
+
+      if (walletAddress) invalidatePortfolioCache(walletAddress);
       setDeployedAddress(addr);
       setCollectionStep("success");
     } catch (err) {

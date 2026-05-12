@@ -45,7 +45,6 @@ import { StarknetkitConnector, useStarknetkitConnectModal } from "starknetkit";
 import { toast } from "sonner";
 import { FadeIn } from "@/components/ui/motion-primitives";
 import { normalizeAddress } from "@medialane/sdk";
-import { Contract } from "starknet";
 import { starknetProvider } from "@/lib/starknet";
 import { EXPLORER_URL } from "@/lib/constants";
 import { absoluteUrl } from "@/lib/seo";
@@ -208,18 +207,14 @@ export default function MintNFTEditionsPage() {
   // Verify the connected wallet is the collection owner before showing the form
   useEffect(() => {
     if (!walletAddress || !collectionAddress) return;
-    const OWNER_ABI = [{
-      type: "function", name: "owner",
-      inputs: [], outputs: [{ type: "core::starknet::contract_address::ContractAddress" }],
-      state_mutability: "view",
-    }];
-    const contract = new (Contract as any)(OWNER_ABI, collectionAddress, starknetProvider);
-    (contract as any).owner()
-      .then((raw: unknown) => {
-        const onChainOwner = normalizeAddress(String(raw));
-        setOwnerCheck(onChainOwner === normalizeAddress(walletAddress) ? "ok" : "denied");
-      })
-      .catch(() => setOwnerCheck("ok"));
+    starknetProvider.callContract({
+      contractAddress: collectionAddress,
+      entrypoint: "owner",
+      calldata: [],
+    }).then((result) => {
+      const onChainOwner = normalizeAddress(result[0]);
+      setOwnerCheck(onChainOwner === normalizeAddress(walletAddress) ? "ok" : "denied");
+    }).catch(() => setOwnerCheck("ok"));
   }, [walletAddress, collectionAddress]);
 
   const handleConnectWallet = async () => {

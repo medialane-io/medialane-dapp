@@ -17,6 +17,7 @@ import {
   ExternalLink,
   Sparkles,
   Layers,
+  Settings,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { TxStatus } from "@/hooks/use-tx";
@@ -32,12 +33,20 @@ interface CollectionProgressDialogProps {
   txHash: string | null;
   error: string | null;
   onCreateAnother: () => void;
+  /** Label for the "create another" button. Defaults to "Create another". */
+  createAnotherLabel?: string;
+  /** Label for first step. Defaults to "Create collection intent". */
+  firstStepLabel?: string;
+  /** If provided, the "Mint" button navigates here. */
+  mintHref?: string;
+  /** Deployed contract address shown in success state with explorer link. */
+  deployedAddress?: string | null;
 }
 
-const STEPS = [
+const makeSteps = (firstStepLabel: string) => [
   {
-    label: "Create collection intent",
-    done: (_: TxStatus) => true, // done as soon as processing starts
+    label: firstStepLabel,
+    done: (_: TxStatus) => true,
     active: (txStatus: TxStatus) => txStatus === "idle",
   },
   {
@@ -62,6 +71,10 @@ export function CollectionProgressDialog({
   txHash,
   error,
   onCreateAnother,
+  createAnotherLabel = "Create another",
+  firstStepLabel = "Create collection intent",
+  mintHref,
+  deployedAddress,
 }: CollectionProgressDialogProps) {
   const router = useRouter();
   const confettiFired = useRef(false);
@@ -79,6 +92,7 @@ export function CollectionProgressDialog({
   const isProcessing = collectionStep === "processing";
   const isSuccess = collectionStep === "success";
   const isError = collectionStep === "error";
+  const STEPS = makeSteps(firstStepLabel);
 
   return (
     <Dialog open={open} modal onOpenChange={(v) => { if (!v && !isProcessing) onCreateAnother(); }}>
@@ -182,27 +196,52 @@ export function CollectionProgressDialog({
               </div>
             )}
 
-            {txHash && (
-              <a
-                href={`${EXPLORER_URL}/tx/${txHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <span className="font-mono">
-                  {txHash.slice(0, 10)}…{txHash.slice(-8)}
-                </span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
+            <div className="flex flex-col items-center gap-1.5">
+              {deployedAddress && (
+                <a
+                  href={`${EXPLORER_URL}/contract/${deployedAddress}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <span className="font-mono">
+                    {deployedAddress.slice(0, 10)}…{deployedAddress.slice(-8)}
+                  </span>
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
+              {txHash && (
+                <a
+                  href={`${EXPLORER_URL}/tx/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <span>View transaction</span>
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
+            </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 w-full pt-1">
-              <Button variant="outline" className="flex-1" onClick={onCreateAnother}>
-                Create another
-              </Button>
-              <Button className="flex-1" onClick={() => router.push("/create/asset")}>
-                Mint an asset
-              </Button>
+            <div className="flex flex-col gap-2 w-full pt-1">
+              {deployedAddress && (
+                <Button
+                  variant="outline"
+                  className="w-full border-primary/30 text-primary hover:bg-primary/5 hover:text-primary gap-2"
+                  onClick={() => router.push(`/launchpad/collections/${deployedAddress}/settings`)}
+                >
+                  <Settings className="h-4 w-4" />
+                  Set up your collection
+                </Button>
+              )}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button variant="outline" className="flex-1" onClick={onCreateAnother}>
+                  {createAnotherLabel}
+                </Button>
+                <Button className="flex-1" onClick={() => router.push(mintHref ?? "/launchpad")}>
+                  {mintHref ? "Mint tokens" : "Go to Launchpad"}
+                </Button>
+              </div>
             </div>
           </div>
         )}
