@@ -4,12 +4,19 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useState,
 } from "react";
+import { usePrivy } from "@privy-io/react-auth";
+import type { User } from "@privy-io/react-auth";
 import { OnboardStrategy } from "starkzap";
 import type { WalletInterface } from "starkzap";
 import { getStarkZapSdk } from "@/lib/starkzap";
-import { COLLECTION_721_CONTRACT, MARKETPLACE_721_CONTRACT, MARKETPLACE_1155_CONTRACT } from "@/lib/constants";
+import {
+  COLLECTION_721_CONTRACT,
+  MARKETPLACE_721_CONTRACT,
+  MARKETPLACE_1155_CONTRACT,
+} from "@/lib/constants";
 
 // ---------------------------------------------------------------------------
 // Cartridge session policies for Medialane contracts
@@ -32,7 +39,7 @@ const CARTRIDGE_POLICIES = [
 // Context types
 // ---------------------------------------------------------------------------
 
-export type StarkZapWalletType = "cartridge";
+export type StarkZapWalletType = "cartridge" | "privy";
 
 export interface StarkZapWalletCtx {
   wallet: WalletInterface | null;
@@ -40,7 +47,9 @@ export interface StarkZapWalletCtx {
   address: string | null;
   isConnecting: boolean;
   error: string | null;
+  privyUser: User | null;
   connectCartridge: () => Promise<void>;
+  connectPrivy: () => Promise<void>;
   disconnect: () => void;
 }
 
@@ -62,6 +71,53 @@ export function StarkZapWalletProvider({
   const [address, setAddress] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [privyUser, setPrivyUser] = useState<User | null>(null);
+
+  const { login, logout, authenticated, getAccessToken, user } = usePrivy();
+
+  // ---------------------------------------------------------------------------
+  // Internal: initialise StarkZap wallet after Privy auth is established
+  // ---------------------------------------------------------------------------
+
+  const initPrivyWallet = useCallback(async () => {
+    const token = await getAccessToken();
+    if (!token) throw new Error("No Privy access token");
+
+    const res = await fetch("/api/wallet/starknet", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("Failed to create Privy Starknet wallet");
+    const walletData = (await res.json()) as {
+      id: string;
+      address: string;
+      publicKey: string;
+    };
+
+    const sdk = getStarkZapSdk();
+    const result = await sdk.onboard({
+      strategy: OnboardStrategy.Privy,
+      accountPreset: "argentXV050",
+      privy: {
+        resolve: async () => ({
+          walletId: walletData.id,
+          publicKey: walletData.publicKey,
+          serverUrl: "/api/wallet/sign",
+          headers: async (): Promise<Record<string, string>> => {
+            const freshToken = await getAccessToken();
+            if (!freshToken) return {};
+            return { Authorization: `Bearer ${freshToken}` };
+          },
+        }),
+      },
+      deploy: "if_needed",
+    });
+
+    setWallet(result.wallet);
+    setWalletType("privy");
+    setAddress(result.wallet.address as unknown as string);
+    setPrivyUser(user ?? null);
+  }, [getAccessToken, user]);
 
   // ---------------------------------------------------------------------------
   // Connect Cartridge
@@ -93,15 +149,54 @@ export function StarkZapWalletProvider({
   }, []);
 
   // ---------------------------------------------------------------------------
+  // Connect Privy (user-initiated — shows the Privy login modal)
+  // ---------------------------------------------------------------------------
+
+  const connectPrivy = useCallback(async () => {
+    setIsConnecting(true);
+    setError(null);
+    try {
+      if (!authenticated) {
+        await login();
+      }
+      await initPrivyWallet();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to connect with Privy"
+      );
+    } finally {
+      setIsConnecting(false);
+    }
+  }, [authenticated, login, initPrivyWallet]);
+
+  // ---------------------------------------------------------------------------
+  // Auto-reconnect: restore Privy wallet on page reload if session is active
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (authenticated && !wallet && walletType !== "cartridge") {
+      initPrivyWallet().catch((err) => {
+        console.error("Privy auto-reconnect failed:", err);
+      });
+    }
+    // intentionally omit wallet/walletType — only re-run when auth changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authenticated]);
+
+  // ---------------------------------------------------------------------------
   // Disconnect
   // ---------------------------------------------------------------------------
 
   const disconnect = useCallback(() => {
+    if (walletType === "privy") {
+      logout().catch(console.error);
+    }
     setWallet(null);
     setWalletType(null);
     setAddress(null);
     setError(null);
-  }, []);
+    setPrivyUser(null);
+  }, [walletType, logout]);
 
   return (
     <StarkZapWalletContext.Provider
@@ -111,7 +206,9 @@ export function StarkZapWalletProvider({
         address,
         isConnecting,
         error,
+        privyUser,
         connectCartridge,
+        connectPrivy,
         disconnect,
       }}
     >
@@ -130,7 +227,9 @@ const STARKZAP_DEFAULT_CTX: StarkZapWalletCtx = {
   address: null,
   isConnecting: false,
   error: null,
+  privyUser: null,
   connectCartridge: async () => {},
+  connectPrivy: async () => {},
   disconnect: () => {},
 };
 
