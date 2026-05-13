@@ -57,6 +57,19 @@ function resolveInjectedWallet(id: string): StarknetWallet | undefined {
   }
 }
 
+function isUserRejected(error: unknown): boolean {
+  if (error instanceof UserRejectedRequestError) return true;
+  if (!(error instanceof Error)) return false;
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("user rejected") ||
+    message.includes("user aborted") ||
+    message.includes("request rejected") ||
+    message.includes("rejected by user") ||
+    message.includes("aborted")
+  );
+}
+
 // @starknet-react/core discovers injected wallets by scanning window, but its
 // built-in connector resolves them later via window.starknet_${id}. Braavos and
 // some extension versions can be discoverable under a different window key, so
@@ -100,21 +113,28 @@ class IdResolvedInjectedConnector extends Connector {
     this.wallet?.on("accountsChanged", this.onAccountsChanged);
     this.wallet?.on("networkChanged", this.onNetworkChanged);
 
-    const accounts = await this.request({ type: "wallet_requestAccounts" });
-    if (!accounts) throw new UserRejectedRequestError();
+    try {
+      const accounts = await this.request({ type: "wallet_requestAccounts" });
+      if (!Array.isArray(accounts) || accounts.length === 0) {
+        throw new UserRejectedRequestError();
+      }
 
-    if (args.chainIdHint) {
       const chainId = await this.requestChainId();
-      if (chainId !== args.chainIdHint) {
+      if (args.chainIdHint && chainId !== args.chainIdHint) {
         await this.switchChain(args.chainIdHint);
       }
+
+      const [account] = accounts;
+      const nextChainId = args.chainIdHint ?? chainId;
+      this.emit("connect", { account, chainId: nextChainId });
+
+      return { account, chainId: nextChainId };
+    } catch (error) {
+      this.wallet?.off?.("accountsChanged", this.onAccountsChanged);
+      this.wallet?.off?.("networkChanged", this.onNetworkChanged);
+      if (isUserRejected(error)) throw new UserRejectedRequestError();
+      throw error;
     }
-
-    const [account] = accounts;
-    const chainId = await this.requestChainId();
-    this.emit("connect", { account, chainId });
-
-    return { account, chainId };
   }
 
   async disconnect() {
@@ -129,7 +149,7 @@ class IdResolvedInjectedConnector extends Connector {
     provider: ProviderInterface,
     paymasterProvider?: PaymasterInterface,
   ): Promise<AccountInterface> {
-    if (!this.currentWallet() || (await this.isLocked())) {
+    if (!this.currentWallet()) {
       throw new ConnectorNotConnectedError();
     }
 
@@ -143,7 +163,7 @@ class IdResolvedInjectedConnector extends Connector {
   }
 
   async chainId() {
-    if (!this.currentWallet() || (await this.isLocked())) {
+    if (!this.currentWallet()) {
       throw new ConnectorNotConnectedError();
     }
 
@@ -159,15 +179,6 @@ class IdResolvedInjectedConnector extends Connector {
   private currentWallet() {
     this.wallet = resolveInjectedWallet(this.walletId);
     return this.wallet;
-  }
-
-  private async isLocked() {
-    const accounts = await this.request({
-      type: "wallet_requestAccounts",
-      params: { silent_mode: true },
-    });
-
-    return Array.isArray(accounts) && accounts.length === 0;
   }
 
   private async requestChainId() {

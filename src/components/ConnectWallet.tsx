@@ -123,6 +123,7 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
   const { disconnect: injectedDisconnect } = useDisconnect();
   const [open, setOpen] = useState(false);
   const [connectDialogOpen, setConnectDialogOpen] = useState(false);
+  const [injectedConnectingId, setInjectedConnectingId] = useState<string | null>(null);
   const { networkConfig } = useNetwork();
 
   const {
@@ -171,10 +172,20 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
   const handleConnectorClick = async (connector: Connector) => {
     // Close our dialog first so the wallet extension popup is unobstructed
     setConnectDialogOpen(false);
+    setInjectedConnectingId(connector.id);
     try {
       await connectAsync({ connector });
     } catch (err) {
       console.error("Failed to connect wallet", err);
+      const message = err instanceof Error ? err.message : "Wallet connection failed";
+      if (/user rejected|user aborted|aborted|rejected/i.test(message)) {
+        toast.info("Wallet connection cancelled");
+      } else {
+        toast.error("Wallet connection failed", { description: message });
+      }
+      setConnectDialogOpen(true);
+    } finally {
+      setInjectedConnectingId(null);
     }
   };
 
@@ -444,7 +455,7 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
                         variant="outline"
                         className="w-full justify-start gap-3"
                         onClick={() => handleConnectorClick(connector)}
-                        disabled={isConnecting}
+                        disabled={isConnecting || injectedConnectingId !== null}
                       >
                         {iconSrc ? (
                           <Image src={iconSrc} alt="" width={20} height={20} className="h-5 w-5 rounded shrink-0" unoptimized />
@@ -452,6 +463,7 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
                           <Wallet className="h-4 w-4 shrink-0" />
                         )}
                         <span>{displayName}</span>
+                        {injectedConnectingId === connector.id && <Loader2 className="ml-auto h-3 w-3 animate-spin" />}
                       </Button>
                     );
                   })
