@@ -176,7 +176,7 @@ function SearchResults() {
   const totalResults = tokens.length + collections.length + creators.length;
 
   return (
-    <PageContainer className="box-border max-w-full pt-14 pb-8 space-y-8">
+    <PageContainer className="box-border max-w-full pb-8 space-y-8">
       {/* Header */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-primary">
@@ -318,7 +318,7 @@ function SearchResults() {
 export default function SearchPage() {
   return (
     <Suspense fallback={
-      <PageContainer className="box-border max-w-full pt-14 pb-8 space-y-4">
+      <PageContainer className="box-border max-w-full pb-8 space-y-4">
         <Skeleton className="h-8 w-32" />
         <Skeleton className="h-11 w-full max-w-xl" />
       </PageContainer>

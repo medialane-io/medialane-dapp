@@ -70,7 +70,7 @@ export function AssetPagePop() {
         )}
       </div>
 
-      <div className="container mx-auto px-4 pt-14 space-y-8 pb-8">
+      <div className="container mx-auto px-4 space-y-8 pb-8">
         <nav className="flex items-center gap-1.5 text-sm text-muted-foreground min-w-0">
           <Link href="/launchpad/pop" className="hover:text-foreground transition-colors shrink-0">
             POP Protocol

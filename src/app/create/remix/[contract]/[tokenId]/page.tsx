@@ -380,7 +380,7 @@ export default function CreateRemixPage() {
 
   if (tokenLoading) {
     return (
-      <div className="container max-w-5xl mx-auto px-4 pt-14 pb-8 space-y-6">
+      <div className="container max-w-5xl mx-auto px-4 pb-8 space-y-6">
         <Skeleton className="h-8 w-48" />
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8">
           <div className="space-y-4">
@@ -416,7 +416,7 @@ export default function CreateRemixPage() {
         listingError={null}
       />
 
-      <div className="container max-w-5xl mx-auto px-4 pt-14 pb-12 space-y-6">
+      <div className="container max-w-5xl mx-auto px-4 pb-12 space-y-6">
         {/* Header */}
         <div className="space-y-3">
           <Link
