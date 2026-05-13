@@ -8,15 +8,9 @@ import { Gamepad2, LogOut, Mail, User, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { useNetwork } from "@/components/starknet-provider";
 import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
-import { useUnifiedWallet, type UnifiedWalletType } from "@/hooks/use-unified-wallet";
+import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { useWalletSession } from "@/hooks/use-wallet-session";
 
-function getWalletLabel(walletType: UnifiedWalletType) {
-  if (walletType === "cartridge") return "Cartridge";
-  if (walletType === "privy") return "Social";
-  if (walletType === "injected") return "Browser";
-  return "Wallet";
-}
 
 function getConnectorDisplayName(id: string, fallback: string) {
   const names: Record<string, string> = {
@@ -69,9 +63,6 @@ export function NavAccountPanel() {
           <User className="h-3.5 w-3.5" />
         </div>
         <span className="truncate text-sm font-medium text-foreground">{shortenAddress(address)}</span>
-        <span className="rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2 py-0.5 text-[10px] font-medium text-emerald-400 shrink-0">
-          {getWalletLabel(walletType)}
-        </span>
         <button
           onClick={() => { disconnect(); close(); }}
           className="ml-auto shrink-0 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
@@ -91,7 +82,6 @@ export function NavAccountPanel() {
         </div>
         <div className="min-w-0">
           <p className="text-sm font-medium text-foreground">Connect wallet</p>
-          <p className="text-xs text-muted-foreground">Browser wallet, Cartridge, or Privy</p>
         </div>
       </div>
 
