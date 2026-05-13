@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import type { ApiOrder, SortOrder } from "@medialane/sdk";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 15;
+const BACKEND_PAGE_SIZE = 50;
 
 interface ListingsGridProps {
   sort?: string;
@@ -20,7 +21,8 @@ interface ListingsGridProps {
 }
 
 export function ListingsGrid({ sort = "recent", currency, orderType = "", minPrice, maxPrice }: ListingsGridProps = {}) {
-  const [page, setPage] = useState(1);
+  const [backendPage, setBackendPage] = useState(1);
+  const [visiblePages, setVisiblePages] = useState(1);
   const [allOrders, setAllOrders] = useState<ApiOrder[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<ApiOrder | null>(null);
   const [purchaseOpen, setPurchaseOpen] = useState(false);
@@ -31,7 +33,8 @@ export function ListingsGrid({ sort = "recent", currency, orderType = "", minPri
     const f = prevFilters.current;
     if (f.sort !== sort || f.currency !== currency || f.orderType !== orderType || f.minPrice !== minPrice || f.maxPrice !== maxPrice) {
       prevFilters.current = { sort, currency, orderType, minPrice, maxPrice };
-      setPage(1);
+      setBackendPage(1);
+      setVisiblePages(1);
       setAllOrders([]);
     }
   }, [sort, currency, orderType, minPrice, maxPrice]);
@@ -42,14 +45,14 @@ export function ListingsGrid({ sort = "recent", currency, orderType = "", minPri
     ...(currency ? { currency } : {}),
     ...(minPrice ? { minPrice } : {}),
     ...(maxPrice ? { maxPrice } : {}),
-    page,
-    limit: PAGE_SIZE,
+    page: backendPage,
+    limit: BACKEND_PAGE_SIZE,
   });
 
   // Append incoming page to accumulated list
   useEffect(() => {
     if (isLoading) return;
-    if (page === 1) {
+    if (backendPage === 1) {
       setAllOrders(orders);
     } else {
       setAllOrders((prev) => {
@@ -58,25 +61,42 @@ export function ListingsGrid({ sort = "recent", currency, orderType = "", minPri
         return newItems.length > 0 ? [...prev, ...newItems] : prev;
       });
     }
-  }, [orders, isLoading, page]);
+  }, [orders, isLoading, backendPage]);
 
   // Client-side type filter (backend doesn't support itemType param).
   // Default ("" / "all") shows only listings — offers (bids) are not useful
   // in the browse grid and are accessible via the "Offers" filter tab.
-  const displayedOrders = orderType === "offers"
+  const filteredOrders = orderType === "offers"
     ? allOrders.filter((o) => o.offer.itemType === "ERC20")
-    : allOrders.filter((o) => o.offer.itemType === "ERC721");
+    : allOrders.filter((o) => o.offer.itemType === "ERC721" || o.offer.itemType === "ERC1155");
+
+  const visibleLimit = visiblePages * PAGE_SIZE;
+  const displayedOrders = filteredOrders.slice(0, visibleLimit);
 
   const isInitialLoading = isLoading && allOrders.length === 0;
   const isLoadingMore = isLoading && allOrders.length > 0;
-  const hasMore = meta ? allOrders.length < (meta.total ?? 0) : false;
+  const backendTotal = meta?.total ?? 0;
+  const hasBackendMore = backendTotal > 0
+    ? allOrders.length < backendTotal
+    : orders.length === BACKEND_PAGE_SIZE;
+  const hasBufferedOrders = filteredOrders.length > displayedOrders.length;
+  const hasMore = hasBufferedOrders || hasBackendMore || isLoadingMore;
+
+  useEffect(() => {
+    if (isLoading || !hasBackendMore || filteredOrders.length >= visibleLimit) return;
+    setBackendPage((p) => p + 1);
+  }, [filteredOrders.length, hasBackendMore, isLoading, visibleLimit]);
 
   const handleBuy = (order: ApiOrder) => {
     setSelectedOrder(order);
     setPurchaseOpen(true);
   };
 
-  if (isInitialLoading) {
+  const handleLoadMore = () => {
+    setVisiblePages((p) => p + 1);
+  };
+
+  if (isInitialLoading || (filteredOrders.length === 0 && hasBackendMore)) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {Array.from({ length: PAGE_SIZE }).map((_, i) => (
@@ -86,7 +106,7 @@ export function ListingsGrid({ sort = "recent", currency, orderType = "", minPri
     );
   }
 
-  if (displayedOrders.length === 0 && !isLoading) {
+  if (filteredOrders.length === 0 && !isLoading && !hasBackendMore) {
     const emptyHeading =
       orderType === "offers" ? "No offers yet" : "No listings yet";
     const emptyBody =
@@ -125,7 +145,7 @@ export function ListingsGrid({ sort = "recent", currency, orderType = "", minPri
               variant="outline"
               size="lg"
               disabled={isLoadingMore}
-              onClick={() => setPage((p) => p + 1)}
+              onClick={handleLoadMore}
             >
               {isLoadingMore ? (
                 <>
@@ -133,15 +153,15 @@ export function ListingsGrid({ sort = "recent", currency, orderType = "", minPri
                   Loading…
                 </>
               ) : (
-                `Load more${!orderType && meta ? ` (${(meta.total ?? 0) - allOrders.length} remaining)` : ""}`
+                orderType === "offers" ? "Load more offers" : "Load more listings"
               )}
             </Button>
           </div>
         )}
 
-        {!hasMore && displayedOrders.length > 0 && meta && (meta.total ?? 0) > PAGE_SIZE && (
+        {!hasMore && filteredOrders.length > PAGE_SIZE && (
           <p className="text-center text-xs text-muted-foreground">
-            All {displayedOrders.length} listings shown
+            All {filteredOrders.length} {orderType === "offers" ? "offers" : "listings"} shown
           </p>
         )}
       </div>
