@@ -8,11 +8,9 @@ import { Toaster, toast } from "sonner";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { NavCommandMenu, useNavCommandMenu } from "@medialane/ui";
-import { AppSidebar } from "@/components/layout/app-sidebar";
 import { CartDrawer } from "@/components/layout/cart-drawer";
 import { NotificationSpotlight } from "@/components/shared/notification-spotlight";
 import { Aurora } from "@/components/ui/aurora";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { MedialaneLogo } from "@/components/brand/medialane-logo";
 import { NAV_COMMANDS } from "@/lib/nav-commands";
 import { SWRConfig } from "swr";
@@ -28,17 +26,17 @@ function NavTrigger() {
       type="button"
       onClick={open}
       aria-label="Open navigation"
-      className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border/70 bg-background/80 px-1.5 pr-2.5 text-muted-foreground shadow-sm backdrop-blur transition hover:border-primary/40 hover:text-foreground hover:shadow-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+      className="group flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       <Image
         src="/icon.png"
-        alt=""
-        width={28}
-        height={28}
-        className="h-7 w-7 rounded-full"
+        alt="Medialane"
+        width={32}
+        height={32}
+        className="h-8 w-8 rounded-full opacity-90 transition-opacity group-hover:opacity-100"
         priority
       />
-      <Menu className="h-4 w-4" aria-hidden="true" />
+      <Menu className="h-5 w-5 text-muted-foreground transition-colors group-hover:text-foreground" aria-hidden="true" />
     </button>
   );
 }
@@ -54,33 +52,29 @@ function Shell({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <SidebarProvider defaultOpen={false}>
+    <div className="relative min-h-screen flex flex-col bg-background">
       <NavCommandMenu commands={NAV_COMMANDS} />
-      <AppSidebar />
-      <SidebarInset>
-        <div className="absolute top-3 left-3 z-50 flex items-center gap-2">
-          <SidebarTrigger />
-          <NavTrigger />
-        </div>
-        <main className="min-w-0 flex-1 bg-background overflow-x-hidden">{children}</main>
-        <footer className="bg-background border-t border-border/60 px-6 py-8 mt-auto">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <MedialaneLogo />
-            </div>
-            <nav className="flex items-center gap-4 flex-wrap justify-center">
-              <Link href="/marketplace" className="hover:text-foreground transition-colors">Trade</Link>
-              <Link href="/launchpad" className="hover:text-foreground transition-colors">Launch</Link>
-              <a href="https://docs.medialane.io" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Docs</a>
-              <a href="https://docs.medialane.io/guidelines/terms" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Terms</a>
-              <a href="https://docs.medialane.io/guidelines/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Privacy</a>
-              <a href="https://x.com/medialane_io" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">X</a>
-            </nav>
-            <p className="text-xs">© {new Date().getFullYear()} Medialane DAO</p>
+      <div className="absolute top-3 left-4 sm:left-6 lg:left-8 z-50 flex items-center gap-1.5">
+        <NavTrigger />
+      </div>
+      <main className="min-w-0 flex-1 bg-background overflow-x-hidden">{children}</main>
+      <footer className="bg-background border-t border-border/60 px-6 py-8 mt-auto">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <MedialaneLogo />
           </div>
-        </footer>
-      </SidebarInset>
-    </SidebarProvider>
+          <nav className="flex items-center gap-4 flex-wrap justify-center">
+            <Link href="/marketplace" className="hover:text-foreground transition-colors">Trade</Link>
+            <Link href="/launchpad" className="hover:text-foreground transition-colors">Launch</Link>
+            <a href="https://docs.medialane.io" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Docs</a>
+            <a href="https://docs.medialane.io/guidelines/terms" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Terms</a>
+            <a href="https://docs.medialane.io/guidelines/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Privacy</a>
+            <a href="https://x.com/medialane_io" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">X</a>
+          </nav>
+          <p className="text-xs">© {new Date().getFullYear()} Medialane DAO</p>
+        </div>
+      </footer>
+    </div>
   );
 }
 
