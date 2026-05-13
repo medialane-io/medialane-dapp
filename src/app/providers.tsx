@@ -1,14 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ThemeProvider } from "next-themes";
-import { PrivyProvider } from "@privy-io/react-auth";
-
-const PRIVY_CONFIG = {
-  loginMethods: ["email", "google", "twitter"] as Array<"email" | "google" | "twitter">,
-  appearance: { theme: "dark" as const },
-};
 import { Toaster, toast } from "sonner";
 import Link from "next/link";
 import { AppSidebar } from "@/components/layout/app-sidebar";
@@ -59,24 +53,62 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
+// PrivyProvider and PrivyBridge are dynamically imported so they are never
+// bundled or executed for users who don't use Privy.
+let PrivyStack: React.ComponentType<{ children: React.ReactNode }> | null = null;
+
+async function loadPrivyStack() {
+  if (PrivyStack) return;
+  const [{ PrivyProvider }, { PrivyBridge }] = await Promise.all([
+    import("@privy-io/react-auth"),
+    import("@/contexts/privy-bridge"),
+  ]);
+  const PRIVY_CONFIG = {
+    loginMethods: ["email", "google", "twitter"] as Array<"email" | "google" | "twitter">,
+    appearance: { theme: "dark" as const },
+  };
+  function PrivyStackInner({ children }: { children: React.ReactNode }) {
+    return (
+      <PrivyProvider appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!} config={PRIVY_CONFIG}>
+        <PrivyBridge />
+        {children}
+      </PrivyProvider>
+    );
+  }
+  PrivyStack = PrivyStackInner;
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isStandalone = pathname === "/mint" || pathname.startsWith("/br/");
 
-  return (
-    <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
-      config={PRIVY_CONFIG}
-    >
+  // Privy is only mounted if the user has previously chosen it as their wallet.
+  const [privyActive, setPrivyActive] = useState(false);
+  const [PrivyWrapper, setPrivyWrapper] = useState<React.ComponentType<{ children: React.ReactNode }> | null>(null);
+
+  useEffect(() => {
+    if (localStorage.getItem("ml_privy_session")) {
+      loadPrivyStack().then(() => {
+        setPrivyWrapper(() => PrivyStack);
+        setPrivyActive(true);
+      });
+    }
+  }, []);
+
+  const handleRequestPrivy = () => {
+    if (privyActive) return;
+    loadPrivyStack().then(() => {
+      setPrivyWrapper(() => PrivyStack);
+      setPrivyActive(true);
+    });
+  };
+
+  const content = (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
       <SWRConfig
         value={{
           onError: (err: unknown) => {
             const msg = err instanceof Error ? err.message : "Something went wrong";
-            // Suppress auth errors and network-level errors — these surface from hooks
-            // that use x-wallet-address auth or from brief connectivity gaps, and
-            // are not actionable from a toast. Real app errors propagate via hook's
-            // own error state and UI.
             if (
               msg.includes("401") || msg.includes("403") ||
               msg.includes("Missing") ||
@@ -88,7 +120,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         }}
       >
         <StarknetProvider>
-          <StarkZapWalletProvider>
+          <StarkZapWalletProvider onRequestPrivy={handleRequestPrivy}>
             <Aurora />
             <UserRegistration />
             {isStandalone ? children : <Shell>{children}</Shell>}
@@ -99,6 +131,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
         </StarknetProvider>
       </SWRConfig>
     </ThemeProvider>
-    </PrivyProvider>
   );
+
+  // Wrap with Privy only when active — invisible to all other users
+  return PrivyWrapper ? <PrivyWrapper>{content}</PrivyWrapper> : content;
 }
