@@ -1,20 +1,10 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useConnect } from "@starknet-react/core";
 import type { Connector } from "@starknet-react/core";
 import { shortenAddress, useNavCommandMenu } from "@medialane/ui";
-import {
-  Briefcase,
-  Gamepad2,
-  LogOut,
-  Mail,
-  Settings,
-  ShieldCheck,
-  User,
-  Wallet,
-} from "lucide-react";
+import { Gamepad2, LogOut, Mail, User, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { useNetwork } from "@/components/starknet-provider";
 import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
@@ -37,28 +27,6 @@ function getConnectorDisplayName(id: string, fallback: string) {
   return names[id] ?? fallback;
 }
 
-function AccountLink({
-  href,
-  icon: Icon,
-  children,
-}: {
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  children: React.ReactNode;
-}) {
-  const { close } = useNavCommandMenu();
-
-  return (
-    <Link
-      href={href}
-      onClick={close}
-      className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-    >
-      <Icon className="h-3.5 w-3.5 shrink-0" />
-      <span>{children}</span>
-    </Link>
-  );
-}
 
 export function NavAccountPanel() {
   const { connectAsync, connectors } = useConnect();
@@ -96,39 +64,20 @@ export function NavAccountPanel() {
 
   if (isConnected && address) {
     return (
-      <div className="rounded-xl border border-border/40 bg-muted/20 p-3">
-        <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-background/70 text-muted-foreground">
-            <User className="h-4 w-4" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-foreground">{shortenAddress(address)}</p>
-            <p className="truncate text-xs text-muted-foreground">
-              {walletType === "privy" && privyUser
-                ? privyUser.email?.address ?? privyUser.google?.name ?? privyUser.twitter?.name ?? networkConfig.name
-                : networkConfig.name}
-            </p>
-          </div>
-          <span className="rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
-            {getWalletLabel(walletType)}
-          </span>
+      <div className="flex items-center gap-2 rounded-xl border border-border/40 bg-muted/20 px-3 py-2">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-background/70 text-muted-foreground">
+          <User className="h-3.5 w-3.5" />
         </div>
-
-        <div className="mt-3 grid grid-cols-3 gap-1">
-          <AccountLink href="/portfolio" icon={Briefcase}>Portfolio</AccountLink>
-          <AccountLink href="/portfolio/settings" icon={Settings}>Settings</AccountLink>
-          <AccountLink href="/create/asset" icon={ShieldCheck}>Create</AccountLink>
-        </div>
-
+        <span className="truncate text-sm font-medium text-foreground">{shortenAddress(address)}</span>
+        <span className="rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2 py-0.5 text-[10px] font-medium text-emerald-400 shrink-0">
+          {getWalletLabel(walletType)}
+        </span>
         <button
-          onClick={() => {
-            disconnect();
-            close();
-          }}
-          className="mt-2 flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-border/50 px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+          onClick={() => { disconnect(); close(); }}
+          className="ml-auto shrink-0 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+          aria-label="Disconnect wallet"
         >
           <LogOut className="h-3.5 w-3.5" />
-          Disconnect wallet
         </button>
       </div>
     );
