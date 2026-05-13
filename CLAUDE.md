@@ -75,7 +75,7 @@ ThemeProvider
 - `src/lib/starkzap.ts` — SDK singleton (`getStarkZapSdk()`), token presets, staking config
 - `src/contexts/starkzap-wallet-context.tsx` — `StarkZapWalletProvider` + `useStarkZapWallet()`
 - `src/hooks/use-unified-wallet.ts` — normalises all wallet types into one interface
-- `src/hooks/use-wallet.ts` — **normalized identity hook**: wraps `useUnifiedWallet()`, returns `{ address, isConnected }`. Use this in any component that only needs to know who the user is. Use `useUnifiedWallet` directly only when you also need signing, execution, or wallet-type detection.
+- `src/hooks/use-wallet.ts` — **normalized identity hook**: wraps `useUnifiedWallet()`, returns `{ address, isConnected, walletType }`. Use this in any component that only needs to know who the user is. Use `useUnifiedWallet` directly only when you also need signing or execution.
 - `src/components/providers.tsx` — PrivyProvider + StarkZapWalletProvider client wrapper
 - `src/app/api/wallet/starknet/route.ts` — Privy wallet get-or-create (server)
 - `src/app/api/wallet/sign/route.ts` — Privy raw signing endpoint (server)

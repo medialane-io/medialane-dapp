@@ -20,6 +20,7 @@ import { MedialaneLogo } from "@/components/brand/medialane-logo";
 import { SWRConfig } from "swr";
 import { StarknetProvider } from "@/components/starknet-provider";
 import { StarkZapWalletProvider } from "@/contexts/starkzap-wallet-context";
+import { UserRegistration } from "@/components/shared/user-registration";
 
 function Shell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -89,6 +90,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <StarknetProvider>
           <StarkZapWalletProvider>
             <Aurora />
+            <UserRegistration />
             {isStandalone ? children : <Shell>{children}</Shell>}
             <CartDrawer />
             <NotificationSpotlight />
