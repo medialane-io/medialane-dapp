@@ -51,6 +51,7 @@ export function OfferDialog({ open, onOpenChange, assetContract, tokenId, tokenN
   const confettiFired = useRef(false);
   const [txStatus, setTxStatus] = useState<"idle" | "confirmed">("idle");
   const name = tokenName || `Token #${tokenId}`;
+  const isCancelled = error?.toLowerCase().includes("request cancelled") ?? false;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -149,7 +150,15 @@ export function OfferDialog({ open, onOpenChange, assetContract, tokenId, tokenN
                       </FormControl>
                     </FormItem>
                   )} />
-                  {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
+                  {error && (
+                    <Alert
+                      variant={isCancelled ? "default" : "destructive"}
+                      className={isCancelled ? "border-border/60 bg-muted/30 text-muted-foreground" : undefined}
+                    >
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
                   <div className="space-y-3">
                     <Button type="submit" className="w-full h-11" disabled={isProcessing || !isConnected}>
                       <HandCoins className="h-4 w-4 mr-2" />Submit offer

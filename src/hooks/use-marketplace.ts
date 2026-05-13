@@ -6,6 +6,7 @@ import { useSWRConfig } from "swr";
 import { IPMarketplaceABI } from "@/abis/ip_market";
 import { IPMarketplace1155ABI } from "@/abis/ip_market_1155";
 import { toast } from "sonner";
+import { getFriendlyWalletError } from "@/lib/wallet-error";
 import {
     getOrderParametersTypedData,
     getOrderCancellationTypedData,
@@ -158,9 +159,13 @@ export function useMarketplace(): UseMarketplaceReturn {
             return await fn();
         } catch (err: any) {
             console.error("[marketplace] error:", JSON.stringify(err, null, 2), err);
-            const msg = err?.message || (err?.code ? `Wallet error ${err.code}` : "An unexpected error occurred");
-            setError(msg);
-            toast.error(msg);
+            const friendly = getFriendlyWalletError(err);
+            setError(friendly.message);
+            if (friendly.isUserRejection) {
+                toast.info(friendly.title, { description: friendly.description });
+            } else {
+                toast.error(friendly.title, { description: friendly.message });
+            }
             return undefined;
         } finally {
             setIsProcessing(false);
