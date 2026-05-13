@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { withSiwsAuth } from "@/lib/pinata-fetch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -25,6 +24,7 @@ import { useTx } from "@/hooks/use-tx";
 import { useSessionKey } from "@/hooks/use-session-key";
 import { useMedialaneClient } from "@/hooks/use-medialane-client";
 import { useSiwsToken } from "@/hooks/use-siws-token";
+import { uploadFileToIpfs, uploadJsonToIpfs } from "@/lib/ipfs-upload-client";
 import { MEDIALANE_BACKEND_URL, MEDIALANE_API_KEY } from "@/lib/constants";
 import { Layers, Loader2, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
@@ -108,20 +108,8 @@ export default function CreateCollectionPage() {
     try {
       const siwsToken = await getValidToken();
       if (!siwsToken) throw new Error("Please sign in with your wallet to upload images.");
-      // Upload directly to Pinata via signed URL (bypasses Next.js 4 MB body limit)
-      const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth(siwsToken, { method: "POST" }));
-      const signedData = await signedRes.json();
-      if (!signedRes.ok || !signedData.url) throw new Error("Failed to get upload URL");
-      const imgFormData = new FormData();
-      imgFormData.append("file", file, file.name);
-      imgFormData.append("network", "public");
-      imgFormData.append("name", file.name);
-      const uploadRes = await fetch(signedData.url, { method: "POST", body: imgFormData });
-      if (!uploadRes.ok) throw new Error("Image upload to IPFS failed");
-      const uploadJson = await uploadRes.json();
-      const cid = uploadJson.data?.cid;
-      if (!cid) throw new Error("Image upload returned no CID");
-      setImageUri(`ipfs://${cid}`);
+      const upload = await uploadFileToIpfs(file, siwsToken);
+      setImageUri(upload.uri);
       toast.success("Image uploaded to IPFS");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Upload failed";
@@ -162,18 +150,12 @@ export default function CreateCollectionPage() {
         try {
           const metaToken = await getValidToken();
           if (!metaToken) throw new Error("Please sign in with your wallet to upload collection metadata.");
-          const metaRes = await fetch("/api/pinata/json", withSiwsAuth(metaToken, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: values.name,
-              description: values.description || "",
-              image: imageUri,
-              external_link: values.external_link || "https://medialane.io",
-            }),
-          }));
-          const metaData = await metaRes.json().catch(() => ({}));
-          if (metaRes.ok && metaData.uri) baseUri = metaData.uri;
+          baseUri = await uploadJsonToIpfs({
+            name: values.name,
+            description: values.description || "",
+            image: imageUri,
+            external_link: values.external_link || "https://medialane.io",
+          }, metaToken);
         } catch {
           // Non-fatal: collection is still created, just without onchain metadata URI
         }

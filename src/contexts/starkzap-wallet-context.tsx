@@ -11,6 +11,15 @@ import { OnboardStrategy } from "starkzap";
 import type { WalletInterface } from "starkzap";
 import { getStarkZapSdk } from "@/lib/starkzap";
 import {
+  IDLE_WALLET_SESSION,
+  isWalletSessionBusy,
+  walletConnecting,
+  walletError,
+  walletReady,
+  walletAuthenticating,
+  type WalletSession,
+} from "@/lib/wallet-session";
+import {
   COLLECTION_721_CONTRACT,
   MARKETPLACE_721_CONTRACT,
   MARKETPLACE_1155_CONTRACT,
@@ -41,6 +50,7 @@ export type StarkZapWalletType = "cartridge" | "privy";
 
 export interface StarkZapWalletCtx {
   wallet: WalletInterface | null;
+  session: WalletSession;
   walletType: StarkZapWalletType | null;
   address: string | null;
   isConnecting: boolean;
@@ -77,20 +87,22 @@ export function StarkZapWalletProvider({
   onRequestPrivy: () => void;
 }) {
   const [wallet, setWallet] = useState<WalletInterface | null>(null);
-  const [walletType, setWalletType] = useState<StarkZapWalletType | null>(null);
-  const [address, setAddress] = useState<string | null>(null);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [session, setSession] = useState<WalletSession>(IDLE_WALLET_SESSION);
   const [privyUser, setPrivyUser] = useState<User | null>(null);
   const [pendingPrivyConnect, setPendingPrivyConnect] = useState(false);
+  const walletType = session.walletType === "cartridge" || session.walletType === "privy"
+    ? session.walletType
+    : null;
+  const address = session.address;
+  const isConnecting = isWalletSessionBusy(session);
+  const error = session.error;
 
   // ---------------------------------------------------------------------------
   // Connect Cartridge
   // ---------------------------------------------------------------------------
 
   const connectCartridge = useCallback(async () => {
-    setIsConnecting(true);
-    setError(null);
+    setSession(walletConnecting("cartridge"));
     try {
       const sdk = getStarkZapSdk();
       const result = await sdk.onboard({
@@ -99,12 +111,10 @@ export function StarkZapWalletProvider({
         deploy: "if_needed",
       });
       setWallet(result.wallet);
-      setWalletType("cartridge");
-      setAddress(result.wallet.address as unknown as string);
+      setSession(walletReady("cartridge", result.wallet.address as unknown as string));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to connect Cartridge");
-    } finally {
-      setIsConnecting(false);
+      setWallet(null);
+      setSession(walletError("cartridge", err instanceof Error ? err.message : "Failed to connect Cartridge"));
     }
   }, []);
 
@@ -115,6 +125,7 @@ export function StarkZapWalletProvider({
 
   const connectPrivy = useCallback(async () => {
     localStorage.setItem("ml_privy_session", "1");
+    setSession(walletAuthenticating("privy"));
     onRequestPrivy(); // mounts PrivyProvider + PrivyBridge in providers.tsx
     setPendingPrivyConnect(true);
   }, [onRequestPrivy]);
@@ -128,9 +139,7 @@ export function StarkZapWalletProvider({
       localStorage.removeItem("ml_privy_session");
     }
     setWallet(null);
-    setWalletType(null);
-    setAddress(null);
-    setError(null);
+    setSession(IDLE_WALLET_SESSION);
     setPrivyUser(null);
   }, [walletType]);
 
@@ -141,19 +150,19 @@ export function StarkZapWalletProvider({
   const bridge: StarkZapPrivyBridge = {
     pendingPrivyConnect,
     clearPendingPrivyConnect: () => setPendingPrivyConnect(false),
-    onPrivyConnecting: () => { setIsConnecting(true); setError(null); },
+    onPrivyConnecting: () => { setSession(walletAuthenticating("privy")); },
     onPrivyConnected: (w, addr, u) => {
       setWallet(w);
-      setWalletType("privy");
-      setAddress(addr);
+      setSession(walletReady("privy", addr));
       setPrivyUser(u);
-      setIsConnecting(false);
     },
-    onPrivyError: (msg) => { setError(msg); setIsConnecting(false); },
+    onPrivyError: (msg) => {
+      setWallet(null);
+      setSession(walletError("privy", msg));
+    },
     onPrivyDisconnect: () => {
       setWallet(null);
-      setWalletType(null);
-      setAddress(null);
+      setSession(IDLE_WALLET_SESSION);
       setPrivyUser(null);
       localStorage.removeItem("ml_privy_session");
     },
@@ -162,7 +171,7 @@ export function StarkZapWalletProvider({
 
   return (
     <StarkZapWalletContext.Provider
-      value={{ wallet, walletType, address, isConnecting, error, privyUser, connectCartridge, connectPrivy, disconnect }}
+      value={{ wallet, session, walletType, address, isConnecting, error, privyUser, connectCartridge, connectPrivy, disconnect }}
     >
       <StarkZapPrivyBridgeContext.Provider value={bridge}>
         {children}
@@ -176,7 +185,7 @@ export function StarkZapWalletProvider({
 // ---------------------------------------------------------------------------
 
 const STARKZAP_DEFAULT_CTX: StarkZapWalletCtx = {
-  wallet: null, walletType: null, address: null,
+  wallet: null, session: IDLE_WALLET_SESSION, walletType: null, address: null,
   isConnecting: false, error: null, privyUser: null,
   connectCartridge: async () => {},
   connectPrivy: async () => {},

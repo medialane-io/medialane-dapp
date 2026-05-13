@@ -22,6 +22,7 @@ import { useAccount, useDisconnect } from "@starknet-react/core";
 import type { Call } from "starknet";
 import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
 import { usePaymasterTransaction } from "@/hooks/use-paymaster-transaction";
+import { useWalletSession } from "@/hooks/use-wallet-session";
 
 export type UnifiedWalletType = "injected" | "cartridge" | "privy" | null;
 
@@ -43,43 +44,24 @@ export interface UnifiedWallet {
 export function useUnifiedWallet(): UnifiedWallet {
   // StarkZap context (Cartridge / Privy)
   const {
-    wallet: szWallet,
-    walletType: szType,
-    address: szAddress,
     disconnect: szDisconnect,
   } = useStarkZapWallet();
+  const {
+    address,
+    isConnected,
+    walletType,
+  } = useWalletSession();
 
   // starknet-react injected (Argent / Braavos)
   const {
-    account,
-    address: injectedAddress,
     isConnected: injectedConnectedRaw,
   } = useAccount();
   const { disconnect: injectedDisconnect } = useDisconnect();
   const injectedConnected = injectedConnectedRaw ?? false;
 
-  const {
-    executeAuto,
-    isLoading: paymasterLoading,
-    error: paymasterError,
-  } = usePaymasterTransaction();
+  const { executeAuto } = usePaymasterTransaction();
 
-  // StarkZap wallet takes priority
-  const hasStarkZap = szWallet !== null && szAddress !== null;
-
-  const address = hasStarkZap
-    ? (szAddress ?? undefined)
-    : injectedConnected
-      ? injectedAddress
-      : undefined;
-
-  const isConnected = hasStarkZap || injectedConnected;
-
-  const walletType: UnifiedWalletType = hasStarkZap
-    ? (szType as UnifiedWalletType)
-    : injectedConnected
-      ? "injected"
-      : null;
+  const hasStarkZap = walletType === "cartridge" || walletType === "privy";
 
   const execute = useCallback(
     async (calls: Call[]): Promise<string> => {
@@ -103,9 +85,9 @@ export function useUnifiedWallet(): UnifiedWallet {
   }, [hasStarkZap, szDisconnect, injectedConnected, injectedDisconnect]);
 
   return {
-    address,
+    address: address ?? undefined,
     isConnected,
-    walletType,
+    walletType: walletType as UnifiedWalletType,
     execute,
     disconnect,
   };

@@ -24,11 +24,11 @@ import { useAccount } from "@starknet-react/core";
 import type { Call } from "starknet";
 import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
 import {
-  checkAccountCompatibility,
-  getGasTokenPrices,
-  executeGaslessTransaction,
-  canSponsor,
-} from "@/utils/paymaster";
+  checkGaslessCompatibility,
+  executeGaslessCalls,
+  fetchGasTokenEstimatePrices,
+  isSponsorshipConfigured,
+} from "@/lib/paymaster-adapter";
 import type { GasTokenPrice } from "@/types/paymaster";
 
 export interface UsePaymasterTransactionResult {
@@ -75,7 +75,7 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
   const [isGaslessCompatible, setIsGaslessCompatible] = useState(false);
   const [gasTokenPrices, setGasTokenPrices] = useState<GasTokenPrice[]>([]);
 
-  const isSponsorAvailable = canSponsor();
+  const isSponsorAvailable = isSponsorshipConfigured();
 
   // ---------------------------------------------------------------------------
   // Init: check account compatibility + fetch gas prices
@@ -83,7 +83,7 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
 
   const refreshGasTokenPrices = useCallback(async () => {
     try {
-      const prices = await getGasTokenPrices();
+      const prices = await fetchGasTokenEstimatePrices();
       setGasTokenPrices(prices);
     } catch {
       // Non-fatal — gasless UI just won't show price estimates
@@ -105,7 +105,7 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
         return null;
       }
 
-      const compatibility = await checkAccountCompatibility(address);
+      const compatibility = await checkGaslessCompatibility(address);
       setIsGaslessCompatible(compatibility.isCompatible);
       if (!compatibility.isCompatible) {
         setError("Account is not compatible with gasless transactions");
@@ -116,18 +116,14 @@ export function usePaymasterTransaction(): UsePaymasterTransactionResult {
       setError(null);
 
       try {
-        const response = await executeGaslessTransaction(
+        const transactionHash = await executeGaslessCalls(
           // starkzap uses starknet v9 Account internally; medialane uses v8.
           // The Account object from starknet-react satisfies the same interface.
           account as any, // eslint-disable-line @typescript-eslint/no-explicit-any
           calls,
           { gasTokenAddress, maxGasTokenAmount }
         );
-
-        if (!response.success) {
-          throw new Error(response.error ?? "Gasless execution failed");
-        }
-        return response.transactionHash;
+        return transactionHash;
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Gasless transaction failed";
         setError(msg);

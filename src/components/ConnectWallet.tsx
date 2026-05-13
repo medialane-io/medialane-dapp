@@ -46,6 +46,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
+import { useWalletSession } from "@/hooks/use-wallet-session";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -119,18 +120,21 @@ interface ConnectWalletProps {
 
 export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
   const { connectAsync, connectors } = useConnect();
-  const { address: injectedAddress, isConnected: injectedConnected, chainId } = useAccount();
+  const { isConnected: injectedConnected, chainId } = useAccount();
   const { disconnect: injectedDisconnect } = useDisconnect();
   const [open, setOpen] = useState(false);
   const [connectDialogOpen, setConnectDialogOpen] = useState(false);
   const [injectedConnectingId, setInjectedConnectingId] = useState<string | null>(null);
   const { networkConfig } = useNetwork();
+  const {
+    address,
+    isConnected,
+    isConnecting: sessionConnecting,
+    walletType: activeWalletType,
+    error: sessionError,
+  } = useWalletSession();
 
   const {
-    address: szAddress,
-    walletType: szType,
-    isConnecting,
-    error: szError,
     connectCartridge,
     connectPrivy,
     privyUser,
@@ -141,14 +145,7 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
   // Unified state
   // ---------------------------------------------------------------------------
 
-  const hasStarkZap = szAddress !== null;
-  const isConnected = hasStarkZap || injectedConnected;
-  const address = hasStarkZap ? szAddress : injectedAddress;
-  const activeWalletType = hasStarkZap
-    ? (szType as "cartridge" | "privy")
-    : injectedConnected
-      ? ("injected" as const)
-      : null;
+  const hasStarkZap = activeWalletType === "cartridge" || activeWalletType === "privy";
 
   const isWrongNetwork =
     injectedConnected &&
@@ -194,7 +191,7 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
     try {
       await connectCartridge();
     } catch {
-      // error surfaced via szError
+      // error surfaced via session state
     }
   };
 
@@ -218,7 +215,7 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
   // Loading state
   // ---------------------------------------------------------------------------
 
-  if (isConnecting && !isConnected) {
+  if (sessionConnecting && !isConnected) {
     return (
       <Button
         variant="ghost"
@@ -430,9 +427,9 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
             </DialogDescription>
           </DialogHeader>
 
-          {szError && (
+          {sessionError && (
             <p className="text-sm text-red-400 bg-red-900/20 border border-red-900/40 rounded p-2">
-              {szError}
+              {sessionError}
             </p>
           )}
 
@@ -455,7 +452,7 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
                         variant="outline"
                         className="w-full justify-start gap-3"
                         onClick={() => handleConnectorClick(connector)}
-                        disabled={isConnecting || injectedConnectingId !== null}
+                        disabled={sessionConnecting || injectedConnectingId !== null}
                       >
                         {iconSrc ? (
                           <Image src={iconSrc} alt="" width={20} height={20} className="h-5 w-5 rounded shrink-0" unoptimized />
@@ -489,13 +486,13 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
                 variant="outline"
                 className="w-full justify-start gap-3"
                 onClick={handleCartridgeConnect}
-                disabled={isConnecting}
+                disabled={sessionConnecting}
               >
                 <Gamepad2 className="h-4 w-4 shrink-0 text-purple-400" />
                 <span>
-                  {isConnecting ? "Connecting…" : "Connect with Cartridge"}
+                  {sessionConnecting ? "Connecting…" : "Connect with Cartridge"}
                 </span>
-                {isConnecting && <Loader2 className="ml-auto h-3 w-3 animate-spin" />}
+                {sessionConnecting && <Loader2 className="ml-auto h-3 w-3 animate-spin" />}
               </Button>
             </section>
 
@@ -517,16 +514,16 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
                   try {
                     await connectPrivy();
                   } catch {
-                    // error surfaced via szError
+                    // error surfaced via session state
                   }
                 }}
-                disabled={isConnecting}
+                disabled={sessionConnecting}
               >
                 <Mail className="h-4 w-4 shrink-0 text-blue-400" />
                 <span>
-                  {isConnecting ? "Connecting…" : "Sign in with Email or Social"}
+                  {sessionConnecting ? "Connecting…" : "Sign in with Email or Social"}
                 </span>
-                {isConnecting && <Loader2 className="ml-auto h-3 w-3 animate-spin" />}
+                {sessionConnecting && <Loader2 className="ml-auto h-3 w-3 animate-spin" />}
               </Button>
             </section>
           </div>
