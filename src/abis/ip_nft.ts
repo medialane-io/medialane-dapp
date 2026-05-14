@@ -1,27 +1,6 @@
+/** Auto-generated from MIP-Collections-ERC721 IPNft audited mainnet build (2026-05-14). */
+/** Class hash: 0x02d50b7e6d1a14f17a8fdc2df24d6e493bae6fae579656d81959b8c92de4b13f */
 export const COLLECTION_NFT_ABI = [
-  {
-    "type": "impl",
-    "name": "UpgradeableImpl",
-    "interface_name": "openzeppelin_upgrades::interface::IUpgradeable"
-  },
-  {
-    "type": "interface",
-    "name": "openzeppelin_upgrades::interface::IUpgradeable",
-    "items": [
-      {
-        "type": "function",
-        "name": "upgrade",
-        "inputs": [
-          {
-            "name": "new_class_hash",
-            "type": "core::starknet::class_hash::ClassHash"
-          }
-        ],
-        "outputs": [],
-        "state_mutability": "external"
-      }
-    ]
-  },
   {
     "type": "impl",
     "name": "ERC721Metadata",
@@ -41,7 +20,7 @@ export const COLLECTION_NFT_ABI = [
       },
       {
         "name": "pending_word_len",
-        "type": "core::integer::u32"
+        "type": "core::internal::bounded_int::BoundedInt::<0, 30>"
       }
     ]
   },
@@ -136,6 +115,30 @@ export const COLLECTION_NFT_ABI = [
     "interface_name": "ip_collection_erc_721::interfaces::IIPNFT::IIPNft"
   },
   {
+    "type": "enum",
+    "name": "core::bool",
+    "variants": [
+      {
+        "name": "False",
+        "type": "()"
+      },
+      {
+        "name": "True",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "core::array::Span::<core::integer::u256>",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<core::integer::u256>"
+      }
+    ]
+  },
+  {
     "type": "interface",
     "name": "ip_collection_erc_721::interfaces::IIPNFT::IIPNft",
     "items": [
@@ -161,7 +164,7 @@ export const COLLECTION_NFT_ABI = [
       },
       {
         "type": "function",
-        "name": "burn",
+        "name": "archive",
         "inputs": [
           {
             "name": "token_id",
@@ -170,6 +173,22 @@ export const COLLECTION_NFT_ABI = [
         ],
         "outputs": [],
         "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "is_archived",
+        "inputs": [
+          {
+            "name": "token_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::bool"
+          }
+        ],
+        "state_mutability": "view"
       },
       {
         "type": "function",
@@ -184,7 +203,7 @@ export const COLLECTION_NFT_ABI = [
       },
       {
         "type": "function",
-        "name": "get_collection_manager",
+        "name": "get_registry",
         "inputs": [],
         "outputs": [
           {
@@ -203,6 +222,86 @@ export const COLLECTION_NFT_ABI = [
           }
         ],
         "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "all_tokens_of_owner",
+        "inputs": [
+          {
+            "name": "owner",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::array::Span::<core::integer::u256>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "token_exists",
+        "inputs": [
+          {
+            "name": "token_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::bool"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_full_token_data",
+        "inputs": [
+          {
+            "name": "token_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "(core::starknet::contract_address::ContractAddress, core::byte_array::ByteArray, core::starknet::contract_address::ContractAddress, core::integer::u64)"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_token_creator",
+        "inputs": [
+          {
+            "name": "token_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_token_registered_at",
+        "inputs": [
+          {
+            "name": "token_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u64"
+          }
+        ],
+        "state_mutability": "view"
       }
     ]
   },
@@ -218,20 +317,6 @@ export const COLLECTION_NFT_ABI = [
       {
         "name": "snapshot",
         "type": "@core::array::Array::<core::felt252>"
-      }
-    ]
-  },
-  {
-    "type": "enum",
-    "name": "core::bool",
-    "variants": [
-      {
-        "name": "False",
-        "type": "()"
-      },
-      {
-        "name": "True",
-        "type": "()"
       }
     ]
   },
@@ -526,66 +611,6 @@ export const COLLECTION_NFT_ABI = [
   },
   {
     "type": "impl",
-    "name": "OwnableMixinImpl",
-    "interface_name": "openzeppelin_access::ownable::interface::OwnableABI"
-  },
-  {
-    "type": "interface",
-    "name": "openzeppelin_access::ownable::interface::OwnableABI",
-    "items": [
-      {
-        "type": "function",
-        "name": "owner",
-        "inputs": [],
-        "outputs": [
-          {
-            "type": "core::starknet::contract_address::ContractAddress"
-          }
-        ],
-        "state_mutability": "view"
-      },
-      {
-        "type": "function",
-        "name": "transfer_ownership",
-        "inputs": [
-          {
-            "name": "new_owner",
-            "type": "core::starknet::contract_address::ContractAddress"
-          }
-        ],
-        "outputs": [],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
-        "name": "renounce_ownership",
-        "inputs": [],
-        "outputs": [],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
-        "name": "transferOwnership",
-        "inputs": [
-          {
-            "name": "newOwner",
-            "type": "core::starknet::contract_address::ContractAddress"
-          }
-        ],
-        "outputs": [],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
-        "name": "renounceOwnership",
-        "inputs": [],
-        "outputs": [],
-        "state_mutability": "external"
-      }
-    ]
-  },
-  {
-    "type": "impl",
     "name": "ERC721EnumerableImpl",
     "interface_name": "openzeppelin_token::erc721::extensions::erc721_enumerable::interface::IERC721Enumerable"
   },
@@ -644,101 +669,6 @@ export const COLLECTION_NFT_ABI = [
   },
   {
     "type": "impl",
-    "name": "AccessControlCamelImpl",
-    "interface_name": "openzeppelin_access::accesscontrol::interface::IAccessControlCamel"
-  },
-  {
-    "type": "interface",
-    "name": "openzeppelin_access::accesscontrol::interface::IAccessControlCamel",
-    "items": [
-      {
-        "type": "function",
-        "name": "hasRole",
-        "inputs": [
-          {
-            "name": "role",
-            "type": "core::felt252"
-          },
-          {
-            "name": "account",
-            "type": "core::starknet::contract_address::ContractAddress"
-          }
-        ],
-        "outputs": [
-          {
-            "type": "core::bool"
-          }
-        ],
-        "state_mutability": "view"
-      },
-      {
-        "type": "function",
-        "name": "getRoleAdmin",
-        "inputs": [
-          {
-            "name": "role",
-            "type": "core::felt252"
-          }
-        ],
-        "outputs": [
-          {
-            "type": "core::felt252"
-          }
-        ],
-        "state_mutability": "view"
-      },
-      {
-        "type": "function",
-        "name": "grantRole",
-        "inputs": [
-          {
-            "name": "role",
-            "type": "core::felt252"
-          },
-          {
-            "name": "account",
-            "type": "core::starknet::contract_address::ContractAddress"
-          }
-        ],
-        "outputs": [],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
-        "name": "revokeRole",
-        "inputs": [
-          {
-            "name": "role",
-            "type": "core::felt252"
-          },
-          {
-            "name": "account",
-            "type": "core::starknet::contract_address::ContractAddress"
-          }
-        ],
-        "outputs": [],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
-        "name": "renounceRole",
-        "inputs": [
-          {
-            "name": "role",
-            "type": "core::felt252"
-          },
-          {
-            "name": "account",
-            "type": "core::starknet::contract_address::ContractAddress"
-          }
-        ],
-        "outputs": [],
-        "state_mutability": "external"
-      }
-    ]
-  },
-  {
-    "type": "impl",
     "name": "SRC5Impl",
     "interface_name": "openzeppelin_introspection::interface::ISRC5"
   },
@@ -781,15 +711,11 @@ export const COLLECTION_NFT_ABI = [
         "type": "core::byte_array::ByteArray"
       },
       {
-        "name": "owner",
-        "type": "core::starknet::contract_address::ContractAddress"
-      },
-      {
         "name": "collection_id",
         "type": "core::integer::u256"
       },
       {
-        "name": "collection_manager",
+        "name": "registry",
         "type": "core::starknet::contract_address::ContractAddress"
       }
     ]
@@ -890,172 +816,9 @@ export const COLLECTION_NFT_ABI = [
   },
   {
     "type": "event",
-    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
-    "kind": "struct",
-    "members": [
-      {
-        "name": "previous_owner",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
-      },
-      {
-        "name": "new_owner",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
-      }
-    ]
-  },
-  {
-    "type": "event",
-    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
-    "kind": "struct",
-    "members": [
-      {
-        "name": "previous_owner",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
-      },
-      {
-        "name": "new_owner",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
-      }
-    ]
-  },
-  {
-    "type": "event",
-    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
-    "kind": "enum",
-    "variants": [
-      {
-        "name": "OwnershipTransferred",
-        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
-        "kind": "nested"
-      },
-      {
-        "name": "OwnershipTransferStarted",
-        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
-        "kind": "nested"
-      }
-    ]
-  },
-  {
-    "type": "event",
-    "name": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleGranted",
-    "kind": "struct",
-    "members": [
-      {
-        "name": "role",
-        "type": "core::felt252",
-        "kind": "data"
-      },
-      {
-        "name": "account",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "data"
-      },
-      {
-        "name": "sender",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "data"
-      }
-    ]
-  },
-  {
-    "type": "event",
-    "name": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleRevoked",
-    "kind": "struct",
-    "members": [
-      {
-        "name": "role",
-        "type": "core::felt252",
-        "kind": "data"
-      },
-      {
-        "name": "account",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "data"
-      },
-      {
-        "name": "sender",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "data"
-      }
-    ]
-  },
-  {
-    "type": "event",
-    "name": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleAdminChanged",
-    "kind": "struct",
-    "members": [
-      {
-        "name": "role",
-        "type": "core::felt252",
-        "kind": "data"
-      },
-      {
-        "name": "previous_admin_role",
-        "type": "core::felt252",
-        "kind": "data"
-      },
-      {
-        "name": "new_admin_role",
-        "type": "core::felt252",
-        "kind": "data"
-      }
-    ]
-  },
-  {
-    "type": "event",
-    "name": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::Event",
-    "kind": "enum",
-    "variants": [
-      {
-        "name": "RoleGranted",
-        "type": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleGranted",
-        "kind": "nested"
-      },
-      {
-        "name": "RoleRevoked",
-        "type": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleRevoked",
-        "kind": "nested"
-      },
-      {
-        "name": "RoleAdminChanged",
-        "type": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::RoleAdminChanged",
-        "kind": "nested"
-      }
-    ]
-  },
-  {
-    "type": "event",
     "name": "openzeppelin_token::erc721::extensions::erc721_enumerable::erc721_enumerable::ERC721EnumerableComponent::Event",
     "kind": "enum",
     "variants": []
-  },
-  {
-    "type": "event",
-    "name": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
-    "kind": "struct",
-    "members": [
-      {
-        "name": "class_hash",
-        "type": "core::starknet::class_hash::ClassHash",
-        "kind": "data"
-      }
-    ]
-  },
-  {
-    "type": "event",
-    "name": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
-    "kind": "enum",
-    "variants": [
-      {
-        "name": "Upgraded",
-        "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
-        "kind": "nested"
-      }
-    ]
   },
   {
     "type": "event",
@@ -1073,25 +836,10 @@ export const COLLECTION_NFT_ABI = [
         "kind": "flat"
       },
       {
-        "name": "OwnableEvent",
-        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
-        "kind": "flat"
-      },
-      {
-        "name": "AccessControlEvent",
-        "type": "openzeppelin_access::accesscontrol::accesscontrol::AccessControlComponent::Event",
-        "kind": "flat"
-      },
-      {
         "name": "ERC721EnumerableEvent",
         "type": "openzeppelin_token::erc721::extensions::erc721_enumerable::erc721_enumerable::ERC721EnumerableComponent::Event",
-        "kind": "flat"
-      },
-      {
-        "name": "UpgradeableEvent",
-        "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
         "kind": "flat"
       }
     ]
   }
-]
+] as const;
