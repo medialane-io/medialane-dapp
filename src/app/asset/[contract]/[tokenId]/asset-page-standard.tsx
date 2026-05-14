@@ -47,6 +47,7 @@ import { HelpIcon } from "@/components/ui/help-icon";
 import { AssetMarketsTab } from "./asset-markets-tab";
 import { AssetProvenanceTab } from "./asset-provenance-tab";
 import { useFullTokenData } from "@/hooks/use-full-token-data";
+import { useIsTransferable } from "@/hooks/use-is-transferable";
 import { ArchiveTokenDialog } from "@/components/asset/archive-token-dialog";
 
 export function AssetPageStandard() {
@@ -97,6 +98,14 @@ export function AssetPageStandard() {
     ipNftAddress: contract,
     tokenId: tokenId ? (() => { try { return BigInt(tokenId); } catch { return undefined; } })() : undefined,
   });
+
+  // Transferability gate — only blocks when explicitly false (archived). undefined → allow.
+  const { isTransferable } = useIsTransferable({
+    collectionId: collection?.collectionId ?? undefined,
+    tokenId,
+  });
+  const isArchived = isTransferable === false;
+  const archivedTitle = isArchived ? "This token is archived and cannot be traded" : undefined;
 
   // Listings = NFT in offer (ERC721 or ERC1155 — someone selling the token)
   const activeListings = listings.filter(
@@ -396,7 +405,9 @@ export function AssetPageStandard() {
                     )}
                     <div className="btn-border-animated p-[1px] rounded-xl">
                       <button
-                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-blue"
+                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-blue disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
+                        disabled={isArchived}
+                        title={archivedTitle}
                         onClick={() => setListOpen(true)}
                       >
                         <Tag className="h-4 w-4" />
@@ -405,7 +416,9 @@ export function AssetPageStandard() {
                     </div>
                     <div className="btn-border-animated p-[1px] rounded-xl">
                       <button
-                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-orange"
+                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
+                        disabled={isArchived}
+                        title={archivedTitle}
                         onClick={() => setTransferOpen(true)}
                       >
                         <ArrowRightLeft className="h-4 w-4" />
@@ -458,7 +471,9 @@ export function AssetPageStandard() {
                       {/* Make offer */}
                       <div className="btn-border-animated p-[1px] rounded-xl">
                         <button
-                          className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-orange"
+                          className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
+                          disabled={isArchived}
+                          title={archivedTitle}
                           onClick={() => setOfferOpen(true)}
                         >
                           <HandCoins className="h-4 w-4" />
@@ -493,7 +508,9 @@ export function AssetPageStandard() {
                   <div className="space-y-2">
                     <div className="btn-border-animated p-[1px] rounded-xl">
                       <button
-                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-blue"
+                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-blue disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
+                        disabled={isArchived}
+                        title={archivedTitle}
                         onClick={() => setListOpen(true)}
                       >
                         <Tag className="h-4 w-4" />
@@ -502,7 +519,9 @@ export function AssetPageStandard() {
                     </div>
                     <div className="btn-border-animated p-[1px] rounded-xl">
                       <button
-                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-orange"
+                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
+                        disabled={isArchived}
+                        title={archivedTitle}
                         onClick={() => setTransferOpen(true)}
                       >
                         <ArrowRightLeft className="h-4 w-4" />
@@ -532,7 +551,9 @@ export function AssetPageStandard() {
                   <div className="space-y-2">
                     <div className="btn-border-animated p-[1px] rounded-xl">
                       <button
-                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-orange"
+                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
+                        disabled={isArchived}
+                        title={archivedTitle}
                         onClick={() => setOfferOpen(true)}
                       >
                         <HandCoins className="h-4 w-4" />
