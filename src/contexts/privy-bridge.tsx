@@ -12,10 +12,14 @@ import { getStarkZapSdk, isStarkZapSponsorshipEnabled } from "@/lib/starkzap";
 import { useStarkZapPrivyBridge } from "./starkzap-wallet-context";
 
 export function PrivyBridge() {
-  const { authenticated, login, logout, getAccessToken, user } = usePrivy();
+  const { ready, authenticated, login, logout, getAccessToken, user } = usePrivy();
   const bridge = useStarkZapPrivyBridge();
 
   const initPrivyWallet = useCallback(async (silent = false) => {
+    if (!bridge) return;
+
+    bridge.onPrivyPreparingWallet();
+
     const token = await getAccessToken();
     if (!token) {
       if (silent) return;
@@ -29,6 +33,12 @@ export function PrivyBridge() {
     if (!res.ok) throw new Error("Failed to create Privy Starknet wallet");
     const walletData = (await res.json()) as { id: string; address: string; publicKey: string };
 
+    if (!isStarkZapSponsorshipEnabled()) {
+      throw new Error("Privy onboarding requires AVNU paymaster sponsorship to deploy the Starknet account.");
+    }
+
+    bridge.onPrivyDeployingAccount(walletData.address);
+
     const sdk = getStarkZapSdk();
     const privyResolve = async () => ({
       walletId: walletData.id,
@@ -41,29 +51,25 @@ export function PrivyBridge() {
       },
     });
 
-    if (!isStarkZapSponsorshipEnabled()) {
-      throw new Error("Privy onboarding requires AVNU paymaster sponsorship to deploy the Starknet account.");
-    }
-
     const result = await sdk.onboard({
       strategy: OnboardStrategy.Privy,
       accountPreset: "argentXV050",
       feeMode: "sponsored",
       privy: { resolve: privyResolve },
-      deploy: "never",
-    });
-
-    await result.wallet.ensureReady({
       deploy: "if_needed",
-      feeMode: "sponsored",
     });
 
-    bridge?.onPrivyConnected(result.wallet, result.wallet.address as unknown as string, user ?? null);
-  }, [getAccessToken, user, bridge]);
+    bridge.onPrivyConnected(
+      result.wallet,
+      result.wallet.address as unknown as string,
+      user ?? null,
+    );
+  }, [bridge, getAccessToken, user]);
 
-  // Handle explicit connect request (user clicked "Connect with Privy")
+  // Explicit connect — gated on Privy `ready` so login() isn't called before init.
   useEffect(() => {
     if (!bridge?.pendingPrivyConnect) return;
+    if (!ready) return;
     bridge.clearPendingPrivyConnect();
     bridge.onPrivyConnecting();
 
@@ -76,27 +82,31 @@ export function PrivyBridge() {
       bridge.onPrivyError(err instanceof Error ? err.message : "Failed to connect with Privy");
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bridge?.pendingPrivyConnect]);
+  }, [ready, bridge?.pendingPrivyConnect]);
 
-  // Auto-reconnect on page reload — only fires when user previously used Privy
+  // Auto-reconnect on page reload — also gated on `ready`.
   useEffect(() => {
+    if (!ready) return;
     if (!authenticated || bridge?.walletType === "cartridge") return;
+    if (typeof window === "undefined") return;
     if (!localStorage.getItem("ml_privy_session")) return;
 
     initPrivyWallet(true).catch((err) => {
       console.error("Privy auto-reconnect failed:", err);
+      bridge?.onPrivyError(err instanceof Error ? err.message : "Privy auto-reconnect failed");
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authenticated]);
+  }, [ready, authenticated]);
 
-  // Sync logout when Privy session ends externally
+  // Sync logout when Privy session ends externally.
   useEffect(() => {
+    if (!ready) return;
     if (!authenticated && bridge?.walletType === "privy") {
       logout().catch(() => {});
       bridge.onPrivyDisconnect();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authenticated]);
+  }, [ready, authenticated]);
 
   return null;
 }
