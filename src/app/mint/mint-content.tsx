@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { GenesisMint } from "@/components/airdrop/genesis-mint";
+import { PrivyInlineLogin } from "@/components/airdrop/privy-inline-login";
 import { MedialaneLogo } from "@/components/brand/medialane-logo";
 import { useWallet } from "@/hooks/use-wallet";
 import { MINT_CONTRACT, GENESIS_NFT_URI, GENESIS_NFT_IMAGE_URL } from "@/lib/constants";
@@ -52,13 +53,21 @@ function EventCard() {
 
 export function MintContent() {
   const { isConnected } = useWallet();
+  const headerConnectRef = useRef<HTMLDivElement | null>(null);
+
+  const openWalletPicker = () => {
+    const btn = headerConnectRef.current?.querySelector("button");
+    btn?.click();
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
       <header className="px-6 py-4 flex items-center justify-between border-b border-border/30 sticky top-0 bg-background/90 backdrop-blur-sm z-10">
         <Link href="/"><MedialaneLogo /></Link>
-        <ConnectWallet />
+        <div ref={headerConnectRef}>
+          <ConnectWallet />
+        </div>
       </header>
 
       <div className="flex-1 w-full">
@@ -80,12 +89,16 @@ export function MintContent() {
                     Creator&apos;s Airdrop
                   </span>
                 </h1>
-                <GenesisMint
-                  contract={MINT_CONTRACT}
-                  nftUri={GENESIS_NFT_URI}
-                  storageKey="ml_mint"
-                  locale="en"
-                />
+                {isConnected ? (
+                  <GenesisMint
+                    contract={MINT_CONTRACT}
+                    nftUri={GENESIS_NFT_URI}
+                    storageKey="ml_mint"
+                    locale="en"
+                  />
+                ) : (
+                  <PrivyInlineLogin onOpenWalletPicker={openWalletPicker} locale="en" />
+                )}
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Medialane is an app for creators to publish, share, and monetize content. Free to join.
                 </p>

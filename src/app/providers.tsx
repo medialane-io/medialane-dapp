@@ -141,9 +141,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!pathname.startsWith("/br/")) return;
+    const isMintLanding = pathname.startsWith("/br/") || pathname === "/mint" || pathname.startsWith("/mint/");
+    if (!isMintLanding) return;
     loadPrivyStack().then(activatePrivy).catch((err) => {
-      console.error("[Privy] /br pre-mount failed:", err);
+      console.error("[Privy] mint-landing pre-mount failed:", err);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);

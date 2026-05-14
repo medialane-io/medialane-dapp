@@ -7,27 +7,62 @@ import { useWallet } from "@/hooks/use-wallet";
 
 type Stage = "idle" | "otp" | "connecting";
 
+export type PrivyInlineLocale = "br" | "en";
+
 const COPY = {
-  title: "Crie sua conta gratuita",
-  subtitle: "Entre com email ou Google. Sem carteira, sem cartão, sem gas.",
-  emailPlaceholder: "seu@email.com",
-  emailSubmit: "Continuar com email",
-  emailSending: "Enviando código…",
-  or: "ou",
-  googleButton: "Continuar com Google",
-  googleLoading: "Abrindo Google…",
-  otpTitle: "Verifique seu email",
-  otpSubtitleA: "Enviamos um código para",
-  otpPlaceholder: "Código de 6 dígitos",
-  otpSubmit: "Verificar",
-  otpVerifying: "Verificando…",
-  otpBack: "Usar outro email",
-  connecting: "Criando sua conta…",
-  connectingSub: "Estamos preparando e implantando sua conta Starknet. Isso leva alguns segundos.",
-  retry: "Tentar de novo",
-  walletLink: "Já tem uma carteira cripto? Conectar",
-  invalidEmail: "Digite um email válido.",
-};
+  br: {
+    title: "Crie sua conta gratuita",
+    subtitle: "Entre com email ou Google. Sem carteira, sem cartão, sem gas.",
+    emailPlaceholder: "seu@email.com",
+    emailSubmit: "Continuar com email",
+    emailSending: "Enviando código…",
+    or: "ou",
+    googleButton: "Continuar com Google",
+    googleLoading: "Abrindo Google…",
+    otpTitle: "Verifique seu email",
+    otpSubtitleA: "Enviamos um código para",
+    otpPlaceholder: "Código de 6 dígitos",
+    otpSubmit: "Verificar",
+    otpVerifying: "Verificando…",
+    otpBack: "Usar outro email",
+    connecting: "Criando sua conta…",
+    connectingSub: "Estamos preparando e implantando sua conta Starknet. Isso leva alguns segundos.",
+    retry: "Tentar de novo",
+    walletLink: "Já tem uma carteira cripto? Conectar",
+    invalidEmail: "Digite um email válido.",
+    incompleteCode: "Digite o código completo.",
+    sendCodeError: "Não foi possível enviar o código.",
+    invalidCode: "Código inválido. Tente novamente.",
+    googleError: "Não foi possível abrir o Google.",
+    loading: "Carregando…",
+  },
+  en: {
+    title: "Create your free account",
+    subtitle: "Sign in with email or Google. No wallet, no card, no gas.",
+    emailPlaceholder: "you@email.com",
+    emailSubmit: "Continue with email",
+    emailSending: "Sending code…",
+    or: "or",
+    googleButton: "Continue with Google",
+    googleLoading: "Opening Google…",
+    otpTitle: "Check your email",
+    otpSubtitleA: "We sent a code to",
+    otpPlaceholder: "6-digit code",
+    otpSubmit: "Verify",
+    otpVerifying: "Verifying…",
+    otpBack: "Use a different email",
+    connecting: "Creating your account…",
+    connectingSub: "Preparing and deploying your Starknet account. This takes a few seconds.",
+    retry: "Try again",
+    walletLink: "Have a crypto wallet? Connect",
+    invalidEmail: "Enter a valid email.",
+    incompleteCode: "Enter the full code.",
+    sendCodeError: "Couldn't send the code.",
+    invalidCode: "Invalid code. Please try again.",
+    googleError: "Couldn't open Google.",
+    loading: "Loading…",
+  },
+} as const;
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
@@ -42,9 +77,11 @@ function maskEmail(value: string): string {
 
 interface Props {
   onOpenWalletPicker: () => void;
+  locale?: PrivyInlineLocale;
 }
 
-export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
+export function PrivyInlineLogin({ onOpenWalletPicker, locale = "br" }: Props) {
+  const t = COPY[locale];
   const { ready, authenticated } = usePrivy();
   const { sendCode, loginWithCode } = useLoginWithEmail();
   const { initOAuth, loading: oauthLoading } = useLoginWithOAuth();
@@ -72,7 +109,7 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
     e.preventDefault();
     setEmailError(null);
     if (!isValidEmail(email)) {
-      setEmailError(COPY.invalidEmail);
+      setEmailError(t.invalidEmail);
       return;
     }
     setBusy(true);
@@ -81,7 +118,7 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
       await sendCode({ email: email.trim() });
       setStage("otp");
     } catch (err) {
-      setEmailError(err instanceof Error ? err.message : "Não foi possível enviar o código.");
+      setEmailError(err instanceof Error ? err.message : t.sendCodeError);
     } finally {
       setBusy(false);
     }
@@ -91,7 +128,7 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
     e.preventDefault();
     setOtpError(null);
     if (code.trim().length < 4) {
-      setOtpError("Digite o código completo.");
+      setOtpError(t.incompleteCode);
       return;
     }
     setBusy(true);
@@ -99,7 +136,7 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
       await loginWithCode({ code: code.trim() });
       setStage("connecting");
     } catch (err) {
-      setOtpError(err instanceof Error ? err.message : "Código inválido. Tente novamente.");
+      setOtpError(err instanceof Error ? err.message : t.invalidCode);
       setCode("");
     } finally {
       setBusy(false);
@@ -113,7 +150,7 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
       armAutoReconnect();
       await initOAuth({ provider: "google" });
     } catch (err) {
-      setEmailError(err instanceof Error ? err.message : "Não foi possível abrir o Google.");
+      setEmailError(err instanceof Error ? err.message : t.googleError);
       setBusy(false);
     }
   };
@@ -124,7 +161,7 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
     return (
       <div className="rounded-2xl border border-border/40 bg-card/30 p-5">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Carregando…
+          <Loader2 className="h-4 w-4 animate-spin" /> {t.loading}
         </div>
       </div>
     );
@@ -136,8 +173,8 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
         <div className="flex items-center gap-3">
           <Loader2 className="h-5 w-5 animate-spin text-primary" />
           <div>
-            <p className="text-sm font-semibold text-foreground">{COPY.connecting}</p>
-            <p className="text-xs text-muted-foreground">{COPY.connectingSub}</p>
+            <p className="text-sm font-semibold text-foreground">{t.connecting}</p>
+            <p className="text-xs text-muted-foreground">{t.connectingSub}</p>
           </div>
         </div>
       </div>
@@ -148,9 +185,9 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
     return (
       <form onSubmit={handleVerify} className="max-w-md space-y-3 rounded-2xl border border-border/40 bg-card/30 p-5">
         <div className="space-y-1">
-          <p className="text-sm font-semibold text-foreground">{COPY.otpTitle}</p>
+          <p className="text-sm font-semibold text-foreground">{t.otpTitle}</p>
           <p className="text-xs text-muted-foreground">
-            {COPY.otpSubtitleA} <span className="text-foreground">{maskEmail(email)}</span>
+            {t.otpSubtitleA} <span className="text-foreground">{maskEmail(email)}</span>
           </p>
         </div>
         {otpError && <p className="text-xs text-destructive">{otpError}</p>}
@@ -162,7 +199,7 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
           maxLength={8}
           value={code}
           onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-          placeholder={COPY.otpPlaceholder}
+          placeholder={t.otpPlaceholder}
           className="w-full rounded-lg border border-border/50 bg-background/60 px-3 py-2.5 text-sm tracking-widest text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
         />
         <button
@@ -170,14 +207,14 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
           disabled={busy}
           className="flex h-10 w-full items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {busy ? COPY.otpVerifying : COPY.otpSubmit}
+          {busy ? t.otpVerifying : t.otpSubmit}
         </button>
         <button
           type="button"
           onClick={() => { setStage("idle"); setCode(""); setOtpError(null); }}
           className="text-xs text-muted-foreground underline-offset-4 hover:underline"
         >
-          {COPY.otpBack}
+          {t.otpBack}
         </button>
       </form>
     );
@@ -186,8 +223,8 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
   return (
     <div className="max-w-md space-y-4 rounded-2xl border border-border/40 bg-card/30 p-5">
       <div className="space-y-1">
-        <p className="text-base font-semibold text-foreground">{COPY.title}</p>
-        <p className="text-xs text-muted-foreground">{COPY.subtitle}</p>
+        <p className="text-base font-semibold text-foreground">{t.title}</p>
+        <p className="text-xs text-muted-foreground">{t.subtitle}</p>
       </div>
 
       <form onSubmit={handleSendCode} className="space-y-2">
@@ -200,7 +237,7 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder={COPY.emailPlaceholder}
+            placeholder={t.emailPlaceholder}
             className="h-10 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
         </div>
@@ -209,13 +246,13 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
           disabled={busy}
           className="flex h-10 w-full items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {busy ? COPY.emailSending : COPY.emailSubmit}
+          {busy ? t.emailSending : t.emailSubmit}
         </button>
       </form>
 
       <div className="flex items-center gap-3 text-[10px] uppercase tracking-wider text-muted-foreground">
         <div className="h-px flex-1 bg-border/50" />
-        {COPY.or}
+        {t.or}
         <div className="h-px flex-1 bg-border/50" />
       </div>
 
@@ -228,7 +265,7 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
         <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
           <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.4-1.7 4.2-5.5 4.2-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.9 3.5 14.7 2.5 12 2.5 6.7 2.5 2.4 6.8 2.4 12s4.3 9.5 9.6 9.5c5.5 0 9.2-3.9 9.2-9.3 0-.6-.1-1-.2-1.5H12z"/>
         </svg>
-        {oauthLoading || busy ? COPY.googleLoading : COPY.googleButton}
+        {oauthLoading || busy ? t.googleLoading : t.googleButton}
       </button>
 
       <button
@@ -236,7 +273,7 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
         onClick={onOpenWalletPicker}
         className="text-xs text-muted-foreground underline-offset-4 hover:underline"
       >
-        {COPY.walletLink}
+        {t.walletLink}
       </button>
     </div>
   );
