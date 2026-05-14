@@ -140,6 +140,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (!pathname.startsWith("/br/")) return;
+    loadPrivyStack().then(activatePrivy).catch((err) => {
+      console.error("[Privy] /br pre-mount failed:", err);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
   const handleRequestPrivy = () => {
     if (privyActive) return;
     loadPrivyStack()
