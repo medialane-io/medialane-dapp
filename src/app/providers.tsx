@@ -82,18 +82,25 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 // PrivyProvider and PrivyBridge are dynamically imported so they are never
 // bundled or executed for users who don't use Privy.
+//
+// Note: PrivyBridge MUST render inside StarkZapWalletProvider (it consumes that
+// context), but it ALSO needs to be inside PrivyProvider (it calls usePrivy()).
+// So PrivyProvider wraps the whole tree, and PrivyBridge is mounted as a
+// sibling inside StarkZapWalletProvider below.
 let PrivyStack: React.ComponentType<{ children: React.ReactNode }> | null = null;
+let PrivyBridgeComponent: React.ComponentType | null = null;
 
 async function loadPrivyStack() {
-  if (PrivyStack) return;
+  if (PrivyStack && PrivyBridgeComponent) return;
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
   if (!appId) {
     throw new Error("NEXT_PUBLIC_PRIVY_APP_ID is not set — Privy onboarding cannot start.");
   }
-  const [{ PrivyProvider }, { PrivyBridge }] = await Promise.all([
+  const [{ PrivyProvider }, bridgeMod] = await Promise.all([
     import("@privy-io/react-auth"),
     import("@/contexts/privy-bridge"),
   ]);
+  PrivyBridgeComponent = bridgeMod.PrivyBridge;
   const PRIVY_CONFIG = {
     loginMethods: ["email", "google", "twitter"] as Array<"email" | "google" | "twitter">,
     appearance: { theme: "dark" as const },
@@ -101,7 +108,6 @@ async function loadPrivyStack() {
   function PrivyStackInner({ children }: { children: React.ReactNode }) {
     return (
       <PrivyProvider appId={appId!} config={PRIVY_CONFIG}>
-        <PrivyBridge />
         {children}
       </PrivyProvider>
     );
@@ -116,23 +122,27 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Privy is only mounted if the user has previously chosen it as their wallet.
   const [privyActive, setPrivyActive] = useState(false);
   const [PrivyWrapper, setPrivyWrapper] = useState<React.ComponentType<{ children: React.ReactNode }> | null>(null);
+  const [PrivyBridgeMount, setPrivyBridgeMount] = useState<React.ComponentType | null>(null);
+
+  const activatePrivy = () => {
+    setPrivyWrapper(() => PrivyStack);
+    setPrivyBridgeMount(() => PrivyBridgeComponent);
+    setPrivyActive(true);
+  };
 
   useEffect(() => {
     if (localStorage.getItem("ml_privy_session")) {
-      loadPrivyStack().then(() => {
-        setPrivyWrapper(() => PrivyStack);
-        setPrivyActive(true);
+      loadPrivyStack().then(activatePrivy).catch((err) => {
+        console.error("[Privy] auto-reconnect load failed:", err);
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRequestPrivy = () => {
     if (privyActive) return;
     loadPrivyStack()
-      .then(() => {
-        setPrivyWrapper(() => PrivyStack);
-        setPrivyActive(true);
-      })
+      .then(activatePrivy)
       .catch((err) => {
         const msg = err instanceof Error ? err.message : "Failed to load Privy";
         console.error("[Privy] loadPrivyStack failed:", err);
@@ -158,6 +168,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       >
         <StarknetProvider>
           <StarkZapWalletProvider onRequestPrivy={handleRequestPrivy}>
+            {PrivyBridgeMount ? <PrivyBridgeMount /> : null}
             <Aurora />
             <UserRegistration />
             {isStandalone ? children : <Shell>{children}</Shell>}
