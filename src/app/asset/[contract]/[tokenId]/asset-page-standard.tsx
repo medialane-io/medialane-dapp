@@ -47,6 +47,7 @@ import { HelpIcon } from "@/components/ui/help-icon";
 import { AssetMarketsTab } from "./asset-markets-tab";
 import { AssetProvenanceTab } from "./asset-provenance-tab";
 import { useFullTokenData } from "@/hooks/use-full-token-data";
+import { ArchiveTokenDialog } from "@/components/asset/archive-token-dialog";
 
 export function AssetPageStandard() {
   const { contract, tokenId } = useParams<{ contract: string; tokenId: string }>();
@@ -421,6 +422,14 @@ export function AssetPageStandard() {
                         <HelpIcon content="Build a licensed derivative of this IP asset — your remix is minted as a new onchain NFT linked to the original" side="top" />
                       </button>
                     </div>
+                    {collection?.collectionId && fullTokenData && (
+                      <div className="pt-1 flex justify-center">
+                        <ArchiveTokenDialog
+                          collectionId={collection.collectionId}
+                          tokenId={tokenId}
+                        />
+                      </div>
+                    )}
                   </div>
                 ) : isSignedIn ? (
                   <div className="space-y-2">
@@ -510,6 +519,14 @@ export function AssetPageStandard() {
                         <HelpIcon content="Build a licensed derivative of this IP asset — your remix is minted as a new onchain NFT linked to the original" side="top" />
                       </button>
                     </div>
+                    {collection?.collectionId && fullTokenData && (
+                      <div className="pt-1 flex justify-center">
+                        <ArchiveTokenDialog
+                          collectionId={collection.collectionId}
+                          tokenId={tokenId}
+                        />
+                      </div>
+                    )}
                   </div>
                 ) : isSignedIn ? (
                   <div className="space-y-2">
