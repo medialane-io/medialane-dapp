@@ -7,7 +7,7 @@
  * second context — that pattern caused a silent-mount regression).
  */
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { OnboardStrategy } from "starkzap";
 import type { WalletInterface } from "starkzap";
@@ -41,6 +41,13 @@ export function PrivyConnector({
   setPrivyUser,
 }: PrivyConnectorProps) {
   const { ready, authenticated, login, logout, getAccessToken, user } = usePrivy();
+
+  // Tracks an in-flight user-initiated onboarding so we can run it once
+  // `authenticated` flips true after the Privy modal closes. login() can
+  // resolve before authentication completes, so we don't drive onboarding
+  // off of awaiting it.
+  const [needsOnboard, setNeedsOnboard] = useState(false);
+  const onboardingRef = useRef(false);
 
   const runOnboarding = useCallback(async (silent = false) => {
     setSession(walletPreparingWallet("privy"));
@@ -89,7 +96,7 @@ export function PrivyConnector({
     setPrivyUser(user ?? null);
   }, [getAccessToken, setSession, setWallet, setPrivyUser, user]);
 
-  // Explicit connect — gated on Privy `ready` so login() isn't called before init.
+  // Step 1: explicit connect request — open Privy login modal.
   useEffect(() => {
     if (!pendingConnect) return;
     if (!ready) {
@@ -99,39 +106,47 @@ export function PrivyConnector({
     console.log("[Privy] SDK ready, starting connect flow. authenticated=", authenticated);
     clearPending();
     setSession(walletAuthenticating("privy"));
-
-    const run = async () => {
-      if (!authenticated) {
-        console.log("[Privy] calling login()");
-        await login();
-        console.log("[Privy] login() resolved");
-      } else {
-        console.log("[Privy] already authenticated, skipping login()");
-      }
-      await runOnboarding();
-    };
-
-    run().catch((err) => {
-      console.error("[Privy] connect flow failed:", err);
-      setWallet(null);
-      setSession(walletError("privy", err instanceof Error ? err.message : "Failed to connect with Privy"));
-    });
+    setNeedsOnboard(true);
+    if (!authenticated) {
+      console.log("[Privy] calling login()");
+      // Don't await — login() may resolve before auth completes. The
+      // onboarding effect below watches `authenticated` and fires when it
+      // flips true.
+      login();
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, pendingConnect]);
 
-  // Auto-reconnect on page reload — gated on `ready`.
+  // Step 2: once authenticated, run the onboarding pipeline.
+  // Covers both the explicit-connect path (needsOnboard=true) and the
+  // page-reload auto-reconnect path (ml_privy_session set in storage).
   useEffect(() => {
-    if (!ready) return;
-    if (!authenticated || walletType === "cartridge") return;
-    if (typeof window === "undefined") return;
-    if (!localStorage.getItem("ml_privy_session")) return;
+    if (!ready || !authenticated) return;
+    if (onboardingRef.current) return;
+    if (walletType === "cartridge") return;
 
-    runOnboarding(true).catch((err) => {
-      console.error("[Privy] auto-reconnect failed:", err);
-      setSession(walletError("privy", err instanceof Error ? err.message : "Privy auto-reconnect failed"));
-    });
+    const isExplicit = needsOnboard;
+    const isAutoReconnect =
+      !needsOnboard &&
+      typeof window !== "undefined" &&
+      !!localStorage.getItem("ml_privy_session");
+
+    if (!isExplicit && !isAutoReconnect) return;
+
+    onboardingRef.current = true;
+    setNeedsOnboard(false);
+
+    runOnboarding(isAutoReconnect)
+      .catch((err) => {
+        console.error("[Privy] onboarding failed:", err);
+        setWallet(null);
+        setSession(walletError("privy", err instanceof Error ? err.message : "Failed to connect with Privy"));
+      })
+      .finally(() => {
+        onboardingRef.current = false;
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, authenticated]);
+  }, [ready, authenticated, needsOnboard]);
 
   // Sync logout when Privy session ends externally.
   useEffect(() => {
