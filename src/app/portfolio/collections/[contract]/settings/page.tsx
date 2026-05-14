@@ -192,8 +192,8 @@ export default function CollectionSettingsPage({ params }: Props) {
         twitterUrl: profile.twitterUrl ?? "",
         discordUrl: profile.discordUrl ?? "",
         telegramUrl: profile.telegramUrl ?? "",
-        gatedEnabled: !!(profile as any).hasGatedContent,
-        gatedContentTitle: (profile as any).gatedContentTitle ?? "",
+        gatedEnabled: !!profile.hasGatedContent,
+        gatedContentTitle: profile.gatedContentTitle ?? "",
       }));
     }
   }, [profile]);
@@ -222,9 +222,12 @@ export default function CollectionSettingsPage({ params }: Props) {
         discordUrl: form.discordUrl || null,
         telegramUrl: form.telegramUrl || null,
         gatedContentTitle: form.gatedEnabled ? (form.gatedContentTitle || null) : null,
+        // gatedContentUrl and gatedContentType are accepted by the backend but not
+        // yet reflected in ApiCollectionProfile — cast until the SDK type catches up
         gatedContentUrl: form.gatedEnabled ? (form.gatedContentUrl || null) : null,
         gatedContentType: form.gatedEnabled ? (form.gatedContentType || null) : null,
-      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any;
       await getMedialaneClient().api.updateCollectionProfile(contract, payload, "");
       await mutate();
       toast.success("Collection profile updated");

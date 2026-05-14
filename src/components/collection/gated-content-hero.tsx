@@ -1,16 +1,9 @@
 "use client";
 
-import { Lock, Unlock, Sparkles, Play, Music, Radio, FileText, Link2 } from "lucide-react";
+import { Lock, Unlock, Sparkles } from "lucide-react";
 import type { GatedContentState } from "@/hooks/use-gated-content";
 import type { ApiCollectionProfile } from "@medialane/sdk";
-
-const CONTENT_TYPE_ICONS: Record<string, React.ElementType> = {
-  VIDEO: Play,
-  AUDIO: Music,
-  STREAM: Radio,
-  DOCUMENT: FileText,
-  LINK: Link2,
-};
+import { GATED_CONTENT_TYPES, GATED_CONTENT_TYPE_FALLBACK } from "@/lib/gated-content-types";
 
 interface GatedContentHeroProps {
   profile: ApiCollectionProfile | null;
@@ -25,7 +18,9 @@ export function GatedContentHero({ profile, gatedState, onViewExclusive }: Gated
 
   if (gatedState.status === "unlocked") {
     const { content } = gatedState;
-    const Icon = content.type ? (CONTENT_TYPE_ICONS[content.type] ?? Link2) : Link2;
+    const { icon: Icon } = content.type
+      ? (GATED_CONTENT_TYPES[content.type] ?? GATED_CONTENT_TYPE_FALLBACK)
+      : GATED_CONTENT_TYPE_FALLBACK;
     return (
       <div className="mx-4 sm:mx-6 mt-3">
         <button
