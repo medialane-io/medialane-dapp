@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Loader2, Mail } from "lucide-react";
 import { useLoginWithEmail, useLoginWithOAuth, usePrivy } from "@privy-io/react-auth";
-import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
 import { useWallet } from "@/hooks/use-wallet";
 
 type Stage = "idle" | "otp" | "connecting";
@@ -49,7 +48,6 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
   const { ready, authenticated } = usePrivy();
   const { sendCode, loginWithCode } = useLoginWithEmail();
   const { initOAuth, loading: oauthLoading } = useLoginWithOAuth();
-  const { session } = useStarkZapWallet();
   const { isConnected } = useWallet();
 
   const [stage, setStage] = useState<Stage>("idle");
@@ -59,10 +57,10 @@ export function PrivyInlineLogin({ onOpenWalletPicker }: Props) {
   const [otpError, setOtpError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const isOnboarding =
-    authenticated &&
-    !isConnected &&
-    (session.status === "preparing-wallet" || session.status === "deploying-account");
+  // Once Privy is authenticated but the StarkZap wallet isn't ready yet, the
+  // background onboarding is running (silent on this surface — we render the
+  // progress here instead of in the global dialog).
+  const isOnboarding = authenticated && !isConnected;
 
   const armAutoReconnect = () => {
     if (typeof window !== "undefined") {

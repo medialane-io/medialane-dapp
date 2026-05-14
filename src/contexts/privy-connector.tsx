@@ -50,7 +50,7 @@ export function PrivyConnector({
   const onboardingRef = useRef(false);
 
   const runOnboarding = useCallback(async (silent = false) => {
-    setSession(walletPreparingWallet("privy"));
+    if (!silent) setSession(walletPreparingWallet("privy"));
 
     const token = await getAccessToken();
     if (!token) {
@@ -69,7 +69,7 @@ export function PrivyConnector({
       throw new Error("Privy onboarding requires AVNU paymaster sponsorship to deploy the Starknet account.");
     }
 
-    setSession(walletDeployingAccount("privy", walletData.address));
+    if (!silent) setSession(walletDeployingAccount("privy", walletData.address));
 
     const sdk = getStarkZapSdk();
     const privyResolve = async () => ({
