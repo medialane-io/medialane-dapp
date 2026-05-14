@@ -14,7 +14,8 @@ import { useDominantColor } from "@/hooks/use-dominant-color";
 import { TokenCard, TokenCardSkeleton } from "@/components/shared/token-card";
 import { AddressDisplay } from "@/components/shared/address-display";
 import { ListingCard, ListingCardSkeleton } from "@/components/marketplace/listing-card";
-import { CollectionCard, CollectionCardSkeleton } from "@/components/shared/collection-card";
+import { CollectionCardSkeleton } from "@/components/shared/collection-card";
+import { CollectionCarouselRow } from "@/components/creator/collection-carousel-row";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ipfsToHttp } from "@/lib/utils";
@@ -487,9 +488,9 @@ export default function CreatorPageClient() {
                 body="This creator hasn't deployed any collections on Medialane yet."
               />
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-10">
                 {collections.map((c) => (
-                  <CollectionCard key={c.contractAddress} collection={c} />
+                  <CollectionCarouselRow key={c.contractAddress} collection={c} />
                 ))}
               </div>
             )
