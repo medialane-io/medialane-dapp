@@ -20,6 +20,7 @@ import { useGatedContent } from "@/hooks/use-gated-content";
 import { GatedContentHero } from "@/components/collection/gated-content-hero";
 import { GatedContentPanel } from "@/components/collection/gated-content-panel";
 import { OwnerSetupPanel } from "@/components/collection/owner-setup-panel";
+import { TransferCollectionOwnershipDialog } from "@/components/collection/transfer-ownership-dialog";
 import { AssetPreviewDialog } from "@/components/shared/asset-preview-dialog";
 import { ShareButton } from "@/components/shared/share-button";
 import { TraitFilter } from "@/components/collection/trait-filter";
@@ -513,10 +514,25 @@ export default function CollectionPageClient() {
       {/* Owner setup checklist — shown only to the collection owner */}
       {!colLoading && collection && walletAddress &&
         collection.owner?.toLowerCase() === walletAddress.toLowerCase() && (
-        <OwnerSetupPanel
-          contract={contract}
-          profile={profile}
-        />
+        <>
+          <OwnerSetupPanel
+            contract={contract}
+            profile={profile}
+          />
+          {/* Per-collection ownership handoff — audited MIP registry only.
+              Cutover gate avoids surfacing on legacy v2 collections, whose
+              registry does not implement transfer_collection_ownership. */}
+          {collection.collectionId &&
+            collection.standard === "ERC721" &&
+            collection.createdAt >= "2026-05-14" && (
+            <div className="px-4 sm:px-6 -mt-2 mb-4 flex justify-end">
+              <TransferCollectionOwnershipDialog
+                collectionId={collection.collectionId}
+                currentOwner={collection.owner!}
+              />
+            </div>
+          )}
+        </>
       )}
 
       {/* ── Tabs ── */}
