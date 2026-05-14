@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
-import { isPrivyConnectInFlight } from "@/lib/wallet-session";
 
 type Phase = "authenticating" | "preparing-wallet" | "deploying-account" | "ready";
 
@@ -38,7 +37,12 @@ export function PrivyConnectDialog() {
   const [isRetrying, setIsRetrying] = useState(false);
 
   useEffect(() => {
-    if (isPrivyConnectInFlight(session)) {
+    // Hide while Privy's own login modal is in front (authenticating phase).
+    // Take over from preparing-wallet onward.
+    const isPostAuthInFlight =
+      session.walletType === "privy" &&
+      (session.status === "preparing-wallet" || session.status === "deploying-account");
+    if (isPostAuthInFlight) {
       setOpen(true);
       return;
     }

@@ -48,6 +48,7 @@ export function NavAccountPanel() {
   };
 
   const connectStarkZap = async (type: "cartridge" | "privy") => {
+    close();
     try {
       if (type === "cartridge") await connectCartridge();
       else await connectPrivy();
