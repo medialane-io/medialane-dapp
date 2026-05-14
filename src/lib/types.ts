@@ -26,12 +26,11 @@ export interface Collection {
   image: string;
   nftAddress: string;
   owner: string;
-  isActive: boolean;
   totalMinted: number;
-  totalBurned: number;
+  totalArchived: number;
   totalTransfers: number;
   lastMintTime: string;
-  lastBurnTime: string;
+  lastArchiveTime: string;
   lastTransferTime: string;
   itemCount: number;
   nftBalance?: number;
@@ -63,8 +62,8 @@ export class CollectionValidator {
 
     const requiredFields = [
       'id', 'name', 'description', 'image', 'nftAddress',
-      'owner', 'isActive', 'totalMinted', 'totalBurned',
-      'totalTransfers', 'lastMintTime', 'lastBurnTime',
+      'owner', 'totalMinted', 'totalArchived',
+      'totalTransfers', 'lastMintTime', 'lastArchiveTime',
       'lastTransferTime', 'itemCount', 'totalSupply', 'baseUri'
     ];
 
@@ -78,9 +77,8 @@ export class CollectionValidator {
       typeof collection.name === 'string' && collection.name.trim() !== '',
       typeof collection.description === 'string',
       typeof collection.image === 'string',
-      typeof collection.isActive === 'boolean',
       typeof collection.totalMinted === 'number' && collection.totalMinted >= 0,
-      typeof collection.totalBurned === 'number' && collection.totalBurned >= 0,
+      typeof collection.totalArchived === 'number' && collection.totalArchived >= 0,
       typeof collection.itemCount === 'number' && collection.itemCount >= 0,
     ];
 
@@ -98,12 +96,11 @@ export class CollectionValidator {
       image: String(collection.image || '/placeholder.svg'),
       nftAddress: String(collection.nftAddress || ''),
       owner: String(collection.owner || ''),
-      isActive: Boolean(collection.isActive),
       totalMinted: Number(collection.totalMinted) || 0,
-      totalBurned: Number(collection.totalBurned) || 0,
+      totalArchived: Number(collection.totalArchived ?? collection.totalBurned) || 0,
       totalTransfers: Number(collection.totalTransfers) || 0,
       lastMintTime: String(collection.lastMintTime || ''),
-      lastBurnTime: String(collection.lastBurnTime || ''),
+      lastArchiveTime: String(collection.lastArchiveTime ?? collection.lastBurnTime ?? ''),
       lastTransferTime: String(collection.lastTransferTime || ''),
       itemCount: Number(collection.itemCount) || 0,
       nftBalance: collection.nftBalance !== undefined ? Number(collection.nftBalance) : undefined,
