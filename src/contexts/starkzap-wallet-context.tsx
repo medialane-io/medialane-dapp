@@ -4,11 +4,14 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
+  useRef,
   useState,
 } from "react";
 import type { User } from "@privy-io/react-auth";
 import { OnboardStrategy } from "starkzap";
 import type { WalletInterface } from "starkzap";
+import { toast } from "sonner";
 import { getStarkZapSdk } from "@/lib/starkzap";
 import {
   IDLE_WALLET_SESSION,
@@ -17,6 +20,8 @@ import {
   walletError,
   walletReady,
   walletAuthenticating,
+  walletPreparingWallet,
+  walletDeployingAccount,
   type WalletSession,
 } from "@/lib/wallet-session";
 import {
@@ -66,6 +71,8 @@ export interface StarkZapPrivyBridge {
   pendingPrivyConnect: boolean;
   clearPendingPrivyConnect: () => void;
   onPrivyConnecting: () => void;
+  onPrivyPreparingWallet: () => void;
+  onPrivyDeployingAccount: (address: string) => void;
   onPrivyConnected: (wallet: WalletInterface, address: string, user: User | null) => void;
   onPrivyError: (msg: string) => void;
   onPrivyDisconnect: () => void;
@@ -151,6 +158,8 @@ export function StarkZapWalletProvider({
     pendingPrivyConnect,
     clearPendingPrivyConnect: () => setPendingPrivyConnect(false),
     onPrivyConnecting: () => { setSession(walletAuthenticating("privy")); },
+    onPrivyPreparingWallet: () => { setSession(walletPreparingWallet("privy")); },
+    onPrivyDeployingAccount: (addr) => { setSession(walletDeployingAccount("privy", addr)); },
     onPrivyConnected: (w, addr, u) => {
       setWallet(w);
       setSession(walletReady("privy", addr));
@@ -168,6 +177,18 @@ export function StarkZapWalletProvider({
     },
     walletType,
   };
+
+  const lastShownError = useRef<string | null>(null);
+  useEffect(() => {
+    if (session.walletType !== "privy") return;
+    if (session.status !== "error") {
+      lastShownError.current = null;
+      return;
+    }
+    if (!session.error || session.error === lastShownError.current) return;
+    lastShownError.current = session.error;
+    toast.error(session.error, { id: "privy-connect-error" });
+  }, [session.status, session.walletType, session.error]);
 
   return (
     <StarkZapWalletContext.Provider
