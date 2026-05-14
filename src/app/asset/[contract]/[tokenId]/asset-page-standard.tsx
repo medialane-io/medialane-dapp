@@ -46,6 +46,7 @@ import { useTokenRemixes } from "@/hooks/use-remix-offers";
 import { HelpIcon } from "@/components/ui/help-icon";
 import { AssetMarketsTab } from "./asset-markets-tab";
 import { AssetProvenanceTab } from "./asset-provenance-tab";
+import { useFullTokenData } from "@/hooks/use-full-token-data";
 
 export function AssetPageStandard() {
   const { contract, tokenId } = useParams<{ contract: string; tokenId: string }>();
@@ -89,6 +90,12 @@ export function AssetPageStandard() {
 
   const { total: commentTotal } = useComments(contract, tokenId);
   const { total: remixCount } = useTokenRemixes(contract, tokenId);
+
+  // Audited IPNft creation record — undefined for external/legacy contracts (hook returns null).
+  const { data: fullTokenData } = useFullTokenData({
+    ipNftAddress: contract,
+    tokenId: tokenId ? (() => { try { return BigInt(tokenId); } catch { return undefined; } })() : undefined,
+  });
 
   // Listings = NFT in offer (ERC721 or ERC1155 — someone selling the token)
   const activeListings = listings.filter(
@@ -779,6 +786,8 @@ export function AssetPageStandard() {
               contract={contract}
               tokenId={tokenId}
               remixCount={remixCount}
+              originalCreator={fullTokenData?.originalCreator}
+              registeredAt={fullTokenData?.registeredAt}
             />
           </TabsContent>
 
