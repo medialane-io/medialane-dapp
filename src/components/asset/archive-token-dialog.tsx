@@ -18,7 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { usePaymasterTransaction } from "@/hooks/use-paymaster-transaction";
 import { COLLECTION_721_CONTRACT } from "@/lib/constants";
-import { ipCollectionAbi } from "@/abis/ip_collection";
+import { IPCollectionABI as ipCollectionAbi } from "@medialane/sdk";
 import { toast } from "sonner";
 
 interface ArchiveTokenDialogProps {

@@ -1,6 +1,6 @@
 import { useReadContract } from "@starknet-react/core";
 import { Abi, cairo, num } from "starknet";
-import { COLLECTION_NFT_ABI } from "@/abis/ip_nft";
+import { IPNftABI as COLLECTION_NFT_ABI } from "@medialane/sdk";
 
 export interface FullTokenData {
   owner: string;

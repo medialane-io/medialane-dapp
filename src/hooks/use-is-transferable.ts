@@ -1,6 +1,6 @@
 import { useReadContract } from "@starknet-react/core";
 import { Abi } from "starknet";
-import { ipCollectionAbi } from "@/abis/ip_collection";
+import { IPCollectionABI as ipCollectionAbi } from "@medialane/sdk";
 import { COLLECTION_721_CONTRACT } from "@/lib/constants";
 
 interface UseIsTransferableArgs {

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useContract } from "@starknet-react/core";
 import type { Abi } from "starknet";
-import { COLLECTION_NFT_ABI } from "@/abis/ip_nft";
+import { IPNftABI as COLLECTION_NFT_ABI } from "@medialane/sdk";
 import { fetchIPFSMetadata, processIPFSHashToUrl } from "@/utils/ipfs";
 import { isAssetReported } from "@/lib/reported-content";
 
