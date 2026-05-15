@@ -519,12 +519,7 @@ export default function CollectionPageClient() {
             contract={contract}
             profile={profile}
           />
-          {/* Per-collection ownership handoff — audited MIP registry only.
-              Cutover gate avoids surfacing on legacy v2 collections, whose
-              registry does not implement transfer_collection_ownership. */}
-          {collection.collectionId &&
-            collection.standard === "ERC721" &&
-            collection.createdAt >= "2026-05-14" && (
+          {collection.collectionId && collection.standard === "ERC721" && (
             <div className="px-4 sm:px-6 -mt-2 mb-4 flex justify-end">
               <TransferCollectionOwnershipDialog
                 collectionId={collection.collectionId}

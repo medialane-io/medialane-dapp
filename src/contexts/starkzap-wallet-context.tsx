@@ -36,8 +36,6 @@ import {
 export const CARTRIDGE_POLICIES = [
   { target: COLLECTION_721_CONTRACT, method: "mint" },
   { target: COLLECTION_721_CONTRACT, method: "create_collection" },
-  { target: COLLECTION_721_CONTRACT, method: "archive" },
-  { target: COLLECTION_721_CONTRACT, method: "batch_archive" },
   { target: COLLECTION_721_CONTRACT, method: "transfer_token" },
   { target: COLLECTION_721_CONTRACT, method: "transfer_collection_ownership" },
   { target: MARKETPLACE_721_CONTRACT, method: "register_order" },
