@@ -117,8 +117,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         address: MARKETPLACE_1155_CONTRACT,
         abi: IPMarketplace1155ABI as unknown as Abi,
     });
-    const { address: walletAddress, walletType } = useUnifiedWallet();
-    const isMarketplaceWalletSupported = walletType === "injected";
+    const { address: walletAddress } = useUnifiedWallet();
 
     const resetState = useCallback(() => {
         setTxHash(null);
@@ -280,8 +279,8 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.error(msg);
             return undefined;
         }
-        if (!account || !isMarketplaceWalletSupported) {
-            const msg = "Marketplace orders currently require Ready or Braavos.";
+        if (!account) {
+            const msg = "Wallet not ready. Please reconnect and try again.";
             setError(msg);
             toast.error(msg);
             return undefined;
@@ -424,7 +423,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.success("Listing Created", { description: "Your asset has been listed successfully." });
             return hash;
         });
-    }, [account, walletAddress, isMarketplaceWalletSupported, medialaneContract, medialane1155Contract, chain, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeDirect, refreshMarketplaceCaches]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeDirect, refreshMarketplaceCaches]);
 
     const makeOffer = useCallback(async (
         assetContractAddress: string,
@@ -443,8 +442,8 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.error(msg);
             return undefined;
         }
-        if (!account || !isMarketplaceWalletSupported) {
-            const msg = "Marketplace orders currently require Ready or Braavos.";
+        if (!account) {
+            const msg = "Wallet not ready. Please reconnect and try again.";
             setError(msg);
             toast.error(msg);
             return undefined;
@@ -530,7 +529,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.success("Offer Placed", { description: "Your offer has been submitted and is now live." });
             return hash;
         });
-    }, [account, walletAddress, isMarketplaceWalletSupported, medialaneContract, medialane1155Contract, chain, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, getErc20Allowance, executeDirect, refreshMarketplaceCaches]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, getErc20Allowance, executeDirect, refreshMarketplaceCaches]);
 
     const checkoutCart = useCallback(async (items: any[]) => {
         if (!walletAddress || !medialaneContract || !chain || items.length === 0) {
@@ -539,8 +538,8 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.error(msg);
             return undefined;
         }
-        if (!account || !isMarketplaceWalletSupported) {
-            const msg = "Marketplace orders currently require Ready or Braavos.";
+        if (!account) {
+            const msg = "Wallet not ready. Please reconnect and try again.";
             setError(msg);
             toast.error(msg);
             return undefined;
@@ -655,7 +654,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.success("Purchase Successful", { description: `Successfully purchased ${items.length} item(s).` });
             return hash;
         });
-    }, [account, walletAddress, isMarketplaceWalletSupported, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeDirect, refreshMarketplaceCaches]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeDirect, refreshMarketplaceCaches]);
 
     const cancelOrder = useCallback(async (orderHash: string, tokenStandard?: string) => {
         const is1155 = tokenStandard === "ERC1155";
@@ -667,8 +666,8 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.error(msg);
             return undefined;
         }
-        if (!account || !isMarketplaceWalletSupported) {
-            const msg = "Marketplace orders currently require Ready or Braavos.";
+        if (!account) {
+            const msg = "Wallet not ready. Please reconnect and try again.";
             setError(msg);
             toast.error(msg);
             return undefined;
@@ -711,7 +710,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.success("Listing Cancelled", { description: "The listing has been successfully cancelled on-chain." });
             return hash;
         });
-    }, [account, walletAddress, isMarketplaceWalletSupported, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeDirect, refreshMarketplaceCaches]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeDirect, refreshMarketplaceCaches]);
 
     /**
      * Asset owner accepts an incoming bid. Signs OrderFulfillment typed data,
@@ -733,8 +732,8 @@ export function useMarketplace(): UseMarketplaceReturn {
             toast.error(msg);
             return undefined;
         }
-        if (!account || !isMarketplaceWalletSupported) {
-            const msg = "Marketplace orders currently require Ready or Braavos.";
+        if (!account) {
+            const msg = "Wallet not ready. Please reconnect and try again.";
             setError(msg);
             toast.error(msg);
             return undefined;
@@ -794,7 +793,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             refreshMarketplaceCaches();
             return hash;
         });
-    }, [account, walletAddress, isMarketplaceWalletSupported, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeDirect, refreshMarketplaceCaches]);
+    }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeDirect, refreshMarketplaceCaches]);
 
     return {
         createListing,
