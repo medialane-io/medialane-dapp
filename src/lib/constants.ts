@@ -83,14 +83,6 @@ export const AVNU_PAYMASTER_CONFIG = {
   apiKey: process.env.NEXT_PUBLIC_AVNU_PAYMASTER_API_KEY,
 };
 
-/**
- * Mainnet deployment date of the audited MIP-Collections-ERC721 (v3).
- * Used to gate v3-only UI (e.g. transfer_collection_ownership button)
- * since the legacy v2 contract does not implement the same surface.
- * ISO 8601 — sorts lexicographically against ApiCollection.createdAt.
- */
-export const MIP_V3_AUDIT_CUTOVER = "2026-05-14";
-
 export const DURATION_OPTIONS = [
   { label: "1 Day", seconds: 86400 },
   { label: "7 Days", seconds: 604800 },
