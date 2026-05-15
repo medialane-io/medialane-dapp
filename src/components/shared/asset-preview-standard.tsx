@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   ShoppingCart, Tag, ArrowRightLeft, X, HandCoins,
   GitBranch, Check, Flag, ArrowUpRight, Layers, Zap,
@@ -161,12 +162,15 @@ export function AssetPreviewStandard({
         name={name}
         ipType={token.metadata?.ipType}
         accentOverlay={rawImage ? (
-          <img
+          <Image
             src={rawImage}
             alt=""
             aria-hidden
-            className="hidden"
+            width={1}
+            height={1}
+            className="pointer-events-none absolute h-px w-px opacity-0"
             onError={() => setImgError(true)}
+            unoptimized
           />
         ) : undefined}
       />

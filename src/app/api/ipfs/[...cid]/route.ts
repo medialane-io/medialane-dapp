@@ -6,6 +6,23 @@ const PINATA_JWT = process.env.PINATA_JWT;
 const GATEWAY =
   process.env.PINATA_DEDICATED_GATEWAY ||
   "https://gateway.pinata.cloud";
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 120;
+const MAX_RESPONSE_BYTES = 25 * 1024 * 1024;
+
+const ipCounts = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = ipCounts.get(ip);
+  if (!entry || now >= entry.resetAt) {
+    ipCounts.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT_MAX) return false;
+  entry.count += 1;
+  return true;
+}
 
 /**
  * GET /api/ipfs/[...cid]
@@ -19,9 +36,14 @@ const GATEWAY =
  * Supports paths: /api/ipfs/QmXxx  and  /api/ipfs/QmXxx/image.png
  */
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ cid: string[] }> }
 ) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const { cid: segments } = await params;
   const cidPath = segments.join("/");
 
@@ -46,13 +68,15 @@ export async function GET(
   }
 
   if (!upstream.ok) {
-    return NextResponse.json(
-      { error: `IPFS gateway returned ${upstream.status}` },
-      { status: upstream.status }
-    );
+    return NextResponse.json({ error: "IPFS content unavailable" }, { status: upstream.status });
   }
 
   const upstreamContentType = upstream.headers.get("content-type") ?? "";
+  const upstreamContentLength = Number(upstream.headers.get("content-length") ?? 0);
+  if (upstreamContentLength > MAX_RESPONSE_BYTES) {
+    return NextResponse.json({ error: "IPFS content too large" }, { status: 413 });
+  }
+
   // Allowlist safe MIME type prefixes — reject text/html, text/javascript,
   // image/svg+xml and other scriptable types that could execute in browser context.
   const SAFE_PREFIXES = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif",
@@ -62,6 +86,9 @@ export async function GET(
     : "application/octet-stream";
 
   const body = await upstream.arrayBuffer();
+  if (body.byteLength > MAX_RESPONSE_BYTES) {
+    return NextResponse.json({ error: "IPFS content too large" }, { status: 413 });
+  }
 
   return new NextResponse(body, {
     status: 200,
