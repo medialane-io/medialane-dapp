@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { MIP_V3_AUDIT_CUTOVER } from "@/lib/constants";
 import { useCollection, useCollectionTokens } from "@/hooks/use-collections";
 import { useOrders } from "@/hooks/use-orders";
 import { useDominantColor } from "@/hooks/use-dominant-color";
@@ -524,7 +525,7 @@ export default function CollectionPageClient() {
               registry does not implement transfer_collection_ownership. */}
           {collection.collectionId &&
             collection.standard === "ERC721" &&
-            collection.createdAt >= "2026-05-14" && (
+            collection.createdAt >= MIP_V3_AUDIT_CUTOVER && (
             <div className="px-4 sm:px-6 -mt-2 mb-4 flex justify-end">
               <TransferCollectionOwnershipDialog
                 collectionId={collection.collectionId}
