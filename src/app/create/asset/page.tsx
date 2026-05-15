@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTx } from "@/hooks/use-tx";
-import { useSessionKey } from "@/hooks/use-session-key";
+import { useWallet } from "@/hooks/use-wallet";
 import { useMedialaneClient } from "@/hooks/use-medialane-client";
 import { useCollectionsByOwner } from "@/hooks/use-collections";
 import { MintProgressDialog } from "@/components/marketplace/mint-progress-dialog";
@@ -119,7 +119,7 @@ function ToggleGroup({
 
 export default function CreateAssetPage() {
   const { execute: executeTransaction, status, txHash, error, statusMessage } = useTx();
-  const { walletAddress } = useSessionKey();
+  const { address: walletAddress } = useWallet();
   const { getValidToken } = useSiwsToken();
   const client = useMedialaneClient();
 

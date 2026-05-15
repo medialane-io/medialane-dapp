@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useToken } from "@/hooks/use-tokens";
-import { useSessionKey } from "@/hooks/use-session-key";
+import { useWallet } from "@/hooks/use-wallet";
 import { useMedialaneClient } from "@/hooks/use-medialane-client";
 import { useTx } from "@/hooks/use-tx";
 import { useCollectionsByOwner } from "@/hooks/use-collections";
@@ -90,7 +90,7 @@ function Section({ title, icon, children }: {
 export default function CreateRemixPage() {
   const { contract, tokenId } = useParams<{ contract: string; tokenId: string }>();
   const router = useRouter();
-  const { walletAddress } = useSessionKey();
+  const { address: walletAddress } = useWallet();
   const { getValidToken } = useSiwsToken();
   const { execute: executeTransaction, status: txStatus } = useTx();
   const client = useMedialaneClient();

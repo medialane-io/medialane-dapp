@@ -647,4 +647,3 @@ function EmptyState({ title, body }: { title: string; body: string }) {
     </div>
   );
 }
-

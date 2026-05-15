@@ -7,7 +7,6 @@ import Image from "next/image";
 import { useConnect } from "@starknet-react/core";
 import { StarknetkitConnector, useStarknetkitConnectModal } from "starknetkit";
 import { useWallet } from "@/hooks/use-wallet";
-import { useSessionKey } from "@/hooks/use-session-key";
 import { byteArray, CallData } from "starknet";
 import {
   Sparkles,
@@ -92,7 +91,8 @@ type MintStep = "ready" | "enter-pin" | "minting" | "success" | "error";
 export function LaunchMint() {
   const { isConnected: isSignedIn, address: walletConnected } = useWallet();
   const isLoaded = true;
-  const { walletAddress: sessionWalletAddress, hasWallet, isLoadingWallet } = useSessionKey();
+  const { address: sessionWalletAddress, isConnected: hasWallet } = useWallet();
+  const isLoadingWallet = false; // shim parity — useWallet exposes connection state synchronously
   const { execute: executeTransaction, status, statusMessage, error: txError, reset } = useTx();
   const { getValidToken } = useSiwsToken();
 

@@ -21,7 +21,7 @@ import { CollectionProgressDialog } from "@/components/marketplace/collection-pr
 import type { CollectionStep } from "@/components/marketplace/collection-progress-dialog";
 import { invalidatePortfolioCache } from "@/lib/portfolio-cache";
 import { useTx } from "@/hooks/use-tx";
-import { useSessionKey } from "@/hooks/use-session-key";
+import { useWallet } from "@/hooks/use-wallet";
 import { useMedialaneClient } from "@/hooks/use-medialane-client";
 import { useSiwsToken } from "@/hooks/use-siws-token";
 import { uploadFileToIpfs, uploadJsonToIpfs } from "@/lib/ipfs-upload-client";
@@ -51,7 +51,7 @@ type FormValues = z.infer<typeof schema>;
 
 export default function CreateCollectionPage() {
   const { execute: executeTransaction, status, txHash } = useTx();
-  const { walletAddress, hasWallet } = useSessionKey();
+  const { address: walletAddress, isConnected: hasWallet } = useWallet();
   const client = useMedialaneClient();
   const { getValidToken } = useSiwsToken();
 
