@@ -244,7 +244,7 @@ function CollectionItems({ contract, activeListings }: { contract: string; activ
       {previewToken && (
         <AssetPreviewDialog
           token={previewToken}
-          serviceSource={collection?.source}
+          service={collection?.service}
           isOwner={checkIsOwner(previewToken, walletAddress)}
           open={previewOpen}
           onOpenChange={(o) => { setPreviewOpen(o); if (!o) setPreviewToken(null); }}
@@ -433,7 +433,7 @@ export default function CollectionPageClient() {
               </div>
             )}
             {/* Mint button — only for ERC-1155 collection owner */}
-            {((collection.source as string) === "MEDIALANE_ERC1155" || (collection.source as string) === "ERC1155_FACTORY") &&
+            {collection.standard === "ERC1155" &&
               walletAddress &&
               collection.owner?.toLowerCase() === walletAddress.toLowerCase() && (
               <Link
@@ -470,7 +470,7 @@ export default function CollectionPageClient() {
 
           {/* Service action slot (POP claim, etc.) */}
           <CollectionServiceAction
-            source={collection.source}
+            service={collection.service}
             contractAddress={collection.contractAddress}
           />
 
