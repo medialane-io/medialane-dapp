@@ -1,14 +1,15 @@
 "use client";
 
+import { getService } from "@medialane/sdk";
 import { PopClaimButton } from "@/components/claim/pop-claim-button";
 
 interface CollectionServiceActionProps {
-  source: string | null | undefined;
+  service: string | null | undefined;
   contractAddress: string;
 }
 
-export function CollectionServiceAction({ source, contractAddress }: CollectionServiceActionProps) {
-  if (source === "POP_PROTOCOL") {
+export function CollectionServiceAction({ service, contractAddress }: CollectionServiceActionProps) {
+  if (getService(service)?.id === "pop-protocol") {
     return <PopClaimButton collectionAddress={contractAddress} />;
   }
   return null;

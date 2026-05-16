@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/collapsible";
 import { submitRemixOffer, confirmSelfRemix } from "@/hooks/use-remix-offers";
 import { useSiwsToken } from "@/hooks/use-siws-token";
-import { getListableTokens, getTokenBySymbol } from "@medialane/sdk";
+import { getListableTokens, getTokenBySymbol, getService } from "@medialane/sdk";
 import { IP_TYPES, LICENSE_TYPES, type IPType } from "@/types/ip";
 import { ipfsToHttp, formatDisplayPrice } from "@/lib/utils";
 import { INDEXER_REVALIDATION_DELAY_MS } from "@/lib/constants";
@@ -98,7 +98,7 @@ export default function CreateRemixPage() {
   const { collections: allCollections, isLoading: collectionsLoading } =
     useCollectionsByOwner(walletAddress ?? null);
   const eligibleCollections = allCollections.filter(
-    (c) => (c.source as string) === "MEDIALANE_ERC721" && c.standard === "ERC721" && c.collectionId != null
+    (c) => getService(c.service)?.id === "mip-erc721" && c.collectionId != null
   );
 
   const walletAddressLower = walletAddress?.toLowerCase() ?? null;

@@ -16,7 +16,7 @@ import { useCollectionsByOwner } from "@/hooks/use-collections";
 import { confirmRemixOffer } from "@/hooks/use-remix-offers";
 import { useSiwsToken } from "@/hooks/use-siws-token";
 import { formatDisplayPrice } from "@/lib/utils";
-import { getTokenByAddress } from "@medialane/sdk";
+import { getTokenByAddress, getService } from "@medialane/sdk";
 import { Check, GitBranch, Loader2 } from "lucide-react";
 import type { RemixOffer } from "@/types/remix-offers";
 import type { Call } from "starknet";
@@ -38,7 +38,7 @@ export function ApproveMintSheet({ offer, open, onOpenChange, onSuccess }: Props
 
   const { collections } = useCollectionsByOwner(walletAddress ?? null);
   const eligibleCollections = collections.filter(
-    (c) => (c.source as string) === "MEDIALANE_ERC721" && c.standard === "ERC721" && c.collectionId != null
+    (c) => getService(c.service)?.id === "mip-erc721" && c.collectionId != null
   );
 
   const defaultCollectionId =
