@@ -22,7 +22,7 @@ export function usePopCollections() {
   const { data, error, isLoading, mutate } = useSWR<{ data: ApiCollection[]; meta: unknown }>(
     "pop-collections",
     () => {
-      const params = new URLSearchParams({ source: "POP_PROTOCOL", hideEmpty: "false", limit: "50" });
+      const params = new URLSearchParams({ service: "pop-protocol", hideEmpty: "false", limit: "50" });
       const url = `${BASE}/v1/collections?${params}`;
       return backendFetch(url);
     },
@@ -67,7 +67,7 @@ export function useMyEvents(ownerAddress: string | null) {
   const { data, error, isLoading, mutate } = useSWR<{ data: ApiCollection[] }>(
     ownerAddress ? `my-pop-events-${ownerAddress}` : null,
     () => {
-      const params = new URLSearchParams({ source: "POP_PROTOCOL", owner: ownerAddress!, limit: "50" });
+      const params = new URLSearchParams({ service: "pop-protocol", owner: ownerAddress!, limit: "50" });
       const url = `${BASE}/v1/collections?${params}`;
       return backendFetch(url);
     },
