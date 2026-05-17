@@ -22,19 +22,11 @@ const SORT_OPTIONS: { label: string; value: CollectionSort }[] = [
   { label: "A → Z",      value: "name"   },
 ];
 
-// NOTE (service-model refactor 2C): this faceted filter intentionally still
-// uses the legacy `source` enum. Unlike the client-side variant predicates
-// (asset dispatcher, preview, service-action) which were cut over to
-// getService(collection.service), this filter is a BACKEND query param
-// (`/v1/collections?source=`). The backend collections route has no
-// `?service=` filter yet (only `?source=`, validated against CollectionSource).
-// Correct + safe during the dual-write window (source is still written).
-// Migrates when the backend collections route gains `?service=` filtering
-// (follow-up tied to the Phase 2D route cleanup). Do NOT blind-swap to service.
-const SOURCE_TABS = [
-  { label: "All",   value: undefined           },
-  { label: "POP",   value: "POP_PROTOCOL"      },
-  { label: "Drops", value: "COLLECTION_DROP"   },
+// Faceted service filter — backend /v1/collections?service= (Phase 2D).
+const SERVICE_TABS = [
+  { label: "All",   value: undefined         },
+  { label: "POP",   value: "pop-protocol"    },
+  { label: "Drops", value: "drop-collection" },
 ] as const;
 
 export default function CollectionsPageClient() {
@@ -42,7 +34,7 @@ export default function CollectionsPageClient() {
   const [sort, setSort]               = useState<CollectionSort>("recent");
   const [featured, setFeatured]       = useState(false);
   const [hideEmpty, setHideEmpty]     = useState(true);
-  const [source, setSource]           = useState<string | undefined>(undefined);
+  const [service, setService]         = useState<string | undefined>(undefined);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [page, setPage]               = useState(1);
   const [allCollections, setAllCollections] = useState<ApiCollection[]>([]);
@@ -52,25 +44,25 @@ export default function CollectionsPageClient() {
     PAGE_SIZE,
     featured ? true : undefined,
     sort,
-    (source === "POP_PROTOCOL" || source === "COLLECTION_DROP") ? false : hideEmpty,
-    source
+    (service === "pop-protocol" || service === "drop-collection") ? false : hideEmpty,
+    service
   );
 
   // Reset accumulated list whenever filters change
-  const prevFilters = useRef({ sort, featured, hideEmpty, source });
+  const prevFilters = useRef({ sort, featured, hideEmpty, service });
   useEffect(() => {
     const f = prevFilters.current;
     if (
       f.sort !== sort ||
       f.featured !== featured ||
       f.hideEmpty !== hideEmpty ||
-      f.source !== source
+      f.service !== service
     ) {
-      prevFilters.current = { sort, featured, hideEmpty, source };
+      prevFilters.current = { sort, featured, hideEmpty, service };
       setPage(1);
       setAllCollections([]);
     }
-  }, [sort, featured, hideEmpty, source]);
+  }, [sort, featured, hideEmpty, service]);
 
   // Append new page to accumulated list
   useEffect(() => {
@@ -86,13 +78,13 @@ export default function CollectionsPageClient() {
   const isInitialLoading = isLoading && allCollections.length === 0;
 
   const activeFilters = [sort !== "recent", featured, !hideEmpty].filter(Boolean).length;
-  const totalBadge = activeFilters + (source !== undefined ? 1 : 0);
+  const totalBadge = activeFilters + (service !== undefined ? 1 : 0);
 
   const clearAll = () => {
     setSort("recent");
     setFeatured(false);
     setHideEmpty(true);
-    setSource(undefined);
+    setService(undefined);
   };
 
   return (
@@ -148,18 +140,18 @@ export default function CollectionsPageClient() {
         </button>
 
         {/* Active filter pills — quick-clear */}
-        {source === "POP_PROTOCOL" && (
+        {service === "pop-protocol" && (
           <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
             <Award className="h-3 w-3" />
             POP Events
-            <button onClick={() => setSource(undefined)} className="ml-0.5 hover:text-primary/60">×</button>
+            <button onClick={() => setService(undefined)} className="ml-0.5 hover:text-primary/60">×</button>
           </span>
         )}
-        {source === "COLLECTION_DROP" && (
+        {service === "drop-collection" && (
           <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
             <Package className="h-3 w-3" />
             Drops
-            <button onClick={() => setSource(undefined)} className="ml-0.5 hover:text-primary/60">×</button>
+            <button onClick={() => setService(undefined)} className="ml-0.5 hover:text-primary/60">×</button>
           </span>
         )}
         {sort !== "recent" && (
@@ -211,19 +203,19 @@ export default function CollectionsPageClient() {
             <div className="space-y-2">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Source</p>
               <div className="flex flex-wrap gap-1.5">
-                {SOURCE_TABS.map(({ label, value }) => (
+                {SERVICE_TABS.map(({ label, value }) => (
                   <button
                     key={label}
-                    onClick={() => setSource(value)}
+                    onClick={() => setService(value)}
                     className={cn(
                       "flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap",
-                      source === value
+                      service === value
                         ? "border-primary bg-primary/10 text-primary font-medium"
                         : "border-border text-muted-foreground hover:border-primary/50"
                     )}
                   >
-                    {value === "POP_PROTOCOL" && <Award className="h-3 w-3" />}
-                    {value === "COLLECTION_DROP" && <Package className="h-3 w-3" />}
+                    {value === "pop-protocol" && <Award className="h-3 w-3" />}
+                    {value === "drop-collection" && <Package className="h-3 w-3" />}
                     {label}
                   </button>
                 ))}
