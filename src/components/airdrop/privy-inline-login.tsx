@@ -27,6 +27,8 @@ const COPY = {
     otpBack: "Usar outro email",
     connecting: "Criando sua conta…",
     connectingSub: "Estamos preparando e implantando sua conta Starknet. Isso leva alguns segundos.",
+    reconnecting: "Conectando…",
+    reconnectingSub: "Reconectando sua conta. Só um instante.",
     retry: "Tentar de novo",
     walletLink: "Já tem uma carteira cripto? Conectar",
     invalidEmail: "Digite um email válido.",
@@ -53,6 +55,8 @@ const COPY = {
     otpBack: "Use a different email",
     connecting: "Creating your account…",
     connectingSub: "Preparing and deploying your Starknet account. This takes a few seconds.",
+    reconnecting: "Connecting…",
+    reconnectingSub: "Reconnecting your account. Just a moment.",
     retry: "Try again",
     walletLink: "Have a crypto wallet? Connect",
     invalidEmail: "Enter a valid email.",
@@ -156,6 +160,11 @@ export function PrivyInlineLogin({ onOpenWalletPicker, locale = "br" }: Props) {
   };
 
   const showConnecting = stage === "connecting" || isOnboarding;
+  // Only the fresh sign-in path (stage flipped to "connecting" in this
+  // component) is actually creating/deploying an account. An already-
+  // authenticated session reconnecting on page load is not — show lighter
+  // copy so returning users don't see a false "deploying your account".
+  const isReconnect = isOnboarding && stage !== "connecting";
 
   if (!ready) {
     return (
@@ -173,8 +182,12 @@ export function PrivyInlineLogin({ onOpenWalletPicker, locale = "br" }: Props) {
         <div className="flex items-center gap-3">
           <Loader2 className="h-5 w-5 animate-spin text-primary" />
           <div>
-            <p className="text-sm font-semibold text-foreground">{t.connecting}</p>
-            <p className="text-xs text-muted-foreground">{t.connectingSub}</p>
+            <p className="text-sm font-semibold text-foreground">
+              {isReconnect ? t.reconnecting : t.connecting}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {isReconnect ? t.reconnectingSub : t.connectingSub}
+            </p>
           </div>
         </div>
       </div>

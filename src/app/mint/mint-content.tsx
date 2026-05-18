@@ -22,11 +22,21 @@ import { GenesisMint } from "@/components/airdrop/genesis-mint";
 import { PrivyInlineLogin } from "@/components/airdrop/privy-inline-login";
 import { MedialaneLogo } from "@/components/brand/medialane-logo";
 import { useWallet } from "@/hooks/use-wallet";
+import { ipfsToHttp } from "@/lib/utils";
 import { MINT_CONTRACT, GENESIS_NFT_URI, GENESIS_NFT_IMAGE_URL } from "@/lib/constants";
+
+// Accept http(s) URLs, local paths, ipfs:// URIs, or bare CIDs. ipfs://
+// and bare CIDs are routed through the /api/ipfs proxy via ipfsToHttp;
+// browsers cannot load an ipfs:// scheme directly in an <img>.
+function resolveImageSrc(value: string, fallback: string): string {
+  if (!value) return fallback;
+  if (value.startsWith("http") || value.startsWith("/")) return value;
+  return ipfsToHttp(value.startsWith("ipfs://") || value.startsWith("ar://") ? value : `ipfs://${value}`);
+}
 
 function EventCard() {
   const [errored, setErrored] = useState(false);
-  const src = GENESIS_NFT_IMAGE_URL || "/genesis.jpg";
+  const src = resolveImageSrc(GENESIS_NFT_IMAGE_URL, "/genesis.jpg");
   return (
     <div className="relative rounded-3xl overflow-hidden border border-border/40 shadow-2xl shadow-black/20 aspect-square w-full">
       {errored ? (
