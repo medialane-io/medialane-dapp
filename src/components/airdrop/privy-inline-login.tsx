@@ -12,9 +12,8 @@ export type PrivyInlineLocale = "br" | "en";
 const COPY = {
   br: {
     title: "Crie sua conta gratuita",
-    subtitle: "Entre com email ou Google. Sem carteira, sem cartão, sem gas.",
     emailPlaceholder: "seu@email.com",
-    emailSubmit: "Continuar com email",
+    emailSubmit: "Participar com email",
     emailSending: "Enviando código…",
     or: "ou",
     googleButton: "Continuar com Google",
@@ -26,11 +25,11 @@ const COPY = {
     otpVerifying: "Verificando…",
     otpBack: "Usar outro email",
     connecting: "Criando sua conta…",
-    connectingSub: "Estamos preparando e implantando sua conta Starknet. Isso leva alguns segundos.",
+    connectingSub: "Configurando sua conta",
     reconnecting: "Conectando…",
     reconnectingSub: "Reconectando sua conta. Só um instante.",
     retry: "Tentar de novo",
-    walletLink: "Já tem uma carteira cripto? Conectar",
+    walletLink: "Outras formas de entrar",
     invalidEmail: "Digite um email válido.",
     incompleteCode: "Digite o código completo.",
     sendCodeError: "Não foi possível enviar o código.",
@@ -40,7 +39,6 @@ const COPY = {
   },
   en: {
     title: "Create your free account",
-    subtitle: "Sign in with email or Google. No wallet, no card, no gas.",
     emailPlaceholder: "you@email.com",
     emailSubmit: "Continue with email",
     emailSending: "Sending code…",
@@ -54,11 +52,11 @@ const COPY = {
     otpVerifying: "Verifying…",
     otpBack: "Use a different email",
     connecting: "Creating your account…",
-    connectingSub: "Preparing and deploying your Starknet account. This takes a few seconds.",
+    connectingSub: "Setting up your account",
     reconnecting: "Connecting…",
     reconnectingSub: "Reconnecting your account. Just a moment.",
     retry: "Try again",
-    walletLink: "Have a crypto wallet? Connect",
+    walletLink: "Other ways to sign in",
     invalidEmail: "Enter a valid email.",
     incompleteCode: "Enter the full code.",
     sendCodeError: "Couldn't send the code.",
@@ -235,29 +233,27 @@ export function PrivyInlineLogin({ onOpenWalletPicker, locale = "br" }: Props) {
 
   return (
     <div className="max-w-md space-y-4 rounded-2xl border border-border/40 bg-card/30 p-5">
-      <div className="space-y-1">
-        <p className="text-base font-semibold text-foreground">{t.title}</p>
-        <p className="text-xs text-muted-foreground">{t.subtitle}</p>
-      </div>
+      <p className="text-lg font-bold text-foreground">{t.title}</p>
 
-      <form onSubmit={handleSendCode} className="space-y-2">
+      <form onSubmit={handleSendCode} className="space-y-3">
         {emailError && <p className="text-xs text-destructive">{emailError}</p>}
-        <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-background/60 px-3">
-          <Mail className="h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-background/80 px-4 transition-colors focus-within:border-primary/70 focus-within:ring-2 focus-within:ring-primary/30">
+          <Mail className="h-5 w-5 text-muted-foreground" />
           <input
             type="email"
             inputMode="email"
             autoComplete="email"
+            autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t.emailPlaceholder}
-            className="h-10 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+            className="h-12 flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
         </div>
         <button
           type="submit"
           disabled={busy}
-          className="flex h-10 w-full items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex h-12 w-full items-center justify-center rounded-xl bg-primary px-4 text-base font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {busy ? t.emailSending : t.emailSubmit}
         </button>

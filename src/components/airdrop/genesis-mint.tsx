@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { CheckCircle2, ExternalLink, Loader2, AlertCircle } from "lucide-react";
+import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { useWallet } from "@/hooks/use-wallet";
 import { usePaymasterTransaction } from "@/hooks/use-paymaster-transaction";
 import { serializeByteArray } from "@/lib/cairo-calldata";
-import { EXPLORER_URL } from "@/lib/constants";
 
 interface GenesisMintProps {
   contract: string;
@@ -24,7 +23,6 @@ const COPY = {
     claim: "Claim my spot",
     minting: "Claiming…",
     success: "You're in!",
-    viewTx: "View transaction",
     retry: "Try again",
     noContract: "Mint not started yet",
   },
@@ -33,7 +31,6 @@ const COPY = {
     claim: "Ativar minha participação",
     minting: "Ativando…",
     success: "Participação confirmada!",
-    viewTx: "Ver transação",
     retry: "Tentar novamente",
     noContract: "Distribuição não iniciada ainda",
   },
@@ -112,15 +109,6 @@ export function GenesisMint({
             {copy.success}
           </span>
         </div>
-        <a
-          href={`${EXPLORER_URL}/tx/${txHash}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {copy.viewTx}
-          <ExternalLink className="h-3 w-3" />
-        </a>
       </div>
     );
   }
