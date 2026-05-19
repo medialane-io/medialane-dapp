@@ -6,6 +6,7 @@ import { useSWRConfig } from "swr";
 import { IPMarketplaceABI, Medialane1155ABI as IPMarketplace1155ABI } from "@medialane/sdk";
 import { toast } from "sonner";
 import { getFriendlyWalletError } from "@/lib/wallet-error";
+import { dappFeeConfig, buildFeeCall } from "@/lib/fee";
 import {
     getOrderParametersTypedData,
     getOrderCancellationTypedData,
@@ -642,8 +643,18 @@ export function useMarketplace(): UseMarketplaceReturn {
 
             toast.info("Executing Purchase", { description: "Approve the final transaction to sweep the cart." });
 
-            // Single atomic multicall: all approvals + all fulfillments
-            const hash = await executeDirect([...approveCalls721, ...approveCalls1155, ...fulfillCalls]);
+            // Platform fee (creators fund) — one transfer per token, summed.
+            const feeCalls = [...tokenTotals721.entries(), ...tokenTotals1155.entries()]
+                .map(([token, totalWei]) =>
+                    buildFeeCall(
+                        { surface: "marketplace", token, grossAmount: totalWei },
+                        dappFeeConfig
+                    )
+                )
+                .filter((c): c is NonNullable<typeof c> => c !== null);
+
+            // Single atomic multicall: all approvals + all fulfillments + fee transfers
+            const hash = await executeDirect([...approveCalls721, ...approveCalls1155, ...fulfillCalls, ...feeCalls]);
             setTxHash(hash);
             const receipt = await provider.waitForTransaction(hash);
             if ((receipt as any).execution_status === "REVERTED") {
