@@ -1,4 +1,9 @@
-export type WalletSessionType = "injected" | "cartridge" | "privy";
+export type WalletSessionType =
+  | "argent"
+  | "braavos"
+  | "injected"
+  | "cartridge"
+  | "privy";
 
 export type WalletSessionStatus =
   | "idle"

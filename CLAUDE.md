@@ -84,7 +84,7 @@ ThemeProvider
 
 ## Starknet Integration Patterns
 
-**Contract ABIs** come from `@medialane/sdk` (currently 0.11.0). Import `IPMarketplaceABI`, `Medialane1155ABI`, `IPCollectionABI`, `IPNftABI`, `POPFactoryABI`, `POPCollectionABI`, `DropFactoryABI`, `DropCollectionABI`, `IPCollection1155FactoryABI`, `IPCollection1155ABI` from the SDK. The only local ABI that remains in `src/abis/` is `user_settings.ts` — everything contract-related lives in the SDK as the single source of truth (after the 2026-05-15 consolidation).
+**Contract ABIs** come from `@medialane/sdk` (currently 0.12.0). Import `IPMarketplaceABI`, `Medialane1155ABI`, `IPCollectionABI`, `IPNftABI`, `POPFactoryABI`, `POPCollectionABI`, `DropFactoryABI`, `DropCollectionABI`, `IPCollection1155FactoryABI`, `IPCollection1155ABI` from the SDK. The only local ABI that remains in `src/abis/` is `user_settings.ts` — everything contract-related lives in the SDK as the single source of truth (after the 2026-05-15 consolidation).
 
 **Marketplace order flow** (in `src/hooks/use-marketplace.ts`):
 - Orders use **SNIP-12 typed data signing** (`getOrderParametersTypedData`, `getOrderFulfillmentTypedData` from `src/utils/marketplace-utils.ts`)

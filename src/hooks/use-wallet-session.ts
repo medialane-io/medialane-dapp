@@ -25,8 +25,19 @@ export function useWalletSession(): ActiveWalletSession {
     session: starkZapSession,
     address: starkZapAddress,
   } = useStarkZapWallet();
-  const { address: injectedAddress, isConnected: injectedConnectedRaw } = useAccount();
+  const {
+    address: injectedAddress,
+    isConnected: injectedConnectedRaw,
+    connector: injectedConnector,
+  } = useAccount();
   const injectedConnected = injectedConnectedRaw ?? false;
+
+  const injectedWalletType: WalletSessionType = (() => {
+    const id = injectedConnector?.id?.toLowerCase();
+    if (id === "argentx" || id === "argent") return "argent";
+    if (id === "braavos") return "braavos";
+    return "injected";
+  })();
 
   return useMemo(() => {
     if (starkZapSession.status !== "idle" && starkZapSession.status !== "error") {
@@ -53,11 +64,11 @@ export function useWalletSession(): ActiveWalletSession {
     }
 
     if (injectedConnected && injectedAddress) {
-      const session = walletReady("injected", injectedAddress);
+      const session = walletReady(injectedWalletType, injectedAddress);
       return {
         session,
         address: injectedAddress,
-        walletType: "injected" as const,
+        walletType: injectedWalletType,
         isConnected: true,
         isConnecting: false,
         error: null,
