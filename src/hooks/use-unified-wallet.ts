@@ -24,7 +24,13 @@ import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
 import { usePaymasterTransaction } from "@/hooks/use-paymaster-transaction";
 import { useWalletSession } from "@/hooks/use-wallet-session";
 
-export type UnifiedWalletType = "injected" | "cartridge" | "privy" | null;
+export type UnifiedWalletType =
+  | "argent"
+  | "braavos"
+  | "injected"
+  | "cartridge"
+  | "privy"
+  | null;
 
 export interface UnifiedWallet {
   /** Connected address (hex string) or undefined */

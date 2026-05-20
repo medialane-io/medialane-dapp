@@ -6,9 +6,12 @@ import { MEDIALANE_BACKEND_URL, MEDIALANE_API_KEY } from "@/lib/constants";
 type BackendWalletType =
   | "ARGENT" | "BRAAVOS" | "CARTRIDGE" | "PRIVY" | "INJECTED" | "UNKNOWN";
 
-function toBackendWalletType(
-  walletType: "injected" | "cartridge" | "privy" | null
-): BackendWalletType {
+type FrontendWalletType =
+  | "argent" | "braavos" | "injected" | "cartridge" | "privy" | null;
+
+function toBackendWalletType(walletType: FrontendWalletType): BackendWalletType {
+  if (walletType === "argent") return "ARGENT";
+  if (walletType === "braavos") return "BRAAVOS";
   if (walletType === "cartridge") return "CARTRIDGE";
   if (walletType === "privy") return "PRIVY";
   if (walletType === "injected") return "INJECTED";
@@ -24,7 +27,7 @@ const SESSION_KEY_PREFIX = "ml_registered_";
  */
 export function useRegisterUser(
   address: string | null,
-  walletType: "injected" | "cartridge" | "privy" | null
+  walletType: FrontendWalletType
 ) {
   useEffect(() => {
     if (!address || !MEDIALANE_API_KEY) return;
