@@ -10,6 +10,7 @@ import {
   RefreshCw, ShieldCheck, ShoppingCart, Zap,
 } from "lucide-react";
 import { fireConfetti } from "@/lib/confetti";
+import { orderTotal, type CheckoutItem } from "@/lib/checkout";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -200,24 +201,16 @@ export function PurchaseDialog({ order, open, onOpenChange, onSuccess }: Purchas
 
     try {
       setStep("processing");
-      // For ERC-1155, order.consideration.startAmount is the price PER edition
-      // (listing-dialog labels the field "Price per edition"). fulfill_order
-      // charges price × quantity, so the approval must be price × quantity —
-      // no division by the listing's edition count.
-      let considerationAmount = order.consideration.startAmount;
-      if (isERC1155 && quantity > 1) {
-        considerationAmount = (BigInt(order.consideration.startAmount) * BigInt(quantity)).toString();
-      }
-
-      const item = {
+      const item: CheckoutItem = {
         orderHash: order.orderHash,
         considerationToken: order.consideration.token,
-        considerationAmount,
+        // orderTotal() owns the price-per-edition × quantity maths.
+        considerationAmount: orderTotal(order, quantity).toString(),
         offerIdentifier: order.offer.identifier,
         isERC1155,
         quantity: quantity.toString(),
       };
-      const hash = await checkoutCart([item as any]);
+      const hash = await checkoutCart([item]);
       if (hash) {
         setSuccessTxHash(hash);
         setStep("success");

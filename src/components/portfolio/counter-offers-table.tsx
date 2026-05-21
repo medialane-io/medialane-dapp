@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyOrError } from "@/components/ui/empty-or-error";
 import { useMarketplace } from "@/hooks/use-marketplace";
+import { orderTotal } from "@/lib/checkout";
 import { ipfsToHttp, formatDisplayPrice, formatOrderExpiry, cn } from "@/lib/utils";
 import { ArrowLeftRight, ExternalLink, Inbox } from "lucide-react";
 import { EXPLORER_URL } from "@/lib/constants";
@@ -117,16 +118,8 @@ export function CounterOffersTable({ address }: { address: string }) {
   const handleAccept = async (counter: ApiOrder, _original: ApiOrder) => {
     await checkoutCart([{
       orderHash: counter.orderHash,
-      nftContract: counter.nftContract ?? "",
-      nftTokenId: counter.nftTokenId ?? "",
-      name: counter.token?.name ?? `#${counter.nftTokenId}`,
-      image: counter.token?.image ?? "",
-      price: counter.price?.formatted ?? "0",
-      currency: counter.price?.currency ?? "",
-      currencyDecimals: counter.price?.decimals ?? 18,
-      offerer: counter.offerer,
       considerationToken: counter.consideration?.token ?? "",
-      considerationAmount: counter.consideration?.startAmount ?? "",
+      considerationAmount: orderTotal(counter, 1).toString(),
       isERC1155: counter.offer?.itemType === "ERC1155",
       offerIdentifier: counter.token?.name ?? `#${counter.nftTokenId}`,
     }]);

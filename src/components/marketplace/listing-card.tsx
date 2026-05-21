@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, ExternalLink, Layers, Flag } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
+import { orderTotal } from "@/lib/checkout";
 import { ReportDialog } from "@/components/report-dialog";
 import type { ApiOrder } from "@medialane/sdk";
 
@@ -50,7 +51,8 @@ export function ListingCard({ order, onBuy, compact = false }: ListingCardProps)
       currencyDecimals: o.price?.decimals,
       offerer: o.offerer ?? "",
       considerationToken: o.consideration?.token ?? "",
-      considerationAmount: o.consideration?.startAmount ?? "",
+      // Cart adds a single unit; orderTotal owns the per-edition maths.
+      considerationAmount: orderTotal(o, 1).toString(),
       isERC1155: o.offer?.itemType === "ERC1155",
       offerIdentifier: name,
     });

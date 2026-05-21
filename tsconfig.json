@@ -38,6 +38,7 @@
   "exclude": [
     "node_modules",
     "decode-test.ts",
-    "test-avnu-rpc.ts"
+    "test-avnu-rpc.ts",
+    "**/*.test.ts"
   ]
 }

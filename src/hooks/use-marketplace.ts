@@ -7,6 +7,7 @@ import { IPMarketplaceABI, Medialane1155ABI as IPMarketplace1155ABI } from "@med
 import { toast } from "sonner";
 import { getFriendlyWalletError } from "@/lib/wallet-error";
 import { dappFeeConfig, buildFeeCall } from "@/lib/fee";
+import type { CheckoutItem } from "@/lib/checkout";
 import {
     getOrderParametersTypedData,
     getOrderCancellationTypedData,
@@ -35,7 +36,7 @@ interface UseMarketplaceReturn {
         durationSeconds: number,
         tokenStandard?: string
     ) => Promise<string | undefined>;
-    checkoutCart: (items: any[]) => Promise<string | undefined>;
+    checkoutCart: (items: CheckoutItem[]) => Promise<string | undefined>;
     cancelOrder: (orderHash: string, tokenStandard?: string) => Promise<string | undefined>;
     cancelListing: (orderHash: string, tokenStandard?: string) => Promise<string | undefined>;
     acceptOffer: (
@@ -531,7 +532,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         });
     }, [account, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, getErc20Allowance, executeDirect, refreshMarketplaceCaches]);
 
-    const checkoutCart = useCallback(async (items: any[]) => {
+    const checkoutCart = useCallback(async (items: CheckoutItem[]) => {
         if (!walletAddress || !medialaneContract || !chain || items.length === 0) {
             const msg = "Account, contract, network not available, or cart empty";
             setError(msg);
