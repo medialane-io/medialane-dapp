@@ -8,7 +8,6 @@ import { Toaster, toast } from "sonner";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { NavCommandMenu, useNavCommandMenu } from "@medialane/ui";
-import { CartDrawer } from "@/components/layout/cart-drawer";
 import { NotificationSpotlight } from "@/components/shared/notification-spotlight";
 import { Aurora } from "@/components/ui/aurora";
 import { MedialaneLogo } from "@/components/brand/medialane-logo";
@@ -182,7 +181,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <Aurora />
             <UserRegistration />
             {isStandalone ? children : <Shell>{children}</Shell>}
-            <CartDrawer />
             <NotificationSpotlight />
             <PrivyConnectDialog />
             <Toaster

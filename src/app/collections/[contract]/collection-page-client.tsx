@@ -24,7 +24,6 @@ import { TransferCollectionOwnershipDialog } from "@/components/collection/trans
 import { AssetPreviewDialog } from "@/components/shared/asset-preview-dialog";
 import { ShareButton } from "@/components/shared/share-button";
 import { TraitFilter } from "@/components/collection/trait-filter";
-import { SweepBar } from "@/components/collection/sweep-bar";
 import { HiddenContentBanner } from "@/components/hidden-content-banner";
 import Image from "next/image";
 import { ipfsToHttp, formatDisplayPrice, cn, checkIsOwner } from "@/lib/utils";
@@ -558,7 +557,6 @@ export default function CollectionPageClient() {
           </TabsContent>
 
           <TabsContent value="listings" className="mt-4">
-            <SweepBar contract={contract} />
             {ordersLoading ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 {Array.from({ length: 8 }).map((_, i) => <ListingCardSkeleton key={i} />)}

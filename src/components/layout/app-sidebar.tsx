@@ -7,12 +7,11 @@ import { useTheme } from "next-themes";
 import { useWallet } from "@/hooks/use-wallet";
 import {
   Telescope, Compass, Store, Briefcase, Plus, Activity,
-  LayoutGrid, Users, Search, Sun, Moon, ShoppingBag,
+  LayoutGrid, Users, Search, Sun, Moon,
   BookOpen, ChevronRight, Music, Palette, Film, Camera, Gem, Trophy,
 } from "lucide-react";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { useUnreadOffers } from "@/hooks/use-unread-offers";
-import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils";
 import {
   Sidebar,
@@ -129,26 +128,6 @@ function ThemeToggleItem() {
       >
         {theme === "dark" ? <Sun /> : <Moon />}
         <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
-  );
-}
-
-function CartItem() {
-  const { items, toggleCart } = useCart();
-  const count = items.length;
-  return (
-    <SidebarMenuItem>
-      <SidebarMenuButton onClick={toggleCart} tooltip={count > 0 ? `Cart (${count})` : "Cart"}>
-        <div className="relative">
-          <ShoppingBag className="size-4" />
-          {count > 0 && (
-            <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary text-[9px] font-bold text-primary-foreground flex items-center justify-center">
-              {count > 9 ? "9+" : count}
-            </span>
-          )}
-        </div>
-        <span>Cart{count > 0 ? ` (${count})` : ""}</span>
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
@@ -347,7 +326,6 @@ export function AppSidebar() {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <CartItem />
             <NotificationsItem />
             <ThemeToggleItem />
             <SidebarMenuItem>

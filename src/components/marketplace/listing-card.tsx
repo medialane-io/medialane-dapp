@@ -17,8 +17,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, ExternalLink, Layers, Flag } from "lucide-react";
-import { useCart } from "@/hooks/use-cart";
-import { orderTotal } from "@/lib/checkout";
 import { ReportDialog } from "@/components/report-dialog";
 import type { ApiOrder } from "@medialane/sdk";
 
@@ -31,32 +29,11 @@ interface ListingCardProps {
 }
 
 export function ListingCard({ order, onBuy, compact = false }: ListingCardProps) {
-  const { addItem, items } = useCart();
   const [reportOpen, setReportOpen] = useState(false);
-  const inCart = items.some((i) => i.orderHash === order.orderHash);
 
   const name = order.token?.name ?? `Token #${order.nftTokenId}`;
   const image = order.token?.image ? ipfsToHttp(order.token.image) : null;
 
-  const handleCart = (o: ApiOrder) => {
-    if (inCart) return;
-    addItem({
-      orderHash: o.orderHash,
-      nftContract: o.nftContract ?? "",
-      nftTokenId: o.nftTokenId ?? "",
-      name,
-      image: image ?? "",
-      price: formatDisplayPrice(o.price?.formatted),
-      currency: o.price?.currency ?? "",
-      currencyDecimals: o.price?.decimals,
-      offerer: o.offerer ?? "",
-      considerationToken: o.consideration?.token ?? "",
-      // Cart adds a single unit; orderTotal owns the per-edition maths.
-      considerationAmount: orderTotal(o, 1).toString(),
-      isERC1155: o.offer?.itemType === "ERC1155",
-      offerIdentifier: name,
-    });
-  };
 
   const overflowMenu = (
     <DropdownMenu>
@@ -100,9 +77,7 @@ export function ListingCard({ order, onBuy, compact = false }: ListingCardProps)
     <>
       <PackageListingCard
         order={order}
-        inCart={inCart}
         onBuy={onBuy}
-        onCart={handleCart}
         compact={compact}
         overflowMenu={overflowMenu}
       />

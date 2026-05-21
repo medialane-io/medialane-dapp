@@ -16,7 +16,6 @@ import { useDropInfo, getDropStatus } from "@/hooks/use-drops";
 import type { DropConditions } from "@/hooks/use-drops";
 import { useTokenListings } from "@/hooks/use-orders";
 import { useWallet } from "@/hooks/use-wallet";
-import { useCart } from "@/hooks/use-cart";
 import { useComments } from "@/hooks/use-comments";
 import { useTokenRemixes } from "@/hooks/use-remix-offers";
 import { OwnerActionPanel } from "@/components/asset/owner-action-panel";
@@ -154,7 +153,6 @@ export function AssetPageDrop() {
   const { acceptOffer, isProcessing } = useMarketplace();
 
 
-  const { addItem, items: cartItems, setIsOpen: setCartOpen } = useCart();
   const shouldReduce = useReducedMotion();
 
   const imageUrl = token?.metadata?.image ? ipfsToHttp(token.metadata.image) : null;
@@ -191,33 +189,6 @@ export function AssetPageDrop() {
     ? activeListings.find((l) => l.offerer.toLowerCase() === walletAddress!.toLowerCase())
     : null;
 
-  const inCart = cheapest ? cartItems.some((i) => i.orderHash === cheapest.orderHash) : false;
-
-  const handleAddToCart = () => {
-    if (!cheapest || inCart) return;
-    const name = token?.metadata?.name || `Token #${tokenId}`;
-    addItem(
-      {
-        orderHash: cheapest.orderHash,
-        nftContract: contract,
-        nftTokenId: tokenId,
-        name,
-        image: ipfsToHttp(token?.metadata?.image) ?? "",
-        price: formatDisplayPrice(cheapest.price.formatted),
-        currency: cheapest.price.currency ?? "",
-        currencyDecimals: cheapest.price.decimals,
-        offerer: cheapest.offerer,
-        considerationToken: cheapest.consideration.token,
-        considerationAmount: cheapest.consideration.startAmount,
-        isERC1155,
-        offerIdentifier: name || `#${tokenId}`,
-      },
-      walletAddress ?? undefined
-    );
-    toast.success("Added to cart", {
-      action: { label: "View cart", onClick: () => setCartOpen(true) },
-    });
-  };
 
   const handleCancelClick = (order: ApiOrder) => {
     setOrderToCancel(order);
@@ -373,19 +344,11 @@ export function AssetPageDrop() {
                         Buy Edition
                       </button>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className={`btn-border-animated p-[1px] rounded-xl ${inCart ? "opacity-40 pointer-events-none" : ""}`}>
-                        <button className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-blue" disabled={inCart} onClick={handleAddToCart}>
-                          <ShoppingCart className="h-4 w-4" />
-                          {inCart ? "In cart" : "Add to cart"}
-                        </button>
-                      </div>
-                      <div className="btn-border-animated p-[1px] rounded-xl">
-                        <button className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-orange" onClick={() => setOfferOpen(true)}>
-                          <HandCoins className="h-4 w-4" />
-                          Make offer
-                        </button>
-                      </div>
+                    <div className="btn-border-animated p-[1px] rounded-xl">
+                      <button className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-orange" onClick={() => setOfferOpen(true)}>
+                        <HandCoins className="h-4 w-4" />
+                        Make offer
+                      </button>
                     </div>
                   </div>
                 ) : (

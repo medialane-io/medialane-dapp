@@ -12,7 +12,6 @@ import { OfferDialog } from "@/components/marketplace/offer-dialog";
 import { ListingDialog } from "@/components/marketplace/listing-dialog";
 import { ReportDialog } from "@/components/report-dialog";
 import { ipfsToHttp, formatDisplayPrice } from "@/lib/utils";
-import { useCart } from "@/hooks/use-cart";
 import { toast } from "sonner";
 import {
   PreviewHero, PreviewFooter, PreviewActionList, PreviewMeta, PreviewOwnerRow,
@@ -22,7 +21,6 @@ import {
 export function AssetPreviewStandard({
   token, isOwner, onClose, onList, onCancel, onTransfer,
 }: AssetPreviewContentProps) {
-  const { addItem, items } = useCart();
   const [imgError, setImgError] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
@@ -33,30 +31,12 @@ export function AssetPreviewStandard({
   const rawImage = ipfsToHttp(token.metadata?.image) ?? null;
   const image = imgError ? null : rawImage;
   const activeOrder = token.activeOrders?.[0] ?? null;
-  const inCart = activeOrder ? items.some((i) => i.orderHash === activeOrder.orderHash) : false;
 
   const assetHref = `/asset/${token.contractAddress}/${token.tokenId}`;
   const collectionHref = `/collections/${token.contractAddress}`;
   const remixHref = `/create/remix/${token.contractAddress}/${token.tokenId}`;
   const currentOwner = token.balances?.[0]?.owner ?? token.owner ?? null;
 
-  const handleAddToCart = () => {
-    if (!activeOrder || inCart) return;
-    addItem({
-      orderHash: activeOrder.orderHash,
-      nftContract: token.contractAddress,
-      nftTokenId: token.tokenId,
-      name,
-      image: token.metadata?.image ?? "",
-      price: formatDisplayPrice(activeOrder.price.formatted),
-      currency: activeOrder.price.currency ?? "",
-      currencyDecimals: activeOrder.price.decimals,
-      offerer: activeOrder.offerer ?? "",
-      considerationToken: activeOrder.consideration.token ?? "",
-      considerationAmount: activeOrder.consideration.startAmount ?? "",
-    });
-    toast.success("Added to cart", { description: name });
-  };
 
   const handleList = () => {
     if (onList) { onClose(); onList(token); } else setListOpen(true);
@@ -114,15 +94,6 @@ export function AssetPreviewStandard({
   };
 
   const secondaryActions: PreviewAction[] = [];
-
-  if (!isOwner && activeOrder) {
-    secondaryActions.push({
-      icon: inCart ? <Check className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />,
-      label: inCart ? "In cart" : "Add to cart",
-      onClick: handleAddToCart,
-      disabled: inCart,
-    });
-  }
 
   if (!isOwner) {
     secondaryActions.push({

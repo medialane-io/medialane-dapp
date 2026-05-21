@@ -37,7 +37,6 @@ import { useComments } from "@/hooks/use-comments";
 import { EXPLORER_URL } from "@/lib/constants";
 import { useWallet } from "@/hooks/use-wallet";
 import { useMarketplace } from "@/hooks/use-marketplace";
-import { useCart } from "@/hooks/use-cart";
 import { toast } from "sonner";
 import { useDominantColor } from "@/hooks/use-dominant-color";
 import { RemixesTab, ParentAttributionBanner } from "@/components/asset/remixes-tab";
@@ -59,7 +58,6 @@ export function AssetPageStandard() {
   const { acceptOffer, isProcessing } = useMarketplace();
 
 
-  const { addItem, items: cartItems, setIsOpen: setCartOpen } = useCart();
   const shouldReduce = useReducedMotion();
 
   const imageUrl = token?.metadata?.image ? ipfsToHttp(token.metadata.image) : null;
@@ -106,32 +104,6 @@ export function AssetPageStandard() {
     ? activeListings.find((l) => l.offerer.toLowerCase() === walletAddress!.toLowerCase())
     : null;
 
-  const inCart = cheapest ? cartItems.some((i) => i.orderHash === cheapest.orderHash) : false;
-
-  const handleAddToCart = () => {
-    if (!cheapest || inCart) return;
-    addItem(
-      {
-        orderHash: cheapest.orderHash,
-        nftContract: contract,
-        nftTokenId: tokenId,
-        name,
-        image: ipfsToHttp(token?.metadata?.image) ?? "",
-        price: formatDisplayPrice(cheapest.price.formatted),
-        currency: cheapest.price.currency ?? "",
-        currencyDecimals: cheapest.price.decimals,
-        offerer: cheapest.offerer,
-        considerationToken: cheapest.consideration.token,
-        considerationAmount: cheapest.consideration.startAmount,
-        isERC1155,
-        offerIdentifier: name || `#${tokenId}`,
-      },
-      walletAddress ?? undefined
-    );
-    toast.success("Added to cart", {
-      action: { label: "View cart", onClick: () => setCartOpen(true) },
-    });
-  };
 
   const handleCancelClick = (order: ApiOrder) => {
     setOrderToCancel(order);
@@ -390,28 +362,15 @@ export function AssetPageStandard() {
                         {isERC1155 ? "Buy Edition" : "Buy Asset"}
                       </button>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {/* Add to cart */}
-                      <div className={`btn-border-animated p-[1px] rounded-xl ${inCart ? "opacity-40 pointer-events-none" : ""}`}>
-                        <button
-                          className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-blue"
-                          disabled={inCart}
-                          onClick={handleAddToCart}
-                        >
-                          <ShoppingCart className="h-4 w-4" />
-                          {inCart ? "In cart" : "Add to cart"}
-                        </button>
-                      </div>
-                      {/* Make offer */}
-                      <div className="btn-border-animated p-[1px] rounded-xl">
-                        <button
-                          className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-orange"
-                          onClick={() => setOfferOpen(true)}
-                        >
-                          <HandCoins className="h-4 w-4" />
-                          Make offer
-                        </button>
-                      </div>
+                    {/* Make offer */}
+                    <div className="btn-border-animated p-[1px] rounded-xl">
+                      <button
+                        className="w-full h-10 rounded-[11px] flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] bg-brand-orange"
+                        onClick={() => setOfferOpen(true)}
+                      >
+                        <HandCoins className="h-4 w-4" />
+                        Make offer
+                      </button>
                     </div>
                     {/* Create a Remix */}
                     {!isOwner && (
