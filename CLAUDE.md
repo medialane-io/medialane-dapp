@@ -90,10 +90,10 @@ ThemeProvider
 - Orders use **SNIP-12 typed data signing** (`getOrderParametersTypedData`, `getOrderFulfillmentTypedData` from `src/utils/marketplace-utils.ts`)
 - Listings: sign → ERC721 `approve` + `register_order` multicall
 - Offers: sign → ERC20 `approve` + `register_order` multicall
-- Cart checkout: approve per-currency totals + sequential `fulfill_order` signatures, then one atomic multicall
+- Buying a listing: approve the ERC-20 total + `fulfill_order` signature, executed as one atomic multicall
 - Cancellations: sign typed cancellation data → `cancel_order`
 
-**Checkout totals — always via `orderTotal()` (`src/lib/checkout.ts`).** `order.consideration.startAmount` is the price **per edition** for ERC-1155 (the listing form labels it "Price per edition"); `fulfill_order` charges `price × quantity`. `orderTotal(order, quantity)` is the single source of truth for the ERC-20 amount to approve — never divide by `offer.startAmount`. `checkoutCart` takes a typed `CheckoutItem[]`; all three call sites (`purchase-dialog`, `listing-card`, `counter-offers-table`) build items through `orderTotal`. A prior bug under-approved ERC-1155 multi-buys by dividing by the edition count → `ERC20: insufficient allowance`.
+**Checkout totals — always via `orderTotal()` (`src/lib/checkout.ts`).** `order.consideration.startAmount` is the price **per edition** for ERC-1155 (the listing form labels it "Price per edition"); `fulfill_order` charges `price × quantity`. `orderTotal(order, quantity)` is the single source of truth for the ERC-20 amount to approve — never divide by `offer.startAmount`. `checkoutCart` takes a typed `CheckoutItem[]`; both call sites (`purchase-dialog`, `counter-offers-table`) build items through `orderTotal`. A prior bug under-approved ERC-1155 multi-buys by dividing by the edition count → `ERC20: insufficient allowance`.
 
 **Event/provenance queries** (`src/hooks/use-events.ts`): `useAssetProvenanceEvents` fetches transfer/mint history from the Medialane backend API (`client.api.getTokenHistory()`). Lower-level `useAssetTransferEvents` / `useMyTransferEvents` still use starknet-react `useEvents` for real-time transfer monitoring.
 
@@ -106,7 +106,7 @@ settlement, routed to a single creators-fund address. Defined once in
 `@medialane/sdk` (`buildFeeCall`); the dapp resolves config via `src/lib/fee.ts`
 (`dappFeeConfig`, env: `NEXT_PUBLIC_FEE_FUND_ADDRESS`,
 `NEXT_PUBLIC_FEE_MARKETPLACE_BPS`/`_LAUNCHPAD_BPS`, `NEXT_PUBLIC_FEE_ENABLED`)
-and splices the fee `Call` into `use-marketplace.ts` cart checkout and the
+and splices the fee `Call` into `use-marketplace.ts` checkout and the
 drop-mint button. Fee is platform-layer only — never on-chain (`00 §12`).
 **Fail-safe:** no fund address ⇒ no fee. The dapp executes atomically
 (`account.execute` via AVNU), so a failed buy reverts the fee too.
@@ -140,7 +140,7 @@ charged on top of the trade.
 1. **IPFS/Pinata**: Asset metadata and images are uploaded via server actions (`src/app/api/pinata/`, `src/app/api/forms-ipfs/`). Server-side Pinata SDK is configured in `src/services/config/server.config.ts`.
 2. **Indexed data (primary read path)**: `getMedialaneClient()` from `src/lib/medialane-client.ts` wraps the Medialane backend REST API (`NEXT_PUBLIC_MEDIALANE_BACKEND_URL`). Use `client.api.*` for tokens, collections, orders, activities, and provenance. Available methods: `getOrders`, `getActiveOrdersForToken`, `getOrdersByUser`, `getToken`, `getTokensByOwner`, `getTokenHistory`, `getCollections`, `getCollection`, `getCollectionTokens`, `getCollectionsByOwner`, `getActivities`, `getActivitiesByAddress`.
 3. **On-chain reads (writes + approvals only)**: Direct RPC calls are reserved for: approval checks (`get_approved`, `is_approved_for_all`), nonce reads, and transaction execution. Never scan events or enumerate tokens on-chain — use the backend API instead.
-4. **Zustand stores**: Used for cart state and mint state (`src/hooks/use-mint.ts`).
+4. **Zustand stores**: Used for mint state (`src/hooks/use-mint.ts`).
 5. **User profiles**: Stored/fetched via `src/services/user_settings.ts` (off-chain).
 
 ## Directory Structure
