@@ -30,15 +30,17 @@ import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { useConnect } from "@starknet-react/core";
 import { StarknetkitConnector, useStarknetkitConnectModal } from "starknetkit";
 import { toast } from "sonner";
-import { normalizeAddress } from "@medialane/sdk";
+import {
+  COLLECTION_1155_CONTRACT_MAINNET,
+  normalizeAddress,
+} from "@medialane/sdk";
 import { hash } from "starknet";
 import { starknetProvider } from "@/lib/starknet";
 import { serializeByteArray } from "@/lib/cairo-calldata";
 import { invalidatePortfolioCache } from "@/lib/portfolio-cache";
 import { MEDIALANE_BACKEND_URL, MEDIALANE_API_KEY } from "@/lib/constants";
 
-// v2 ERC-1155 factory — hardcoded to avoid stale SDK npm cache
-const FACTORY = "0x006b2dc7ca7c4f466bb4575ba043d934310f052074f849caf853a86bcb819fd6" as `0x${string}`;
+const FACTORY = COLLECTION_1155_CONTRACT_MAINNET as `0x${string}`;
 const COLLECTION_DEPLOYED_SELECTOR = hash.getSelectorFromName("CollectionDeployed");
 
 const schema = z.object({
