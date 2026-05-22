@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useParams } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Layers } from "lucide-react";
 import { useToken, useTokenHistory } from "@/hooks/use-tokens";
@@ -12,78 +11,50 @@ import { useTokenListings } from "@/hooks/use-orders";
 import { useWallet } from "@/hooks/use-wallet";
 import { useComments } from "@/hooks/use-comments";
 import { useTokenRemixes } from "@/hooks/use-remix-offers";
-import { ipfsToHttp, checkIsOwner } from "@/lib/utils";
+import { ipfsToHttp } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PurchaseDialog } from "@/components/marketplace/purchase-dialog";
-import { ListingDialog } from "@/components/marketplace/listing-dialog";
-import { OfferDialog } from "@/components/marketplace/offer-dialog";
-import { TransferDialog } from "@/components/marketplace/transfer-dialog";
-import { CancelOrderDialog } from "@/components/marketplace/cancel-order-dialog";
 import { FloatingCommentsButton } from "@/components/asset/floating-comments-button";
 import { HiddenContentBanner } from "@/components/hidden-content-banner";
 import { useDominantColor } from "@/hooks/use-dominant-color";
 import { EXPLORER_URL } from "@/lib/constants";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { CommentsSection } from "@/components/asset/comments-section";
+import type { ApiActivity, ApiOrder } from "@medialane/sdk";
+import { useMarketplace } from "@/hooks/use-marketplace";
 import { AssetMarketsTab } from "./asset-markets-tab";
 import { AssetProvenanceTab } from "./asset-provenance-tab";
 import { AssetMarketplacePanel } from "./asset-marketplace-panel";
-import { AssetOwnersPanel, AssetLinksRow } from "./asset-side-panels";
+import { AssetOwnersPanel, AssetLinksRow, AssetCommentsDialog } from "./asset-side-panels";
 import { AssetOverviewContent } from "./asset-overview-content";
 import { AssetMediaColumn, AssetHeaderBlock, buildEditionStats } from "./asset-top-sections";
-import { LICENSE_TRAIT_TYPES } from "@/types/ip";
-import type { IPType } from "@/types/ip";
-import { IP_TEMPLATES } from "@/lib/ip-templates";
-import type { ApiActivity, ApiOrder } from "@medialane/sdk";
-import { useMarketplace } from "@/hooks/use-marketplace";
+import { AssetAtmosphere, useAssetMarketState, type AssetToken } from "./asset-shared";
+import { useAssetMarketplaceDialogState, AssetMarketplaceDialogs } from "./asset-marketplace-dialogs";
 
 export function AssetPageEdition() {
   const { contract, tokenId } = useParams<{ contract: string; tokenId: string }>();
   const { isConnected: isSignedIn, address: walletAddress } = useWallet();
   const { collection } = useCollection(contract);
-  const { token, isLoading } = useToken(contract, tokenId);
+  const { token: rawToken, isLoading } = useToken(contract, tokenId);
+  const token = rawToken as AssetToken | null;
   const { listings, mutate: mutateListings } = useTokenListings(contract, tokenId);
   const { history } = useTokenHistory(contract, tokenId);
   const { acceptOffer, isProcessing } = useMarketplace();
-
   const shouldReduce = useReducedMotion();
 
   const imageUrl = token?.metadata?.image ? ipfsToHttp(token.metadata.image) : null;
   const { imgRef, dynamicTheme } = useDominantColor(imageUrl);
 
   const [imgError, setImgError] = useState(false);
-  const [purchaseOrder, setPurchaseOrder] = useState<ApiOrder | null>(null);
-  const [listOpen, setListOpen] = useState(false);
-  const [offerOpen, setOfferOpen] = useState(false);
-  const [orderToCancel, setOrderToCancel] = useState<ApiOrder | null>(null);
-  const [cancelOpen, setCancelOpen] = useState(false);
-  const [transferOpen, setTransferOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [commentOpen, setCommentOpen] = useState(false);
 
   const { total: commentTotal } = useComments(contract, tokenId);
   const { total: remixCount } = useTokenRemixes(contract, tokenId);
 
-  const activeListings = listings.filter(
-    (l) => l.status === "ACTIVE" && (l.offer.itemType === "ERC721" || l.offer.itemType === "ERC1155")
-  );
-  const activeBids = listings.filter(
-    (l) => l.status === "ACTIVE" && l.offer.itemType === "ERC20"
-  );
-  const cheapest = [...activeListings].sort((a, b) =>
-    BigInt(a.consideration.startAmount) < BigInt(b.consideration.startAmount) ? -1 : 1
-  )[0];
-
-  const isOwner = checkIsOwner(token as any, walletAddress);
-  const myListing = isOwner
-    ? activeListings.find((l) => l.offerer.toLowerCase() === walletAddress!.toLowerCase()) ?? null
-    : null;
-
-  const handleCancelClick = (order: ApiOrder) => {
-    setOrderToCancel(order);
-    setCancelOpen(true);
-  };
+  const dialogs = useAssetMarketplaceDialogState();
+  const {
+    activeListings, activeBids, cheapest, isOwner, myListing,
+    attributes, hasTemplateData, isDisplayAttr,
+  } = useAssetMarketState(token, listings, walletAddress);
 
   const handleAcceptClick = async (order: ApiOrder) => {
     await acceptOffer(order.orderHash, contract, tokenId, order.consideration.itemType);
@@ -117,26 +88,7 @@ export function AssetPageEdition() {
   const name = token.metadata?.name || `Token #${token.tokenId}`;
   const image = ipfsToHttp(token.metadata?.image);
   const description = token.metadata?.description;
-  const attributes = Array.isArray(token.metadata?.attributes)
-    ? (token.metadata.attributes as { trait_type?: string; value?: string }[])
-    : [];
-
-  const activeTemplate = IP_TEMPLATES[
-    (attributes.find((a) => a.trait_type?.toLowerCase() === "ip type")?.value ?? "") as IPType
-  ];
-  const activeTemplateKeys = new Set<string>([
-    "IP Type",
-    ...(activeTemplate?.fields.map((f) => f.key) ?? []),
-  ]);
-  const hasTemplateData =
-    !!activeTemplate &&
-    activeTemplate.fields.length > 0 &&
-    activeTemplate.fields.some((f) => attributes.some((a) => a.trait_type === f.key && a.value));
-  const isDisplayAttr = (a: { trait_type?: string }): boolean =>
-    !LICENSE_TRAIT_TYPES.has(a.trait_type ?? "") && !activeTemplateKeys.has(a.trait_type ?? "");
-
-  const balances = (token as any).balances as { owner: string; amount: string }[] | undefined;
-  const holders = balances ?? [];
+  const holders = token.balances ?? [];
   const uniqueHolders = holders.length;
   const totalEditions = holders.reduce((sum, b) => sum + parseInt(b.amount, 10), 0);
 
@@ -145,15 +97,8 @@ export function AssetPageEdition() {
       style={dynamicTheme ? (dynamicTheme as React.CSSProperties) : {}}
       className="relative z-0 min-h-screen"
     >
-      {(token as any).isHidden && <HiddenContentBanner />}
-      {imageUrl && (
-        <Image ref={imgRef} src={imageUrl} crossOrigin="anonymous" aria-hidden alt="" width={1} height={1} fetchPriority="high" unoptimized style={{ display: "none" }} />
-      )}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        {imageUrl && (
-          <Image src={imageUrl} alt="" aria-hidden fill sizes="100vw" className="absolute inset-0 w-full h-full object-cover opacity-20 scale-110" style={{ filter: "blur(60px) saturate(1.5)" }} unoptimized />
-        )}
-      </div>
+      {token.isHidden && <HiddenContentBanner />}
+      <AssetAtmosphere imageUrl={imageUrl} imgRef={imgRef} />
 
       <div className="container mx-auto px-4 pt-14 space-y-8 pb-8">
         <nav className="flex items-center gap-1.5 text-sm text-muted-foreground min-w-0">
@@ -201,12 +146,12 @@ export function AssetPageEdition() {
               myListing={myListing}
               activeBids={activeBids}
               walletAddress={walletAddress}
-              onCancelClick={handleCancelClick}
+              onCancelClick={dialogs.handleCancelClick}
               onAcceptBid={handleAcceptClick}
-              onOpenListing={() => setListOpen(true)}
-              onOpenTransfer={() => setTransferOpen(true)}
-              onOpenPurchase={setPurchaseOrder}
-              onOpenOffer={() => setOfferOpen(true)}
+              onOpenListing={() => dialogs.setListOpen(true)}
+              onOpenTransfer={() => dialogs.setTransferOpen(true)}
+              onOpenPurchase={dialogs.setPurchaseOrder}
+              onOpenOffer={() => dialogs.setOfferOpen(true)}
             />
 
             <AssetOwnersPanel balances={holders} maxVisible={8} />
@@ -243,7 +188,7 @@ export function AssetPageEdition() {
           </TabsContent>
 
           <TabsContent value="markets">
-            <AssetMarketsTab activeListings={activeListings} activeBids={activeBids} walletAddress={walletAddress ?? undefined} isOwner={isOwner} isProcessing={isProcessing} onBuyClick={setPurchaseOrder} onCancelClick={handleCancelClick} onAcceptClick={handleAcceptClick} />
+            <AssetMarketsTab activeListings={activeListings} activeBids={activeBids} walletAddress={walletAddress ?? undefined} isOwner={isOwner} isProcessing={isProcessing} onBuyClick={dialogs.setPurchaseOrder} onCancelClick={dialogs.handleCancelClick} onAcceptClick={handleAcceptClick} />
           </TabsContent>
 
           <TabsContent value="provenance">
@@ -254,32 +199,30 @@ export function AssetPageEdition() {
 
       <FloatingCommentsButton onClick={() => setCommentOpen(true)} commentTotal={commentTotal} />
 
-      <Dialog open={commentOpen} onOpenChange={setCommentOpen}>
-        <DialogContent className="w-full max-w-md p-0 overflow-hidden gap-0 flex flex-col max-h-[85svh]">
-          <div className="flex items-center gap-3 pr-10 pl-4 pt-4 pb-3 shrink-0 border-b border-brand-blue/20" style={{ background: "linear-gradient(135deg, hsl(var(--brand-blue) / 0.10), hsl(var(--brand-purple) / 0.08))" }}>
-            <div className="relative h-9 w-9 rounded-full overflow-hidden shrink-0 ring-2 ring-white/20" style={{ background: "linear-gradient(135deg, hsl(var(--brand-blue) / 0.3), hsl(var(--brand-purple) / 0.3))" }}>
-              {imageUrl && <Image src={imageUrl} alt={name} fill className="object-cover" unoptimized />}
-            </div>
-            <div className="min-w-0 flex-1">
-              <DialogTitle asChild>
-                <p className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "hsl(var(--brand-blue))" }}>Comments</p>
-              </DialogTitle>
-              <p className="text-sm font-semibold truncate text-foreground">{name}</p>
-            </div>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <CommentsSection contract={contract} tokenId={tokenId} className="h-full rounded-none border-0" />
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AssetCommentsDialog
+        open={commentOpen}
+        onOpenChange={setCommentOpen}
+        contract={contract}
+        tokenId={tokenId}
+        name={name}
+        imageUrl={imageUrl}
+        commentTotal={commentTotal}
+        accentBorderClassName="border-brand-blue/20"
+        accentHeaderStyle="linear-gradient(135deg, hsl(var(--brand-blue) / 0.10), hsl(var(--brand-purple) / 0.08))"
+        accentAvatarStyle="linear-gradient(135deg, hsl(var(--brand-blue) / 0.3), hsl(var(--brand-purple) / 0.3))"
+        accentLabelClassName="text-brand-blue"
+        accentCountStyle={{ background: "hsl(var(--brand-blue))" }}
+      />
 
-      {purchaseOrder && (
-        <PurchaseDialog order={purchaseOrder} open onOpenChange={(v) => { if (!v) setPurchaseOrder(null); }} onSuccess={mutateListings} />
-      )}
-      <ListingDialog open={listOpen} onOpenChange={setListOpen} assetContract={contract} tokenId={tokenId} tokenName={name} tokenStandard="ERC1155" onSuccess={mutateListings} />
-      <OfferDialog open={offerOpen} onOpenChange={setOfferOpen} assetContract={contract} tokenId={tokenId} tokenName={name} tokenStandard="ERC1155" />
-      <CancelOrderDialog order={orderToCancel} open={cancelOpen} onOpenChange={(v) => { setCancelOpen(v); if (!v) setOrderToCancel(null); }} onSuccess={mutateListings} />
-      <TransferDialog open={transferOpen} onOpenChange={setTransferOpen} contractAddress={contract} tokenId={tokenId} tokenName={name} hasActiveListing={activeListings.length > 0} onSuccess={mutateListings} />
+      <AssetMarketplaceDialogs
+        contract={contract}
+        tokenId={tokenId}
+        tokenName={name}
+        tokenStandard="ERC1155"
+        hasActiveListing={activeListings.length > 0}
+        mutateListings={mutateListings}
+        dialogs={dialogs}
+      />
     </div>
   );
 }

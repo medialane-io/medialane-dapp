@@ -16,6 +16,7 @@ import { PopClaimButton } from "@/components/claim/pop-claim-button";
 import { ShareButton } from "@/components/shared/share-button";
 import { ReportDialog } from "@/components/report-dialog";
 import { useDominantColor } from "@/hooks/use-dominant-color";
+import { AssetAtmosphere } from "./asset-shared";
 import { EXPLORER_URL } from "@/lib/constants";
 
 export function AssetPagePop() {
@@ -41,34 +42,7 @@ export function AssetPagePop() {
       style={dynamicTheme ? (dynamicTheme as React.CSSProperties) : {}}
       className="relative z-0 min-h-screen"
     >
-      {imageUrl && (
-        <Image
-          ref={imgRef}
-          src={imageUrl}
-          crossOrigin="anonymous"
-          aria-hidden
-          alt=""
-          width={1}
-          height={1}
-          fetchPriority="high"
-          unoptimized
-          style={{ display: "none" }}
-        />
-      )}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        {imageUrl && (
-          <Image
-            src={imageUrl}
-            alt=""
-            aria-hidden
-            fill
-            sizes="100vw"
-            className="absolute inset-0 w-full h-full object-cover opacity-20 scale-110"
-            style={{ filter: "blur(60px) saturate(1.5)" }}
-            unoptimized
-          />
-        )}
-      </div>
+      <AssetAtmosphere imageUrl={imageUrl} imgRef={imgRef} />
 
       <div className="container mx-auto px-4 pt-14 space-y-8 pb-8">
         <nav className="flex items-center gap-1.5 text-sm text-muted-foreground min-w-0">
