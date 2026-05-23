@@ -31,7 +31,7 @@ NEXT_PUBLIC_RPC_URL                   # Starknet RPC endpoint (for write/executi
 
 # Contracts
 # Marketplace contract addresses come from @medialane/sdk only.
-NEXT_PUBLIC_COLLECTION_CONTRACT       # ERC-721 collection registry
+NEXT_PUBLIC_COLLECTION_721_CONTRACT   # ERC-721 collection registry (renamed from NEXT_PUBLIC_COLLECTION_CONTRACT on 2026-05-22)
 NEXT_PUBLIC_COLLECTION_1155_CONTRACT  # ERC-1155 collection registry
 NEXT_PUBLIC_NFTCOMMENTS_CONTRACT      # NFT comments contract
 
@@ -84,7 +84,7 @@ ThemeProvider
 
 ## Starknet Integration Patterns
 
-**Contract ABIs** come from `@medialane/sdk` (currently 0.12.0). Import `IPMarketplaceABI`, `Medialane1155ABI`, `IPCollectionABI`, `IPNftABI`, `POPFactoryABI`, `POPCollectionABI`, `DropFactoryABI`, `DropCollectionABI`, `IPCollection1155FactoryABI`, `IPCollection1155ABI` from the SDK. The only local ABI that remains in `src/abis/` is `user_settings.ts` — everything contract-related lives in the SDK as the single source of truth (after the 2026-05-15 consolidation).
+**Contract ABIs** come from `@medialane/sdk` (currently 0.20.0). Import `IPMarketplaceABI`, `Medialane1155ABI`, `IPCollectionABI`, `IPNftABI`, `POPFactoryABI`, `POPCollectionABI`, `DropFactoryABI`, `DropCollectionABI`, `IPCollection1155FactoryABI`, `IPCollection1155ABI` from the SDK. Each ABI lives in its own file under `src/abis/` in the SDK (split in v0.19.0); the public import path is unchanged via `abis/index.ts` barrel. The only local ABI that remains in this repo's `src/abis/` is `user_settings.ts` — everything contract-related lives in the SDK as the single source of truth.
 
 **Marketplace order flow** (in `src/hooks/use-marketplace.ts`):
 - Orders use **SNIP-12 typed data signing** (`getOrderParametersTypedData`, `getOrderFulfillmentTypedData` from `src/utils/marketplace-utils.ts`)
