@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 import { sepolia, mainnet } from "@starknet-react/chains";
 import {
   StarknetConfig,
@@ -36,6 +36,7 @@ export const useNetwork = () => {
 };
 
 export function StarknetProvider({ children }: { children: React.ReactNode }) {
+  const chains = useMemo(() => [mainnet, sepolia], []);
   const recommendedConnectors = useMemo(
     () => [idResolvedReady(), idResolvedBraavos()],
     [],
@@ -70,10 +71,16 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
   // Retrieve your custom RPC URL from environment variables
   const customRpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
 
-  const providerFactory = (chain: any) => new RpcProvider({ nodeUrl: customRpcUrl || "" });
-  const paymasterProvider = avnuPaymasterProvider({
-    apiKey: process.env.NEXT_PUBLIC_AVNU_PAYMASTER_API_KEY,
-  });
+  const providerFactory = useCallback(
+    (_chain: unknown) => new RpcProvider({ nodeUrl: customRpcUrl || "" }),
+    [customRpcUrl],
+  );
+  const paymasterProvider = useMemo(
+    () => avnuPaymasterProvider({
+      apiKey: process.env.NEXT_PUBLIC_AVNU_PAYMASTER_API_KEY,
+    }),
+    [],
+  );
 
   return (
     <NetworkContext.Provider value={{
@@ -81,7 +88,7 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
       networkConfig
     }}>
       <StarknetConfig
-        chains={[mainnet, sepolia]}
+        chains={chains}
         provider={providerFactory}
         paymasterProvider={paymasterProvider}
         connectors={connectors}

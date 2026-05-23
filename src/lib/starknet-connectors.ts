@@ -76,6 +76,9 @@ function isUserRejected(error: unknown): boolean {
 // this adapter keeps the same connector behavior while resolving by wallet.id.
 class IdResolvedInjectedConnector extends Connector {
   private wallet?: StarknetWallet;
+  private accountPromise?: Promise<AccountInterface>;
+  private accountProvider?: ProviderInterface;
+  private accountPaymasterProvider?: PaymasterInterface;
 
   constructor(
     private readonly walletId: string,
@@ -142,6 +145,7 @@ class IdResolvedInjectedConnector extends Connector {
 
     this.wallet?.off?.("accountsChanged", this.onAccountsChanged);
     this.wallet?.off?.("networkChanged", this.onNetworkChanged);
+    this.clearAccountCache();
     this.emit("disconnect");
   }
 
@@ -153,13 +157,28 @@ class IdResolvedInjectedConnector extends Connector {
       throw new ConnectorNotConnectedError();
     }
 
-    return WalletAccount.connect(
+    if (
+      this.accountPromise &&
+      this.accountProvider === provider &&
+      this.accountPaymasterProvider === paymasterProvider
+    ) {
+      return this.accountPromise;
+    }
+
+    this.accountProvider = provider;
+    this.accountPaymasterProvider = paymasterProvider;
+    this.accountPromise = WalletAccount.connect(
       provider,
       this.wallet as any,
       undefined,
       paymasterProvider,
       true,
-    );
+    ).catch((error) => {
+      this.clearAccountCache();
+      throw error;
+    });
+
+    return this.accountPromise;
   }
 
   async chainId() {
@@ -193,8 +212,15 @@ class IdResolvedInjectedConnector extends Connector {
     });
   }
 
+  private clearAccountCache() {
+    this.accountPromise = undefined;
+    this.accountProvider = undefined;
+    this.accountPaymasterProvider = undefined;
+  }
+
   private onAccountsChanged = async (accounts?: string[]) => {
     const [account] = accounts || [];
+    this.clearAccountCache();
 
     if (!account) {
       this.emit("disconnect");
@@ -209,6 +235,7 @@ class IdResolvedInjectedConnector extends Connector {
 
   private onNetworkChanged = (chainIdHex?: string, accounts?: string[]) => {
     const [account] = accounts || [];
+    this.clearAccountCache();
 
     this.emit(
       "change",
