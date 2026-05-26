@@ -63,7 +63,10 @@ NEXT_PUBLIC_AVNU_PAYMASTER_API_KEY    # AVNU API key — all tx types sponsored 
 The app supports three wallet connection strategies, unified by `useUnifiedWallet`:
 
 1. **Argent / Braavos** — injected browser wallets via `starknetkit` + `@starknet-react/core`
-2. **Cartridge Controller** — session-key gaming wallet via StarkZap SDK (`OnboardStrategy.Cartridge`). Auto-gasless, policies scoped to collection + marketplace contracts.
+2. **Cartridge Controller** — session-key gaming wallet via StarkZap SDK (`OnboardStrategy.Cartridge`). Auto-gasless, policies scoped via `CARTRIDGE_POLICIES` in `src/contexts/starkzap-wallet-context.tsx`.
+   - **Static targets are exhaustively whitelisted** as of PRs #20 + #24 (2026-05-26): MIP registry, ERC-1155 factory, marketplace ×2, POP factory, Drop factory, NFTComments, three airdrop mint contracts. Whenever a new (target, method) is invoked on a static-address contract, **add it to `CARTRIDGE_POLICIES`** — Cartridge session-keys reject any call outside the list.
+   - **Per-instance contracts are a structural gap**: per-collection NFT contracts (transfers, approves, mint_item), per-pop event contracts (claim), per-drop contracts (manage actions) all have dynamic addresses the static list cannot cover. Cartridge users hit "additional approval needed" prompts mid-flow for these. Three follow-up paths possible: route through registry wrappers (e.g. MIP `transfer_token`), add a runtime UX nudge, or use Cartridge SDK wildcard support if available.
+   - **Audit methodology**: `grep -rEo 'entrypoint:\s*"[a-zA-Z_]+"' src/ | awk -F'"' '{print $2}' | sort -u` lists every called entrypoint. Diff against `CARTRIDGE_POLICIES`. Anything called on a static-address contract but not in the list is a silent-failure bug.
 3. **Privy** — email/social login via StarkZap SDK (`OnboardStrategy.Privy`). Keys managed server-side; no seed phrase required. Requires the two Privy API routes.
 
 **Priority**: StarkZap wallet (Cartridge/Privy) takes priority over injected in `useUnifiedWallet`.
@@ -88,7 +91,7 @@ ThemeProvider
 
 ## Starknet Integration Patterns
 
-**Contract ABIs** come from `@medialane/sdk` (currently 0.20.0). Import `IPMarketplaceABI`, `Medialane1155ABI`, `IPCollectionABI`, `IPNftABI`, `POPFactoryABI`, `POPCollectionABI`, `DropFactoryABI`, `DropCollectionABI`, `IPCollection1155FactoryABI`, `IPCollection1155ABI` from the SDK. Each ABI lives in its own file under `src/abis/` in the SDK (split in v0.19.0); the public import path is unchanged via `abis/index.ts` barrel. The only local ABI that remains in this repo's `src/abis/` is `user_settings.ts` — everything contract-related lives in the SDK as the single source of truth.
+**Contract ABIs** come from `@medialane/sdk` (currently 0.23.0; 0.24.0 with new typed fields is merged on the SDK repo but pending `npm publish`). Import `IPMarketplaceABI`, `Medialane1155ABI`, `IPCollectionABI`, `IPNftABI`, `POPFactoryABI`, `POPCollectionABI`, `DropFactoryABI`, `DropCollectionABI`, `IPCollection1155FactoryABI`, `IPCollection1155ABI` from the SDK. Each ABI lives in its own file under `src/abis/` in the SDK (split in v0.19.0); the public import path is unchanged via `abis/index.ts` barrel. The only local ABI that remains in this repo's `src/abis/` is `user_settings.ts` — everything contract-related lives in the SDK as the single source of truth.
 
 **Marketplace order flow** (in `src/hooks/use-marketplace.ts`):
 - Orders use **SNIP-12 typed data signing** (`getOrderParametersTypedData`, `getOrderFulfillmentTypedData` from `src/utils/marketplace-utils.ts`)
@@ -125,6 +128,8 @@ charged on top of the trade.
 - `executeSponsored(calls)` — explicit sponsored path (requires API key)
 - `executeGasless(calls, gasToken, maxAmount)` — user pays with alt token (USDC/USDT/etc.)
 - `executeTraditional(calls)` — normal ETH/STRK gas
+
+All four methods **await on-chain confirmation** via `waitForReceipt(hash)` before returning (PR #18, 2026-05-25). A revert returns `null` (or throws, for `executeAuto`) with `error` set. RPC polling failure returns the hash optimistically with a console warning. Same correctness invariant as `useTx` (fixed in PR #17). `use-marketplace.ts` has its own pipeline and was already correct.
 
 **Feature hooks**:
 - `usePaymasterMinting` — `mint(recipient, tokenURI)` calls `executeAuto` internally
