@@ -33,9 +33,13 @@ function TokenBrowseCard({ token }: { token: ApiToken }) {
   const image = ipfsToHttp(token.metadata?.image);
   const name = token.metadata?.name ?? `#${token.tokenId}`;
   const activeOrder = token.activeOrders?.[0];
+  // `token.standard` is the canonical field (derived from the parent collection
+  // at index time). The `.collection?.standard` fallback existed when the
+  // backend didn't yet serialize standard on tokens; that was fixed in SDK v0.6.5.
+  // ApiToken has no `.collection` field, so the second cast was always
+  // dead code — drop it. Keep the activeOrder hint for orphan-token edge cases.
   const tokenStandard =
-    (token as any).standard ??
-    (token as any).collection?.standard ??
+    token.standard ??
     (activeOrder?.offer.itemType === "ERC1155" ? "ERC1155" : undefined);
   const price = activeOrder?.price;
   const ipType = token.metadata?.ipType;
