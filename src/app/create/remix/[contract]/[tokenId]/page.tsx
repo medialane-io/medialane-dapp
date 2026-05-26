@@ -296,7 +296,7 @@ export default function CreateRemixPage() {
         recipient: walletAddress,
         tokenUri,
       });
-      const calls = (intentRes.data as any)?.calls as Call[];
+      const calls = intentRes.data?.calls as Call[];
       if (!calls?.length) throw new Error("No calls returned from mint intent");
 
       const result = await executeTransaction(calls);
@@ -349,7 +349,7 @@ export default function CreateRemixPage() {
     if (err) { toast.error(err); return; }
     setOfferLoading(true);
     try {
-      const tokenInfo = getTokenBySymbol(currency as any);
+      const tokenInfo = getTokenBySymbol(currency);
       const decimals = tokenInfo?.decimals ?? 18;
       const rawPrice = BigInt(Math.round(parseFloat(price) * 10 ** decimals)).toString();
 

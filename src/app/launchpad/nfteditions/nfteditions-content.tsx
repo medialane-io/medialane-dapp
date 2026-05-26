@@ -137,7 +137,7 @@ export function NFTEditionsContent() {
   const { collections, isLoading } = useCollectionsByOwner(walletAddress ?? null);
 
   const erc1155 = useMemo(
-    () => collections.filter((c) => (c as any).standard === "ERC1155"),
+    () => collections.filter((c) => c.standard === "ERC1155"),
     [collections]
   );
 
