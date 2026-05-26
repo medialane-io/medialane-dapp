@@ -23,27 +23,50 @@ import {
   walletAuthenticating,
   type WalletSession,
 } from "@/lib/wallet-session";
+import { POP_FACTORY_CONTRACT_MAINNET, DROP_FACTORY_CONTRACT_MAINNET } from "@medialane/sdk";
 import {
   COLLECTION_721_CONTRACT,
+  COLLECTION_1155_CONTRACT,
   MARKETPLACE_721_CONTRACT,
   MARKETPLACE_1155_CONTRACT,
+  NFTCOMMENTS_CONTRACT,
 } from "@/lib/constants";
 
 // ---------------------------------------------------------------------------
 // Cartridge session policies for Medialane contracts
 // ---------------------------------------------------------------------------
+//
+// Cartridge session keys authorise only the (target, method) pairs in this
+// list — anything outside triggers a fresh PIN/passkey prompt or, in some
+// SDK versions, a hard rejection. Adding a method to the dapp without a
+// matching policy entry silently breaks the feature for Cartridge users.
+//
+// Per-collection NFT / POP / Drop contracts have DYNAMIC addresses (one per
+// event / drop / minted collection). The static target list below cannot
+// cover them. Cartridge users hitting those flows currently fall back to
+// an additional approval prompt — known UX gap, tracked as the next item
+// after this PR.
 
 export const CARTRIDGE_POLICIES = [
+  // ── MIP collection registry (ERC-721) ─────────────────────────────────
   { target: COLLECTION_721_CONTRACT, method: "mint" },
   { target: COLLECTION_721_CONTRACT, method: "create_collection" },
   { target: COLLECTION_721_CONTRACT, method: "transfer_token" },
   { target: COLLECTION_721_CONTRACT, method: "transfer_collection_ownership" },
+  // ── IP-Programmable ERC-1155 factory ──────────────────────────────────
+  { target: COLLECTION_1155_CONTRACT, method: "deploy_collection" },
+  // ── Marketplace contracts ─────────────────────────────────────────────
   { target: MARKETPLACE_721_CONTRACT, method: "register_order" },
   { target: MARKETPLACE_721_CONTRACT, method: "fulfill_order" },
   { target: MARKETPLACE_721_CONTRACT, method: "cancel_order" },
   { target: MARKETPLACE_1155_CONTRACT, method: "register_order" },
   { target: MARKETPLACE_1155_CONTRACT, method: "fulfill_order" },
   { target: MARKETPLACE_1155_CONTRACT, method: "cancel_order" },
+  // ── POP / Drop factories (collection creation) ────────────────────────
+  { target: POP_FACTORY_CONTRACT_MAINNET, method: "create_collection" },
+  { target: DROP_FACTORY_CONTRACT_MAINNET, method: "create_drop" },
+  // ── NFT comments ──────────────────────────────────────────────────────
+  { target: NFTCOMMENTS_CONTRACT, method: "add_comment" },
 ] as { target: string; method: string }[];
 
 // ---------------------------------------------------------------------------
