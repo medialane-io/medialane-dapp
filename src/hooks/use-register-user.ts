@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import type { ApiWalletType } from "@medialane/sdk";
-import { MEDIALANE_API_KEY } from "@/lib/constants";
 import { getMedialaneClient } from "@/lib/medialane-client";
 
 type FrontendWalletType =
@@ -30,7 +29,7 @@ export function useRegisterUser(
   walletType: FrontendWalletType
 ) {
   useEffect(() => {
-    if (!address || !MEDIALANE_API_KEY) return;
+    if (!address) return;
 
     // Key on (address, walletType) so switching connectors (e.g. Argent → Braavos
     // on the same smart-account address) re-registers and the backend can upgrade
