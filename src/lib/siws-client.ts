@@ -123,7 +123,18 @@ export async function requestSiwsToken({
   });
 
   if (!verifyRes.ok) {
-    throw new Error("Wallet sign-in failed");
+    // Backend distinguishes counterfactual-wallet errors with code
+    // "account_not_deployed" + a user-facing `message` field so we can
+    // surface "Check if your wallet is deployed on Starknet." instead of
+    // the generic "sign-in failed" toast.
+    let backendMessage: string | undefined;
+    try {
+      const body = await verifyRes.json() as { error?: string; message?: string };
+      if (body?.message) backendMessage = body.message;
+    } catch {
+      // body wasn't JSON — fall through to generic message
+    }
+    throw new Error(backendMessage ?? "Wallet sign-in failed");
   }
 
   const { token } = await verifyRes.json() as { token?: string };

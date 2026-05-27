@@ -44,8 +44,13 @@ export function useSiwsToken() {
       setToken(newToken);
       return newToken;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Wallet sign-in failed");
-      return null;
+      // Capture for UI surfaces that read the hook's `error` field, AND
+      // rethrow so callers awaiting getValidToken() see the real reason
+      // (e.g. "Check if your wallet is deployed on Starknet.") in their
+      // try/catch instead of a null they convert to a generic message.
+      const message = err instanceof Error ? err.message : "Wallet sign-in failed";
+      setError(message);
+      throw err instanceof Error ? err : new Error(message);
     } finally {
       setIsSigningIn(false);
     }
