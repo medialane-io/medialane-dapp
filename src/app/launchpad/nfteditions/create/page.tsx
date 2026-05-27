@@ -88,6 +88,16 @@ export default function CreateNFTEditionsCollectionPage() {
     defaultValues: { name: "", symbol: "", description: "", external_link: "" },
   });
 
+  // Default external_link to the creator's public profile on medialane.io —
+  // matches the ERC-721 create-collection form and gives collectors a
+  // landing page even when the creator doesn't have a personal site yet.
+  // The creator can still override before submitting.
+  useEffect(() => {
+    if (walletAddress && !form.getValues("external_link")) {
+      form.setValue("external_link", `https://medialane.io/account/${walletAddress}`);
+    }
+  }, [walletAddress, form]);
+
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/svg+xml", "image/webp"];
 
   const handleImageSelect = async (file: File) => {
