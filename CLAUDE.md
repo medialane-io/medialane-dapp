@@ -89,9 +89,25 @@ ThemeProvider
 
 **Compat note**: StarkZap bundles starknet v9 internally; the app uses v8 via starknet-react. They coexist — share primitives (addresses, tx hashes) as plain strings only; never mix Account objects across stacks.
 
+### Connect dialog — `<ConnectWallet />` is the single entry point (2026-05-27)
+
+Every page and component that prompts the user to connect renders the shared `<ConnectWallet />` from `src/components/ConnectWallet.tsx`. It contains the four-card picker (Ready / Braavos / Cartridge / Email or Social) and handles both StarkZap (Cartridge / Privy) and injected (Ready / Braavos) connectors internally.
+
+- **Do NOT use `starknetkit`'s `useStarknetkitConnectModal`**. That path was removed across the launchpad pages, drop / pop mint flows, claim gate, and genesis mint. It silently auto-selected one wallet when only one connector was "available" — which masked extension-id rebrands (e.g. Ready X exposing `wallet.id = "ready"` instead of `"argentX"`) by falling through to Braavos with no picker.
+- **Pattern for "connect or block" UI**: render `<ConnectWallet label="Connect wallet" />` in the not-connected branch. For inline guards mid-flow (form submits, mint handlers), use `toast.error("Connect your wallet first")` and return — the persistent `<ConnectWallet />` button is still on the page.
+- **Ready / Argent connector** (`src/lib/starknet-connectors.ts`): `idResolvedReady()` constructs an `IdResolvedInjectedConnector("argentX", …, ["ready"])` — the alias list lets it discover extensions that expose under either id. The connector's external `id` stays `"argentX"` so backend `WalletType` attribution doesn't drift across the rebrand.
+
+### Onboarding — `/v1/users/register` via the BFF proxy (2026-05-27 incident note)
+
+`src/hooks/use-register-user.ts` runs on every wallet connect; it POSTs to `/api/proxy/v1/users/register` via the SDK so the BFF can inject the server-side `MEDIALANE_API_KEY`. **The hook must NOT guard on `MEDIALANE_API_KEY`** — that constant is intentionally an empty string in the browser (the key only exists server-side, per `src/lib/constants.ts:60-62`). A `!MEDIALANE_API_KEY` check there silently kills onboarding (was the cause of zero Wallet rows from 2026-05-24 → 2026-05-27 in prod). Same anti-pattern in any other client hook is a regression target — grep for `!MEDIALANE_API_KEY` and `!process.env.NEXT_PUBLIC_` in browser code paths when auditing.
+
+### BFF proxy method/path allowlist (added 2026-05-27)
+
+`src/app/api/proxy/v1/[...path]/route.ts` enforces an explicit allowlist on POST / PATCH / DELETE — `GET /v1/*` stays wildcard. The proxy injects the server-only tenant `MEDIALANE_API_KEY`; the allowlist keeps that key from being reachable on routes the dapp doesn't actually use. When adding any new mutating route call from the dapp, add the matching `(method, regex)` pair to `ALLOWED_ROUTES`. A missed entry surfaces as `[/api/proxy] blocked by allowlist` in Vercel logs (silent for the user, loud for ops).
+
 ## Starknet Integration Patterns
 
-**Contract ABIs** come from `@medialane/sdk` (currently 0.24.1). Import `IPMarketplaceABI`, `Medialane1155ABI`, `IPCollectionABI`, `IPNftABI`, `POPFactoryABI`, `POPCollectionABI`, `DropFactoryABI`, `DropCollectionABI`, `IPCollection1155FactoryABI`, `IPCollection1155ABI` from the SDK. Each ABI lives in its own file under `src/abis/` in the SDK (split in v0.19.0); the public import path is unchanged via `abis/index.ts` barrel. The only local ABI that remains in this repo's `src/abis/` is `user_settings.ts` — everything contract-related lives in the SDK as the single source of truth.
+**Contract ABIs** come from `@medialane/sdk` (currently 0.25.0). Import `IPMarketplaceABI`, `Medialane1155ABI`, `IPCollectionABI`, `IPNftABI`, `POPFactoryABI`, `POPCollectionABI`, `DropFactoryABI`, `DropCollectionABI`, `IPCollection1155FactoryABI`, `IPCollection1155ABI` from the SDK. Each ABI lives in its own file under `src/abis/` in the SDK (split in v0.19.0); the public import path is unchanged via `abis/index.ts` barrel. The only local ABI that remains in this repo's `src/abis/` is `user_settings.ts` — everything contract-related lives in the SDK as the single source of truth.
 
 **Marketplace order flow** (in `src/hooks/use-marketplace.ts`):
 - Orders use **SNIP-12 typed data signing** (`getOrderParametersTypedData`, `getOrderFulfillmentTypedData` from `src/utils/marketplace-utils.ts`)
