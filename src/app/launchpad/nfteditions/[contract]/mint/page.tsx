@@ -186,16 +186,20 @@ export default function MintNFTEditionsPage() {
     }
   }, [walletAddress, form]);
 
-  // Pre-fill external URL with the canonical asset URL. Creators can still override it.
+  // Pre-fill external URL with the collection page (not the asset URL — the
+  // token doesn't exist on-chain until mint completes, and indexers won't
+  // resolve /asset/:contract/:tokenId until they pick up the Transfer event).
+  // Pointing to the collection page gives collectors a working link the
+  // moment the metadata JSON is written to IPFS. Creators can still override.
   useEffect(() => {
     if (!collectionAddress) return;
-    const suggested = absoluteUrl(`/asset/${collectionAddress}/${generatedTokenId}`);
+    const suggested = absoluteUrl(`/collections/${collectionAddress}`);
     const current = form.getValues("external_url");
     if (!current || current === autoExternalUrl) {
       form.setValue("external_url", suggested);
       setAutoExternalUrl(suggested);
     }
-  }, [autoExternalUrl, collectionAddress, form, generatedTokenId]);
+  }, [autoExternalUrl, collectionAddress, form]);
 
   // Verify the connected wallet is the collection owner before showing the form
   useEffect(() => {
