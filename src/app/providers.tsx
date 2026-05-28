@@ -44,15 +44,6 @@ function NavTrigger() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    if (sessionStorage.getItem("ml-mainnet-notice-shown")) return;
-    sessionStorage.setItem("ml-mainnet-notice-shown", "1");
-    toast.warning("Medialane is live on Starknet Mainnet — early testing phase. Proceed with caution.", {
-      duration: 12000,
-      id: "mainnet-notice",
-    });
-  }, []);
-
   return (
     <div className="relative min-h-screen flex flex-col bg-background">
       <NavCommandMenu commands={NAV_COMMANDS} accountSlot={<NavAccountPanel />} footerSlot={<NavThemeToggle />} />
