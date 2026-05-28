@@ -220,8 +220,6 @@ export function PrivyInlineLogin({ onOpenWalletPicker, locale = "br" }: Props) {
 
   return (
     <div className="max-w-md space-y-4 rounded-2xl border border-border/40 bg-card/30 p-5">
-      <p className="text-lg font-bold text-foreground">{t.title}</p>
-
       <form onSubmit={handleSendCode} className="space-y-3">
         {emailError && <p className="text-xs text-destructive">{emailError}</p>}
         <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-background/80 px-4 transition-colors focus-within:border-primary/70 focus-within:ring-2 focus-within:ring-primary/30">

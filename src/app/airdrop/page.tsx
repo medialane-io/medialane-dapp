@@ -13,8 +13,8 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import { MedialaneLogo } from "@/components/brand/medialane-logo";
-import { GenesisMint, AirdropEventCard } from "@/components/airdrop/genesis-mint";
-import { MINT_CONTRACT, GENESIS_NFT_URI } from "@/lib/constants";
+import { AirdropEventCard } from "@/components/airdrop/genesis-mint";
+import { AirdropClaim } from "@/components/airdrop/airdrop-claim";
 import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -79,12 +79,7 @@ export default function AirdropPage() {
                 <p className="text-base lg:text-lg text-muted-foreground leading-relaxed">
                   Join the Creator&apos;s Airdrop to earn rewards. Sign up, create, trade, and grow with us from day one.
                 </p>
-                <GenesisMint
-                  contract={MINT_CONTRACT}
-                  nftUri={GENESIS_NFT_URI}
-                  storageKey="ml_airdrop"
-                  locale="en"
-                />
+                <AirdropClaim storageKey="ml_airdrop" locale="en" />
               </div>
 
               {/* Right: featured airdrop image */}

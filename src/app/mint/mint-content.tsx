@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -17,13 +17,10 @@ import {
   UserCheck,
   XCircle,
 } from "lucide-react";
-import { ConnectWallet } from "@/components/ConnectWallet";
-import { GenesisMint } from "@/components/airdrop/genesis-mint";
-import { PrivyInlineLogin } from "@/components/airdrop/privy-inline-login";
+import { AirdropClaim } from "@/components/airdrop/airdrop-claim";
 import { MedialaneLogo } from "@/components/brand/medialane-logo";
-import { useWallet } from "@/hooks/use-wallet";
 import { ipfsToHttp } from "@/lib/utils";
-import { MINT_CONTRACT, GENESIS_NFT_URI, GENESIS_NFT_IMAGE_URL } from "@/lib/constants";
+import { GENESIS_NFT_IMAGE_URL } from "@/lib/constants";
 
 // Accept http(s) URLs, local paths, ipfs:// URIs, or bare CIDs. ipfs://
 // and bare CIDs are routed through the /api/ipfs proxy via ipfsToHttp;
@@ -76,26 +73,12 @@ function EventCard() {
 }
 
 export function MintContent() {
-  const { isConnected } = useWallet();
-  const headerConnectRef = useRef<HTMLDivElement | null>(null);
-
-  const openWalletPicker = () => {
-    const btn = headerConnectRef.current?.querySelector("button");
-    btn?.click();
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header — logo only, no distractions */}
-      <header className="px-6 py-4 flex items-center border-b border-border/30">
+      <header className="px-6 py-4 flex items-center">
         <Link href="/"><MedialaneLogo /></Link>
       </header>
-
-      {/* Hidden ConnectWallet — programmatically triggered by the
-          "Other ways to sign in" link in PrivyInlineLogin. */}
-      <div ref={headerConnectRef} className="hidden">
-        <ConnectWallet />
-      </div>
 
       <div className="flex-1 w-full">
         <div className="max-w-5xl mx-auto px-5 sm:px-8">
@@ -107,7 +90,7 @@ export function MintContent() {
                 <div className="inline-flex items-center gap-2 rounded-full border border-yellow-500/30 bg-yellow-500/5 px-3 py-1">
                   <Sparkles className="h-3.5 w-3.5 text-yellow-500" />
                   <span className="text-xs font-semibold text-yellow-600 dark:text-yellow-400">
-                    Creator&apos;s Airdrop — Launch Campaign
+                    Creators Fund Campaign
                   </span>
                 </div>
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.05]">
@@ -116,16 +99,7 @@ export function MintContent() {
                     Creator&apos;s Airdrop
                   </span>
                 </h1>
-                {isConnected ? (
-                  <GenesisMint
-                    contract={MINT_CONTRACT}
-                    nftUri={GENESIS_NFT_URI}
-                    storageKey="ml_mint"
-                    locale="en"
-                  />
-                ) : (
-                  <PrivyInlineLogin onOpenWalletPicker={openWalletPicker} locale="en" />
-                )}
+                <AirdropClaim storageKey="ml_mint" locale="en" />
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Medialane is an app for creators to publish, share, and monetize content. Free to join.
                 </p>
