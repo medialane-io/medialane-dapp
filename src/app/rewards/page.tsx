@@ -1,25 +1,44 @@
 import type { Metadata } from "next";
-import { Trophy } from "lucide-react";
+import { Trophy, Info } from "lucide-react";
+import { PageContainer } from "@medialane/ui";
 import { RewardsDashboard } from "./rewards-dashboard";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Rewards — Medialane",
-  description: "Your XP, rank, and badges. Earn more by creating, collecting, and trading.",
+  description:
+    "Your XP, rank, badges, and Creator's Fund airdrop share. Earn more by creating, collecting, and trading.",
+  alternates: canonical("/rewards"),
 };
 
 export default function RewardsPage() {
   return (
-    <div className="container mx-auto px-4 sm:px-6 pt-10 pb-20 max-w-3xl">
-      <div className="mb-8 space-y-1">
+    <PageContainer className="box-border max-w-full pt-20 pb-16 space-y-8">
+      <header className="space-y-2">
         <div className="flex items-center gap-2.5">
           <Trophy className="h-5 w-5 text-primary" />
-          <h1 className="text-2xl font-bold">Rewards</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Rewards</h1>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Earn XP by creating, collecting, and trading. Level up to unlock recognition.
+        <p className="text-sm text-muted-foreground max-w-2xl">
+          Earn XP by creating, collecting, and trading. Every $1,000 the Creator&apos;s
+          Fund collects is airdropped back to participants — weighted by your score.
         </p>
-      </div>
+      </header>
+
       <RewardsDashboard />
-    </div>
+
+      <footer className="rounded-2xl border border-border/40 bg-muted/20 px-5 py-4 flex items-start gap-3">
+        <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          <span className="font-semibold text-foreground">
+            Subject to DAO recalibration.
+          </span>{" "}
+          XP values, Score Board weights, and badge criteria may be adjusted by
+          Medialane DAO governance to keep Creator&apos;s Fund airdrop
+          distributions fair and sustainable. Final share at each round is
+          determined when the round is executed on-chain.
+        </p>
+      </footer>
+    </PageContainer>
   );
 }

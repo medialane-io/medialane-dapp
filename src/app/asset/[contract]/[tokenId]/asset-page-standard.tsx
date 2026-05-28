@@ -78,7 +78,7 @@ export function AssetPageStandard() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 pt-14 pb-8">
+      <div className="container mx-auto px-4 pt-20 pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] lg:gap-10 gap-8">
           <Skeleton className="aspect-[4/3] w-full rounded-2xl" />
           <div className="space-y-4">
@@ -114,7 +114,7 @@ export function AssetPageStandard() {
       {token.isHidden && <HiddenContentBanner />}
       <AssetAtmosphere imageUrl={imageUrl} imgRef={imgRef} />
 
-      <div className="container mx-auto px-4 pt-14 space-y-8 pb-8">
+      <div className="container mx-auto px-4 pt-20 space-y-8 pb-8">
         <nav className="flex items-center gap-1.5 text-sm text-muted-foreground min-w-0">
           <Link href={`/collections/${contract}`} className="hover:text-foreground transition-colors truncate max-w-[140px] shrink-0">
             {collection?.name ?? contract.slice(0, 8) + "…"}

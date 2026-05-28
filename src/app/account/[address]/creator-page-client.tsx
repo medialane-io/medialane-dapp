@@ -3,84 +3,29 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { useParams } from "next/navigation";
-import Link from "next/link";
-import NextImage from "next/image";
-import { toast } from "sonner";
 import { useTokensByOwner } from "@/hooks/use-tokens";
 import { useUserOrders } from "@/hooks/use-orders";
 import { useActivitiesByAddress } from "@/hooks/use-activities";
 import { useCollectionsByOwner } from "@/hooks/use-collections";
-import { useDominantColor } from "@/hooks/use-dominant-color";
 import { TokenCard, TokenCardSkeleton } from "@/components/shared/token-card";
 import { AddressDisplay } from "@/components/shared/address-display";
 import { ListingCard, ListingCardSkeleton } from "@/components/marketplace/listing-card";
 import { CollectionCard, CollectionCardSkeleton } from "@/components/shared/collection-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ipfsToHttp } from "@/lib/utils";
 import {
   Activity,
   Image as ImageIcon,
   LayoutGrid,
   ShoppingBag,
-  Share2,
   LayoutList,
   Flag,
 } from "lucide-react";
 import { ReportDialog } from "@/components/report-dialog";
+import { ShareButton } from "@/components/shared/share-button";
 import { HiddenContentBanner } from "@/components/hidden-content-banner";
 import { cn } from "@/lib/utils";
-import { addressPalette } from "@/lib/creator-utils";
 import { ActivityRow } from "@/components/creator/activity-row";
-
-function AddressAvatar({
-  address,
-  image,
-  size = 88,
-  borderColor,
-}: {
-  address: string;
-  image?: string | null;
-  size?: number;
-  borderColor?: string;
-}) {
-  const [imgError, setImgError] = useState(false);
-  const { h1, h2 } = addressPalette(address);
-  const initials = address.slice(2, 4).toUpperCase();
-  const showImage = image && image !== "/placeholder.svg" && !imgError;
-
-  return (
-    <div
-      className="rounded-full shrink-0 ring-[3px] ring-background overflow-hidden flex items-center justify-center text-white font-bold"
-      style={{
-        width: size,
-        height: size,
-        background: showImage
-          ? "transparent"
-          : `linear-gradient(145deg, hsl(${h1}, 72%, 60%), hsl(${h2}, 72%, 50%))`,
-        fontSize: size * 0.33,
-        boxShadow: borderColor
-          ? `0 0 0 3px ${borderColor}, 0 8px 32px rgba(0,0,0,0.3)`
-          : `0 0 0 2px hsl(${h1}, 72%, 60% / 0.4), 0 8px 24px rgba(0,0,0,0.25)`,
-      }}
-    >
-      {showImage ? (
-        <NextImage
-          src={image!}
-          alt="Creator"
-          width={size}
-          height={size}
-          className="w-full h-full object-cover"
-          unoptimized
-          onError={() => setImgError(true)}
-        />
-      ) : (
-        initials
-      )}
-    </div>
-  );
-}
-
 
 // ─── Tab config ──────────────────────────────────────────────────────────────
 
@@ -88,7 +33,7 @@ const TABS = [
   { id: "assets",      label: "Assets",      Icon: LayoutGrid },
   { id: "listings",    label: "Listings",    Icon: ShoppingBag },
   { id: "collections", label: "Collections", Icon: LayoutList },
-{ id: "activity",    label: "Activity",    Icon: Activity },
+  { id: "activity",    label: "Activity",    Icon: Activity },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -137,144 +82,48 @@ export default function CreatorPageClient() {
   const { collections, isLoading: collectionsLoading } = useCollectionsByOwner(activeTab === "collections" ? addr : null);
   const { activities,  isLoading: activitiesLoading  } = useActivitiesByAddress(activeTab === "activity" ? addr : null);
 
-  // Always fetch one token for the banner image
-  const { tokens: bannerTokens } = useTokensByOwner(addr, 1, 1);
-
   const activeListings = orders.filter(
     (o) => o.status === "ACTIVE" && o.offer.itemType === "ERC721"
   );
-
-  const { h1, h2, h3 } = addressPalette(addr ?? "0x0");
-
-  const latestToken  = bannerTokens[0];
-  const latestRawImg = latestToken?.metadata?.image;
-  const latestImage  = latestRawImg ? ipfsToHttp(latestRawImg) : null;
-  const bannerImage  = latestImage && latestImage !== "/placeholder.svg" ? latestImage : null;
-
-  const { imgRef, dynamicTheme } = useDominantColor(bannerImage);
-  const dynamicPrimary = dynamicTheme
-    ? `hsl(var(--dynamic-primary))`
-    : `hsl(${h1}, 72%, 62%)`;
 
   // Tab count badges — only shown once that tab has been visited and loaded
   const tabBadge: Partial<Record<TabId, number>> = {
     ...(activeTab === "assets"      && !tokensLoading      && { assets:      tokens.length }),
     ...(activeTab === "listings"    && !ordersLoading      && { listings:    activeListings.length }),
     ...(activeTab === "collections" && !collectionsLoading && { collections: collections.length }),
-    ...(activeTab === "activity" && !activitiesLoading && { activity: activities.length }),
+    ...(activeTab === "activity"    && !activitiesLoading  && { activity:    activities.length }),
   };
 
   return (
-    <div
-      className="pb-20 min-h-screen"
-      style={dynamicTheme ? (dynamicTheme as React.CSSProperties) : {}}
-    >
-      {/* Hidden extraction image for dominant color */}
-      {bannerImage && (
-        <NextImage
-          ref={imgRef}
-          src={bannerImage}
-          crossOrigin="anonymous"
-          aria-hidden
-          alt=""
-          width={1}
-          height={1}
-          unoptimized
-          style={{ display: "none" }}
-        />
-      )}
-
+    <div className="min-h-screen pb-20">
       {hiddenStatus?.isHidden === true && <HiddenContentBanner />}
 
-      {/* ── Cinematic banner ─────────────────────────────────────────────── */}
-      <div className="relative h-48 sm:h-64 overflow-hidden">
-        {/* Layer 1 — blurred asset image */}
-        {bannerImage && (
-          <div className="absolute inset-0">
-            <NextImage
-              src={bannerImage}
-              alt=""
-              fill
-              className="object-cover scale-150"
-              style={{ opacity: 0.6, filter: "blur(48px) saturate(1.8) brightness(0.55)" }}
-              unoptimized
-              aria-hidden
-            />
-            <div className="absolute inset-0 bg-background/25" />
-          </div>
-        )}
-
-        {/* Layer 2 — address-derived mesh gradient (always present) */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `
-              radial-gradient(ellipse 90% 90% at 15% 60%, hsl(${h1}, 68%, 42% / ${bannerImage ? 0.28 : 0.52}) 0%, transparent 65%),
-              radial-gradient(ellipse 65% 65% at 85% 25%, hsl(${h2}, 68%, 38% / ${bannerImage ? 0.18 : 0.42}) 0%, transparent 60%),
-              radial-gradient(ellipse 45% 45% at 55% 85%, hsl(${h3}, 68%, 38% / ${bannerImage ? 0.12 : 0.30}) 0%, transparent 55%)
-            `,
-          }}
-        />
-
-        {/* Bottom fade to background */}
-        <div
-          className="absolute inset-x-0 bottom-0 h-28"
-          style={{ background: `linear-gradient(to bottom, transparent 0%, hsl(var(--background)) 100%)` }}
-        />
-
-        {/* Top edge fade */}
-        <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-background/15 to-transparent" />
+      {/* ── Header ───────────────────────────────────────────────────────── */}
+      <div className="px-6 pt-20 pb-2 flex items-start justify-between gap-3">
+        <div className="space-y-1.5 min-w-0">
+          <AddressDisplay
+            address={address ?? ""}
+            chars={10}
+            className="text-base font-mono font-semibold"
+          />
+          {(() => {
+            const parts: string[] = [];
+            if (tabBadge.assets      !== undefined) parts.push(`${tabBadge.assets} ${tabBadge.assets === 1 ? "asset" : "assets"}`);
+            if (tabBadge.listings    !== undefined && tabBadge.listings    > 0) parts.push(`${tabBadge.listings} ${tabBadge.listings === 1 ? "listing" : "listings"}`);
+            if (tabBadge.collections !== undefined && tabBadge.collections > 0) parts.push(`${tabBadge.collections} ${tabBadge.collections === 1 ? "collection" : "collections"}`);
+            if (parts.length === 0) return null;
+            return <p className="text-xs text-muted-foreground">{parts.join(" · ")}</p>;
+          })()}
+        </div>
+        <div className="flex items-center gap-1 shrink-0 pt-1">
+          <ShareButton title="Creator Profile" size="icon" variant="ghost" />
+          <Button variant="ghost" size="icon" onClick={() => setReportOpen(true)}>
+            <Flag className="w-4 h-4 text-muted-foreground" />
+          </Button>
+        </div>
       </div>
 
-      {/* ── Page body ────────────────────────────────────────────────────── */}
       <div className="px-6">
-
-        {/* ── Identity row ─────────────────────────────────────────────── */}
-        <div className="-mt-14 sm:-mt-16 relative z-10">
-          <div className="flex flex-wrap items-end gap-x-4 gap-y-3 pb-6">
-            <AddressAvatar
-              address={address ?? "0x0"}
-              image={latestImage}
-              size={88}
-              borderColor={dynamicTheme ? `hsl(var(--dynamic-primary))` : undefined}
-            />
-
-            <div className="flex-1 min-w-0 pb-1 space-y-1.5">
-              <span className="pill-badge">Creator</span>
-              <h1 className="text-lg sm:text-xl font-bold font-mono tracking-tight leading-snug truncate text-foreground">
-                {addr ? `${addr.slice(0, 10)}…${addr.slice(-8)}` : "—"}
-              </h1>
-              <AddressDisplay
-                address={address ?? ""}
-                chars={8}
-                className="text-xs text-muted-foreground"
-              />
-            </div>
-
-            <div className="pb-1 shrink-0 flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  toast.success("Link copied");
-                }}
-              >
-                <Share2 className="h-3.5 w-3.5 mr-1.5" />
-                Share
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-foreground"
-                onClick={() => setReportOpen(true)}
-                title="Report this creator"
-              >
-                <Flag className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
 
         <ReportDialog
           target={{
@@ -287,7 +136,7 @@ export default function CreatorPageClient() {
         />
 
         {/* ── Tab navigation ────────────────────────────────────────────── */}
-        <div className="sticky top-0 z-10 -mx-6 px-6 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="sticky top-0 z-10 -mx-6 px-6 bg-background/75 backdrop-blur-sm border-b border-border">
           <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-none -mb-px">
             {TABS.map(({ id, label, Icon }) => {
               const count = tabBadge[id];
@@ -318,14 +167,7 @@ export default function CreatorPageClient() {
                     </span>
                   )}
                   {isActive && (
-                    <span
-                      className="absolute bottom-0 inset-x-0 h-0.5 rounded-full"
-                      style={{
-                        background: dynamicTheme
-                          ? `linear-gradient(90deg, hsl(var(--dynamic-primary)), hsl(var(--dynamic-accent)))`
-                          : `linear-gradient(90deg, hsl(${h1}, 68%, 62%), hsl(${h2}, 68%, 58%))`,
-                      }}
-                    />
+                    <span className="absolute bottom-0 inset-x-0 h-0.5 rounded-full bg-primary" />
                   )}
                 </button>
               );
