@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useAccount, useContract, useNetwork, useProvider } from "@starknet-react/core";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
-import { Abi, shortString, constants } from "starknet";
+import { Abi, shortString, constants, num } from "starknet";
 import { useSWRConfig } from "swr";
 import { IPMarketplaceABI, Medialane1155ABI as IPMarketplace1155ABI } from "@medialane/sdk";
 import { toast } from "sonner";
@@ -11,9 +11,7 @@ import type { CheckoutItem } from "@/lib/checkout";
 import {
     getOrderParametersTypedData,
     getOrderCancellationTypedData,
-    getOrderFulfillmentTypedData,
     get1155OrderParametersTypedData,
-    get1155OrderFulfillmentTypedData,
     get1155OrderCancellationTypedData,
     stringifyBigInts,
 } from "@/utils/marketplace-utils";
@@ -60,6 +58,16 @@ const getDecimals = (currencySymbol: string) =>
 
 const toWei = (price: string, currencySymbol: string): string =>
     BigInt(Math.floor(parseFloat(price) * Math.pow(10, getDecimals(currencySymbol)))).toString();
+
+// Full-felt (248-bit) random salt. In the 0.26.0 schema the nonce was removed,
+// so salt is the SOLE order-hash uniqueness source — it must be wide to avoid
+// hash collisions the contract would reject. Mirrors @medialane/sdk generateSalt.
+const generateSalt = (): string => {
+    const bytes = new Uint8Array(31);
+    crypto.getRandomValues(bytes);
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    return num.toHex(BigInt("0x" + hex));
+};
 
 const ORDER_CREATED_SELECTOR = "0x3427759bfd3b941f14e687e129519da3c9b0046c5b9aaa290bb1dede63753b3";
 
@@ -197,26 +205,48 @@ export function useMarketplace(): UseMarketplaceReturn {
         }
     }, [provider]);
 
-    // Builds shared timing/nonce/currency fields for an order.
+    // Builds shared timing/counter/currency fields for an order.
     const buildBaseOrderParams = useCallback(async (
         currencySymbol: string,
         durationSeconds: number,
         contract: NonNullable<typeof medialaneContract>
     ) => {
         const now = Math.floor(Date.now() / 1000);
-        const startTime = (now + 300).toString();
+        const startTime = (now + 30).toString(); // ~6s blocks — small inclusion buffer
         const endTime = (now + durationSeconds).toString();
-        const salt = Math.floor(Math.random() * 1000000).toString();
+        const salt = generateSalt();
 
         const { SUPPORTED_TOKENS } = await import("@/lib/constants");
         const currencyAddress = SUPPORTED_TOKENS.find((t: any) => t.symbol === currencySymbol)?.address;
         if (!currencyAddress) throw new Error("Unsupported currency selected");
 
-        const currentNonce = await contract.nonces(walletAddress!);
-        const nonce = currentNonce.toString();
+        // 0.26.0: per-offerer monotonic counter replaces the removed nonce.
+        const currentCounter = await contract.get_counter(walletAddress!);
+        const counter = currentCounter.toString();
 
-        return { startTime, endTime, salt, currencyAddress, nonce };
+        return { startTime, endTime, salt, currencyAddress, counter };
     }, [walletAddress]);
+
+    // Signed EIP-2981 royalty cap (bps) for an order. Reads the NFT's live 2981
+    // rate via royalty_info(tokenId, 10000) — the returned amount equals the bps
+    // at salePrice 10000. Non-2981 NFTs / failures yield "0" (never over-pay).
+    const resolveRoyaltyMaxBps = useCallback(async (
+        nft: string,
+        tokenId: string
+    ): Promise<string> => {
+        try {
+            const { cairo } = await import("starknet");
+            const id = cairo.uint256(tokenId);
+            const res = await provider.callContract({
+                contractAddress: nft,
+                entrypoint: "royalty_info",
+                calldata: [id.low.toString(), id.high.toString(), "10000", "0"],
+            });
+            return BigInt(res[1] ?? "0").toString();
+        } catch {
+            return "0";
+        }
+    }, [provider]);
 
     // Signs the orderParams, verifies the hash against the contract, and returns a
     // populated register_order call ready to include in a multicall.
@@ -289,33 +319,34 @@ export function useMarketplace(): UseMarketplaceReturn {
 
         return withProcessing(async () => {
             const priceWei = toWei(price, currencySymbol);
-            const { startTime, endTime, salt, currencyAddress, nonce } =
+            const { startTime, endTime, salt, currencyAddress, counter } =
                 await buildBaseOrderParams(currencySymbol, durationSeconds, contract);
+            const royaltyMaxBps = await resolveRoyaltyMaxBps(assetContractAddress, tokenId);
 
             // ── ERC-1155 path ─────────────────────────────────────────────────
             if (is1155) {
                 const listAmount = amount ?? "1";
                 const orderParams1155 = {
                     offerer: walletAddress,
+                    marketplace: contract.address,
                     offer: {
                         item_type: "ERC1155",
                         token: assetContractAddress,
                         identifier_or_criteria: tokenId,
-                        start_amount: listAmount,
-                        end_amount: listAmount,
+                        amount: listAmount,
                     },
                     consideration: {
                         item_type: "ERC20",
                         token: currencyAddress,
                         identifier_or_criteria: "0",
-                        start_amount: priceWei,
-                        end_amount: priceWei,
+                        amount: priceWei,
                         recipient: walletAddress,
                     },
+                    royalty_max_bps: royaltyMaxBps,
                     start_time: startTime,
                     end_time: endTime,
                     salt,
-                    nonce,
+                    counter,
                 };
                 const chainId = ('0x' + chain!.id.toString(16)) as constants.StarknetChainId;
                 const typedData1155 = stringifyBigInts(
@@ -369,25 +400,25 @@ export function useMarketplace(): UseMarketplaceReturn {
 
             const orderParams = {
                 offerer: walletAddress,
+                marketplace: contract.address,
                 offer: {
                     item_type: "ERC721",
                     token: assetContractAddress,
                     identifier_or_criteria: tokenId,
-                    start_amount: "1",
-                    end_amount: "1",
+                    amount: "1",
                 },
                 consideration: {
                     item_type: "ERC20",
                     token: currencyAddress,
                     identifier_or_criteria: "0",
-                    start_amount: priceWei,
-                    end_amount: priceWei,
+                    amount: priceWei,
                     recipient: walletAddress,
                 },
+                royalty_max_bps: royaltyMaxBps,
                 start_time: startTime,
                 end_time: endTime,
                 salt,
-                nonce,
+                counter,
             };
 
             const registerCall = await signAndBuildRegisterCall(orderParams, contract);
@@ -452,31 +483,32 @@ export function useMarketplace(): UseMarketplaceReturn {
 
         return withProcessing(async () => {
             const priceWei = toWei(price, currencySymbol);
-            const { startTime, endTime, salt, currencyAddress, nonce } =
+            const { startTime, endTime, salt, currencyAddress, counter } =
                 await buildBaseOrderParams(currencySymbol, durationSeconds, contract);
+            const royaltyMaxBps = await resolveRoyaltyMaxBps(assetContractAddress, tokenId);
 
             // Inverted vs. listing: offerer sends ERC20, receives the NFT
             const orderParams = {
                 offerer: walletAddress,
+                marketplace: contract.address,
                 offer: {
                     item_type: "ERC20",
                     token: currencyAddress,
                     identifier_or_criteria: "0",
-                    start_amount: priceWei,
-                    end_amount: priceWei,
+                    amount: priceWei,
                 },
                 consideration: {
                     item_type: is1155 ? "ERC1155" : "ERC721",
                     token: assetContractAddress,
                     identifier_or_criteria: tokenId,
-                    start_amount: "1",
-                    end_amount: "1",
+                    amount: "1",
                     recipient: walletAddress,
                 },
+                royalty_max_bps: royaltyMaxBps,
                 start_time: startTime,
                 end_time: endTime,
                 salt,
-                nonce,
+                counter,
             };
 
             let registerCall: any;
@@ -578,69 +610,14 @@ export function useMarketplace(): UseMarketplaceReturn {
                 };
             });
 
-            // Fetch base nonces per contract — each fulfillment increments sequentially
-            const baseNonce721 = BigInt(await medialaneContract.nonces(walletAddress));
-            const baseNonce1155 = medialane1155Contract
-                ? BigInt(await medialane1155Contract.nonces(walletAddress))
-                : 0n;
-
-            const chainId = ('0x' + chain.id.toString(16)) as constants.StarknetChainId;
-            const fulfillCalls: any[] = [];
-            let counter721 = 0;
-            let counter1155 = 0;
-
-            // Prompt one signature per item — must be sequential per SNIP-12
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-
-                if (item.isERC1155) {
-                    const executionNonce = baseNonce1155 + BigInt(counter1155++);
-                    const quantity = item.quantity ?? "1";
-                    const fulfillmentParams = {
-                        order_hash: item.orderHash,
-                        fulfiller: walletAddress,
-                        quantity,
-                        nonce: executionNonce.toString(),
-                    };
-                    const typedData = stringifyBigInts(
-                        get1155OrderFulfillmentTypedData(fulfillmentParams as Record<string, unknown>, chainId)
-                    );
-                    toast.info(`Signature Required (${i + 1}/${items.length})`, {
-                        description: `Please sign the purchase for edition ${item.offerIdentifier}`,
-                    });
-                    const signature = await account.signMessage(typedData);
-                    const signatureArray = Array.isArray(signature)
-                        ? signature
-                        : [signature.r.toString(), signature.s.toString()];
-                    fulfillCalls.push(
-                        medialane1155Contract!.populate("fulfill_order", [{
-                            fulfillment: fulfillmentParams,
-                            signature: signatureArray,
-                        }])
-                    );
-                } else {
-                    const executionNonce = baseNonce721 + BigInt(counter721++);
-                    const fulfillmentParams = {
-                        order_hash: item.orderHash,
-                        fulfiller: walletAddress,
-                        nonce: executionNonce.toString(),
-                    };
-                    const typedData = stringifyBigInts(getOrderFulfillmentTypedData(fulfillmentParams, chainId));
-                    toast.info(`Signature Required (${i + 1}/${items.length})`, {
-                        description: `Please sign the request for ${item.offerIdentifier}`,
-                    });
-                    const signature = await account.signMessage(typedData);
-                    const signatureArray = Array.isArray(signature)
-                        ? signature
-                        : [signature.r.toString(), signature.s.toString()];
-                    fulfillCalls.push(
-                        medialaneContract.populate("fulfill_order", [{
-                            fulfillment: fulfillmentParams,
-                            signature: signatureArray,
-                        }])
-                    );
-                }
-            }
+            // Fulfilment is unsigned in 0.26.0 — the caller IS the fulfiller, so no
+            // per-item SNIP-12 signature (and no nonce) is needed. fulfill_order takes
+            // the order hash (+ quantity for ERC-1155).
+            const fulfillCalls: any[] = items.map((item) =>
+                item.isERC1155
+                    ? medialane1155Contract!.populate("fulfill_order", [item.orderHash, item.quantity ?? "1"])
+                    : medialaneContract.populate("fulfill_order", [item.orderHash])
+            );
 
             toast.info("Executing Purchase", { description: "Approve the final transaction to sweep the cart." });
 
@@ -685,12 +662,9 @@ export function useMarketplace(): UseMarketplaceReturn {
         }
 
         return withProcessing(async () => {
-            const currentNonce = await contract.nonces(walletAddress);
-
             const cancelParams = {
                 order_hash: orderHash,
                 offerer: walletAddress,
-                nonce: currentNonce.toString(),
             };
 
             const chainId = ('0x' + chain.id.toString(16)) as constants.StarknetChainId;
@@ -751,31 +725,10 @@ export function useMarketplace(): UseMarketplaceReturn {
         }
 
         return withProcessing(async () => {
-            const currentNonce = await contract.nonces(walletAddress);
-
-            const fulfillmentParams: Record<string, unknown> = {
-                order_hash: orderHash,
-                fulfiller: walletAddress,
-                nonce: currentNonce.toString(),
-                ...(is1155 ? { quantity: "1" } : {}),
-            };
-
-            const chainId = ('0x' + chain.id.toString(16)) as constants.StarknetChainId;
-            const typedData = stringifyBigInts(
-                is1155
-                    ? get1155OrderFulfillmentTypedData(fulfillmentParams, chainId)
-                    : getOrderFulfillmentTypedData(fulfillmentParams, chainId)
-            );
-
-            const signature = await account.signMessage(typedData);
-            const signatureArray = Array.isArray(signature)
-                ? signature
-                : [signature.r.toString(), signature.s.toString()];
-
-            const fulfillCall = contract.populate("fulfill_order", [{
-                fulfillment: fulfillmentParams,
-                signature: signatureArray,
-            }]);
+            // Fulfilment is unsigned in 0.26.0 — the owner (caller) is the fulfiller.
+            const fulfillCall = is1155
+                ? contract.populate("fulfill_order", [orderHash, "1"])
+                : contract.populate("fulfill_order", [orderHash]);
 
             // Owner must approve the NFT transfer before fulfilling
             const { cairo } = await import("starknet");
