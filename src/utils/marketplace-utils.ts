@@ -1,132 +1,41 @@
-import { type TypedData, TypedDataRevision, constants } from "starknet";
+import { type TypedData, constants } from "starknet";
 import {
+    buildOrderTypedData,
     build1155OrderTypedData,
-    build1155FulfillmentTypedData,
+    buildCancellationTypedData,
     build1155CancellationTypedData,
 } from "@medialane/sdk";
 
+// SNIP-12 typed-data construction is owned by @medialane/sdk (0.26.0 redesigned
+// schema: domain v4/v3, single `amount`, `marketplace`/`royalty_max_bps`/`counter`,
+// no nonce). These thin wrappers keep the call sites stable while delegating to
+// the SDK so the dapp can never drift from the contracts' expected schema.
+//
+// Note: there are no fulfillment builders — fulfilment is UNSIGNED in the new
+// protocol (the caller is the fulfiller).
+
+/** SNIP-12 typed data for ERC-721 OrderParameters (domain "Medialane" v4). */
 export const getOrderParametersTypedData = (
-    message: any,
-    chainId: constants.StarknetChainId
-): TypedData => {
-    return {
-        domain: {
-            name: "Medialane",
-            version: "1",
-            chainId: chainId,
-            revision: TypedDataRevision.ACTIVE,
-        },
-        primaryType: "OrderParameters",
-        types: {
-            StarknetDomain: [
-                { name: "name", type: "shortstring" },
-                { name: "version", type: "shortstring" },
-                { name: "chainId", type: "shortstring" },
-                { name: "revision", type: "shortstring" },
-            ],
-            OrderParameters: [
-                { name: "offerer", type: "ContractAddress" },
-                { name: "offer", type: "OfferItem" },
-                { name: "consideration", type: "ConsiderationItem" },
-                { name: "start_time", type: "felt" },
-                { name: "end_time", type: "felt" },
-                { name: "salt", type: "felt" },
-                { name: "nonce", type: "felt" },
-            ],
-            OfferItem: [
-                { name: "item_type", type: "shortstring" },
-                { name: "token", type: "ContractAddress" },
-                { name: "identifier_or_criteria", type: "felt" },
-                { name: "start_amount", type: "felt" },
-                { name: "end_amount", type: "felt" },
-            ],
-            ConsiderationItem: [
-                { name: "item_type", type: "shortstring" },
-                { name: "token", type: "ContractAddress" },
-                { name: "identifier_or_criteria", type: "felt" },
-                { name: "start_amount", type: "felt" },
-                { name: "end_amount", type: "felt" },
-                { name: "recipient", type: "ContractAddress" },
-            ],
-        },
-        message,
-    };
-};
+    message: Record<string, unknown>,
+    chainId: constants.StarknetChainId,
+): TypedData => buildOrderTypedData(message, chainId);
 
-export const getOrderCancellationTypedData = (
-    message: any,
-    chainId: constants.StarknetChainId
-): TypedData => {
-    return {
-        domain: {
-            name: "Medialane",
-            version: "1",
-            chainId: chainId,
-            revision: TypedDataRevision.ACTIVE,
-        },
-        primaryType: "OrderCancellation",
-        types: {
-            StarknetDomain: [
-                { name: "name", type: "shortstring" },
-                { name: "version", type: "shortstring" },
-                { name: "chainId", type: "shortstring" },
-                { name: "revision", type: "shortstring" },
-            ],
-            OrderCancellation: [
-                { name: "order_hash", type: "felt" },
-                { name: "offerer", type: "ContractAddress" },
-                { name: "nonce", type: "felt" },
-            ],
-        },
-        message,
-    };
-};
-
-export const getOrderFulfillmentTypedData = (
-    message: any,
-    chainId: constants.StarknetChainId
-): TypedData => {
-    return {
-        domain: {
-            name: "Medialane",
-            version: "1",
-            chainId: chainId,
-            revision: TypedDataRevision.ACTIVE,
-        },
-        primaryType: "OrderFulfillment",
-        types: {
-            StarknetDomain: [
-                { name: "name", type: "shortstring" },
-                { name: "version", type: "shortstring" },
-                { name: "chainId", type: "shortstring" },
-                { name: "revision", type: "shortstring" },
-            ],
-            OrderFulfillment: [
-                { name: "order_hash", type: "felt" },
-                { name: "fulfiller", type: "ContractAddress" },
-                { name: "nonce", type: "felt" },
-            ],
-        },
-        message,
-    };
-};
-
-/** SNIP-12 typed data for ERC-1155 V2 OrderParameters. Domain: "Medialane" v2. Nested OfferItem/ConsiderationItem. */
+/** SNIP-12 typed data for ERC-1155 OrderParameters (domain "Medialane" v3). */
 export const get1155OrderParametersTypedData = (
     message: Record<string, unknown>,
-    chainId: constants.StarknetChainId
+    chainId: constants.StarknetChainId,
 ): TypedData => build1155OrderTypedData(message, chainId);
 
-/** SNIP-12 typed data for ERC-1155 OrderFulfillment. Includes `quantity` field. */
-export const get1155OrderFulfillmentTypedData = (
+/** SNIP-12 typed data for ERC-721 OrderCancellation (no nonce). */
+export const getOrderCancellationTypedData = (
     message: Record<string, unknown>,
-    chainId: constants.StarknetChainId
-): TypedData => build1155FulfillmentTypedData(message, chainId);
+    chainId: constants.StarknetChainId,
+): TypedData => buildCancellationTypedData(message, chainId);
 
-/** SNIP-12 typed data for ERC-1155 V2 OrderCancellation. Domain: "Medialane" v2. */
+/** SNIP-12 typed data for ERC-1155 OrderCancellation (no nonce). */
 export const get1155OrderCancellationTypedData = (
     message: Record<string, unknown>,
-    chainId: constants.StarknetChainId
+    chainId: constants.StarknetChainId,
 ): TypedData => build1155CancellationTypedData(message, chainId);
 
 export const stringifyBigInts = (obj: any): any => {
