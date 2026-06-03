@@ -3,6 +3,24 @@ import { createFailoverFetch, PUBLIC_RPC_FALLBACKS } from "@medialane/sdk";
 import { STARKNET_RPC_URL } from "./constants";
 
 /**
+ * ⚠️ The dapp talks to Starknet through THREE distinct providers — when a read
+ * fails, check which one the failing call actually uses (this tripped up the
+ * 2026-06-03 Alchemy-503 hunt for days):
+ *
+ *  1. `starknetProvider` (below) — direct `Contract` calls + `waitForTransaction`
+ *     in NON-hook contexts: launchpad pages (drop/pop/nfteditions), transfer-
+ *     ownership, `use-tx`, `use-paymaster-transaction`.
+ *  2. starknet-react's provider (`components/starknet-provider.tsx`) — every
+ *     `useProvider()` / `useContract()` call, i.e. the whole marketplace flow
+ *     (`use-marketplace.ts`: get_counter, royalty_info, approvals).
+ *  3. the SDK client's `getProvider` (`@medialane/sdk`) — SDK-routed ops.
+ *
+ * All three share ONE failover policy: #1 + #2 use `failoverFetch` below; #3
+ * uses the SDK's `createFailoverFetch` internally (≥0.28.0). Keep them in sync —
+ * never give one a bare `new RpcProvider({ nodeUrl })` without `baseFetch`.
+ */
+
+/**
  * Resilient Starknet RPC: try the configured primary (Alchemy), then the public
  * fallbacks (lava.build, …) on a transient failure — Alchemy's intermittent
  * HTTP 503 / `-32001 "Unable to complete request"` (~1 in 6 calls) otherwise

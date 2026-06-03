@@ -10,6 +10,25 @@ import {
 import { RpcProvider } from "starknet";
 import { idResolvedBraavos, idResolvedReady } from "@/lib/starknet-connectors";
 import { failoverFetch } from "@/lib/starknet";
+import { QueryClient } from "@tanstack/react-query";
+
+/**
+ * Tamed React Query defaults for starknet-react. Without this it uses RQ's
+ * defaults — `refetchOnWindowFocus: true` + 3 retries — so every tab focus
+ * fired a burst of contract reads (visible as the 503 storm during the
+ * 2026-06-03 Alchemy outage). Disable focus refetching, bound retries, and add
+ * a small staleTime so reads aren't hammered. Module-scoped → one stable client.
+ */
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 2,
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+      staleTime: 10_000,
+    },
+  },
+});
 
 interface NetworkContextType {
   currentNetwork: 'mainnet' | 'sepolia';
@@ -95,6 +114,7 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
         paymasterProvider={paymasterProvider}
         connectors={connectors}
         explorer={voyager}
+        queryClient={queryClient}
         defaultChainId={currentNetwork === 'mainnet' ? mainnet.id : sepolia.id}
         autoConnect={true}
       >
