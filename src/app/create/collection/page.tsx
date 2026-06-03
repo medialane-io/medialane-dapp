@@ -171,7 +171,11 @@ export default function CreateCollectionPage() {
         baseUri,
       });
 
-      const calls = intentRes.data.calls as Call[];
+      const intentData = intentRes.data;
+      if (intentData.requiresSignature) {
+        throw new Error("Collection intent should be pre-signed but requires a signature");
+      }
+      const calls = intentData.calls as Call[];
       if (!calls || calls.length === 0) throw new Error("No calls returned from intent");
 
       // 3. Execute directly with the connected wallet

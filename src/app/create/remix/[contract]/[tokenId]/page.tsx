@@ -297,7 +297,11 @@ export default function CreateRemixPage() {
         recipient: walletAddress,
         tokenUri,
       });
-      const calls = intentRes.data?.calls as Call[];
+      const intentData = intentRes.data;
+      if (!intentData || intentData.requiresSignature) {
+        throw new Error("Mint intent should be pre-signed but requires a signature");
+      }
+      const calls = intentData.calls as Call[];
       if (!calls?.length) throw new Error("No calls returned from mint intent");
 
       const result = await executeTransaction(calls);
