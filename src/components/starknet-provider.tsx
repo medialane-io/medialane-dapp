@@ -9,6 +9,7 @@ import {
 } from "@starknet-react/core";
 import { RpcProvider } from "starknet";
 import { idResolvedBraavos, idResolvedReady } from "@/lib/starknet-connectors";
+import { failoverFetch } from "@/lib/starknet";
 
 interface NetworkContextType {
   currentNetwork: 'mainnet' | 'sepolia';
@@ -72,7 +73,8 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
   const customRpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
 
   const providerFactory = useCallback(
-    (_chain: unknown) => new RpcProvider({ nodeUrl: customRpcUrl || "" }),
+    (_chain: unknown) =>
+      new RpcProvider({ nodeUrl: customRpcUrl || "", baseFetch: failoverFetch }),
     [customRpcUrl],
   );
   const paymasterProvider = useMemo(

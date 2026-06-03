@@ -34,7 +34,7 @@ function looksTransient(status: number, bodyText: string): boolean {
  * and on a transient failure (network error, 5xx/429, or a transient
  * JSON-RPC envelope) replay the identical request against the fallback.
  */
-const failoverFetch: typeof fetch = async (input, init) => {
+export const failoverFetch: typeof fetch = async (input, init) => {
   const primaryUrl = typeof input === "string" ? input : PRIMARY_RPC_URL;
   try {
     const res = await fetch(primaryUrl, init);
