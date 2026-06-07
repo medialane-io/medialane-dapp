@@ -86,20 +86,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, [szWallet, szAddress, szType, injectedConnected, injectedAddress, injectedAccount, injectedType]);
 
-  // [ML-WALLET-DIAG] log injected-connection transitions so we can see exactly
-  // when/why the slot empties on navigation.
-  useEffect(() => {
-    console.warn("[ML-WALLET] injected state", {
-      injectedConnected,
-      hasAddress: Boolean(injectedAddress),
-      hasAccount: Boolean(injectedAccount),
-      status: injectedStatus,
-      connectorId: injectedConnector?.id ?? null,
-      szWallet: Boolean(szWallet),
-      activeType: szWallet ? szType : injectedConnected ? injectedType : null,
-    });
-  }, [injectedConnected, injectedAddress, injectedAccount, injectedStatus, injectedConnector, szWallet, szType, injectedType]);
-
   const isConnecting =
     szConnecting ||
     injectedStatus === "connecting" ||
@@ -141,14 +127,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         const connector = connectors.find((c) => c.id === targetId);
         if (connector) {
           try {
-            const ready = await connector.ready();
-            console.warn("[ML-WALLET] injected reconnect attempt", { i, targetId, ready });
-            if (ready) {
+            if (await connector.ready()) {
               await connectAsync({ connector });
               return;
             }
-          } catch (err) {
-            console.warn("[ML-WALLET] injected reconnect error", { i, err });
+          } catch {
+            // extension not ready / transient — retry on the next tick
           }
         }
         await new Promise((r) => setTimeout(r, 400));
