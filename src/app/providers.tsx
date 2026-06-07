@@ -17,8 +17,8 @@ import { NavThemeToggle } from "@/components/nav-theme-toggle";
 import { SWRConfig } from "swr";
 import { StarknetProvider } from "@/components/starknet-provider";
 import { StarkZapWalletProvider } from "@/contexts/starkzap-wallet-context";
+import { WalletProvider } from "@/contexts/wallet-context";
 import { UserRegistration } from "@/components/shared/user-registration";
-import { PrivyConnectDialog } from "@/components/wallet/privy-connect-dialog";
 
 function NavTrigger() {
   const { open } = useNavCommandMenu();
@@ -126,9 +126,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    if (localStorage.getItem("ml_privy_session")) {
+    // Mount Privy on reload ONLY when it is the user's persisted wallet choice.
+    // (Previously this fired for any stale ml_privy_session on every route,
+    // which let Privy auto-reconnect and hijack an actively-connected wallet.)
+    if (localStorage.getItem("ml_wallet") === "privy") {
       loadPrivyStack().then(activatePrivy).catch((err) => {
-        console.error("[Privy] auto-reconnect load failed:", err);
+        console.error("[Privy] restore load failed:", err);
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -172,11 +175,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       >
         <StarknetProvider>
           <StarkZapWalletProvider onRequestPrivy={handleRequestPrivy} PrivyConnector={PrivyConnectorMount}>
+            <WalletProvider>
             <Aurora />
             <UserRegistration />
             {isStandalone ? children : <Shell>{children}</Shell>}
             {!isStandalone && <NotificationSpotlight />}
-            <PrivyConnectDialog />
             <Toaster
               richColors
               position="bottom-center"
@@ -192,6 +195,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 },
               }}
             />
+            </WalletProvider>
           </StarkZapWalletProvider>
         </StarknetProvider>
       </SWRConfig>
