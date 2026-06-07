@@ -232,10 +232,38 @@ class IdResolvedInjectedConnector extends Connector {
   }
 
   private onAccountsChanged = async (accounts?: string[]) => {
-    const [account] = accounts || [];
+    let [account] = accounts || [];
     this.clearAccountCache();
 
+    // Extensions (notably with their wallet panel open) fire `accountsChanged`
+    // with no accounts during internal refreshes / lock UI — this is NOT a real
+    // disconnect. Treating it as one drops an actively-connected wallet mid-
+    // session (reported as "the dapp disconnected my wallet on navigation").
+    // Before tearing down, verify silently: only disconnect if the wallet has
+    // genuinely revoked the `accounts` permission.
     if (!account) {
+      try {
+        const permissions = await this.request({ type: "wallet_getPermissions" });
+        if (Array.isArray(permissions) && permissions.includes("accounts")) {
+          // Permission still granted → re-read the current account without a
+          // prompt (silent_mode is honored by Argent/Ready & Braavos; ignored
+          // by wallets that don't support it, which return the account anyway
+          // since permission is already granted).
+          const current = await this.request({
+            type: "wallet_requestAccounts",
+            params: { silent_mode: true },
+          });
+          account = Array.isArray(current) ? current[0] : undefined;
+        }
+      } catch {
+        // Silent re-check failed — fall through; only disconnect if still empty.
+      }
+    }
+
+    if (!account) {
+      console.warn("[connector] accountsChanged with no account — disconnecting", {
+        id: this.walletId,
+      });
       this.emit("disconnect");
       return;
     }
