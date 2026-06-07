@@ -14,6 +14,7 @@ import type { WalletInterface } from "starkzap";
 import { toast } from "sonner";
 import { getStarkZapSdk } from "@/lib/starkzap";
 import { getFriendlyWalletError } from "@/lib/wallet-error";
+import { writePersistedWallet, clearPersistedWallet } from "@/lib/wallet-types";
 import type { PrivyConnectorProps } from "./privy-connector";
 import {
   IDLE_WALLET_SESSION,
@@ -143,6 +144,7 @@ export function StarkZapWalletProvider({
       });
       setWallet(result.wallet);
       setSession(walletReady("cartridge", result.wallet.address as unknown as string));
+      writePersistedWallet("cartridge");
     } catch (err) {
       // Raw detail → console only; user sees a friendly message.
       console.error("[Cartridge] connect failed:", err);
@@ -152,20 +154,18 @@ export function StarkZapWalletProvider({
   }, []);
 
   const connectPrivy = useCallback(async () => {
-    localStorage.setItem("ml_privy_session", "1");
+    writePersistedWallet("privy");
     setSession(walletAuthenticating("privy"));
     onRequestPrivy();
     setPendingPrivyConnect(true);
   }, [onRequestPrivy]);
 
   const disconnect = useCallback(() => {
-    if (walletType === "privy") {
-      localStorage.removeItem("ml_privy_session");
-    }
+    clearPersistedWallet();
     setWallet(null);
     setSession(IDLE_WALLET_SESSION);
     setPrivyUser(null);
-  }, [walletType]);
+  }, []);
 
   // Surface session errors as toasts (Privy-only — Cartridge errors are
   // already shown inline in nav-account-panel).
