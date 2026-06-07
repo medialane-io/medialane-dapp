@@ -7,9 +7,7 @@ import { shortenAddress, useNavCommandMenu } from "@medialane/ui";
 import { Gamepad2, Loader2, LogOut, Mail, User, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { useNetwork } from "@/components/starknet-provider";
-import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
-import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
-import { useWalletSession } from "@/hooks/use-wallet-session";
+import { useWallet } from "@/hooks/use-wallet";
 
 
 function getConnectorDisplayName(id: string, fallback: string) {
@@ -23,10 +21,8 @@ function getConnectorDisplayName(id: string, fallback: string) {
 
 
 export function NavAccountPanel() {
-  const { connectAsync, connectors } = useConnect();
-  const { address, isConnected, walletType, disconnect } = useUnifiedWallet();
-  const { isConnecting, error } = useWalletSession();
-  const { connectCartridge, connectPrivy, privyUser } = useStarkZapWallet();
+  const { connectors } = useConnect();
+  const { address, isConnected, disconnect, isConnecting, error, connect } = useWallet();
   const { networkConfig } = useNetwork();
   const { close } = useNavCommandMenu();
   const [connectingId, setConnectingId] = React.useState<string | null>(null);
@@ -34,7 +30,8 @@ export function NavAccountPanel() {
   const connectInjected = async (connector: Connector) => {
     setConnectingId(connector.id);
     try {
-      await connectAsync({ connector });
+      const type = connector.id.toLowerCase() === "braavos" ? "braavos" : "argent";
+      await connect(type, connector);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Wallet connection failed";
       if (/user rejected|user aborted|aborted|rejected/i.test(message)) {
@@ -50,8 +47,7 @@ export function NavAccountPanel() {
   const connectStarkZap = async (type: "cartridge" | "privy") => {
     close();
     try {
-      if (type === "cartridge") await connectCartridge();
-      else await connectPrivy();
+      await connect(type);
     } catch {
       // The StarkZap context exposes the user-facing error state.
     }
