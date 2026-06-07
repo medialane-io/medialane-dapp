@@ -1,18 +1,24 @@
 "use client";
 
-import { useMemo } from "react";
-import { useAccount } from "@starknet-react/core";
-import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
-import {
-  IDLE_WALLET_SESSION,
-  isWalletSessionBusy,
-  walletReady,
-  type WalletSession,
-  type WalletSessionType,
-} from "@/lib/wallet-session";
+/**
+ * useWalletSession — thin read of the single active-wallet slot.
+ *
+ * Preserves the field names its remaining consumers use. The old
+ * referee/state-machine (which compared StarkZap vs injected every render and
+ * silently let a background Privy session win) is gone — identity now comes
+ * straight from the one slot via useWallet().
+ */
+
+import { useWallet } from "@/hooks/use-wallet";
+
+export type WalletSessionType =
+  | "argent"
+  | "braavos"
+  | "injected"
+  | "cartridge"
+  | "privy";
 
 export interface ActiveWalletSession {
-  session: WalletSession;
   address: string | null;
   walletType: WalletSessionType | null;
   isConnected: boolean;
@@ -21,74 +27,12 @@ export interface ActiveWalletSession {
 }
 
 export function useWalletSession(): ActiveWalletSession {
-  const {
-    session: starkZapSession,
-    address: starkZapAddress,
-  } = useStarkZapWallet();
-  const {
-    address: injectedAddress,
-    isConnected: injectedConnectedRaw,
-    connector: injectedConnector,
-    status: injectedStatus,
-  } = useAccount();
-  const injectedConnected = injectedConnectedRaw ?? false;
-  // On reload, starknet-react's autoConnect rehydrates the injected wallet
-  // asynchronously and surfaces here as "connecting"/"reconnecting". Surface it
-  // so wallet-gated pages can show a "Connecting…" state instead of flashing a
-  // disconnected/connect prompt that disappears a beat later.
-  const injectedConnecting =
-    injectedStatus === "connecting" || injectedStatus === "reconnecting";
-
-  const injectedWalletType: WalletSessionType = (() => {
-    const id = injectedConnector?.id?.toLowerCase();
-    if (id === "argentx" || id === "argent") return "argent";
-    if (id === "braavos") return "braavos";
-    return "injected";
-  })();
-
-  return useMemo(() => {
-    if (starkZapSession.status !== "idle" && starkZapSession.status !== "error") {
-      return {
-        session: starkZapSession,
-        address: starkZapSession.address,
-        walletType: starkZapSession.walletType,
-        isConnected: Boolean(starkZapSession.address),
-        isConnecting: isWalletSessionBusy(starkZapSession),
-        error: starkZapSession.error,
-      };
-    }
-
-    if (starkZapAddress) {
-      const session = walletReady(starkZapSession.walletType ?? "cartridge", starkZapAddress);
-      return {
-        session,
-        address: starkZapAddress,
-        walletType: session.walletType,
-        isConnected: true,
-        isConnecting: false,
-        error: null,
-      };
-    }
-
-    if (injectedConnected && injectedAddress) {
-      const session = walletReady(injectedWalletType, injectedAddress);
-      return {
-        session,
-        address: injectedAddress,
-        walletType: injectedWalletType,
-        isConnected: true,
-        isConnecting: false,
-        error: null,
-      };
-    }
-
-    return {
-      session: starkZapSession.status === "error" ? starkZapSession : IDLE_WALLET_SESSION,
-      address: null,
-      walletType: null,
-      isConnected: false,
-      isConnecting: injectedConnecting,
-      error: starkZapSession.error,
-    };
-  }, [starkZapSession, starkZapAddress, injectedConnected, injectedAddress, injectedConnecting]);
+  const { address, walletType, isConnected, isConnecting, error } = useWallet();
+  return {
+    address,
+    walletType: walletType as WalletSessionType | null,
+    isConnected,
+    isConnecting,
+    error: error ?? null,
+  };
 }
