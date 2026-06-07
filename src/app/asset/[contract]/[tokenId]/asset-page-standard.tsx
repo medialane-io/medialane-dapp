@@ -38,7 +38,7 @@ export function AssetPageStandard() {
   const { collection } = useCollection(contract);
   const { token: rawToken, isLoading } = useToken(contract, tokenId);
   const token = rawToken as AssetToken | null;
-  const { listings, mutate: mutateListings } = useTokenListings(contract, tokenId);
+  const { listings, mutate: mutateListings, isLoading: listingsLoading } = useTokenListings(contract, tokenId);
   const { history } = useTokenHistory(contract, tokenId);
   const { acceptOffer, isProcessing } = useMarketplace();
   const shouldReduce = useReducedMotion();
@@ -155,6 +155,7 @@ export function AssetPageStandard() {
 
             <AssetMarketplacePanel
               cheapest={cheapest}
+              isMarketLoading={listingsLoading}
               isOwner={isOwner}
               isSignedIn={isSignedIn}
               isProcessing={isProcessing}

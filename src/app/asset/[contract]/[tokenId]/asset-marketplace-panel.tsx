@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { CurrencyIcon } from "@/components/shared/currency-icon";
 import { AddressDisplay } from "@/components/shared/address-display";
@@ -62,6 +63,9 @@ function ActionButton({
 
 interface AssetMarketplacePanelProps {
   cheapest?: ApiOrder;
+  /** Listings still loading — render a neutral placeholder instead of flashing
+   *  the no-listing (offer) action and then swapping to the listing (trade) one. */
+  isMarketLoading?: boolean;
   isOwner: boolean;
   isSignedIn: boolean;
   isProcessing: boolean;
@@ -81,6 +85,7 @@ interface AssetMarketplacePanelProps {
 
 export function AssetMarketplacePanel({
   cheapest,
+  isMarketLoading = false,
   isOwner,
   isSignedIn,
   isProcessing,
@@ -108,6 +113,19 @@ export function AssetMarketplacePanel({
     !!cheapest &&
     !!walletAddress &&
     cheapest.offerer.toLowerCase() !== walletAddress.toLowerCase();
+
+  // Until listings resolve we don't know whether to show the "trade" (has
+  // listing) or "make an offer" (no listing) action — render a neutral
+  // placeholder so the connect/action button doesn't render once and then
+  // swap style/label a moment later.
+  if (isMarketLoading && !cheapest) {
+    return (
+      <div className="rounded-2xl border border-border p-5 space-y-4">
+        <Skeleton className="h-9 w-32" />
+        <Skeleton className="h-12 w-full rounded-2xl" />
+      </div>
+    );
+  }
 
   return (
     <>
