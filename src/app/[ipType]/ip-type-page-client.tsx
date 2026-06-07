@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Loader2, SlidersHorizontal, HandCoins, GitBranch, Search, X as XIcon } from "lucide-react";
 import { CurrencyIcon } from "@/components/shared/currency-icon";
+import { PageContainer } from "@medialane/ui";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -260,7 +261,7 @@ export function IpTypePageClient({ slug }: IpTypePageClientProps) {
   const listedCount = allTokens.filter((t) => (t.activeOrders?.length ?? 0) > 0).length;
 
   return (
-    <div className="mx-auto w-full px-5 sm:px-8 lg:px-12 pt-20 pb-16 space-y-8">
+    <PageContainer className="box-border max-w-full pt-20 pb-16 space-y-8">
       {/* Header */}
       <div className="space-y-4">
         <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -490,6 +491,6 @@ export function IpTypePageClient({ slug }: IpTypePageClientProps) {
           )}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

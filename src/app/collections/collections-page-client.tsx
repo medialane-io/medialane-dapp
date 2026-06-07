@@ -88,7 +88,7 @@ export default function CollectionsPageClient() {
   };
 
   return (
-    <PageContainer className="box-border max-w-full pt-14 pb-8 space-y-8">
+    <PageContainer className="box-border max-w-full pt-20 pb-8 space-y-8">
 
       {/* Header */}
       <div className="space-y-2">
