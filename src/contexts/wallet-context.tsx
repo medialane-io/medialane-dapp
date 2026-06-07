@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useMemo, useCallback } from "react";
+import React, { createContext, useContext, useMemo, useCallback, useEffect } from "react";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 import type { Connector } from "@starknet-react/core";
 import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
@@ -84,6 +84,20 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
     return null;
   }, [szWallet, szAddress, szType, injectedConnected, injectedAddress, injectedAccount, injectedType]);
+
+  // [ML-WALLET-DIAG] log injected-connection transitions so we can see exactly
+  // when/why the slot empties on navigation.
+  useEffect(() => {
+    console.warn("[ML-WALLET] injected state", {
+      injectedConnected,
+      hasAddress: Boolean(injectedAddress),
+      hasAccount: Boolean(injectedAccount),
+      status: injectedStatus,
+      connectorId: injectedConnector?.id ?? null,
+      szWallet: Boolean(szWallet),
+      activeType: szWallet ? szType : injectedConnected ? injectedType : null,
+    });
+  }, [injectedConnected, injectedAddress, injectedAccount, injectedStatus, injectedConnector, szWallet, szType, injectedType]);
 
   const isConnecting =
     szConnecting ||

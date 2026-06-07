@@ -148,6 +148,9 @@ class IdResolvedInjectedConnector extends Connector {
   }
 
   async disconnect() {
+    // [ML-WALLET-DIAG] who/what is tearing down the connection?
+    console.warn("[ML-WALLET] connector.disconnect() called", { id: this.walletId });
+    console.trace("[ML-WALLET] disconnect() stack");
     if (!this.currentWallet()) throw new ConnectorNotFoundError();
 
     this.wallet?.off?.("accountsChanged", this.onAccountsChanged);
@@ -233,6 +236,8 @@ class IdResolvedInjectedConnector extends Connector {
 
   private onAccountsChanged = async (accounts?: string[]) => {
     let [account] = accounts || [];
+    // [ML-WALLET-DIAG]
+    console.warn("[ML-WALLET] accountsChanged event", { id: this.walletId, accounts, count: accounts?.length });
     this.clearAccountCache();
 
     // Extensions (notably with their wallet panel open) fire `accountsChanged`
@@ -276,6 +281,8 @@ class IdResolvedInjectedConnector extends Connector {
 
   private onNetworkChanged = (chainIdHex?: string, accounts?: string[]) => {
     const [account] = accounts || [];
+    // [ML-WALLET-DIAG]
+    console.warn("[ML-WALLET] networkChanged event", { id: this.walletId, chainIdHex, accounts });
     this.clearAccountCache();
 
     this.emit(
