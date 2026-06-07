@@ -1,6 +1,6 @@
 "use client";
 
-import type { Account, Call } from "starknet";
+import type { AccountInterface, Call } from "starknet";
 import type { WalletInterface } from "starkzap";
 import { waitForReceipt } from "@/lib/wait-for-receipt";
 
@@ -9,7 +9,7 @@ import { waitForReceipt } from "@/lib/wait-for-receipt";
  * StarknetConfig wraps around account.execute, then confirm on-chain.
  * Mirrors the non-StarkZap branch of the old executeAuto.
  */
-export function makeInjectedExecute(account: Account) {
+export function makeInjectedExecute(account: AccountInterface) {
   return async (calls: Call[]): Promise<string> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await account.execute(calls as any);
