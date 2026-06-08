@@ -36,8 +36,8 @@ interface UseMarketplaceReturn {
         tokenStandard?: string
     ) => Promise<string | undefined>;
     checkoutCart: (items: CheckoutItem[]) => Promise<string | undefined>;
-    cancelOrder: (orderHash: string, tokenStandard?: string) => Promise<string | undefined>;
-    cancelListing: (orderHash: string, tokenStandard?: string) => Promise<string | undefined>;
+    cancelOrder: (orderHash: string, tokenStandard?: string, kind?: "listing" | "offer") => Promise<string | undefined>;
+    cancelListing: (orderHash: string, tokenStandard?: string, kind?: "listing" | "offer") => Promise<string | undefined>;
     acceptOffer: (
         orderHash: string,
         nftContractAddress: string,
@@ -142,6 +142,13 @@ export function useMarketplace(): UseMarketplaceReturn {
     }, []);
 
     const invalidateMarketplaceCaches = useCallback(() => {
+        // Revalidate matching keys WITHOUT clearing their cached data. Passing
+        // `undefined` as mutate's data arg wipes the cache — and since the asset
+        // page's `token-<contract>-<id>` key matches this filter, wiping it flips
+        // `useToken().isLoading` true, which unmounts the asset variant (and any
+        // open marketplace dialog) into the skeleton branch — destroying the
+        // success dialog mid-flow so only the toast survives. Filter-only mutate
+        // re-fetches in the background while keeping the variant mounted.
         mutate(
             (key) => {
                 if (typeof key !== "string") return false;
@@ -154,9 +161,7 @@ export function useMarketplace(): UseMarketplaceReturn {
                 if (key.startsWith("floor-listings-")) return true;
                 if (key.startsWith("tokens-by-type-")) return true;
                 return key.includes('"op":"orders"');
-            },
-            undefined,
-            { revalidate: true }
+            }
         );
     }, [mutate]);
 
@@ -673,7 +678,7 @@ export function useMarketplace(): UseMarketplaceReturn {
         });
     }, [account, szWallet, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeDirect, refreshMarketplaceCaches]);
 
-    const cancelOrder = useCallback(async (orderHash: string, tokenStandard?: string) => {
+    const cancelOrder = useCallback(async (orderHash: string, tokenStandard?: string, kind: "listing" | "offer" = "listing") => {
         const is1155 = tokenStandard === "ERC1155";
         const contract = is1155 ? medialane1155Contract : medialaneContract;
 
@@ -721,7 +726,10 @@ export function useMarketplace(): UseMarketplaceReturn {
                 throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
             }
             refreshMarketplaceCaches();
-            toast.success("Listing Cancelled", { description: "The listing has been successfully cancelled on-chain." });
+            toast.success(
+                kind === "offer" ? "Offer Cancelled" : "Listing Cancelled",
+                { description: `The ${kind} has been successfully cancelled on-chain.` }
+            );
             return hash;
         });
     }, [account, szWallet, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeDirect, refreshMarketplaceCaches]);
