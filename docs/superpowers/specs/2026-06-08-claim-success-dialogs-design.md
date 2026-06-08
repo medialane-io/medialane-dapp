@@ -32,10 +32,14 @@ toasts (frequent lightweight admin actions / mid-flow progress, not completion e
 
 Extract one small shared `TransactionResultDialog` (Dialog + success/error branch),
 built on the existing `MarketplaceSuccessState` / `MarketplaceErrorState` primitives,
-and use it in the three claim/mint surfaces. medialane-io already has an equivalent
-shared wrapper (`TransactionDialogStates`); the dapp has the primitives but no wrapper,
-so this is the "improve the code you're touching" move rather than copy-pasting the same
-Dialog boilerplate at each callsite.
+and use it in the two claim/mint **buttons** that have no dialog container of their own.
+medialane-io already has an equivalent shared wrapper (`TransactionDialogStates`); the
+dapp has the primitives but no wrapper, so this is the "improve the code you're touching"
+move rather than copy-pasting the same Dialog boilerplate at each callsite.
+
+Surfaces that **already own a container** (a `Dialog` or `Sheet`) reuse the
+`MarketplaceSuccessState` primitive directly inside that container rather than stacking a
+second dialog on top — that applies to `transfer-ownership-dialog` and `approve-mint-sheet`.
 
 Rejected alternatives:
 - **Inline per-surface** (io's claim-button pattern, copy-pasted): works, but duplicates
@@ -74,32 +78,22 @@ Behavior:
 
 ## Integrations
 
-1. **`collection-drop-mint-button.tsx`** — add `const [result, setResult] = useState<TxResult | null>(null)`.
-   Replace `toast.success("Minted! …")` with
-   `setResult({ status: "success", title: "Minted!", description: "Your drop token is on-chain.", txHash, tokenImage: <drop cover>, name: <drop name> })`
-   and the catch's `toast.error(...)` with `setResult({ status: "error", title: "Mint failed", description: …, error: msg })`.
-   Mount `<TransactionResultDialog result={result} onClose={() => setResult(null)} />`.
-   Keep the pre-flight `toast.error("Connect your wallet first")` (guard, not a tx result).
-
-2. **`pop-claim-button.tsx`** — same pattern; success copy "Credential claimed!" /
-   "Your proof of participation is on-chain." Keep the pre-flight wallet guard toast.
-
-3. **`approve-mint-sheet.tsx`** — on success, close the sheet and surface the result dialog
-   ("Remix minted!" / "Buyer has been notified."). The error path likewise routes to the
-   dialog. Confetti optional here (default on is fine).
-
-4. **`transfer-ownership-dialog.tsx`** — already owns a `Dialog`. Replace the
-   `toast.success(...) + setOpen(false)` success path with a local success flag and render
-   `MarketplaceSuccessState` **directly** in place of the form body (no second dialog —
-   reuse the primitive). "Ownership transferred" / new owner address in the description.
-   `Done` button closes the dialog. Keep `toast.error` for the failure path or render the
-   inline error — implementation picks whichever reads cleaner in this dialog.
-
-5. **`use-transfer.ts`** — remove the redundant `toast.success("Transfer complete!")`
-   (line ~107); `transfer-dialog.tsx` already renders `MarketplaceSuccessState` inline from
-   the same hook, so the toast is a duplicate notification. Leave `toast.error` unless
-   implementation confirms `transfer-dialog` already surfaces the error inline (in which
-   case remove it too, to match).
+1. **`collection-drop-mint-button.tsx`** (no container → `TransactionResultDialog`) — capture the
+   `executeAuto` hash, swap `toast.success`/`toast.error` for `setResult({...})`, render the dialog.
+   **Caveat:** the component has early `return`s and `mutate()` flips it to a "Minted" early-return
+   on success — collapse the branches into a `content` node and render the dialog at the component
+   root so it survives the status flip. Keep the pre-flight wallet-guard toast.
+2. **`pop-claim-button.tsx`** (no container → `TransactionResultDialog`) — same `content`-node + root
+   dialog pattern (more early returns). Keep the pre-flight wallet-guard toast.
+3. **`approve-mint-sheet.tsx`** (already has a `Sheet` + bespoke inline success panel) — replace the
+   bespoke `done` panel with `MarketplaceSuccessState` inside the sheet, fire `fireConfetti()` on
+   success, and **remove the now-redundant `toast.success`**. Keep `toast.error` (no inline error state).
+4. **`transfer-ownership-dialog.tsx`** (already owns a `Dialog`) — add a `done` flag; on success render
+   `MarketplaceSuccessState` in place of the form body. Remove `toast.success`. Keep `toast.error`.
+5. **`use-transfer.ts`** — remove the redundant `toast.success("Transfer complete!")`;
+   `transfer-dialog.tsx` already renders `MarketplaceSuccessState` inline. **Keep `toast.error`** —
+   confirmed `transfer-dialog` falls back to the form (not an error state) when `error` is set, so the
+   hook's toast is the only error surface.
 
 ## Verification
 
