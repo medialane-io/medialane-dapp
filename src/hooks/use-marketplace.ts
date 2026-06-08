@@ -17,6 +17,14 @@ import {
     stringifyBigInts,
 } from "@/utils/marketplace-utils";
 
+/**
+ * Per-call options for marketplace write ops. `silent` suppresses the success
+ * toast — passed by dialog callers that render their own inline success state,
+ * so the user doesn't get a dialog AND a toast. Direct callers (portfolio
+ * tables/grids, which have no dialog) omit it and keep the toast.
+ */
+interface WriteOpts { silent?: boolean }
+
 interface UseMarketplaceReturn {
     createListing: (
         assetContractAddress: string,
@@ -25,7 +33,8 @@ interface UseMarketplaceReturn {
         currencySymbol: string,
         durationSeconds: number,
         tokenStandard?: string,
-        amount?: string
+        amount?: string,
+        opts?: WriteOpts
     ) => Promise<string | undefined>;
     makeOffer: (
         assetContractAddress: string,
@@ -33,11 +42,12 @@ interface UseMarketplaceReturn {
         price: string,
         currencySymbol: string,
         durationSeconds: number,
-        tokenStandard?: string
+        tokenStandard?: string,
+        opts?: WriteOpts
     ) => Promise<string | undefined>;
-    checkoutCart: (items: CheckoutItem[]) => Promise<string | undefined>;
-    cancelOrder: (orderHash: string, tokenStandard?: string, kind?: "listing" | "offer") => Promise<string | undefined>;
-    cancelListing: (orderHash: string, tokenStandard?: string, kind?: "listing" | "offer") => Promise<string | undefined>;
+    checkoutCart: (items: CheckoutItem[], opts?: WriteOpts) => Promise<string | undefined>;
+    cancelOrder: (orderHash: string, tokenStandard?: string, kind?: "listing" | "offer", opts?: WriteOpts) => Promise<string | undefined>;
+    cancelListing: (orderHash: string, tokenStandard?: string, kind?: "listing" | "offer", opts?: WriteOpts) => Promise<string | undefined>;
     acceptOffer: (
         orderHash: string,
         nftContractAddress: string,
@@ -333,7 +343,8 @@ export function useMarketplace(): UseMarketplaceReturn {
         currencySymbol: string,
         durationSeconds: number,
         tokenStandard?: string,
-        amount?: string
+        amount?: string,
+        opts?: WriteOpts
     ) => {
         const is1155 = tokenStandard === "ERC1155";
         const contract = is1155 ? medialane1155Contract : medialaneContract;
@@ -427,7 +438,7 @@ export function useMarketplace(): UseMarketplaceReturn {
                 assertTransactionSucceeded(receipt1155);
                 assertOrderCreated(receipt1155, contract.address);
                 refreshMarketplaceCaches();
-                toast.success("Listing Created", { description: "Your edition has been listed successfully." });
+                if (!opts?.silent) toast.success("Listing Created", { description: "Your edition has been listed successfully." });
                 return hash1155;
             }
             // ── ERC-721 path — unchanged below ────────────────────────────────
@@ -486,7 +497,7 @@ export function useMarketplace(): UseMarketplaceReturn {
             assertTransactionSucceeded(receipt);
             assertOrderCreated(receipt, contract.address);
             refreshMarketplaceCaches();
-            toast.success("Listing Created", { description: "Your asset has been listed successfully." });
+            if (!opts?.silent) toast.success("Listing Created", { description: "Your asset has been listed successfully." });
             return hash;
         });
     }, [account, szWallet, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, executeDirect, refreshMarketplaceCaches]);
@@ -497,7 +508,8 @@ export function useMarketplace(): UseMarketplaceReturn {
         price: string,
         currencySymbol: string,
         durationSeconds: number,
-        tokenStandard?: string
+        tokenStandard?: string,
+        opts?: WriteOpts
     ) => {
         const is1155 = tokenStandard === "ERC1155";
         const contract = is1155 ? medialane1155Contract : medialaneContract;
@@ -593,12 +605,12 @@ export function useMarketplace(): UseMarketplaceReturn {
             assertTransactionSucceeded(receipt);
             assertOrderCreated(receipt, contract.address);
             refreshMarketplaceCaches();
-            toast.success("Offer Placed", { description: "Your offer has been submitted and is now live." });
+            if (!opts?.silent) toast.success("Offer Placed", { description: "Your offer has been submitted and is now live." });
             return hash;
         });
     }, [account, szWallet, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, buildBaseOrderParams, signAndBuildRegisterCall, getErc20Allowance, executeDirect, refreshMarketplaceCaches]);
 
-    const checkoutCart = useCallback(async (items: CheckoutItem[]) => {
+    const checkoutCart = useCallback(async (items: CheckoutItem[], opts?: WriteOpts) => {
         if (!walletAddress || !medialaneContract || !chain || items.length === 0) {
             const msg = "Account, contract, network not available, or cart empty";
             setError(msg);
@@ -673,12 +685,12 @@ export function useMarketplace(): UseMarketplaceReturn {
                 throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
             }
             refreshMarketplaceCaches();
-            toast.success("Purchase Successful", { description: `Successfully purchased ${items.length} item(s).` });
+            if (!opts?.silent) toast.success("Purchase Successful", { description: `Successfully purchased ${items.length} item(s).` });
             return hash;
         });
     }, [account, szWallet, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeDirect, refreshMarketplaceCaches]);
 
-    const cancelOrder = useCallback(async (orderHash: string, tokenStandard?: string, kind: "listing" | "offer" = "listing") => {
+    const cancelOrder = useCallback(async (orderHash: string, tokenStandard?: string, kind: "listing" | "offer" = "listing", opts?: WriteOpts) => {
         const is1155 = tokenStandard === "ERC1155";
         const contract = is1155 ? medialane1155Contract : medialaneContract;
 
@@ -726,10 +738,12 @@ export function useMarketplace(): UseMarketplaceReturn {
                 throw new Error((receipt as any).revert_reason || "Transaction reverted on-chain. Check the explorer for details.");
             }
             refreshMarketplaceCaches();
-            toast.success(
-                kind === "offer" ? "Offer Cancelled" : "Listing Cancelled",
-                { description: `The ${kind} has been successfully cancelled on-chain.` }
-            );
+            if (!opts?.silent) {
+                toast.success(
+                    kind === "offer" ? "Offer Cancelled" : "Listing Cancelled",
+                    { description: `The ${kind} has been successfully cancelled on-chain.` }
+                );
+            }
             return hash;
         });
     }, [account, szWallet, walletAddress, medialaneContract, medialane1155Contract, chain, provider, withProcessing, executeDirect, refreshMarketplaceCaches]);
