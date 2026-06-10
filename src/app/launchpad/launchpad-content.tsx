@@ -54,6 +54,7 @@ const SERVICE_COLORS: Record<string, { icon: string; button: string; chip: strin
   "subscriptions": { icon: BRAND.blue.text, button: "bg-brand-blue", chip: "border-blue-500/30 text-blue-400 bg-blue-500/10", gradient: "from-blue-500/50 via-cyan-400/20 to-blue-600/30" },
   "ip-coins": { icon: BRAND.orange.text, button: "bg-brand-orange", chip: "border-orange-500/30 text-orange-400 bg-orange-500/10", gradient: "from-orange-500/50 via-amber-400/20 to-orange-700/30" },
   "creator-coins": { icon: BRAND.rose.text, button: "bg-brand-rose", chip: "border-rose-500/30 text-rose-400 bg-rose-500/10", gradient: "from-rose-500/50 via-pink-400/20 to-rose-700/30" },
+  "claim-memecoin": { icon: BRAND.orange.text, button: "bg-brand-orange", chip: "border-orange-500/30 text-orange-400 bg-orange-500/10", gradient: "from-orange-500/50 via-amber-400/20 to-orange-700/30" },
 };
 
 interface ServiceContent {
@@ -127,6 +128,25 @@ const DAPP_HREFS: Record<string, { href?: string; buttonLabel?: string; browseHr
   "collection-drop": { href: "/launchpad/drop/create", buttonLabel: "Launch drop", browseHref: "/launchpad/drop" },
   "ip-collection-1155": { href: "/launchpad/nfteditions/create", buttonLabel: "Create Limited Edition contract" },
   "mint-editions": { href: "/launchpad/nfteditions", buttonLabel: "Mint Limited Edition" },
+  "claim-memecoin": { href: "/launchpad/memecoin", buttonLabel: "Claim Memecoin" },
+};
+
+// Local launchpad card for claiming an existing coin (no @medialane/ui def — the
+// claim flow is DAO-reviewed and lives in the dapp). Rendered alongside the grid.
+const CLAIM_MEMECOIN_DEF: ServiceDefinition = {
+  key: "claim-memecoin",
+  title: "Claim Memecoin",
+  subtitle: "Bring your Starknet coin to Medialane",
+  description: "Already launched a coin on Starknet (unrug or partner)? Claim it to add it to Medialane — reviewed by our team, then live on the Coins page and your profile.",
+  features: ["unrug & partner coins", "Team reviewed", "Lists on /coins"],
+  icon: Coins,
+  gradient: "from-orange-500/50 via-amber-400/20 to-orange-700/30",
+  borderColor: "border-orange-500/30",
+  iconColor: BRAND.orange.text,
+  buttonColor: "bg-brand-orange",
+  badge: "Claim",
+  status: "live",
+  category: "launch",
 };
 
 function ServiceCard({
@@ -276,30 +296,14 @@ export function LaunchpadContent() {
             const { href, buttonLabel, browseHref } = DAPP_HREFS[def.key] ?? {};
             return <ServiceCard key={def.key} def={def} href={href} buttonLabel={buttonLabel} browseHref={browseHref} />;
           })}
+          {/* Claim Memecoin — a matching launchpad card (DAO-reviewed claim → /launchpad/memecoin) */}
+          <ServiceCard
+            key={CLAIM_MEMECOIN_DEF.key}
+            def={CLAIM_MEMECOIN_DEF}
+            href={DAPP_HREFS["claim-memecoin"]?.href}
+            buttonLabel={DAPP_HREFS["claim-memecoin"]?.buttonLabel}
+          />
         </motion.div>
-      </section>
-
-      {/* Claim an existing coin — routes to the shared claim flow (DAO-reviewed) */}
-      <section className="px-4">
-        <FadeIn>
-          <Link
-            href="/claim"
-            className="group flex items-center justify-between gap-4 rounded-2xl border border-border/40 p-5 transition-colors hover:border-primary/50"
-          >
-            <div className="flex items-center gap-4">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-rose-500/10 text-rose-400">
-                <Coins className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-semibold">Claim Memecoin</p>
-                <p className="text-sm text-muted-foreground">
-                  Bring an existing Starknet coin to Medialane — reviewed by our team.
-                </p>
-              </div>
-            </div>
-            <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        </FadeIn>
       </section>
 
       <section className="px-4">
