@@ -44,6 +44,7 @@ import { ConnectWallet } from "@/components/ConnectWallet";
 import { toast } from "sonner";
 import { FadeIn } from "@/components/ui/motion-primitives";
 import { normalizeAddress } from "@medialane/sdk";
+import { hash } from "starknet";
 import { starknetProvider } from "@/lib/starknet";
 import { EXPLORER_URL } from "@/lib/constants";
 import { absoluteUrl } from "@/lib/seo";
@@ -89,15 +90,22 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-function generateErc1155TokenId(): string {
-  const randomValues = new Uint32Array(1);
-  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-    crypto.getRandomValues(randomValues);
-  } else {
-    randomValues[0] = Math.floor(Math.random() * 1_000_000);
-  }
-
-  return (BigInt(Date.now()) * 1_000_000n + BigInt(randomValues[0] % 1_000_000)).toString();
+/** Reads the token id the contract assigned, from the IPMinted event of a mint_edition tx. */
+async function readAssignedEditionId(txHash: string, collection: string): Promise<string> {
+  const receipt = await starknetProvider.getTransactionReceipt(txHash);
+  const selector = hash.getSelectorFromName("IPMinted");
+  const events = (receipt as unknown as { events?: Array<{ from_address: string; keys: string[] }> }).events ?? [];
+  const ev = events.find(
+    (e) =>
+      BigInt(e.from_address) === BigInt(collection) &&
+      e.keys?.[0] != null &&
+      BigInt(e.keys[0]) === BigInt(selector),
+  );
+  if (!ev) throw new Error("Minted, but could not read the assigned token id from the receipt");
+  // keys = [selector, token_id_low, token_id_high, recipient]; token_id is a u256 key.
+  const low = BigInt(ev.keys[1] ?? 0);
+  const high = BigInt(ev.keys[2] ?? 0);
+  return (low + (high << 128n)).toString();
 }
 
 function ToggleGroup({
@@ -150,7 +158,8 @@ export default function MintNFTEditionsPage() {
   const [metadataFields, setMetadataFields] = useState<MetadataField[]>([]);
   const [metadataResetKey, setMetadataResetKey] = useState(0);
   const [autoExternalUrl, setAutoExternalUrl] = useState("");
-  const [generatedTokenId, setGeneratedTokenId] = useState(() => generateErc1155TokenId());
+  // The on-chain-assigned edition id, read from the IPMinted event in the mint handler.
+  const [mintedTokenId, setMintedTokenId] = useState<string | null>(null);
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageUri, setImageUri] = useState<string | null>(null);
@@ -302,22 +311,24 @@ export default function MintNFTEditionsPage() {
       setMintStep("processing");
       setTxStatus("submitting");
 
-      const [tokenIdLow, tokenIdHigh] = encodeU256(BigInt(generatedTokenId));
-      const [valueLow, valueHigh]     = encodeU256(BigInt(values.value));
+      const [valueLow, valueHigh] = encodeU256(BigInt(values.value));
 
-      const hash = await executeAuto([{
+      // The contract assigns the edition id on-chain (sequential from 1).
+      const txHashResult = await executeAuto([{
         contractAddress: collectionAddress,
-        entrypoint: "mint_item",
+        entrypoint: "mint_edition",
         calldata: [
           values.recipient,
-          tokenIdLow, tokenIdHigh,
           valueLow, valueHigh,
           ...serializeByteArray(tokenUri),
         ],
       }]);
-      if (!hash) throw new Error("Mint transaction failed");
+      if (!txHashResult) throw new Error("Mint transaction failed");
 
-      setTxHash(hash);
+      // Read the assigned id from the IPMinted event for the success/asset link.
+      setMintedTokenId(await readAssignedEditionId(txHashResult, collectionAddress));
+
+      setTxHash(txHashResult);
       setTxStatus("confirmed");
       setMintStep("success");
       if (walletAddress) invalidatePortfolioCache(walletAddress);
@@ -338,7 +349,7 @@ export default function MintNFTEditionsPage() {
     setMetadataFields([]);
     setMetadataResetKey((key) => key + 1);
     setAutoExternalUrl("");
-    setGeneratedTokenId(generateErc1155TokenId());
+    setMintedTokenId(null);
     form.reset({
       value: "1",
       recipient: walletAddress ?? "",
@@ -751,9 +762,9 @@ export default function MintNFTEditionsPage() {
         txHash={txHash}
         error={mintError}
         onMintAnother={handleMintAnother}
-        mintedTokenId={generatedTokenId}
-        assetHref={`/asset/${collectionAddress}/${generatedTokenId}`}
-        explorerAssetHref={`${EXPLORER_URL}/nft/${collectionAddress}/${generatedTokenId}`}
+        mintedTokenId={mintedTokenId ?? ""}
+        assetHref={`/asset/${collectionAddress}/${mintedTokenId ?? ""}`}
+        explorerAssetHref={`${EXPLORER_URL}/nft/${collectionAddress}/${mintedTokenId ?? ""}`}
       />
     </>
   );

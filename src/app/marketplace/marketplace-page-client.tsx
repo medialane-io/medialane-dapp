@@ -20,6 +20,7 @@ import { usePlatformStats } from "@/hooks/use-stats";
 import { IP_TYPES } from "@/types/ip";
 import { HelpIcon } from "@/components/ui/help-icon";
 import { PageContainer } from "@medialane/ui";
+import { CoinsExplorer } from "@/components/coins/coins-explorer";
 
 const SORT_OPTIONS = [
   { label: "Recent", value: "recent" },
@@ -193,6 +194,7 @@ function IpTypeChip({ href, label }: { href: string; label: string }) {
 }
 
 export default function MarketplacePageClient() {
+  const [view, setView] = useState<"nfts" | "tokens">("nfts");
   const [sort, setSort] = useState("recent");
   const [currency, setCurrency] = useState("");
   const [orderType, setOrderType] = useState("");
@@ -255,6 +257,24 @@ export default function MarketplacePageClient() {
         <PlatformStatsBar />
       </div>
 
+      {/* NFTs | Tokens segmented toggle */}
+      <div className="inline-flex rounded-lg border border-border p-0.5">
+        {([["nfts", "NFTs"], ["tokens", "Tokens"]] as const).map(([v, label]) => (
+          <button
+            key={v}
+            onClick={() => setView(v)}
+            className={cn(
+              "rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
+              view === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {view === "nfts" ? (
+        <>
       {/* Live activity ticker */}
       <ActivityTicker limit={12} />
 
@@ -456,6 +476,10 @@ export default function MarketplacePageClient() {
         minPrice={minPrice}
         maxPrice={maxPrice}
       />
+        </>
+      ) : (
+        <CoinsExplorer heading={false} />
+      )}
     </PageContainer>
   );
 }

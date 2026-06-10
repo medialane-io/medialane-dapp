@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useSWRConfig } from "swr";
 import { toast } from "sonner";
+import { getFriendlyWalletError } from "@/lib/wallet-error";
 import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
 import { INDEXER_REVALIDATION_DELAY_MS } from "@/lib/constants";
 import type { Call } from "starknet";
@@ -45,13 +46,16 @@ export function useTransfer() {
   const [txStatus, setTxStatus] = useState<"idle" | "submitting" | "confirmed" | "failed">("idle");
 
   const invalidate = useCallback(() => {
+    // Filter-only mutate: revalidate matching keys WITHOUT clearing their data.
+    // Passing `undefined` would wipe the `token-<contract>-<id>` cache the asset
+    // page reads, flipping it into its loading skeleton — which unmounts the
+    // transfer dialog and destroys its success state before it can show. See the
+    // same fix in use-marketplace's invalidateMarketplaceCaches.
     mutate(
       (key) => {
         if (typeof key !== "string") return false;
         return key.startsWith("tokens-owned-") || key.startsWith("token-");
-      },
-      undefined,
-      { revalidate: true }
+      }
     );
   }, [mutate]);
 
@@ -104,17 +108,18 @@ export function useTransfer() {
         setTxHash(hash);
         setTxStatus("confirmed");
 
-        toast.success("Transfer complete!", {
-          description: `Token #${input.tokenId} sent successfully.`,
-        });
         invalidate();
         setTimeout(() => invalidate(), INDEXER_REVALIDATION_DELAY_MS);
         return hash;
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Transfer failed";
-        setError(msg);
+        const friendly = getFriendlyWalletError(err);
+        setError(friendly.message);
         setTxStatus("failed");
-        toast.error("Transfer failed", { description: msg });
+        if (friendly.isUserRejection) {
+          toast.info(friendly.title, { description: friendly.description });
+        } else {
+          toast.error(friendly.title, { description: friendly.message });
+        }
       } finally {
         setIsProcessing(false);
       }

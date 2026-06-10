@@ -13,9 +13,10 @@ export function useCollections(
   isFeatured?: boolean,
   sort: CollectionSort = "recent",
   hideEmpty = true,
-  service?: string
+  service?: string,
+  standard?: string
 ) {
-  const key = `collections-${page}-${limit}-${isFeatured}-${sort}-${hideEmpty}-${service ?? ""}`;
+  const key = `collections-${page}-${limit}-${isFeatured}-${sort}-${hideEmpty}-${service ?? ""}-${standard ?? ""}`;
 
   const { data, error, isLoading, mutate } = useSWR<ApiResponse<ApiCollection[]>>(
     key,
@@ -28,6 +29,7 @@ export function useCollections(
       if (isFeatured !== undefined) params.set("isFeatured", String(isFeatured));
       if (hideEmpty) params.set("hideEmpty", "true");
       if (service) params.set("service", service);
+      if (standard) params.set("standard", standard);
       const url = `${MEDIALANE_BACKEND_URL.replace(/\/$/, "")}/v1/collections?${params}`;
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (MEDIALANE_API_KEY) headers["x-api-key"] = MEDIALANE_API_KEY;
