@@ -2,12 +2,13 @@
 
 import { useState, useCallback } from "react";
 import { useAccount } from "@starknet-react/core";
-import { hash, type AccountInterface } from "starknet";
+import { type AccountInterface } from "starknet";
 import {
   VALIDATED_EKUBO_PARAMS,
   getTokenBySymbol,
   normalizeAddress,
-  CREATOR_COIN_FACTORY_CONTRACT_MAINNET,
+  parseCreatorCoinCreated,
+  type CreatorCoinReceiptLike,
 } from "@medialane/sdk";
 import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
 import { getMedialaneClient } from "@/lib/medialane-client";
@@ -23,26 +24,6 @@ export interface LaunchCoinInput {
 }
 
 export type LaunchStatus = "idle" | "deploying" | "launching" | "indexing" | "done" | "error";
-
-const FACTORY = normalizeAddress(CREATOR_COIN_FACTORY_CONTRACT_MAINNET);
-const CREATED_SELECTOR = hash.getSelectorFromName("CreatorCoinCreated");
-
-/** Pull the deployed coin address from the Factory's CreatorCoinCreated event.
- *  Event data = [owner, name, symbol, supply_low, supply_high, coin_address]. */
-function coinAddressFromReceipt(receipt: any): string {
-  const events: any[] = receipt?.events ?? [];
-  for (const ev of events) {
-    let from: string;
-    try { from = normalizeAddress(ev.from_address); } catch { continue; }
-    if (from !== FACTORY) continue;
-    const k0 = ev.keys?.[0];
-    if (!k0 || normalizeAddress(k0) !== normalizeAddress(CREATED_SELECTOR)) continue;
-    const data: string[] = ev.data ?? [];
-    if (data.length < 1) continue;
-    return normalizeAddress(data[data.length - 1]); // coin_address is last
-  }
-  throw new Error("Launch deployed but the coin address could not be read from the receipt");
-}
 
 export function useLaunchCoin() {
   const { account } = useAccount();
@@ -78,7 +59,7 @@ export function useLaunchCoin() {
           salt,
         });
         const receipt = await starknetProvider.waitForTransaction(created.txHash);
-        const coinAddress = coinAddressFromReceipt(receipt);
+        const coinAddress = parseCreatorCoinCreated(receipt as unknown as CreatorCoinReceiptLike);
 
         // Tx2 — launch on Ekubo at the fixed validated price; buyback pre-funded
         // in the same multicall. Anti-snipe off (delay 0) in v1.
