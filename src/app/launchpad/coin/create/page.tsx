@@ -67,8 +67,10 @@ export default function CoinCreatePage() {
       const { coinAddress } = await launch(input);
       toast.success("Creator Coin launched");
       router.push(`/collections/${coinAddress}`);
-    } catch {
-      toast.error(error ?? "Launch failed");
+    } catch (e) {
+      // Read the message off the exception — the `error` state set inside
+      // launch() isn't visible to this closure until the next render.
+      toast.error(e instanceof Error ? e.message : "Launch failed");
     }
   }
 
