@@ -27,7 +27,7 @@ export function CoinCard({ collection }: { collection: ApiCollection }) {
   return (
     <Link
       href={`/collections/${contract}`}
-      className="group flex flex-col rounded-xl border border-border/60 bg-card overflow-hidden transition-colors hover:border-primary/50"
+      className="flex flex-col rounded-xl border border-border/60 bg-card overflow-hidden transition-transform active:scale-[0.99]"
     >
       {/* Header: logo + identity */}
       <div className="flex items-center gap-3 p-4">
@@ -80,7 +80,7 @@ export function CoinCard({ collection }: { collection: ApiCollection }) {
       </div>
 
       {/* Affordance */}
-      <div className="border-t border-border/60 px-4 py-2.5 text-center text-sm font-medium text-primary group-hover:underline">
+      <div className="border-t border-border/60 px-4 py-2.5 text-center text-sm font-medium text-primary">
         Trade
       </div>
     </Link>

@@ -17,7 +17,7 @@ const FILTER_TABS: { label: string; value: Filter }[] = [
 // Default sort is recency, never raw swap volume (05 §11 anti-wash hygiene).
 const SORT_OPTIONS: { label: string; value: CollectionSort }[] = [
   { label: "Recently launched", value: "recent" },
-  { label: "Holders", value: "supply" },
+  { label: "Supply", value: "supply" },
   { label: "Name", value: "name" },
 ];
 
