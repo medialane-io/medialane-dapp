@@ -14,7 +14,7 @@ import { LAUNCHPAD_SERVICE_DEFINITIONS } from "@medialane/ui";
 import type { ServiceDefinition } from "@medialane/ui";
 import {
   Zap, Package, Tag, ShoppingCart,
-  Layers, Globe, ExternalLink, ArrowRight, Lock,
+  Layers, Globe, ExternalLink, ArrowRight, Lock, Coins,
 } from "lucide-react";
 
 function HeroStats({ address }: { address: string }) {
@@ -277,6 +277,29 @@ export function LaunchpadContent() {
             return <ServiceCard key={def.key} def={def} href={href} buttonLabel={buttonLabel} browseHref={browseHref} />;
           })}
         </motion.div>
+      </section>
+
+      {/* Claim an existing coin — routes to the shared claim flow (DAO-reviewed) */}
+      <section className="px-4">
+        <FadeIn>
+          <Link
+            href="/claim"
+            className="group flex items-center justify-between gap-4 rounded-2xl border border-border/40 p-5 transition-colors hover:border-primary/50"
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-rose-500/10 text-rose-400">
+                <Coins className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-semibold">Claim Memecoin</p>
+                <p className="text-sm text-muted-foreground">
+                  Bring an existing Starknet coin to Medialane — reviewed by our team.
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </FadeIn>
       </section>
 
       <section className="px-4">
