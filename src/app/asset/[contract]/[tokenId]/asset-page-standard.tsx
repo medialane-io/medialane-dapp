@@ -14,6 +14,8 @@ import { HiddenContentBanner } from "@/components/hidden-content-banner";
 import { ipfsToHttp } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ApiActivity, ApiOrder } from "@medialane/sdk";
+import { getService } from "@medialane/sdk";
+import { resolveRemixPolicy, getDerivativesTerm } from "@/lib/remix-policy";
 import { useComments } from "@/hooks/use-comments";
 import { EXPLORER_URL } from "@/lib/constants";
 import { useWallet } from "@/hooks/use-wallet";
@@ -72,8 +74,18 @@ export function AssetPageStandard() {
     mutateListings();
   };
 
+  const remixPolicy = resolveRemixPolicy({
+    parentNoDerivatives: getDerivativesTerm(token?.metadata?.attributes) === "Not Allowed",
+    viewerIsParentOwner: isOwner,
+    dealAvailable: !!getService(collection?.service),
+  });
+
   const handleAutoRemix = () => {
     router.push(`/create/remix/${contract}/${tokenId}`);
+  };
+
+  const goToDeal = () => {
+    router.push(`/create/licensing/${contract}/${tokenId}`);
   };
 
   if (isLoading) {
@@ -112,7 +124,7 @@ export function AssetPageStandard() {
       className="relative z-0 min-h-screen"
     >
       {token.isHidden && <HiddenContentBanner />}
-      <AssetAtmosphere imageUrl={imageUrl} imgRef={imgRef} />
+      <AssetAtmosphere imageUrl={imageUrl} imgRef={imgRef} opacityClassName="opacity-30" />
 
       <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 pt-20 space-y-8 pb-8">
         <nav className="flex items-center gap-1.5 text-sm text-muted-foreground min-w-0">
@@ -163,7 +175,7 @@ export function AssetPageStandard() {
               myListing={myListing}
               activeBids={activeBids}
               walletAddress={walletAddress}
-              remixEnabled
+              remixEnabled={remixPolicy.canRemixDirect}
               onCancelClick={dialogs.handleCancelClick}
               onAcceptBid={handleAcceptClick}
               onOpenListing={() => dialogs.setListOpen(true)}
@@ -171,6 +183,8 @@ export function AssetPageStandard() {
               onOpenPurchase={dialogs.setPurchaseOrder}
               onOpenOffer={() => dialogs.setOfferOpen(true)}
               onOpenRemix={handleAutoRemix}
+              showDealOption={remixPolicy.showDealOption}
+              onProposeDeal={goToDeal}
             />
 
             {isERC1155 && balances.length > 0 ? (
@@ -257,6 +271,7 @@ export function AssetPageStandard() {
         contract={contract}
         tokenId={tokenId}
         tokenName={name}
+        tokenImage={imageUrl}
         tokenStandard={collection?.standard}
         hasActiveListing={activeListings.length > 0}
         mutateListings={mutateListings}
