@@ -21,7 +21,10 @@ export function CoinCard({ collection }: { collection: ApiCollection }) {
   const { price, isLoading: priceLoading } = useCoinPrice(contract);
   const kind = coinKind(collection.service);
   const verified = collection.claimedBy != null || kind === "creator";
-  const logo = collection.image ? ipfsToHttp(collection.image) : null;
+  // Studio-uploaded feature image lives on the profile (platform layer);
+  // fall back to the indexed collection image.
+  const logoUri = collection.profile?.image ?? collection.image;
+  const logo = logoUri ? ipfsToHttp(logoUri) : null;
   const fdv = formatFdv(price?.quotePerCoin, collection.totalSupply, price?.quoteSymbol ?? null);
 
   return (
