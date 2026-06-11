@@ -40,7 +40,10 @@ export function CoinPageClient({ collection }: { collection: ApiCollection }) {
   const contract = collection.contractAddress;
   const { price, isLoading: priceLoading } = useCoinPrice(contract);
 
-  const bannerUrl = collection.image ? ipfsToHttp(collection.image) : null;
+  // Studio-uploaded feature image lives on the profile (platform layer);
+  // fall back to the indexed collection image.
+  const bannerSource = collection.profile?.image ?? collection.image;
+  const bannerUrl = bannerSource ? ipfsToHttp(bannerSource) : null;
   const { imgRef, dynamicTheme } = useDominantColor(bannerUrl);
 
   const serviceLabel = getService(collection.service)?.displayName ?? "Creator Coin";
