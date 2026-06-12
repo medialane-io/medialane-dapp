@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { withSiwsAuth } from "@/lib/pinata-fetch";
 import { useSiwsToken } from "@/hooks/use-siws-token";
+import { uploadFailureToast } from "@/lib/upload-error";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -132,7 +133,8 @@ export default function CreateNFTEditionsCollectionPage() {
       setImageUri(`ipfs://${data.cid}`);
       toast.success("Image uploaded to IPFS");
     } catch (err) {
-      toast.error("Image upload failed", { description: err instanceof Error ? err.message : undefined });
+      const t = uploadFailureToast(err);
+      toast.error(t.title, { description: t.description });
       setImageUri(null);
     } finally {
       setImageUploading(false);

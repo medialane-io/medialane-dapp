@@ -24,6 +24,7 @@ import { useTx } from "@/hooks/use-tx";
 import { useWallet } from "@/hooks/use-wallet";
 import { useMedialaneClient } from "@/hooks/use-medialane-client";
 import { useSiwsToken } from "@/hooks/use-siws-token";
+import { uploadFailureToast } from "@/lib/upload-error";
 import { uploadFileToIpfs, uploadJsonToIpfs } from "@/lib/ipfs-upload-client";
 import { MEDIALANE_BACKEND_URL, MEDIALANE_API_KEY } from "@/lib/constants";
 import { Layers, Loader2, ImagePlus, X } from "lucide-react";
@@ -112,8 +113,8 @@ export default function CreateCollectionPage() {
       setImageUri(upload.uri);
       toast.success("Image uploaded to IPFS");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Upload failed";
-      toast.error("Image upload failed", { description: msg });
+      const t = uploadFailureToast(err);
+      toast.error(t.title, { description: t.description });
       setImageUri(null);
     } finally {
       setImageUploading(false);

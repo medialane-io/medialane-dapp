@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { withSiwsAuth } from "@/lib/pinata-fetch";
 import { useSiwsToken } from "@/hooks/use-siws-token";
+import { uploadFailureToast } from "@/lib/upload-error";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -106,8 +107,11 @@ export default function CreateDropPage() {
       if (!data?.cid) throw new Error("No CID");
       setImageUri(`ipfs://${data.cid}`);
       toast.success("Cover image uploaded");
-    } catch {
-      toast.error("Image upload failed");
+    } catch (err) {
+      if (previewRef.current) { URL.revokeObjectURL(previewRef.current); previewRef.current = null; }
+      setImagePreview(null);
+      const t = uploadFailureToast(err);
+      toast.error(t.title, { description: t.description });
     } finally {
       setImageUploading(false);
     }

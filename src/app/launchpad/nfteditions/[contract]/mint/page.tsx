@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { withSiwsAuth } from "@/lib/pinata-fetch";
 import { useSiwsToken } from "@/hooks/use-siws-token";
+import { uploadFailureToast } from "@/lib/upload-error";
 import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -254,8 +255,12 @@ export default function MintNFTEditionsPage() {
       if (!data?.cid) throw new Error("No CID");
       setImageUri(`ipfs://${data.cid}`);
       toast.success("Image uploaded to IPFS");
-    } catch {
-      toast.error("Image upload failed");
+    } catch (err) {
+      // Clear the preview so the form doesn't pretend an image is attached
+      if (previewRef.current) { URL.revokeObjectURL(previewRef.current); previewRef.current = null; }
+      setImagePreview(null);
+      const t = uploadFailureToast(err);
+      toast.error(t.title, { description: t.description });
     } finally {
       setImageUploading(false);
     }
