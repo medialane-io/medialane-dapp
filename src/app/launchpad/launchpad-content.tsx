@@ -8,11 +8,9 @@ import { useTokensByOwner } from "@/hooks/use-tokens";
 import { useUserOrders } from "@/hooks/use-orders";
 import { FadeIn } from "@/components/ui/motion-primitives";
 import { BRAND } from "@/lib/brand";
-import { cn } from "@/lib/utils";
 import { LaunchpadGroupedSections, type ServiceOverrides } from "@medialane/ui";
 import {
-  Zap, Package, Tag, ShoppingCart,
-  Layers, Globe, ExternalLink, ArrowRight,
+  Zap, Package, Tag, ShoppingCart, ArrowRight,
 } from "lucide-react";
 
 function HeroStats({ address }: { address: string }) {
@@ -53,14 +51,15 @@ const DAPP_OVERRIDES: ServiceOverrides = {
   "claim-memecoin": { href: "/launchpad/memecoin", status: "live" },
   "claim-username": { href: "/claim" },
   "claim-collection": { href: "/claim" },
+  "claim-collection-name": { href: "/claim" },
 };
 
 export function LaunchpadContent() {
   const { isConnected, address: walletAddress } = useWallet();
 
   return (
-    <div className="pb-16 space-y-10">
-      <section className="relative overflow-hidden border-b border-border/50">
+    <div className="pb-20 space-y-12 sm:space-y-20">
+      <section className="relative overflow-hidden">
         <div className="px-4 py-14 sm:py-20">
           <FadeIn>
             <span className="pill-badge mb-5 inline-flex">
@@ -90,47 +89,6 @@ export function LaunchpadContent() {
       {/* Grouped services (shared @medialane/ui component) */}
       <section className="px-4">
         <LaunchpadGroupedSections overrides={DAPP_OVERRIDES} />
-      </section>
-
-      <section className="px-4">
-        <FadeIn>
-          <div className="rounded-2xl border border-border/40 p-5 sm:p-8 bg-gradient-to-br from-brand-purple/[0.08] via-brand-blue/[0.05] to-transparent overflow-hidden relative">
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden sm:flex items-center justify-center opacity-[0.05] select-none pointer-events-none">
-              <Layers className="h-52 w-52" />
-            </div>
-            <div className="relative z-10 max-w-lg space-y-4">
-              <div>
-                <p className="section-label">Drop Pages</p>
-                <h2 className="text-xl font-bold mt-0.5">Every collection gets a branded page</h2>
-                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                  Share your work as a standalone creator drop page, fully branded, shareable on social, and accessible to any Starknet wallet.
-                </p>
-              </div>
-              <div className="flex items-center gap-2 bg-muted/50 border border-border/50 rounded-lg px-3 py-2 max-w-sm">
-                <Globe className={`h-3.5 w-3.5 shrink-0 ${BRAND.purple.text}`} />
-                <span className="font-mono text-xs text-muted-foreground">dapp.medialane.io/collections/</span>
-                <span className={`font-mono text-xs font-semibold ${BRAND.blue.text} truncate`}>your-collection</span>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Link
-                  href="/create/collection"
-                  className={cn(
-                    "h-9 px-4 rounded-xl flex items-center gap-2 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98]",
-                    BRAND.purple.bgSolid,
-                  )}
-                >
-                  Create a collection
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-                <Button variant="ghost" size="sm" asChild className="text-muted-foreground">
-                  <Link href="/collections">
-                    Browse collections <ExternalLink className="h-3 w-3 ml-1" />
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </FadeIn>
       </section>
 
       {isConnected ? (
