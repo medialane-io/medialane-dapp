@@ -11,7 +11,7 @@ export function makeUploadDocument(getValidToken: () => Promise<string | null>) 
     try {
       const token = await getValidToken();
       if (!token) throw new Error("Connect your wallet first");
-      return (await uploadFileToIpfs(file, token)).uri;
+      return (await uploadFileToIpfs(file, token, "document")).uri;
     } catch (err) {
       const t = uploadFailureToast(err);
       throw new Error(t.description ?? t.title);

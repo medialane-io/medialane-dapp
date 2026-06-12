@@ -10,8 +10,13 @@ export interface UploadedIpfsFile {
 export async function uploadFileToIpfs(
   file: File,
   siwsToken: string,
+  kind: "image" | "document" = "image",
 ): Promise<UploadedIpfsFile> {
-  const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth(siwsToken, { method: "POST" }));
+  const signedRes = await fetch("/api/pinata/signed-url", withSiwsAuth(siwsToken, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ kind }),
+  }));
   const signedData = await signedRes.json().catch(() => ({})) as { url?: string };
   if (!signedRes.ok || !signedData.url) {
     throw new Error("Failed to get upload URL");
