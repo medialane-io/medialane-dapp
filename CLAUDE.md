@@ -177,10 +177,15 @@ Every page and component that prompts the user to connect renders the shared `<C
 - Buying a listing / accepting an offer: **unsigned** — `fulfill_order(orderHash[, quantity])`, no `signMessage`; approve + (fee) executed atomically via the paymaster
 - Cancellations: signed `{ order_hash, offerer }` (no nonce) → `cancel_order`
 - Execution stays on dapp's AVNU paymaster (`executeAuto`) + creators-fund fee splice.
-- **Signer/executor resolution** (`d039e43`): the trade path resolves `szWallet ?? account`
-  (mirrors `use-tx`/`use-siws-token`) — so Cartridge/Privy users can list/buy/offer, and a
-  momentarily-`undefined` injected `account` never crashes the multicall (no more `account!`).
-  For injected users the path is byte-identical to the prior account-only flow.
+- **Signer/executor resolution** (2026-06-12, supersedes `d039e43`): the StarkZap wallet is
+  **gated on the active-wallet slot** before any `szWallet ?? account` fallback —
+  `const szWallet = walletType === "cartridge" || walletType === "privy" ? szWalletRaw : null;`
+  (applied in `use-marketplace`, `use-tx`, `use-siws-token`, `use-launch-coin`). A bare
+  `szWallet ?? account` priority let a lingering Cartridge/Privy session sign/execute for a
+  different wallet than the one the user explicitly connected (and in `use-launch-coin` even
+  split signer vs owner across rails). Cartridge/Privy users still list/buy/offer normally, and
+  a momentarily-`undefined` injected `account` surfaces a retryable error instead of crashing.
+  **Any new hook that resolves a signer/executor must use this slot-gated pattern.**
 
 **Checkout totals — always via `orderTotal()` (`src/lib/checkout.ts`).** `order.consideration.startAmount` is the price **per edition** for ERC-1155 (the listing form labels it "Price per edition"); `fulfill_order` charges `price × quantity`. `orderTotal(order, quantity)` is the single source of truth for the ERC-20 amount to approve — never divide by `offer.startAmount`. `checkoutCart` takes a typed `CheckoutItem[]`; both call sites (`purchase-dialog`, `counter-offers-table`) build items through `orderTotal`. A prior bug under-approved ERC-1155 multi-buys by dividing by the edition count → `ERC20: insufficient allowance`.
 
