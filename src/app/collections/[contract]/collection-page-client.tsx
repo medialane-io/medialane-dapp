@@ -260,7 +260,10 @@ function CollectionItems({ contract, activeListings }: { contract: string; activ
 }
 
 export default function CollectionPageClient() {
-  const { contract } = useParams<{ contract: string }>();
+  // Served from both /collections/[contract] and /coins/[address] (the
+  // friendlier canonical URL for Creator Coins) — accept either param name.
+  const params = useParams<{ contract?: string; address?: string }>();
+  const contract = params.contract ?? params.address ?? "";
   const [reportOpen, setReportOpen] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
   const [descClamped, setDescClamped] = useState(false);
