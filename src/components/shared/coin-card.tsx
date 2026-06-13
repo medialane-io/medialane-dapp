@@ -29,7 +29,7 @@ export function CoinCard({ collection }: { collection: ApiCollection }) {
 
   return (
     <Link
-      href={`/collections/${contract}`}
+      href={`/coins/${contract}`}
       className="flex flex-col rounded-xl border border-border/60 bg-card overflow-hidden transition-transform active:scale-[0.99]"
     >
       {/* Header: logo + identity */}
