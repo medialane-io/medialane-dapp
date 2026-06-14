@@ -143,7 +143,7 @@ function ToggleGroup({
 
 export default function MintNFTEditionsPage() {
   const { contract: rawContract } = useParams<{ contract: string }>();
-  const collectionAddress = normalizeAddress(rawContract ?? "");
+  const collectionAddress = normalizeAddress("STARKNET", rawContract ?? "");
 
   const { isConnected, address: walletAddress } = useUnifiedWallet();
   const { executeAuto } = usePaymasterTransaction();
@@ -220,8 +220,8 @@ export default function MintNFTEditionsPage() {
       entrypoint: "owner",
       calldata: [],
     }).then((result) => {
-      const onChainOwner = normalizeAddress(result[0]);
-      setOwnerCheck(onChainOwner === normalizeAddress(walletAddress) ? "ok" : "denied");
+      const onChainOwner = normalizeAddress("STARKNET", result[0]);
+      setOwnerCheck(onChainOwner === normalizeAddress("STARKNET", walletAddress) ? "ok" : "denied");
     }).catch(() => setOwnerCheck("ok"));
   }, [walletAddress, collectionAddress]);
 

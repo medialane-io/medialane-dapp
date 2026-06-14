@@ -2,25 +2,31 @@
 
 /**
  * CoinsExplorer — dapp binding of the shared @medialane/ui explorer.
- * Injects the dapp's collections data source (useCollections + standard filter)
- * and Ekubo price read; links to the internal /coins page (Starknet trading).
+ * Injects the dapp's coins data source (useCoins → /v1/coins) and the Ekubo
+ * price read; links to the internal /coins page (Starknet trading).
  */
 
 import { CoinsExplorer as UICoinsExplorer, type CoinFilter, type CoinSort, type CoinCollectionLike } from "@medialane/ui";
-import { useCollections } from "@/hooks/use-collections";
+import { useCoins as useCoinsData } from "@/hooks/use-coins";
 import { useCoinPrice } from "@/hooks/use-coin-price";
 
-function usePrice(collection: CoinCollectionLike) {
-  const { price, isLoading } = useCoinPrice(collection.contractAddress);
+function usePrice(coin: CoinCollectionLike) {
+  const { price, isLoading } = useCoinPrice(coin.contractAddress);
   return { price, isLoading };
 }
 
-function useCoins({ filter, sort }: { filter: CoinFilter; sort: CoinSort }) {
-  // "all" → both coin services via standard=ERC20; per-kind → service filter.
+function useCoins({ filter }: { filter: CoinFilter; sort: CoinSort }) {
+  // Coins live in the Coin model now (/v1/coins). "all" → no service filter;
+  // per-kind → the coin service. Sorting is handled by the explorer UI.
   const service = filter === "creator" ? "creator-coin" : filter === "memecoin" ? "external-erc20" : undefined;
-  const standard = filter === "all" ? "ERC20" : undefined;
-  const { collections, isLoading } = useCollections(1, 24, undefined, sort, false, service, standard);
-  return { collections: collections ?? [], isLoading };
+  const { coins, isLoading } = useCoinsData({ service });
+  // ApiCoin.totalSupply is a fungible decimal string; the UI's CoinCollectionLike
+  // (and FDV math) expects a number — coerce so coins satisfy it structurally.
+  const collections = coins.map((c) => ({
+    ...c,
+    totalSupply: c.totalSupply != null ? Number(c.totalSupply) : null,
+  }));
+  return { collections, isLoading };
 }
 
 export function CoinsExplorer({ heading = true }: { heading?: boolean }) {

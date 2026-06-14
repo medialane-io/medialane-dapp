@@ -52,7 +52,7 @@ export function useLaunchCoin() {
       const supplyRaw = toRaw(BigInt(input.supplyHuman));
       const teamRaw = teamCoinsRaw(supplyRaw, input.teamPct);
       const buybackRaw = buybackQuoteRaw(teamRaw, quote.decimals);
-      const ownerAddr = normalizeAddress(owner);
+      const ownerAddr = normalizeAddress("STARKNET", owner);
       const client = getMedialaneClient();
       const salt = "0x" + Date.now().toString(16);
 

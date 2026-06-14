@@ -15,7 +15,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowDownUp, Loader2, ShieldCheck, ExternalLink, Check, Zap, Wallet, TrendingUp } from "lucide-react";
 import { getService } from "@medialane/sdk";
-import type { ApiCollection, CreatorCoinPrice } from "@medialane/sdk";
+import type { ApiCoin, CreatorCoinPrice } from "@medialane/sdk";
 import { useCoinPrice } from "@/hooks/use-coin-price";
 import { useCoinBalance } from "@/hooks/use-coin-balance";
 import { useSwap, SWAP_TOKENS, type SwapToken } from "@/hooks/use-swap";
@@ -79,25 +79,22 @@ function formatCompact(n: number): string {
   return new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 2 }).format(n);
 }
 
-export function CoinPageClient({ collection }: { collection: ApiCollection }) {
-  const contract = collection.contractAddress;
+export function CoinPageClient({ coin }: { coin: ApiCoin }) {
+  const contract = coin.contractAddress;
   const { price, isLoading: priceLoading } = useCoinPrice(contract);
 
-  // Studio-uploaded feature image lives on the profile (platform layer);
-  // fall back to the indexed collection image.
-  const bannerSource = collection.profile?.image ?? collection.image;
+  const bannerSource = coin.image;
   const bannerUrl = bannerSource ? ipfsToHttp(bannerSource) : null;
   const { imgRef, dynamicTheme } = useDominantColor(bannerUrl);
 
-  const serviceLabel = getService(collection.service)?.displayName ?? "Creator Coin";
-  const isExternal = collection.service === "external-erc20";
+  const serviceLabel = getService(coin.service)?.displayName ?? "Creator Coin";
+  const isExternal = coin.service === "external-erc20";
 
   // Market cap = live spot price × circulating supply, in the quote token.
   const marketCap =
-    price && collection.totalSupply != null && Number(collection.totalSupply) > 0
-      ? price.quotePerCoin * Number(collection.totalSupply)
+    price && coin.totalSupply != null && Number(coin.totalSupply) > 0
+      ? price.quotePerCoin * Number(coin.totalSupply)
       : null;
-  const isFresh = collection.holderCount === 0;
   const explorerUrl = `${EXPLORER_URL}/contract/${contract}`;
 
   return (
@@ -144,20 +141,20 @@ export function CoinPageClient({ collection }: { collection: ApiCollection }) {
           {/* ── Left: identity + price + trust ── */}
           <div className="space-y-6">
             <div className="flex items-center gap-4">
-              <CoinAvatar url={bannerUrl} symbol={collection.symbol} />
+              <CoinAvatar url={bannerUrl} symbol={coin.symbol} />
               <div className="min-w-0">
                 <h1 className="text-3xl sm:text-4xl font-bold leading-tight truncate">
-                  {collection.name ?? "Creator Coin"}
+                  {coin.name ?? "Creator Coin"}
                 </h1>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  {collection.symbol && (
+                  {coin.symbol && (
                     <span className="font-mono text-xs bg-muted/60 border border-border/60 rounded-full px-2.5 py-0.5">
-                      {collection.symbol}
+                      {coin.symbol}
                     </span>
                   )}
                   <span className="text-xs text-muted-foreground">{serviceLabel}</span>
                 </div>
-                {collection.owner && <CreatorChip address={collection.owner} className="mt-2" />}
+                {coin.creator && <CreatorChip address={coin.creator} className="mt-2" />}
               </div>
             </div>
 
@@ -174,7 +171,7 @@ export function CoinPageClient({ collection }: { collection: ApiCollection }) {
                     {formatPrice(price.quotePerCoin)}
                   </span>
                   <span className="text-sm text-muted-foreground">
-                    {price.quoteSymbol ?? "quote"} / {collection.symbol ?? "coin"}
+                    {price.quoteSymbol ?? "quote"} / {coin.symbol ?? "coin"}
                   </span>
                 </div>
               ) : (
@@ -188,11 +185,10 @@ export function CoinPageClient({ collection }: { collection: ApiCollection }) {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <StatCell label="Holders" value={collection.holderCount != null ? String(collection.holderCount) : "—"} />
+            <div className="grid grid-cols-3 gap-3">
               <StatCell
                 label="Supply"
-                value={collection.totalSupply != null ? Number(collection.totalSupply).toLocaleString() : "—"}
+                value={coin.totalSupply != null ? Number(coin.totalSupply).toLocaleString() : "—"}
               />
               <StatCell
                 label="Market Cap"
@@ -201,16 +197,10 @@ export function CoinPageClient({ collection }: { collection: ApiCollection }) {
               <StatCell label="Priced in" value={price?.quoteSymbol ?? "—"} />
             </div>
 
-            {isFresh && (
-              <p className="text-xs text-muted-foreground">
-                Just launched — be the first to buy {collection.symbol ?? "this coin"}.
-              </p>
-            )}
-
             {/* Description */}
-            {collection.description && (
+            {coin.description && (
               <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
-                {collection.description}
+                {coin.description}
               </p>
             )}
 
@@ -218,7 +208,7 @@ export function CoinPageClient({ collection }: { collection: ApiCollection }) {
                 collapsible explainer + trust rows; everything visible at a glance) */}
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground leading-relaxed">
-                {collection.name ?? "This"} is a <span className="text-foreground font-medium">Creator Coin</span> —
+                {coin.name ?? "This"} is a <span className="text-foreground font-medium">Creator Coin</span> —
                 a token you can buy, hold in your own wallet, and trade any time on the open market.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -255,7 +245,7 @@ export function CoinPageClient({ collection }: { collection: ApiCollection }) {
               >
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
-              <ShareButton title={collection.name ?? "Creator Coin"} variant="ghost" size="icon" />
+              <ShareButton title={coin.name ?? "Creator Coin"} variant="ghost" size="icon" />
             </div>
           </div>
 
@@ -263,8 +253,8 @@ export function CoinPageClient({ collection }: { collection: ApiCollection }) {
           <div className="lg:sticky lg:top-20 h-fit">
             <CoinSwapCard
               coinAddress={contract}
-              coinSymbol={collection.symbol ?? "COIN"}
-              coinName={collection.name ?? "Creator Coin"}
+              coinSymbol={coin.symbol ?? "COIN"}
+              coinName={coin.name ?? "Creator Coin"}
               coinColor={dynamicTheme ? "var(--dynamic-primary)" : "hsl(var(--brand-purple))"}
               price={price}
             />

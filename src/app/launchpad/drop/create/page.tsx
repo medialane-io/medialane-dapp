@@ -229,7 +229,7 @@ export default function CreateDropPage() {
         const dropEvent = events.find((e: any) =>
           e.keys?.[0] && BigInt(e.keys[0]) === BigInt(DROP_CREATED_SELECTOR)
         );
-        if (dropEvent?.data?.[0]) collectionAddress = normalizeAddress(dropEvent.data[0]);
+        if (dropEvent?.data?.[0]) collectionAddress = normalizeAddress("STARKNET", dropEvent.data[0]);
       } catch { /* non-fatal */ }
 
       // Fire-and-forget: persist drop conditions with the address from receipt

@@ -222,7 +222,7 @@ export default function CreateNFTEditionsCollectionPage() {
         const deployEvent = events.find((e: any) =>
           e.keys?.[0] && BigInt(e.keys[0]) === BigInt(COLLECTION_DEPLOYED_SELECTOR)
         );
-        if (deployEvent?.keys?.[1]) addr = normalizeAddress(deployEvent.keys[1]);
+        if (deployEvent?.keys?.[1]) addr = normalizeAddress("STARKNET", deployEvent.keys[1]);
       } catch { /* non-fatal */ }
 
       // 4. Register with backend so the collection appears in portfolio immediately.
