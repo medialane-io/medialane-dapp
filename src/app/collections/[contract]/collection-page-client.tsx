@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { useCollection, useCollectionTokens } from "@/hooks/use-collections";
+import { useCoin } from "@/hooks/use-coins";
 import { useOrders } from "@/hooks/use-orders";
 import { useDominantColor } from "@/hooks/use-dominant-color";
 import { ListingCard, ListingCardSkeleton } from "@/components/marketplace/listing-card";
@@ -275,7 +276,12 @@ export default function CollectionPageClient() {
 
   const [activeTab, setActiveTab] = useState("items");
   const { address: walletAddress } = useWallet();
-  const { collection, isLoading: colLoading } = useCollection(contract);
+  const { collection, isLoading: colLoading } = useCollection(isCoinRoute ? null : contract);
+  // Coins are their own model now (2026-06-14 split). Resolve via useCoin on the
+  // /coins route, or as a fallback for old /collections/[coin] links once we
+  // know there's no NFT collection for this address.
+  const tryCoin = isCoinRoute || (!colLoading && !collection);
+  const { coin, isLoading: coinLoading } = useCoin(tryCoin ? contract : null);
   const { profile } = useCollectionProfile(contract);
   const gatedState = useGatedContent(
     profile?.hasGatedContent ? contract : undefined
@@ -302,14 +308,14 @@ export default function CollectionPageClient() {
   );
   const activeBids = orders.filter((o) => o.status === "ACTIVE" && o.offer.itemType === "ERC20");
 
-  // Registry dispatch: Creator Coins (and external ERC-20s) get the coin view —
-  // an ERC-20 has no per-token grid/listings, just a price + embedded swap.
-  if (!colLoading && collection && getService(collection.service)?.uiVariant === "coin") {
-    return <CoinPageClient collection={collection} />;
+  // Coin dispatch: a fungible coin (Creator Coin / external ERC-20) renders the
+  // coin view — price + embedded swap, no per-token grid/listings.
+  if (coin) {
+    return <CoinPageClient coin={coin} />;
   }
-  // On the /coins route, show the coin skeleton while loading instead of
-  // flashing the NFT-collection layout before the dispatch resolves.
-  if (colLoading && isCoinRoute) {
+  // Show the coin skeleton while a coin is resolving (the /coins route, or an
+  // old /collections/[coin] link) instead of flashing the NFT layout.
+  if (tryCoin && coinLoading) {
     return <CoinPageSkeleton />;
   }
 

@@ -11,7 +11,7 @@
 
 import { StarkZap, ChainId, getStakingPreset, fromAddress } from "starkzap";
 import type { Token } from "starkzap";
-import { DEFAULT_RPC_URL } from "@medialane/sdk";
+import { getCoordinates } from "@medialane/sdk";
 
 // ---------------------------------------------------------------------------
 // Network resolution
@@ -40,8 +40,9 @@ export function getStarkZapSdk(): StarkZap {
   // RPC path, outside the 3 failover-covered providers). Pointing it at Alchemy —
   // the capped endpoint that intermittently -32001s, the whole reason failover
   // exists — means its chainId/connect calls fail with nothing to fall back to.
-  // Pin it to the reliable Lava RPC (spec 0.8, used by every mainnet op).
-  const rpcUrl = DEFAULT_RPC_URL;
+  // Pin it to the reliable Lava RPC (spec 0.8, used by every mainnet op) —
+  // the chain registry's rpcUrl for Starknet (replaces the removed DEFAULT_RPC_URL).
+  const rpcUrl = getCoordinates("STARKNET").rpcUrl;
   const avnuApiKey = process.env.NEXT_PUBLIC_AVNU_PAYMASTER_API_KEY;
 
   // Pass the AVNU API key so sponsored (feeMode: "sponsored") deployments

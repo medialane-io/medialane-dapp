@@ -138,11 +138,11 @@ export function useMarketplace(): UseMarketplaceReturn {
     const [error, setError] = useState<string | null>(null);
 
     const { contract: medialaneContract } = useContract({
-        address: MARKETPLACE_721_CONTRACT,
+        address: MARKETPLACE_721_CONTRACT as `0x${string}`,
         abi: IPMarketplaceABI as unknown as Abi,
     });
     const { contract: medialane1155Contract } = useContract({
-        address: MARKETPLACE_1155_CONTRACT,
+        address: MARKETPLACE_1155_CONTRACT as `0x${string}`,
         abi: IPMarketplace1155ABI as unknown as Abi,
     });
     const { address: walletAddress } = useUnifiedWallet();
