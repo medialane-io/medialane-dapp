@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { getService } from "@medialane/sdk";
 import { withSiwsAuth } from "@/lib/pinata-fetch";
@@ -138,7 +138,13 @@ export default function CreateAssetPage() {
   const [ipTypeOpen, setIpTypeOpen] = useState(false);
   const [mintStep, setMintStep] = useState<MintStep>("idle");
   const [mintError, setMintError] = useState<string | null>(null);
-  const [templateFields, setTemplateFields] = useState<MetadataField[]>([]);
+  // IP-type template fields are only read at submit time — keep them in a ref so
+  // every keystroke in IPTypeFields doesn't re-render this whole form (the cause
+  // of the visible flicker on this page).
+  const templateFieldsRef = useRef<MetadataField[]>([]);
+  const handleTemplateFields = useCallback((fields: MetadataField[]) => {
+    templateFieldsRef.current = fields;
+  }, []);
   const previewUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -230,7 +236,7 @@ export default function CreateAssetPage() {
       }
 
       // Forward suggested and custom traits — keyed as "tmpl_{trait_type}".
-      templateFields.forEach(({ traitType, value }) => {
+      templateFieldsRef.current.forEach(({ traitType, value }) => {
         if (traitType.trim() && value.trim()) formData.append(`tmpl_${traitType.trim()}`, value.trim());
       });
 
@@ -289,7 +295,7 @@ export default function CreateAssetPage() {
       aiPolicy: "Not Allowed",
       royalty: 0,
     });
-    setTemplateFields([]);
+    templateFieldsRef.current = [];
     setImageFile(null);
     setImagePreview(null);
   };
@@ -654,7 +660,7 @@ export default function CreateAssetPage() {
                     />
                     <IPTypeFields
                       ipType={form.watch("ipType") as IPType}
-                      onChange={setTemplateFields}
+                      onChange={handleTemplateFields}
                       uploadDocument={makeUploadDocument(getValidToken)}
                     />
                   </div>
