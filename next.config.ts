@@ -12,6 +12,9 @@ const PRIVY_UNUSED_OPTIONAL_MODULES = [
   "@solana-program/token",
   "@abstract-foundation/agw-client",
   "permissionless",
+  // Privy's optional Stripe fiat→crypto on-ramp — not used by the dapp and not
+  // declared as a Privy dependency, so webpack can't resolve the import. Stub it.
+  "@stripe/crypto",
 ];
 
 const nextConfig: NextConfig = {
