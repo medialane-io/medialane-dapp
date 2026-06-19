@@ -28,6 +28,7 @@ import { AssetProvenanceTab } from "./asset-provenance-tab";
 import { AssetMarketplacePanel } from "./asset-marketplace-panel";
 import { AssetOwnersPanel, AssetLinksRow, AssetCommentsDialog } from "./asset-side-panels";
 import { AssetOverviewContent } from "./asset-overview-content";
+import { AssetLicenseSummary } from "@medialane/ui";
 import { AssetHeaderBlock, AssetMediaColumn } from "./asset-top-sections";
 import { AssetAtmosphere, useAssetMarketState, type AssetToken } from "./asset-shared";
 import { useAssetMarketplaceDialogState, AssetMarketplaceDialogs } from "./asset-marketplace-dialogs";
@@ -91,13 +92,42 @@ export function AssetPageStandard() {
   if (isLoading) {
     return (
       <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 pt-20 pb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] lg:gap-10 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] lg:gap-10 gap-8 items-start">
           <Skeleton className="aspect-[4/3] w-full rounded-2xl" />
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-12 w-full" />
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-9 w-3/4" />
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <div className="space-y-1.5 pt-1">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+            </div>
+            <Skeleton className="h-9 w-28" />
+            <div className="grid grid-cols-2 gap-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-10 rounded-2xl" />
+              ))}
+            </div>
+            <div className="pt-5 border-t border-border/40 space-y-5">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-xl" />
+                <div className="space-y-1.5">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-4 w-28" />
+                </div>
+              </div>
+              <div className="space-y-2.5">
+                <Skeleton className="h-3 w-14" />
+                <Skeleton className="h-4 w-3/4" />
+                <div className="flex flex-wrap gap-2 pt-0.5">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-7 w-24 rounded-full" />
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -191,15 +221,23 @@ export function AssetPageStandard() {
               <AssetOwnersPanel balances={balances} maxVisible={5} />
             ) : null}
 
-            <AssetLinksRow
-              contractHref={`${EXPLORER_URL}/contract/${token.contractAddress}`}
-              collectionHref={`/collections/${token.contractAddress}`}
-              collection={collection}
-              shareTitle={name}
-              reportTarget={{ type: "TOKEN", contract: token.contractAddress, tokenId: token.tokenId, name }}
-              reportOpen={reportOpen}
-              onReportOpenChange={setReportOpen}
-            />
+            {/* Details + rights — separated from the action group by a hairline
+                so the column reads as placard sections, not one flat stack. */}
+            <div className="pt-5 border-t border-border/40 space-y-5">
+              <AssetLinksRow
+                contractHref={`${EXPLORER_URL}/contract/${token.contractAddress}`}
+                collectionHref={`/collections/${token.contractAddress}`}
+                collection={collection}
+                shareTitle={name}
+                reportTarget={{ type: "TOKEN", contract: token.contractAddress, tokenId: token.tokenId, name }}
+                reportOpen={reportOpen}
+                onReportOpenChange={setReportOpen}
+              />
+
+              {/* Human-first license: one plain line + glanceable rights pills.
+                  Detailed receipts (license bento + protection banner) live in Overview. */}
+              <AssetLicenseSummary attributes={attributes} />
+            </div>
           </motion.div>
         </div>
 

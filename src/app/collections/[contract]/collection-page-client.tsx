@@ -22,7 +22,6 @@ import { GatedContentHero } from "@/components/collection/gated-content-hero";
 import { GatedContentPanel } from "@/components/collection/gated-content-panel";
 import { OwnerSetupPanel } from "@/components/collection/owner-setup-panel";
 import { TransferCollectionOwnershipDialog } from "@/components/collection/transfer-ownership-dialog";
-import { AssetPreviewDialog } from "@/components/shared/asset-preview-dialog";
 import { ShareButton } from "@/components/shared/share-button";
 import { TraitFilter } from "@/components/collection/trait-filter";
 import { HiddenContentBanner } from "@/components/hidden-content-banner";
@@ -103,9 +102,6 @@ function CollectionItems({ contract, activeListings }: { contract: string; activ
   const handleTransfer = (token: ApiToken) => { setTransferToken(token); setTransferOpen(true); };
   const handleCancelRequest = (token: ApiToken) => { setCancelToken(token); setCancelOpen(true); };
 
-  const [previewToken, setPreviewToken] = useState<ApiToken | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
-
   useEffect(() => {
     if (tokens.length > 0) {
       setAllTokens((prev) => {
@@ -181,20 +177,15 @@ function CollectionItems({ contract, activeListings }: { contract: string; activ
                 ? false
                 : checkIsOwner(t, walletAddress);
               return (
-                <div
+                <TokenCard
                   key={`${t.contractAddress}-${t.tokenId}`}
-                  className="cursor-pointer"
-                  onClick={() => { setPreviewToken(t); setPreviewOpen(true); }}
-                >
-                  <TokenCard
-                    token={t}
-                    rarityTier={rarityMap.get(t.tokenId)?.tier}
-                    isOwner={isOwner}
-                    onList={isOwner ? handleList : undefined}
-                    onTransfer={isOwner ? handleTransfer : undefined}
-                    onCancel={isOwner ? handleCancelRequest : undefined}
-                  />
-                </div>
+                  token={t}
+                  rarityTier={rarityMap.get(t.tokenId)?.tier}
+                  isOwner={isOwner}
+                  onList={isOwner ? handleList : undefined}
+                  onTransfer={isOwner ? handleTransfer : undefined}
+                  onCancel={isOwner ? handleCancelRequest : undefined}
+                />
               );
             })}
           </div>
@@ -245,18 +236,6 @@ function CollectionItems({ contract, activeListings }: { contract: string; activ
         variant="listing"
       />
 
-      {previewToken && (
-        <AssetPreviewDialog
-          token={previewToken}
-          service={collection?.service}
-          isOwner={checkIsOwner(previewToken, walletAddress)}
-          open={previewOpen}
-          onOpenChange={(o) => { setPreviewOpen(o); if (!o) setPreviewToken(null); }}
-          onList={(tok) => { setPreviewOpen(false); handleList(tok); }}
-          onCancel={(tok) => { setPreviewOpen(false); handleCancelRequest(tok); }}
-          onTransfer={(tok) => { setPreviewOpen(false); handleTransfer(tok); }}
-        />
-      )}
     </>
   );
 }
