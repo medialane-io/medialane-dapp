@@ -29,7 +29,9 @@ import { AssetMarketplacePanel } from "./asset-marketplace-panel";
 import { AssetOwnersPanel, AssetLinksRow, AssetCommentsDialog } from "./asset-side-panels";
 import { AssetOverviewContent } from "./asset-overview-content";
 import { AssetLicenseSummary } from "@medialane/ui";
-import { AssetHeaderBlock, AssetMediaColumn } from "./asset-top-sections";
+import { AssetHeaderBlock } from "./asset-top-sections";
+import { AssetMediaColumn } from "@/components/asset/asset-media-column";
+import { AssetLightbox } from "@/components/asset/asset-lightbox";
 import { AssetAtmosphere, useAssetMarketState, type AssetToken } from "./asset-shared";
 import { useAssetMarketplaceDialogState, AssetMarketplaceDialogs } from "./asset-marketplace-dialogs";
 import { useFullTokenData } from "@/hooks/use-full-token-data";
@@ -52,6 +54,7 @@ export function AssetPageStandard() {
   const [imgError, setImgError] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [commentOpen, setCommentOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const { total: commentTotal } = useComments(contract, tokenId);
   const { total: remixCount } = useTokenRemixes(contract, tokenId);
@@ -181,6 +184,7 @@ export function AssetPageStandard() {
               imageAlt={name}
               imgError={imgError}
               onImageError={() => setImgError(true)}
+              onZoom={() => setLightboxOpen(true)}
               fallback={(
                 <div className="aspect-square flex items-center justify-center bg-gradient-to-br from-primary/10 to-purple-500/10">
                   <span className="text-5xl font-mono text-muted-foreground">#{tokenId}</span>
@@ -317,6 +321,8 @@ export function AssetPageStandard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <AssetLightbox open={lightboxOpen} onOpenChange={setLightboxOpen} image={image} alt={name} />
 
       <FloatingCommentsButton onClick={() => setCommentOpen(true)} commentTotal={commentTotal} />
 
