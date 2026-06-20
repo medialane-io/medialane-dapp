@@ -6,7 +6,7 @@ import { Award, Plus, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FadeIn, Stagger, StaggerItem } from "@/components/ui/motion-primitives";
-import { ConnectWallet } from "@/components/ConnectWallet";
+import { ConnectGate } from "@/components/connect-gate";
 import { useWallet } from "@/hooks/use-wallet";
 import { useMyEvents } from "@/hooks/use-pop";
 import { ipfsToHttp } from "@/lib/utils";
@@ -55,23 +55,14 @@ function MyEventCard({ collection }: { collection: ApiCollection }) {
 }
 
 export default function MyEventsPage() {
-  const { address, isConnected } = useWallet();
+  const { address } = useWallet();
   const { events, isLoading } = useMyEvents(address ?? null);
 
-  if (!isConnected) {
-    return (
-      <div className="container max-w-lg mx-auto px-4 pt-24 pb-8 text-center space-y-4">
-        <Award className="h-10 w-10 text-muted-foreground/20 mx-auto" />
-        <h1 className="text-xl font-bold">Connect your wallet</h1>
-        <p className="text-muted-foreground text-sm">Connect to view events you&apos;ve deployed.</p>
-        <div className="flex justify-center">
-          <ConnectWallet />
-        </div>
-      </div>
-    );
-  }
-
   return (
+    <ConnectGate
+      title="Connect your wallet"
+      subtitle="Connect your Starknet wallet to see the POP events you've created."
+    >
     <div className="container max-w-2xl mx-auto px-4 pt-10 pb-16 space-y-8">
       <FadeIn>
         <div className="flex items-center justify-between">
@@ -121,5 +112,6 @@ export default function MyEventsPage() {
         </Stagger>
       )}
     </div>
+    </ConnectGate>
   );
 }

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FadeIn, Stagger, StaggerItem } from "@/components/ui/motion-primitives";
 import { useWallet } from "@/hooks/use-wallet";
+import { ConnectGate } from "@/components/connect-gate";
 import { ipfsToHttp } from "@/lib/utils";
 import { MEDIALANE_BACKEND_URL, MEDIALANE_API_KEY } from "@/lib/constants";
 import useSWR from "swr";
@@ -68,19 +69,14 @@ function MyDropCard({ collection }: { collection: ApiCollection }) {
 }
 
 export default function MyDropsPage() {
-  const { isConnected, address: walletAddress } = useWallet();
+  const { address: walletAddress } = useWallet();
   const { data: collections, isLoading } = useMyDrops(walletAddress ?? null);
 
-  if (!isConnected) {
-    return (
-      <div className="container max-w-lg mx-auto px-4 pt-24 pb-8 text-center space-y-4">
-        <Package className="h-10 w-10 text-muted-foreground/20 mx-auto" />
-        <h1 className="text-xl font-bold">Connect wallet to view your drops</h1>
-      </div>
-    );
-  }
-
   return (
+    <ConnectGate
+      title="Connect wallet to view your drops"
+      subtitle="Connect your Starknet wallet to see the drops you've deployed."
+    >
     <div className="container max-w-2xl mx-auto px-4 pt-10 pb-16 space-y-8">
       <FadeIn>
         <div className="flex items-center justify-between">
@@ -130,5 +126,6 @@ export default function MyDropsPage() {
         </Stagger>
       )}
     </div>
+    </ConnectGate>
   );
 }
