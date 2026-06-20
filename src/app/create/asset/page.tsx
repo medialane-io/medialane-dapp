@@ -38,6 +38,7 @@ import { useMedialaneClient } from "@/hooks/use-medialane-client";
 import { useCollectionsByOwner } from "@/hooks/use-collections";
 import { MintProgressDialog } from "@/components/marketplace/mint-progress-dialog";
 import type { MintStep } from "@/components/marketplace/mint-progress-dialog";
+import { ConnectGate } from "@/components/connect-gate";
 import { invalidatePortfolioCache } from "@/lib/portfolio-cache";
 import { cn } from "@/lib/utils";
 import { absoluteUrl } from "@/lib/seo";
@@ -313,6 +314,10 @@ export default function CreateAssetPage() {
         onMintAnother={handleMintAnother}
       />
 
+      <ConnectGate
+        title="Connect to create an asset"
+        subtitle="Connect your wallet to mint your work and pick a collection."
+      >
       <div className="container max-w-2xl mx-auto px-4 pt-14 pb-8 space-y-8">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-primary">
@@ -683,6 +688,7 @@ export default function CreateAssetPage() {
           </form>
         </Form>
       </div>
+      </ConnectGate>
     </>
   );
 }
