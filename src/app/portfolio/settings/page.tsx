@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useUnifiedWallet } from "@/hooks/use-unified-wallet";
+import { useWallet } from "@/hooks/use-wallet";
 import { useCreatorProfile } from "@/hooks/use-profiles";
 import { useMyUsernameClaim, submitUsernameClaim, checkUsernameAvailability } from "@/hooks/use-username-claims";
 import { useSiwsToken } from "@/hooks/use-siws-token";
@@ -79,7 +79,7 @@ function UsernameClaimInput({
 }
 
 export default function ProfileSettingsPage() {
-  const { address: walletAddress, disconnect } = useUnifiedWallet();
+  const { address: walletAddress, disconnect } = useWallet();
   const { getValidToken } = useSiwsToken();
   const router = useRouter();
   const { profile, isLoading: profileLoading, mutate } = useCreatorProfile(walletAddress ?? undefined);

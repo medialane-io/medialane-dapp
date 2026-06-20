@@ -4,14 +4,13 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { AddressDisplay } from "@/components/shared/address-display";
-import { Briefcase, Wallet } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import { useUserOrders } from "@/hooks/use-orders";
 import { useTokensByOwner } from "@/hooks/use-tokens";
 import { markOffersAsSeen } from "@/hooks/use-unread-offers";
 import { useRemixOffers } from "@/hooks/use-remix-offers";
 import { useWallet } from "@/hooks/use-wallet";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ConnectWallet } from "@/components/ConnectWallet";
+import { ConnectGate } from "@/components/connect-gate";
 import { HelpIcon } from "@/components/ui/help-icon";
 import {
   PortfolioSubnav,
@@ -48,7 +47,7 @@ const NAV_GROUPS: PortfolioNavGroup[] = [
 ];
 
 export default function PortfolioLayout({ children }: { children: React.ReactNode }) {
-  const { address: walletAddress, isConnected } = useWallet();
+  const { address: walletAddress } = useWallet();
   const pathname = usePathname();
   const address = walletAddress;
   const { orders } = useUserOrders(address ?? null);
@@ -68,42 +67,11 @@ export default function PortfolioLayout({ children }: { children: React.ReactNod
     }
   }, [orders]);
 
-  if (!isConnected && !walletAddress) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 pt-20 pb-8 space-y-6">
-        <Skeleton className="h-5 w-32" />
-        <Skeleton className="h-4 w-48" />
-        <div className="flex gap-2">
-          <Skeleton className="h-6 w-20 rounded-full" />
-          <Skeleton className="h-6 w-20 rounded-full" />
-          <Skeleton className="h-6 w-28 rounded-full" />
-        </div>
-        <Skeleton className="h-10 w-full" />
-        <div className="space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full rounded-xl" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (!isConnected) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 py-24 text-center space-y-6">
-        <Wallet className="h-12 w-12 mx-auto text-muted-foreground" />
-        <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Connect your wallet</h1>
-          <p className="text-muted-foreground">Connect your wallet to view your assets, listings, and offers.</p>
-        </div>
-        <div className="flex justify-center">
-          <ConnectWallet />
-        </div>
-      </div>
-    );
-  }
-
   return (
+    <ConnectGate
+      title="Connect your wallet"
+      subtitle="Connect your wallet to view your assets, listings, and offers."
+    >
     <div className="px-4 sm:px-6 lg:px-8 pt-20 pb-8 space-y-6">
       {/* Header */}
       <div className="space-y-3">
@@ -148,5 +116,6 @@ export default function PortfolioLayout({ children }: { children: React.ReactNod
       {/* Page content */}
       {children}
     </div>
+    </ConnectGate>
   );
 }

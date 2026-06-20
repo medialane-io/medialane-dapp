@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { CollectionProgressDialog } from "@/components/marketplace/collection-progress-dialog";
 import type { CollectionStep } from "@/components/marketplace/collection-progress-dialog";
+import { ConnectGate } from "@/components/connect-gate";
 import { invalidatePortfolioCache } from "@/lib/portfolio-cache";
 import { useTx } from "@/hooks/use-tx";
 import { useWallet } from "@/hooks/use-wallet";
@@ -228,6 +229,10 @@ export default function CreateCollectionPage() {
         onCreateAnother={handleCreateAnother}
       />
 
+      <ConnectGate
+        title="Connect to create a collection"
+        subtitle="Connect your wallet to deploy a collection on Starknet."
+      >
       <div className="container max-w-2xl mx-auto px-4 pt-14 pb-8 space-y-8">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-primary">
@@ -398,6 +403,7 @@ export default function CreateCollectionPage() {
           </form>
         </Form>
       </div>
+      </ConnectGate>
     </>
   );
 }

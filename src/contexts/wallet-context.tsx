@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useMemo, useCallback, useEffect, useRef } from "react";
+import React, { createContext, useContext, useMemo, useCallback, useEffect, useRef, useState } from "react";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 import type { Connector } from "@starknet-react/core";
 import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
@@ -86,10 +86,18 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, [szWallet, szAddress, szType, injectedConnected, injectedAddress, injectedAccount, injectedType]);
 
+  // True while our manual injected-reconnect retry loop (below) is running. The
+  // loop is bounded (~6s), so this can never stick on. Folding it into
+  // isConnecting lets <ConnectGate> show a skeleton (not the connect panel) for
+  // a returning user whose extension hasn't finished re-injecting yet —
+  // starknet-react's own injectedStatus reads "disconnected" during this window.
+  const [reconnecting, setReconnecting] = useState(false);
+
   const isConnecting =
     szConnecting ||
     injectedStatus === "connecting" ||
-    injectedStatus === "reconnecting";
+    injectedStatus === "reconnecting" ||
+    reconnecting;
 
   // ── Robust injected reconnect ──────────────────────────────────────────────
   // starknet-react's `autoConnect` makes a SINGLE one-shot attempt on mount.
@@ -113,6 +121,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     if (persisted !== "argent" && persisted !== "braavos") return;
     if (liveConnectedRef.current || liveSzRef.current) return;
     reconnectRan.current = true;
+    setReconnecting(true);
 
     let cancelled = false;
     const targetId = persisted === "braavos" ? "braavos" : "argentX";
@@ -123,12 +132,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       await new Promise((r) => setTimeout(r, 500));
       // Up to ~6s of retries (15 × 400ms) to outlast slow extension injection.
       for (let i = 0; i < 15 && !cancelled; i++) {
-        if (liveConnectedRef.current || liveSzRef.current) return;
+        if (liveConnectedRef.current || liveSzRef.current) { setReconnecting(false); return; }
         const connector = connectors.find((c) => c.id === targetId);
         if (connector) {
           try {
             if (await connector.ready()) {
               await connectAsync({ connector });
+              setReconnecting(false);
               return;
             }
           } catch {
@@ -137,10 +147,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
         await new Promise((r) => setTimeout(r, 400));
       }
+      setReconnecting(false);
     })();
 
     return () => {
       cancelled = true;
+      setReconnecting(false);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectors]);
