@@ -254,6 +254,7 @@ export default function CreateRemixPage() {
         collectionId,
         recipient: walletAddress,
         tokenUri,
+        royaltyBps: 0, // remix mint has no royalty input UI yet — default to none
       });
       const intentData = intentRes.data;
       if (!intentData || intentData.requiresSignature) {

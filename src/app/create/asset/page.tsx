@@ -257,6 +257,8 @@ export default function CreateAssetPage() {
         collectionId: values.collectionId,
         recipient: walletAddress,
         tokenUri,
+        // Form royalty is a percentage (0–50); EIP-2981 is basis points. Set once, immutable.
+        royaltyBps: Math.round(values.royalty * 100),
       });
 
       const intentData = intentRes.data as { calls?: { contractAddress: string; [key: string]: unknown }[] } | undefined;
