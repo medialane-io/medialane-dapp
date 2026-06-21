@@ -129,6 +129,7 @@ export function ApproveMintSheet({ offer, open, onOpenChange, onSuccess }: Props
         collectionId: effectiveCollectionId,
         recipient: walletAddress,
         tokenUri: pinData.uri,
+        royaltyBps: 0, // remix-approval mint has no royalty input UI yet — default to none
       });
       const mintCalls = (intentRes.data as any)?.calls as Call[];
       if (!mintCalls?.length) throw new Error("No mint calls returned");
