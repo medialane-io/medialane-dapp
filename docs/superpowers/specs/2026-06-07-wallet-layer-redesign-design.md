@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-07
 **Status:** Design — pending approval
-**Owner:** wallet/account layer (medialane-dapp)
+**Owner:** wallet/account layer (medialane-starknet)
 
 ## Problem
 

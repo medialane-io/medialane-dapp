@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Bring medialane-dapp to parity with medialane-io's separation of derivative-rights UX into permissionless **Remix** (`/create/remix`) and the **Licensing** deal (`/create/licensing`), gated by a shared `remix-policy`.
+**Goal:** Bring medialane-starknet to parity with medialane-io's separation of derivative-rights UX into permissionless **Remix** (`/create/remix`) and the **Licensing** deal (`/create/licensing`), gated by a shared `remix-policy`.
 
 **Architecture:** Frontend-only restructure. The backend is shared and already supports every endpoint (`confirmSelfRemix` == io's `registerRemix`, same `/v1/remix-offers/self/confirm`). Port io's policy + licensing page (adapting auth: SIWS instead of Clerk), refactor the dapp's combined remix page to self-mint-only, add policy-gated asset-page CTAs, rename the portfolio inbox.
 

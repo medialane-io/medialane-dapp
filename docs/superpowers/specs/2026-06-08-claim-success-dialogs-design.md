@@ -5,7 +5,7 @@
 
 ## Problem
 
-medialane-dapp's create and trade flows already show rich success/error **dialogs**
+medialane-starknet's create and trade flows already show rich success/error **dialogs**
 (`MintProgressDialog`, `CollectionProgressDialog`, and inline `MarketplaceSuccessState`
 in every marketplace dialog). But a few on-chain write surfaces still confirm completion
 with only a `toast.success`, which is a weaker UX than the success-dialog pattern used
