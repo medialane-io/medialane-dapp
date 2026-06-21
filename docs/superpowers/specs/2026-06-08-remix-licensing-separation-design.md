@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-08
 **Branch:** `feat/remix-licensing-separation`
-**Goal:** Bring medialane-dapp to parity with medialane-io's 2026-06-01 separation of the derivative-rights UX into two distinct flows: permissionless **Remix** and the **Licensing** deal. Mirror io faithfully (the explicit goal is feature/aesthetic parity).
+**Goal:** Bring medialane-starknet to parity with medialane-io's 2026-06-01 separation of the derivative-rights UX into two distinct flows: permissionless **Remix** and the **Licensing** deal. Mirror io faithfully (the explicit goal is feature/aesthetic parity).
 
 ## Background
 
