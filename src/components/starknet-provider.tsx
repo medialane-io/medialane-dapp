@@ -9,7 +9,7 @@ import {
 } from "@starknet-react/core";
 import { RpcProvider } from "starknet";
 import { idResolvedBraavos, idResolvedReady } from "@/lib/starknet-connectors";
-import { failoverFetch } from "@/lib/starknet";
+import { failoverFetch, RPC_PRIMARY_URL } from "@/lib/starknet";
 import { QueryClient } from "@tanstack/react-query";
 
 /**
@@ -82,13 +82,12 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
 
   const networkConfig = networkConfigs[currentNetwork];
 
-  // Retrieve your custom RPC URL from environment variables
-  const customRpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
-
+  // Single source of truth for the primary RPC URL (the /api/rpc proxy in prod)
+  // + shared failover — never read the raw keyed env here (see lib/starknet.ts).
   const providerFactory = useCallback(
     (_chain: unknown) =>
-      new RpcProvider({ nodeUrl: customRpcUrl || "", baseFetch: failoverFetch }),
-    [customRpcUrl],
+      new RpcProvider({ nodeUrl: RPC_PRIMARY_URL, baseFetch: failoverFetch }),
+    [],
   );
   const paymasterProvider = useMemo(
     () => avnuPaymasterProvider({

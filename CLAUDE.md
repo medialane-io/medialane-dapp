@@ -27,7 +27,11 @@ The app is deployed at [medialane.io](https://medialane.io) on Starknet Mainnet.
 ```
 # Network
 NEXT_PUBLIC_STARKNET_NETWORK          # "mainnet" or "sepolia" (defaults to mainnet)
-NEXT_PUBLIC_RPC_URL                   # Starknet RPC endpoint (for write/execution only)
+
+# Starknet RPC (browser talks to the same-origin proxy; Alchemy key stays server-side)
+NEXT_PUBLIC_STARKNET_PROVIDER_URL     # Browser RPC endpoint — set to /api/rpc (the proxy)
+NEXT_PUBLIC_STARKNET_RPC_URL          # Keyless public fallback (e.g. lava) for local dev / proxy-unset. Chain-named standard, replaces the legacy bare NEXT_PUBLIC_RPC_URL. NEVER a keyed URL (NEXT_PUBLIC_ is inlined into the bundle).
+ALCHEMY_RPC_URL                       # Server-only: the keyed Alchemy endpoint the /api/rpc proxy forwards to (PRIMARY). Never NEXT_PUBLIC_.
 
 # Contracts
 # Marketplace contract addresses come from @medialane/sdk only.
@@ -211,6 +215,17 @@ Alchemy's Starknet endpoint intermittently 503s (`-32001 "Unable to complete
 request"`, ~1 in 6 calls). All Starknet RPC fails over to public endpoints
 (`lava.build`, …) via `@medialane/sdk`'s `createFailoverFetch` /
 `PUBLIC_RPC_FALLBACKS` — never re-copy that policy locally.
+
+**🔑 Browser RPC goes through the same-origin `/api/rpc` proxy
+(`src/app/api/rpc/route.ts`), NOT a keyed URL.** Alchemy stays the PRIMARY
+upstream, but its key lives only in the server-only `ALCHEMY_RPC_URL`; the proxy
+forwards to it and rotates to the public fallbacks server-side. The client
+providers (#1–#3) point at `NEXT_PUBLIC_STARKNET_PROVIDER_URL=/api/rpc` via
+`RPC_PRIMARY_URL` (`lib/starknet.ts`). **Never put a keyed provider URL in a
+`NEXT_PUBLIC_` var — it is inlined into the client bundle** (the 2026-06-23
+Alchemy-key leak; both io and the dapp shipped the key in the browser this way).
+The proxy is unauthenticated (no Clerk here) but guarded by a same-origin check +
+method allowlist.
 
 **⚠️ The dapp has FOUR RpcProviders — when a read fails, find which one the
 failing call uses** (the first three are documented in full at the top of

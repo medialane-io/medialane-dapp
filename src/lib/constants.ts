@@ -32,7 +32,17 @@ export const COMMENTS_CONTRACT =
   (process.env.NEXT_PUBLIC_COMMENTS_CONTRACT as `0x${string}`) ||
   NFTCOMMENTS_CONTRACT;
 
+// Browser Starknet RPC endpoint. Points at the same-origin proxy
+// (NEXT_PUBLIC_STARKNET_PROVIDER_URL=/api/rpc) which holds the Alchemy key
+// SERVER-side — Alchemy stays primary, but the key never enters the bundle.
+// Falls back to a keyless public node (NEXT_PUBLIC_STARKNET_RPC_URL, e.g. lava)
+// for local dev / when the proxy env is unset. NEVER put a keyed provider URL in
+// a NEXT_PUBLIC_ var — its value is inlined into the client bundle (the
+// 2026-06-23 leak). The legacy bare NEXT_PUBLIC_RPC_URL is kept only as a
+// last-resort fallback during the env migration; standardize on the chain-named
+// NEXT_PUBLIC_STARKNET_RPC_URL.
 export const STARKNET_RPC_URL =
+  process.env.NEXT_PUBLIC_STARKNET_PROVIDER_URL ||
   process.env.NEXT_PUBLIC_STARKNET_RPC_URL ||
   process.env.NEXT_PUBLIC_RPC_URL || "";
 
