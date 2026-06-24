@@ -29,6 +29,8 @@ import type { TxStatus } from "@/hooks/use-tx";
 import { usePaymasterTransaction } from "@/hooks/use-paymaster-transaction";
 import { useWallet } from "@/hooks/use-wallet";
 import { ConnectGate } from "@/components/connect-gate";
+import { ClaimRouteShell } from "@/components/claim/claim-route-shell";
+import { CreateEditionsAside } from "@/components/claim/create-editions-aside";
 import { toast } from "sonner";
 import {
   COLLECTION_1155_CONTRACT_MAINNET,
@@ -275,18 +277,13 @@ export default function CreateNFTEditionsCollectionPage() {
         title="Connect wallet to create a collection"
         subtitle="Connect your Starknet wallet to create an editions collection."
       >
-      <div className="container max-w-2xl mx-auto px-4 pt-14 pb-8 space-y-8">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-primary">
-            <Layers className="h-5 w-5" />
-            <span className="text-sm font-semibold uppercase tracking-wider">IP Collection · ERC-1155</span>
-          </div>
-          <h1 className="text-3xl font-bold">Create IP Collection</h1>
-          <p className="text-muted-foreground">
-            Deploy a multi-edition ERC-1155 collection on Starknet. Gas is free.
-          </p>
-        </div>
-
+      <ClaimRouteShell
+        gated={false}
+        icon={<Layers className="h-4 w-4 text-white" />}
+        title="Create an Edition Collection"
+        subtitle="Create a collection where each piece can have multiple editions — free to publish, and it's yours."
+        aside={<CreateEditionsAside />}
+      >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
 
@@ -344,7 +341,7 @@ export default function CreateNFTEditionsCollectionPage() {
                   )}
                   <p className="text-xs text-muted-foreground">
                     JPG, PNG, GIF, SVG or WebP · max 10 MB
-                    {imageUri && <span className="ml-2 text-emerald-500 font-medium">✓ Uploaded to IPFS</span>}
+                    {imageUri && <span className="ml-2 text-emerald-500 font-medium">✓ Uploaded</span>}
                   </p>
                 </div>
               </div>
@@ -371,7 +368,7 @@ export default function CreateNFTEditionsCollectionPage() {
                     onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                   />
                 </FormControl>
-                <FormDescription>Short ticker (2–10 uppercase letters). Shown in wallets and explorers.</FormDescription>
+                <FormDescription>Short ticker (2–10 uppercase letters). Shown in wallets and marketplaces.</FormDescription>
                 <FormMessage />
               </FormItem>
             )} />
@@ -392,26 +389,24 @@ export default function CreateNFTEditionsCollectionPage() {
               <FormItem>
                 <FormLabel>External link <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
                 <FormControl><Input placeholder="https://yourwebsite.com" {...field} /></FormControl>
-                <FormDescription>Your website, portfolio, or social profile. Stored in collection metadata on IPFS.</FormDescription>
+                <FormDescription>Your website, portfolio, or social profile — saved with your collection so it travels with it.</FormDescription>
                 <FormMessage />
               </FormItem>
             )} />
 
             {/* ── Submit ── */}
-            <div className={`btn-border-animated p-[1px] rounded-xl ${collectionStep !== "idle" || imageUploading ? "opacity-40 pointer-events-none" : ""}`}>
-              <button
-                type="submit"
-                disabled={collectionStep !== "idle" || imageUploading}
-                className="w-full h-12 text-base font-semibold text-white rounded-[11px] flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-[0.98] bg-violet-600"
-              >
-                <Layers className="h-4 w-4" />
-                Deploy Collection
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={collectionStep !== "idle" || imageUploading}
+              className={`w-full h-12 text-base font-semibold text-white rounded-xl flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-[0.98] bg-violet-600 ${collectionStep !== "idle" || imageUploading ? "opacity-40 pointer-events-none" : ""}`}
+            >
+              <Layers className="h-4 w-4" />
+              Publish Collection
+            </button>
 
           </form>
         </Form>
-      </div>
+      </ClaimRouteShell>
       </ConnectGate>
     </>
   );
