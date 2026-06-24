@@ -1,4 +1,4 @@
-import { MedialaneClient } from "@medialane/sdk";
+import { MedialaneClient, PUBLIC_RPC_FALLBACKS } from "@medialane/sdk";
 import {
   COLLECTION_1155_CONTRACT,
   COLLECTION_721_CONTRACT,
@@ -17,9 +17,13 @@ export function getMedialaneClient(): MedialaneClient {
     // Mirror MEDIALANE_BACKEND_URL: browser → the same-origin proxy made
     // absolute (`origin/api/rpc`, key stays server-side); server → the keyed
     // Alchemy URL directly (a relative proxy URL can't resolve in RSC).
+    // Server: keyed Alchemy when configured, else a public absolute node. The
+    // SDK validates rpcUrl with z.string().url(), so it must NEVER be undefined
+    // or relative — falling back to undefined crashed the build (/_not-found
+    // prerender ZodError) whenever the server RPC env vars were unset on Vercel.
     const rpcUrl =
       typeof window === "undefined"
-        ? process.env.ALCHEMY_RPC_URL || process.env.STARKNET_RPC_URL_SERVER || undefined
+        ? process.env.ALCHEMY_RPC_URL || process.env.STARKNET_RPC_URL_SERVER || PUBLIC_RPC_FALLBACKS[0]
         : `${window.location.origin}/api/rpc`;
     _client = new MedialaneClient({
       backendUrl: MEDIALANE_BACKEND_URL,
