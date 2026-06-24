@@ -32,19 +32,18 @@ export const COMMENTS_CONTRACT =
   (process.env.NEXT_PUBLIC_COMMENTS_CONTRACT as `0x${string}`) ||
   NFTCOMMENTS_CONTRACT;
 
-// Browser Starknet RPC endpoint. Points at the same-origin proxy
-// (NEXT_PUBLIC_STARKNET_PROVIDER_URL=/api/rpc) which holds the Alchemy key
-// SERVER-side — Alchemy stays primary, but the key never enters the bundle.
-// Falls back to a keyless public node (NEXT_PUBLIC_STARKNET_RPC_URL, e.g. lava)
-// for local dev / when the proxy env is unset. NEVER put a keyed provider URL in
-// a NEXT_PUBLIC_ var — its value is inlined into the client bundle (the
-// 2026-06-23 leak). The legacy bare NEXT_PUBLIC_RPC_URL is kept only as a
-// last-resort fallback during the env migration; standardize on the chain-named
-// NEXT_PUBLIC_STARKNET_RPC_URL.
-export const STARKNET_RPC_URL =
-  process.env.NEXT_PUBLIC_STARKNET_PROVIDER_URL ||
-  process.env.NEXT_PUBLIC_STARKNET_RPC_URL ||
-  process.env.NEXT_PUBLIC_RPC_URL || "";
+// ── Starknet RPC — provider-agnostic, two roles, server-only ────────────────
+// MAIN: the keyed provider (Alchemy today, any provider tomorrow). SERVER-ONLY —
+//   never a NEXT_PUBLIC_ var, or the key is inlined into the browser bundle (the
+//   2026-06-23 key leak). The browser never uses it directly.
+// FALLBACK: the keyless public node (lava). Hardcoded default so a missing env
+//   can never break the build; override with STARKNET_RPC_FALLBACK_URL.
+// PROXY: the same-origin path the browser uses — the /api/rpc route forwards to
+//   MAIN → FALLBACK server-side, so the keyed URL stays off the bundle.
+export const RPC_MAIN_URL = process.env.STARKNET_RPC_URL ?? "";
+export const RPC_FALLBACK_URL =
+  process.env.STARKNET_RPC_FALLBACK_URL || "https://rpc.starknet.lava.build";
+export const RPC_PROXY_PATH = "/api/rpc";
 
 /**
  * `MEDIALANE_BACKEND_URL` + `MEDIALANE_API_KEY` are **environment-aware**:

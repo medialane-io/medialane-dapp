@@ -1,35 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PUBLIC_RPC_FALLBACKS, isTransientRpcError } from "@medialane/sdk";
+import { isTransientRpcError } from "@medialane/sdk";
+import { RPC_MAIN_URL, RPC_FALLBACK_URL } from "@/lib/constants";
 
 /**
  * Server-side Starknet RPC proxy.
  *
- * Keeps the Alchemy API key OUT of the browser bundle. The dapp's client RPC
- * providers point at this same-origin route (NEXT_PUBLIC_STARKNET_PROVIDER_URL
- * =/api/rpc); the key lives only in the server-only `ALCHEMY_RPC_URL`. Alchemy
- * stays the PRIMARY upstream; on a transient failure (Alchemy's intermittent
- * 503 / -32001) it rotates to the SDK's keyless public fallbacks (lava.build, …)
- * — same policy + list as every other RPC path (single source of truth in
- * @medialane/sdk).
+ * Keeps the keyed RPC key OUT of the browser bundle. The dapp's client RPC
+ * providers point at this same-origin route (/api/rpc); the keyed URL lives only
+ * in the server-only MAIN var. MAIN stays the PRIMARY upstream; on a transient
+ * failure (e.g. Alchemy's intermittent 503 / -32001) it rotates to the keyless
+ * public FALLBACK (lava). Both come from `constants.ts` (single source).
  *
  * The dapp has no Clerk session to gate on (unlike io). Abuse protection:
  *  - same-origin guard: reject browser requests whose Origin is a different host
  *    (the realistic cross-origin abuse vector). Requests without an Origin
- *    (non-CORS / SSR) are allowed; the method allowlist + Alchemy cap + lava
- *    fallback bound the residual risk.
+ *    (non-CORS / SSR) are allowed; the method allowlist + main cap + fallback
+ *    bound the residual risk.
  *  - method allowlist: only forward the JSON-RPC methods the dapp actually uses
  *    (reads + addInvoke); trace/debug/declare/deploy-account are excluded.
  */
 
-// Configured private endpoints first (Alchemy = primary), then the SDK's shared
-// keyless public fallback list. Public providers are rate-limited, so rotation
-// continues on transient JSON-RPC errors / non-JSON responses.
-const RPC_URLS = Array.from(new Set([
-  process.env.ALCHEMY_RPC_URL,
-  process.env.STARKNET_RPC_URL_SERVER,
-  process.env.STARKNET_RPC_FALLBACK_URL,
-  ...PUBLIC_RPC_FALLBACKS,
-].filter((url): url is string => Boolean(url))));
+// Keyed MAIN first (primary), then the keyless public FALLBACK. Public providers
+// are rate-limited, so rotation continues on transient JSON-RPC errors.
+const RPC_URLS = Array.from(new Set(
+  [RPC_MAIN_URL, RPC_FALLBACK_URL].filter((url): url is string => Boolean(url)),
+));
 
 // Allowlist of JSON-RPC methods forwarded upstream. Covers reads, approvals,
 // tx lifecycle, fee estimation, and starknet.js internal handshake calls.

@@ -1,43 +1,39 @@
 import { RpcProvider } from "starknet";
-import { createFailoverFetch, PUBLIC_RPC_FALLBACKS } from "@medialane/sdk";
-import { STARKNET_RPC_URL } from "./constants";
+import { createFailoverFetch } from "@medialane/sdk";
+import { RPC_MAIN_URL, RPC_FALLBACK_URL, RPC_PROXY_PATH } from "./constants";
 
 /**
- * ⚠️ The dapp talks to Starknet through THREE distinct providers — when a read
- * fails, check which one the failing call actually uses (this tripped up the
- * 2026-06-03 Alchemy-503 hunt for days):
+ * ⚠️ The dapp talks to Starknet through several providers — when a read fails,
+ * check which one the failing call actually uses (this tripped up the 2026-06-03
+ * Alchemy-503 hunt for days):
  *
  *  1. `starknetProvider` (below) — direct `Contract` calls + `waitForTransaction`
  *     in NON-hook contexts: launchpad pages (drop/pop/nfteditions), transfer-
- *     ownership, `use-tx`, `use-paymaster-transaction`.
+ *     ownership, `use-tx`, `use-paymaster-transaction`, `use-coin-price`.
  *  2. starknet-react's provider (`components/starknet-provider.tsx`) — every
- *     `useProvider()` / `useContract()` call, i.e. the whole marketplace flow
- *     (`use-marketplace.ts`: get_counter, royalty_info, approvals).
+ *     `useProvider()` / `useContract()` call (the whole marketplace flow).
  *  3. the SDK client's `getProvider` (`@medialane/sdk`) — SDK-routed ops.
  *
- * All three share ONE failover policy: #1 + #2 use `failoverFetch` below; #3
- * uses the SDK's `createFailoverFetch` internally (≥0.28.0). Keep them in sync —
- * never give one a bare `new RpcProvider({ nodeUrl })` without `baseFetch`.
+ * #1 + #2 share the `failoverFetch` below; #3 fails over internally. Never give
+ * one a bare `new RpcProvider({ nodeUrl })` without `baseFetch`.
  */
 
 /**
- * Resilient Starknet RPC: try the configured primary, then the public fallbacks
- * (lava.build, …) on a transient failure. The primary is the same-origin
- * `/api/rpc` proxy (`STARKNET_RPC_URL` ← `NEXT_PUBLIC_STARKNET_PROVIDER_URL`),
- * which forwards to Alchemy SERVER-side — so Alchemy stays the primary upstream
- * while its API key never enters the browser bundle. Alchemy's intermittent
- * HTTP 503 / `-32001 "Unable to complete request"` (~1 in 6 calls) is absorbed
- * both by the proxy's own rotation and by this client-side failover.
- *
- * The failover policy + fallback list are owned by @medialane/sdk
- * (`createFailoverFetch` / `PUBLIC_RPC_FALLBACKS`) — single source of truth
- * shared across dapp, io, and the backend. No app-local copy.
+ * Resilient Starknet RPC with two roles (see `constants.ts`):
+ *  - Browser → the same-origin `/api/rpc` proxy, which forwards to the keyed
+ *    MAIN provider server-side (so the key never enters the bundle), then to the
+ *    keyless FALLBACK.
+ *  - Server → the keyed MAIN directly, then FALLBACK.
+ * Both fail over to the keyless public FALLBACK (lava) on a transient error.
+ * No provider names, no NEXT_PUBLIC_ keyed URLs, no external fallback lists.
  */
-const RPC_URLS = Array.from(
-  new Set([STARKNET_RPC_URL, ...PUBLIC_RPC_FALLBACKS].filter(Boolean)),
-);
+const RPC_PRIMARY = typeof window === "undefined"
+  ? (RPC_MAIN_URL || RPC_FALLBACK_URL)
+  : RPC_PROXY_PATH;
 
-/** The primary browser RPC URL (the `/api/rpc` proxy in prod). Share this
+const RPC_URLS = Array.from(new Set([RPC_PRIMARY, RPC_FALLBACK_URL].filter(Boolean)));
+
+/** The primary RPC URL (the `/api/rpc` proxy in the browser). Share this
  *  everywhere a `nodeUrl` is needed so all client paths stay in lock-step. */
 export const RPC_PRIMARY_URL = RPC_URLS[0];
 
