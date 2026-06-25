@@ -423,6 +423,50 @@ rows. Coins are fetched from **`/v1/coins`** via the SDK's **`getCoins()` / `get
 
 ---
 
+## Launchpad & Claim form template (Phase 3 complete, 2026-06-25)
+
+Every claim/create/mint surface in the launchpad shares one presentation template.
+The vivid primitives live in `@medialane/ui` (`ServiceHeader`, `ServiceFormShell`,
+`ClaimRail`); this repo holds the wiring in `src/components/claim/`:
+
+- **`ServiceHeader`** (`@medialane/ui`) — page header: a dark `bg-card` card on a static
+  brand-gradient border (`from-brand-blue via-brand-purple to-brand-rose`), solid
+  `primary` icon chip, title + subtitle, optional `headerAccessory`. Used standalone
+  (coin page, browse pages, `/claim` hub) or inside `ClaimRouteShell`.
+- **`ClaimRouteShell`** (local) — full form layout: `ClaimBackButton` + `ServiceHeader` +
+  the form wrapped in the animated full-spectrum border (`.btn-border-animated`, same one
+  as the asset page / Buy button). With an `aside`, an 8/4 bento (form left, rail right);
+  without, a single column. Prop **`gated`** (default **true** → wraps children in
+  `WalletGate`, the form-level blur gate); pass **`gated={false}`** for pages already
+  protected by their own page-level `ConnectGate` or an early-return signed-out/owner
+  state (most launchpad form pages) so the connect UI isn't doubled.
+- **`ClaimRail`** (`@medialane/ui`) — the vivid right-rail panels (What's included · How it
+  works · trust). **`included` is optional** — omit it to skip the first panel (the coin
+  page does this; its live `CoinLaunchPreview` is the rail's first panel). Per-surface
+  content lives in tiny `*-aside.tsx` wrappers (`create-collection-aside`,
+  `mint-edition-aside`, `create-pop-aside`, …).
+
+**To migrate a form onto the template:** replace its old header with `ClaimRouteShell`
+(or `ServiceHeader` + `ClaimBackButton` for non-form pages), wrap the existing `<Form>` as
+`children`, add a `*-aside.tsx`, **de-animate the form's own submit button** (the
+compartment provides the border now — drop the `btn-border-animated` wrapper, use a solid
+`bg-*` button), and soften copy to plain language (no "IPFS"/"PIN"/"ERC-xxxx"; footers say
+"Free to publish/mint — no gas fees"). Keep all tx logic + dialogs + the page's
+`ConnectGate`/`WalletGate` untouched.
+
+**Applied to:** all claims (`/launchpad/memecoin` + `ClaimCollectionPanel`),
+`/create/{collection,asset}`, `/launchpad/nfteditions/{create,[contract]/mint}`,
+`/launchpad/{pop,drop,coin}/create`. **Browse/list pages**
+(`/launchpad/{nfteditions,pop,drop}`) and the combined **`/claim`** hub use
+`ServiceHeader` + `ClaimBackButton` only (no animated form/rail), constrained to
+`max-w-5xl`. The **coin page** keeps its stepper + `CoinLaunchPreview` live-preview rail
+and adds `ServiceHeader` + a `ClaimRail` (How it works + a "Locked forever" trust panel,
+no `included`) under the preview. `ClaimCollectionPanel` gained an optional `helperText`
+prop (default unchanged) so `/launchpad/memecoin` shows coin-specific copy. Mirrors the
+medialane-io rollout end-to-end.
+
+---
+
 ## Notification System (added 2026-05-12)
 
 **Types** (`src/types/notification.ts`): `offer`, `offer_accepted`, `sale`, `listing`, `mint`, `transfer`, `asset_received`, `cancelled`, `announcement`. Priority: `"normal" | "spotlight"`. Celebratory flag drives confetti.
