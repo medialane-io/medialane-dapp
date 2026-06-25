@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { WalletGate } from "@/components/claim/wallet-gate";
 import { ClaimCollectionPanel } from "@/components/claim/claim-collection-panel";
 import { UsernameClaimPanel } from "@/components/shared/username-claim-panel";
+import { ServiceHeader } from "@medialane/ui";
+import { ClaimBackButton } from "@/components/claim/claim-back-button";
 
 function SectionDivider({ label }: { label: string }) {
   return (
@@ -23,16 +25,15 @@ export function ClaimPageClient() {
   return (
     <div className="container mx-auto px-4 sm:px-6 py-12 max-w-5xl space-y-16 pb-20">
       {/* Page header */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
-            <Package className="h-4 w-4 text-white" />
-          </div>
-          <h1 className="text-3xl font-black">Claims & Drops</h1>
+      <div>
+        <ClaimBackButton />
+        <div className="mt-6">
+          <ServiceHeader
+            icon={<Package className="h-4 w-4 text-white" />}
+            title="Claims & Drops"
+            subtitle="Exclusive drops, collections and creator pages available on Medialane."
+          />
         </div>
-        <p className="text-muted-foreground">
-          Exclusive drops, collections and creator pages available on Medialane.
-        </p>
       </div>
 
       {/* Section 1 — Genesis Mint */}
