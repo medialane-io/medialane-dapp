@@ -13,11 +13,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowDownUp, Loader2, ShieldCheck, ExternalLink, Check, Zap, Wallet, TrendingUp, Settings } from "lucide-react";
+import { ArrowDownUp, Loader2, ShieldCheck, ExternalLink, Check, Zap, Settings } from "lucide-react";
 import { getService } from "@medialane/sdk";
 import type { ApiCoin, CreatorCoinPrice } from "@medialane/sdk";
 import { useCoinPrice } from "@/hooks/use-coin-price";
 import { useCoinBalance } from "@/hooks/use-coin-balance";
+import { useCoinSupply } from "@/hooks/use-coin-supply";
 import { useSwap, SWAP_TOKENS, type SwapToken } from "@/hooks/use-swap";
 import { useDominantColor } from "@/hooks/use-dominant-color";
 import { useWallet } from "@/hooks/use-wallet";
@@ -88,14 +89,17 @@ export function CoinPageClient({ coin }: { coin: ApiCoin }) {
   const { imgRef, dynamicTheme } = useDominantColor(bannerUrl);
 
   const serviceLabel = getService(coin.service)?.displayName ?? "Creator Coin";
-  const isExternal = coin.service === "external-erc20";
 
-  // Market cap = live spot price × circulating supply, in the quote token.
-  const marketCap =
-    price && coin.totalSupply != null && Number(coin.totalSupply) > 0
-      ? price.quotePerCoin * Number(coin.totalSupply)
-      : null;
-  const explorerUrl = `${EXPLORER_URL}/contract/${contract}`;
+  // Supply read on-chain (works for every coin, incl. external ERC-20s the
+  // backend doesn't index). Market cap = live spot price × that supply.
+  const { supply } = useCoinSupply(contract, coin.decimals ?? 18);
+  const marketCap = price && supply != null && supply > 0 ? price.quotePerCoin * supply : null;
+
+  // Only render stats that actually resolve — no empty placeholder boxes.
+  const stats: { label: string; value: string }[] = [];
+  if (supply != null && supply > 0) stats.push({ label: "Supply", value: formatCompact(supply) });
+  if (marketCap != null) stats.push({ label: "Market Cap", value: `${formatCompact(marketCap)} ${price?.quoteSymbol ?? ""}`.trim() });
+  if (price?.quoteSymbol) stats.push({ label: "Priced in", value: price.quoteSymbol });
 
   const { address } = useWallet();
   const isCreator =
@@ -193,18 +197,12 @@ export function CoinPageClient({ coin }: { coin: ApiCoin }) {
               </p>
             </Panel>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-3">
-              <StatCell
-                label="Supply"
-                value={coin.totalSupply != null ? Number(coin.totalSupply).toLocaleString() : "—"}
-              />
-              <StatCell
-                label="Market Cap"
-                value={marketCap != null ? `${formatCompact(marketCap)} ${price?.quoteSymbol ?? ""}`.trim() : "—"}
-              />
-              <StatCell label="Priced in" value={price?.quoteSymbol ?? "—"} />
-            </div>
+            {/* Stats — only those that resolve (no empty boxes) */}
+            {stats.length > 0 && (
+              <div className={cn("grid gap-3", stats.length === 1 ? "grid-cols-1" : stats.length === 2 ? "grid-cols-2" : "grid-cols-3")}>
+                {stats.map((s) => <StatCell key={s.label} label={s.label} value={s.value} />)}
+              </div>
+            )}
 
             {/* Description */}
             {coin.description && (
@@ -212,38 +210,6 @@ export function CoinPageClient({ coin }: { coin: ApiCoin }) {
                 {coin.description}
               </p>
             )}
-
-            {/* How it works — plain-language benefit tiles (replaces the old
-                collapsible explainer + trust rows; everything visible at a glance) */}
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {coin.name ?? "This"} is a <span className="text-foreground font-medium">Creator Coin</span> —
-                a token you can buy, hold in your own wallet, and trade any time on the open market.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <BenefitTile
-                  icon={Wallet}
-                  tone="blue"
-                  title="You own it"
-                  text="It lives in your wallet. Medialane never holds it for you."
-                />
-                <BenefitTile
-                  icon={TrendingUp}
-                  tone="purple"
-                  title="Fair market price"
-                  text="The price is set by the open market, not by us."
-                />
-                {!isExternal && (
-                  <BenefitTile
-                    icon={ShieldCheck}
-                    tone="emerald"
-                    title="Safe by design"
-                    text="The funds can't be pulled and no extra coins can be made."
-                    link={{ href: explorerUrl, label: "Verify" }}
-                  />
-                )}
-              </div>
-            </div>
 
             {/* Meta */}
             <div className="flex items-center gap-3 pt-1">
@@ -295,11 +261,8 @@ export function CoinPageSkeleton() {
             </div>
           </div>
           <Skeleton className="h-28 w-full rounded-2xl" />
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+          <div className="grid grid-cols-3 gap-3">
+            {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
           </div>
         </div>
         <Skeleton className="h-[28rem] w-full rounded-2xl lg:sticky lg:top-20" />
@@ -673,48 +636,6 @@ function StatCell({ label, value }: { label: string; value: string }) {
     <Panel className="rounded-xl px-3 py-2.5">
       <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
       <p className="text-base font-bold tabular-nums truncate">{value}</p>
-    </Panel>
-  );
-}
-
-const benefitToneClass: Record<"blue" | "purple" | "emerald", string> = {
-  blue: "bg-brand-blue/15 text-brand-blue",
-  purple: "bg-brand-purple/15 text-brand-purple",
-  emerald: "bg-emerald-500/10 text-emerald-500",
-};
-
-function BenefitTile({
-  icon: Icon,
-  title,
-  text,
-  link,
-  tone = "blue",
-}: {
-  icon: typeof Wallet;
-  title: string;
-  text: string;
-  link?: { href: string; label: string };
-  tone?: "blue" | "purple" | "emerald";
-}) {
-  return (
-    <Panel className="rounded-xl p-3">
-      <div className="space-y-1.5">
-        <div className={cn("flex h-7 w-7 items-center justify-center rounded-full", benefitToneClass[tone])}>
-          <Icon className="h-3.5 w-3.5" />
-        </div>
-        <p className="text-xs font-semibold">{title}</p>
-        <p className="text-[11px] leading-relaxed text-muted-foreground">{text}</p>
-        {link && (
-          <a
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
-          >
-            {link.label} <ExternalLink className="h-3 w-3" />
-          </a>
-        )}
-      </div>
     </Panel>
   );
 }
