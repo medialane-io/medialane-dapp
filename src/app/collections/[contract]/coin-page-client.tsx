@@ -21,7 +21,7 @@ import { useCoinBalance } from "@/hooks/use-coin-balance";
 import { useSwap, SWAP_TOKENS, type SwapToken } from "@/hooks/use-swap";
 import { useDominantColor } from "@/hooks/use-dominant-color";
 import { useWallet } from "@/hooks/use-wallet";
-import { Button } from "@/components/ui/button";
+import { ConnectWallet } from "@/components/ConnectWallet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddressDisplay } from "@/components/shared/address-display";
 import { ShareButton } from "@/components/shared/share-button";
@@ -152,7 +152,7 @@ export function CoinPageClient({ coin }: { coin: ApiCoin }) {
                 </h1>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   {coin.symbol && (
-                    <span className="font-mono text-xs bg-muted/60 border border-border/60 rounded-full px-2.5 py-0.5">
+                    <span className="text-xs bg-muted/60 border border-border/60 rounded-full px-2.5 py-0.5">
                       {coin.symbol}
                     </span>
                   )}
@@ -171,7 +171,7 @@ export function CoinPageClient({ coin }: { coin: ApiCoin }) {
             </div>
 
             {/* Live price */}
-            <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm p-5">
+            <Panel className="p-5">
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground mb-1.5">
                 Price
               </p>
@@ -179,7 +179,7 @@ export function CoinPageClient({ coin }: { coin: ApiCoin }) {
                 <Skeleton className="h-9 w-40" />
               ) : price ? (
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold tabular-nums">
+                  <span className="text-3xl font-bold tabular-nums text-brand-orange">
                     {formatPrice(price.quotePerCoin)}
                   </span>
                   <span className="text-sm text-muted-foreground">
@@ -194,7 +194,7 @@ export function CoinPageClient({ coin }: { coin: ApiCoin }) {
               <p className="mt-2 text-[11px] text-muted-foreground/70">
                 Live market price · updates every 30s
               </p>
-            </div>
+            </Panel>
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-3">
@@ -226,17 +226,20 @@ export function CoinPageClient({ coin }: { coin: ApiCoin }) {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <BenefitTile
                   icon={Wallet}
+                  tone="blue"
                   title="You own it"
                   text="It lives in your wallet. Medialane never holds it for you."
                 />
                 <BenefitTile
                   icon={TrendingUp}
+                  tone="purple"
                   title="Fair market price"
                   text="The price is set by the open market, not by us."
                 />
                 {!isExternal && (
                   <BenefitTile
                     icon={ShieldCheck}
+                    tone="emerald"
                     title="Safe by design"
                     text="The funds can't be pulled and no extra coins can be made."
                     link={{ href: explorerUrl, label: "Verify" }}
@@ -428,7 +431,8 @@ function CoinSwapCard({
   );
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/70 backdrop-blur-sm p-4 space-y-3">
+    <Panel className="p-4">
+      <div className="space-y-3">
       {/* Buy / Sell toggle */}
       <div className="flex items-center justify-between">
         <div className="inline-flex rounded-lg border border-border/60 bg-muted/30 p-0.5">
@@ -591,22 +595,31 @@ function CoinSwapCard({
             </button>
           </div>
         </div>
+      ) : !isConnected ? (
+        // Same animated brand-gradient CTA as portfolio / the asset page's
+        // "Connect wallet to trade" — opens the shared wallet picker.
+        <div className="btn-border-animated p-[1px] rounded-2xl">
+          <ConnectWallet
+            label="Connect wallet to trade"
+            className="w-full h-12 text-base bg-transparent text-white rounded-[15px] flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-[0.98]"
+          />
+        </div>
       ) : (
-        <Button
-          className="w-full h-11 border-0 bg-gradient-to-r from-brand-blue to-brand-purple text-white hover:opacity-90"
-          disabled={!isConnected || !swap.canSwap || coinInsufficient}
-          onClick={handleSwap}
-        >
-          {swap.isExecuting ? (
-            <><Loader2 className="h-4 w-4 animate-spin mr-2" /> {isBuy ? "Buying" : "Selling"}…</>
-          ) : !isConnected ? (
-            "Connect wallet to trade"
-          ) : noRoute ? (
-            "Not tradable here yet"
-          ) : (
-            <><Zap className="h-4 w-4 mr-2" /> {isBuy ? "Buy" : "Sell"} {coinSymbol}</>
-          )}
-        </Button>
+        <div className={cn("btn-border-animated p-[1px] rounded-2xl", (!swap.canSwap || coinInsufficient) && "opacity-40 pointer-events-none")}>
+          <button
+            className="w-full h-12 rounded-[15px] bg-brand-blue text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+            disabled={!swap.canSwap || coinInsufficient}
+            onClick={handleSwap}
+          >
+            {swap.isExecuting ? (
+              <><Loader2 className="h-4 w-4 animate-spin mr-2" /> {isBuy ? "Buying" : "Selling"}…</>
+            ) : noRoute ? (
+              "Not tradable here yet"
+            ) : (
+              <><Zap className="h-4 w-4 mr-2" /> {isBuy ? "Buy" : "Sell"} {coinSymbol}</>
+            )}
+          </button>
+        </div>
       )}
 
       {/* Friendly trust footer (matches the offer-dialog microcopy pattern) */}
@@ -614,7 +627,8 @@ function CoinSwapCard({
         <ShieldCheck className="h-3 w-3 shrink-0 mt-0.5" />
         Held in your own wallet · settles on a public pool · gas sponsored by Medialane
       </p>
-    </div>
+      </div>
+    </Panel>
   );
 }
 
@@ -642,44 +656,69 @@ function CoinAvatar({ url, symbol }: { url: string | null; symbol?: string | nul
   );
 }
 
-function StatCell({ label, value }: { label: string; value: string }) {
+/**
+ * Auxiliary panel — a card surface with a subtle brand gradient fill (Primary
+ * gradient, blue→purple) layered over the base, per the design system. The
+ * gradient is an overlay so inner content keeps full contrast against the
+ * frosted backdrop. `rounded-2xl` is the default; pass `rounded-xl` to override.
+ */
+function Panel({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-border/50 bg-card/40 px-3 py-2.5">
-      <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
-      <p className="text-base font-bold tabular-nums truncate">{value}</p>
+    <div className={cn("relative overflow-hidden rounded-2xl border border-border/60 bg-card/70 backdrop-blur-sm", className)}>
+      <span aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-blue/12 via-brand-purple/8 to-transparent" />
+      <div className="relative z-10 h-full">{children}</div>
     </div>
   );
 }
+
+function StatCell({ label, value }: { label: string; value: string }) {
+  return (
+    <Panel className="rounded-xl px-3 py-2.5">
+      <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
+      <p className="text-base font-bold tabular-nums truncate">{value}</p>
+    </Panel>
+  );
+}
+
+const benefitToneClass: Record<"blue" | "purple" | "emerald", string> = {
+  blue: "bg-brand-blue/15 text-brand-blue",
+  purple: "bg-brand-purple/15 text-brand-purple",
+  emerald: "bg-emerald-500/10 text-emerald-500",
+};
 
 function BenefitTile({
   icon: Icon,
   title,
   text,
   link,
+  tone = "blue",
 }: {
   icon: typeof Wallet;
   title: string;
   text: string;
   link?: { href: string; label: string };
+  tone?: "blue" | "purple" | "emerald";
 }) {
   return (
-    <div className="rounded-xl border border-border/50 bg-muted/20 p-3 space-y-1.5">
-      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10">
-        <Icon className="h-3.5 w-3.5 text-emerald-500" />
+    <Panel className="rounded-xl p-3">
+      <div className="space-y-1.5">
+        <div className={cn("flex h-7 w-7 items-center justify-center rounded-full", benefitToneClass[tone])}>
+          <Icon className="h-3.5 w-3.5" />
+        </div>
+        <p className="text-xs font-semibold">{title}</p>
+        <p className="text-[11px] leading-relaxed text-muted-foreground">{text}</p>
+        {link && (
+          <a
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {link.label} <ExternalLink className="h-3 w-3" />
+          </a>
+        )}
       </div>
-      <p className="text-xs font-semibold">{title}</p>
-      <p className="text-[11px] leading-relaxed text-muted-foreground">{text}</p>
-      {link && (
-        <a
-          href={link.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
-        >
-          {link.label} <ExternalLink className="h-3 w-3" />
-        </a>
-      )}
-    </div>
+    </Panel>
   );
 }
 
