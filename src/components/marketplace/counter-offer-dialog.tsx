@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useWallet } from "@/hooks/use-wallet";
 import { useMarketplace } from "@/hooks/use-marketplace";
 import { EXPLORER_URL, DURATION_OPTIONS } from "@/lib/constants";
+import { resolveTokenImage } from "@/lib/utils";
 import {
   DurationPicker,
   MarketplaceSuccessState,
@@ -42,9 +43,10 @@ interface CounterOfferDialogProps {
 }
 
 export function CounterOfferDialog({
-  open, onOpenChange, nftContract, tokenId, tokenName, tokenImage,
+  open, onOpenChange, nftContract, tokenId, tokenName, tokenImage: tokenImageRaw,
   currentBid, currencySymbol, onSuccess,
 }: CounterOfferDialogProps) {
+  const tokenImage = resolveTokenImage(tokenImageRaw);
   const { isConnected } = useWallet();
   const { makeOffer, isProcessing, txHash, error, resetState } = useMarketplace();
   const [done, setDone] = useState(false);

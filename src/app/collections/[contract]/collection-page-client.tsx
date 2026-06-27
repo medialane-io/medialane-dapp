@@ -212,7 +212,7 @@ function CollectionItems({ contract, activeListings }: { contract: string; activ
           assetContract={selectedToken.contractAddress}
           tokenId={selectedToken.tokenId}
           tokenName={selectedToken.metadata?.name ?? undefined}
-          tokenImage={selectedToken.metadata?.image ? ipfsToHttp(selectedToken.metadata.image) : null}
+          tokenImage={selectedToken.metadata?.image ?? null}
           tokenStandard={collection?.standard}
           onSuccess={() => { setListOpen(false); setSelectedToken(null); setPage(1); setAllTokens([]); mutate(); }}
         />
@@ -224,7 +224,7 @@ function CollectionItems({ contract, activeListings }: { contract: string; activ
           contractAddress={transferToken.contractAddress}
           tokenId={transferToken.tokenId}
           tokenName={transferToken.metadata?.name ?? undefined}
-          tokenImage={transferToken.metadata?.image ? ipfsToHttp(transferToken.metadata.image) : null}
+          tokenImage={transferToken.metadata?.image ?? null}
           tokenStandard={(transferToken.standard ?? collection?.standard) === "ERC1155" ? "ERC1155" : "ERC721"}
           hasActiveListing={!!transferToken.activeOrders?.[0]}
           onSuccess={() => { setTransferOpen(false); setTransferToken(null); setPage(1); setAllTokens([]); mutate(); }}

@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { resolveTokenImage } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 
@@ -66,11 +67,12 @@ export function TransferDialog({
   contractAddress,
   tokenId,
   tokenName,
-  tokenImage,
+  tokenImage: tokenImageRaw,
   tokenStandard,
   onSuccess,
   hasActiveListing = false,
 }: TransferDialogProps) {
+  const tokenImage = resolveTokenImage(tokenImageRaw);
   const {
     transferToken,
     walletAddress,

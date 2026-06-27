@@ -83,6 +83,21 @@ export function ipfsToHttp(uri: string | null | undefined): string {
   return uri;
 }
 
+/**
+ * Resolve a token/collection image value for display in marketplace dialogs and
+ * cards. Returns a browser-loadable URL, or `null` when there's no image (so the
+ * UI can show its own fallback rather than the /placeholder.svg sentinel).
+ * Idempotent: already-resolved URLs (http, /api/ipfs, …) pass through unchanged,
+ * so callers may pass a raw `ipfs://` value or an already-resolved one.
+ */
+export function resolveTokenImage(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  // Already a resolved/proxied URL (our own /api/* routes or the placeholder
+  // sentinel) — pass through so callers may hand us raw or resolved values.
+  if (raw.startsWith("/")) return raw;
+  return ipfsToHttp(raw);
+}
+
 export function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const seconds = Math.floor(diff / 1000);

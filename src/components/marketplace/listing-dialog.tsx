@@ -16,6 +16,7 @@ import { useWallet } from "@/hooks/use-wallet";
 import { useMarketplace } from "@/hooks/use-marketplace";
 import { EXPLORER_URL, DURATION_OPTIONS } from "@/lib/constants";
 import { getListableTokens } from "@medialane/sdk";
+import { resolveTokenImage } from "@/lib/utils";
 import { CurrencyIcon } from "@/components/shared/currency-icon";
 import {
   CurrencyPicker,
@@ -47,7 +48,8 @@ interface ListingDialogProps {
   onSuccess?: () => void;
 }
 
-export function ListingDialog({ open, onOpenChange, assetContract, tokenId, tokenName, tokenStandard, tokenImage, onSuccess }: ListingDialogProps) {
+export function ListingDialog({ open, onOpenChange, assetContract, tokenId, tokenName, tokenStandard, tokenImage: tokenImageRaw, onSuccess }: ListingDialogProps) {
+  const tokenImage = resolveTokenImage(tokenImageRaw);
   const { isConnected } = useWallet();
   const { createListing, isProcessing, txHash, error, resetState } = useMarketplace();
   const confettiFired = useRef(false);
