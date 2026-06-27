@@ -9,6 +9,7 @@ import { EmptyOrError } from "@/components/ui/empty-or-error";
 import { Button } from "@/components/ui/button";
 import { ImageIcon, Loader2 } from "lucide-react";
 import { useMarketplace } from "@/hooks/use-marketplace";
+import { ipfsToHttp } from "@/lib/utils";
 import type { ApiToken } from "@medialane/sdk";
 
 interface AssetsGridProps {
@@ -142,6 +143,7 @@ export function AssetsGrid({ address }: AssetsGridProps) {
           assetContract={selectedToken.contractAddress}
           tokenId={selectedToken.tokenId}
           tokenName={selectedToken.metadata?.name ?? undefined}
+          tokenImage={selectedToken.metadata?.image ? ipfsToHttp(selectedToken.metadata.image) : null}
           tokenStandard={(selectedToken as any).standard}
           onSuccess={handleSuccess}
         />
@@ -157,6 +159,7 @@ export function AssetsGrid({ address }: AssetsGridProps) {
           contractAddress={transferToken.contractAddress}
           tokenId={transferToken.tokenId}
           tokenName={transferToken.metadata?.name ?? undefined}
+          tokenImage={transferToken.metadata?.image ? ipfsToHttp(transferToken.metadata.image) : null}
           tokenStandard={transferToken.standard === "ERC1155" ? "ERC1155" : "ERC721"}
           hasActiveListing={!!transferToken.activeOrders?.[0]}
           onSuccess={handleSuccess}
