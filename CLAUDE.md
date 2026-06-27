@@ -480,6 +480,31 @@ no `included`) under the preview. `ClaimCollectionPanel` gained an optional `hel
 prop (default unchanged) so `/launchpad/memecoin` shows coin-specific copy. Mirrors the
 medialane-io rollout end-to-end.
 
+### Standard form layout + UX conventions (2026-06-27, @medialane/ui ≥ 0.28.0)
+
+The 2-column form layout is the **standard** every launchpad create/mint surface follows.
+Three conventions were added; keep new forms consistent with them:
+
+- **Plain header, gradient on the form only.** `ServiceHeader` gained a `plain` variant
+  (neutral border, no brand gradient); `ServiceFormShell` renders the header **`plain`** so a
+  create/mint page shows the animated gradient border **only on the form**, never stacked on
+  the header. Standalone headers (browse pages, coin detail, `/claim` hub) still pass no
+  `plain` → they keep the gradient (single accent, nothing competing).
+- **Multi-step forms use the shared shell, not a bespoke layout.** `ServiceFormShell` gained
+  an **`aboveForm`** slot (left column, between header and form) and a **sticky right rail**
+  on desktop. New **`StepNav`** (`@medialane/ui`, `accentText`/`accentBg` props) is the
+  polished stepper (solid active dot, outlined check for done, filling connector). The
+  **coin page (`/launchpad/coin/create`) now uses `ServiceFormShell`**: plain header in the
+  left column, animated border on the form, `StepNav` via `aboveForm`, `CoinLaunchPreview` +
+  `CreateCoinAside` as the `aside`. Do NOT reintroduce its old `grid-cols-[1fr_340px]` /
+  full-width-gradient-header layout.
+- **Mobile-flush nested panels — no panels-inside-panels on phones.** Collapsible sub-panels
+  inside a form (Licensing, IP Type & Metadata, drop/edition sections) drop their border,
+  rounding, and horizontal padding on mobile so fields get the form card's full width. The
+  `sm:`-gated pattern: wrapper `sm:overflow-hidden sm:rounded-xl sm:border sm:border-border`,
+  trigger `px-0 py-3 sm:px-5 sm:py-4`, content `px-0 pb-4 sm:px-5 sm:pb-5 …`. Applies to
+  `/create/asset`, `/launchpad/nfteditions/[contract]/mint`, `/launchpad/drop/create`, remix.
+
 ---
 
 ## Notification System (added 2026-05-12)
@@ -516,3 +541,4 @@ medialane-io rollout end-to-end.
 - **Wallet**: `useWallet()` is the single hook for everything — `{ address, isConnected, isConnecting, walletType, error, connect, disconnect, execute }`. `useUnifiedWallet()`/`useWalletSession()` are legacy compat shims over it; don't reach for them in new code.
 - **Page layout**: top-level pages wrap content in `<PageContainer className="box-border max-w-full pt-20 …">` from `@medialane/ui` (full-width, content aligns with the logo) — do NOT use Tailwind's `container` (it caps width + centers → mismatched side gutters). `pt-20` clears the fixed logo/nav. Asset pages use `mx-auto w-full px-4 sm:px-6 lg:px-8` (full-width without PageContainer).
 - **No hover-only effects** on cards/grids (scale, lift-shadow, color-shift) — most users are on mobile where hover doesn't exist. Keep `active:` (touch) states; reserve `hover:` for non-essential desktop polish only.
+- **Token images go through `resolveTokenImage` (`src/lib/utils.ts`), not raw `ipfsToHttp`.** It returns a browser-loadable URL or `null` (so the UI shows its own fallback, never the `/placeholder.svg` sentinel), and is **idempotent** (already-resolved/proxied URLs pass through). The marketplace dialogs that take a `tokenImage` prop (`listing`/`transfer`/`offer`/`counter-offer`) **resolve it internally** — so callers pass the **raw** `token.metadata?.image` and never repeat `x ? ipfsToHttp(x) : null`. (Forgetting that incantation is what dropped the image in the portfolio/collection dialogs, 2026-06-27.)
