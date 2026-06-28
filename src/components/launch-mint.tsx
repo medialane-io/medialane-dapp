@@ -6,7 +6,7 @@ import { useSiwsToken } from "@/hooks/use-siws-token";
 import Image from "next/image";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { useWallet } from "@/hooks/use-wallet";
-import { byteArray, CallData } from "starknet";
+import { encodeByteArray } from "@medialane/sdk";
 import {
   Sparkles,
   Zap,
@@ -151,8 +151,7 @@ export function LaunchMint() {
       }
 
       setMintStatusMsg("Submitting transaction…");
-      const encodedUri = byteArray.byteArrayFromString(tokenUri);
-      const calldata = CallData.compile([recipientAddress, encodedUri]);
+      const calldata = [recipientAddress, ...encodeByteArray(tokenUri)];
 
       const result = await executeTransaction([
         { contractAddress: LAUNCH_MINT_CONTRACT, entrypoint: "mint_item", calldata },
