@@ -299,10 +299,12 @@ export function AssetMarketplacePanel({
               ) : null}
             </div>
           ) : (
-            <ConnectWallet
-              label="Connect wallet to make an offer"
-              className="w-full h-10 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-            />
+            <div className="btn-border-animated p-[1px] rounded-2xl">
+              <ConnectWallet
+                label="Connect wallet to make an offer"
+                className="w-full h-12 text-base bg-transparent text-white rounded-[15px] flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-[0.98]"
+              />
+            </div>
           )}
         </div>
       )}

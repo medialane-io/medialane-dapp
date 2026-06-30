@@ -351,7 +351,7 @@ export function TokenCard({
           assetContract={token.contractAddress}
           tokenId={token.tokenId}
           tokenName={token.metadata?.name ?? undefined}
-          tokenImage={image ?? undefined}
+          tokenImage={token.metadata?.image ?? undefined}
           tokenStandard={token.standard ?? undefined}
         />
       )}
