@@ -99,6 +99,15 @@ export function PrivyConnector({
   }, [getAccessToken, setSession, setWallet, setPrivyUser, user]);
 
   // Step 1: explicit connect request — open Privy login modal.
+  //
+  // `login()` opens a popup window; if the browser blocks it (Brave and
+  // Safari block popups by default unless triggered by a very recent user
+  // gesture) it throws or its promise rejects with no visible UI change —
+  // the session was left stuck in "authenticating" forever, which renders
+  // as a permanently-disabled spinner with no explanation (reported
+  // 2026-07-02: "the button does nothing, zero user feedback"). We also
+  // arm a timeout as a backstop for any other silent-stall mode (e.g. the
+  // popup opens but the user abandons the tab).
   useEffect(() => {
     if (!pendingConnect) return;
     if (!ready) return;
@@ -106,13 +115,42 @@ export function PrivyConnector({
     setSession(walletAuthenticating("privy"));
     setNeedsOnboard(true);
     if (!authenticated) {
-      // Don't await — login() may resolve before auth completes. The
-      // onboarding effect below watches `authenticated` and fires when it
-      // flips true.
-      login();
+      const failLogin = (err: unknown) => {
+        console.error("[Privy] login failed:", err);
+        setSession(
+          walletError(
+            "privy",
+            "Sign-in didn't open. If your browser blocked a pop-up, allow pop-ups for this site and try again."
+          )
+        );
+      };
+      try {
+        // Don't await — login() may resolve before auth completes. The
+        // onboarding effect below watches `authenticated` and fires when it
+        // flips true.
+        Promise.resolve(login()).catch(failLogin);
+      } catch (err) {
+        failLogin(err);
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, pendingConnect]);
+
+  // Backstop: if sign-in hasn't completed within 45s of the explicit
+  // request, surface an error instead of leaving the UI stuck indefinitely.
+  useEffect(() => {
+    if (!pendingConnect && !needsOnboard) return;
+    if (authenticated) return;
+    const timer = setTimeout(() => {
+      setSession(
+        walletError(
+          "privy",
+          "Sign-in timed out. If your browser blocked a pop-up, allow pop-ups for this site and try again."
+        )
+      );
+    }, 45000);
+    return () => clearTimeout(timer);
+  }, [pendingConnect, needsOnboard, authenticated, setSession]);
 
   // Step 2: once authenticated, run the onboarding pipeline — EXPLICIT connect
   // only (needsOnboard=true). There is no silent background auto-reconnect: a

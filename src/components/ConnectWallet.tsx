@@ -48,6 +48,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useStarkZapWallet } from "@/contexts/starkzap-wallet-context";
 import { useWallet } from "@/hooks/use-wallet";
 import type { WalletSessionType } from "@/lib/wallet-session";
+import { getFriendlyWalletError } from "@/lib/wallet-error";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -73,6 +74,11 @@ function getConnectorDisplayName(id: string, fallback: string): string {
   };
   return NAMES[id] ?? fallback;
 }
+
+const WALLET_INSTALL_URLS: Record<string, string> = {
+  argentX: "https://www.ready.co/download",
+  braavos: "https://braavos.app/download-braavos-wallet/",
+};
 
 type WalletBadgeInfo = {
   label: string;
@@ -167,6 +173,17 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
     }
   }, [isConnected, address]);
 
+  // Cartridge/Privy connect failures happen asynchronously (a popup, a
+  // remote SDK call) after the dialog has already closed — without this the
+  // error is only recorded in session state and never actually seen, which
+  // reads as "the button does nothing" (reported 2026-07-02). Reopen so the
+  // sessionError banner below is visible whenever a connect attempt fails.
+  useEffect(() => {
+    if (sessionError && !isConnected) {
+      setConnectDialogOpen(true);
+    }
+  }, [sessionError, isConnected]);
+
   // ---------------------------------------------------------------------------
   // Handlers
   // ---------------------------------------------------------------------------
@@ -183,11 +200,11 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
       await connect(type, connector);
     } catch (err) {
       console.error("Failed to connect wallet", err);
-      const message = err instanceof Error ? err.message : "Wallet connection failed";
-      if (/user rejected|user aborted|aborted|rejected/i.test(message)) {
+      const friendly = getFriendlyWalletError(err);
+      if (friendly.isUserRejection) {
         toast.info("Wallet connection cancelled");
       } else {
-        toast.error("Wallet connection failed", { description: message });
+        toast.error("Wallet connection failed", { description: friendly.message, duration: 8000 });
       }
       setConnectDialogOpen(true);
     } finally {
@@ -200,7 +217,8 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
     try {
       await connect("cartridge");
     } catch {
-      // error surfaced via session state
+      // error surfaced via session state — the sessionError effect reopens
+      // the dialog so the banner is actually visible.
     }
   };
 
@@ -451,6 +469,32 @@ export function ConnectWallet({ label, className }: ConnectWalletProps = {}) {
                       connector.icon as ConnectorIconObj | string | undefined
                     );
                     const displayName = getConnectorDisplayName(connector.id, connector.name);
+                    // Both connectors are always configured regardless of which
+                    // extensions are actually installed — `available()` is a
+                    // synchronous window-object check, so we can gate on it at
+                    // render time instead of letting the user click into a
+                    // guaranteed "Connector not found" failure.
+                    const installed = connector.available();
+                    const installUrl = WALLET_INSTALL_URLS[connector.id];
+                    if (!installed && installUrl) {
+                      return (
+                        <a
+                          key={connector.id}
+                          href={installUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex w-full items-center gap-3 rounded-md border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-colors"
+                        >
+                          {iconSrc ? (
+                            <Image src={iconSrc} alt="" width={20} height={20} className="h-5 w-5 rounded shrink-0 opacity-60" unoptimized />
+                          ) : (
+                            <Wallet className="h-4 w-4 shrink-0" />
+                          )}
+                          <span>Install {displayName}</span>
+                          <ExternalLink className="ml-auto h-3 w-3" />
+                        </a>
+                      );
+                    }
                     return (
                       <Button
                         key={connector.id}

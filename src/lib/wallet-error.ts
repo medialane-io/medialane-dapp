@@ -60,10 +60,13 @@ function isTransientNetworkError(text: string): boolean {
 }
 
 /** Heuristic: a raw RPC / serialization blob that must never be shown to a
- *  user (the full detail is logged to the console by the caller). */
+ *  user (the full detail is logged to the console by the caller). A message
+ *  containing a raw URL (e.g. "Chain https://rpc.starknet.lava.build/ not
+ *  supported" — leaked to a public Telegram community, 2026-07-02) is always
+ *  technical, regardless of length: users should never see infra endpoints. */
 function looksTechnical(text: string): boolean {
   return (
-    /rpc:|jsonrpc|starknet_call|entry_point_selector|contract_address|fetchendpoint|errorhandler|at async|baseerror|"code"\s*:\s*-?\d/i.test(
+    /rpc:|jsonrpc|starknet_call|entry_point_selector|contract_address|fetchendpoint|errorhandler|at async|baseerror|"code"\s*:\s*-?\d|https?:\/\//i.test(
       text,
     ) || text.length > 160
   );
@@ -106,17 +109,20 @@ export function getFriendlyWalletError(error: unknown): FriendlyWalletError {
   // Anything that looks like a raw RPC / serialization blob must never reach
   // the user — the full technical detail is already logged to the console by
   // the caller. Short, human-readable messages (e.g. app-thrown validation or
-  // on-chain revert reasons) are safe to show verbatim.
+  // on-chain revert reasons) are safe to show verbatim. "Something went
+  // wrong" alone was flagged as unhelpful — always pair it with a concrete
+  // next step so the user isn't stuck.
   if (!raw || looksTechnical(raw)) {
     return {
-      title: "Transaction failed",
-      message: "Something went wrong while processing this transaction. Please try again in a moment.",
+      title: "Something went wrong",
+      message:
+        "We couldn't complete that action. Please try again in a moment — if it keeps happening, try a different wallet or refresh the page.",
       isUserRejection: false,
     };
   }
 
   return {
-    title: "Transaction failed",
+    title: "Something went wrong",
     message: raw,
     isUserRejection: false,
   };

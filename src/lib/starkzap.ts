@@ -64,6 +64,44 @@ export function isStarkZapSponsorshipEnabled(): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Cartridge-only SDK instance
+// ---------------------------------------------------------------------------
+
+let _cartridgeSdk: StarkZap | null = null;
+
+/**
+ * Returns a StarkZap SDK instance dedicated to Cartridge Controller onboarding.
+ *
+ * Cartridge's `connectCartridge()` unconditionally forwards the SDK's
+ * `rpcUrl` into `@cartridge/controller`'s `chains` config, and Controller's
+ * internal chain-ID detection only recognizes URLs whose PATH contains
+ * "starknet"/"mainnet" (Cartridge's own hosted-RPC convention, e.g.
+ * `https://api.cartridge.gg/x/starknet/mainnet`). Our Lava RPC
+ * (`https://rpc.starknet.lava.build`, pinned for reliability — see
+ * `getStarkZapSdk`) has no such path segment, so passing it through throws
+ * `Chain https://rpc.starknet.lava.build/ not supported` and Cartridge
+ * connect always fails. Use StarkZap's own "mainnet" network preset (which
+ * resolves to Cartridge's hosted RPC) for this SDK instance only — every
+ * other read/write keeps using the Lava-pinned singleton from
+ * `getStarkZapSdk()`.
+ */
+export function getCartridgeStarkZapSdk(): StarkZap {
+  if (_cartridgeSdk) return _cartridgeSdk;
+
+  const avnuApiKey = process.env.NEXT_PUBLIC_AVNU_PAYMASTER_API_KEY;
+  const paymaster = avnuApiKey
+    ? {
+        nodeUrl: "https://starknet.paymaster.avnu.fi",
+        headers: { "x-paymaster-api-key": avnuApiKey },
+      }
+    : undefined;
+
+  _cartridgeSdk = new StarkZap({ network: "mainnet", paymaster });
+
+  return _cartridgeSdk;
+}
+
+// ---------------------------------------------------------------------------
 // Staking config helper
 // ---------------------------------------------------------------------------
 
