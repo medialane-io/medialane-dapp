@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { fireConfetti } from "@/lib/confetti";
 import { orderTotal, type CheckoutItem } from "@/lib/checkout";
+import { dappFeeConfig } from "@/lib/fee";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,6 +80,43 @@ function TokenHero({ order, quantity }: { order: ApiOrder; quantity: number }) {
             )}
           </div>
         ) : null}
+      </div>
+    </div>
+  );
+}
+
+// checkoutCart bundles the platform fee as a separate ERC-20 transfer() in the
+// SAME multicall as fulfill_order — the buyer's wallet must hold price + fee,
+// not just the listed price. This was never disclosed here, so a wallet
+// funded to exactly the listed price always failed the wallet's own pre-flight
+// simulation ("Argent multicall failed", reported 2026-07-02). Only render
+// when a fee actually applies (enabled, fund address set, bps > 0).
+function PriceBreakdown({ order, quantity }: { order: ApiOrder; quantity: number }) {
+  if (!order.price?.formatted) return null;
+  const unitPrice = parseFloat(order.price.formatted);
+  const totalPrice = unitPrice * quantity;
+  const bps = dappFeeConfig.marketplaceBps;
+  if (!dappFeeConfig.enabled || !dappFeeConfig.fundAddress || bps <= 0) return null;
+  const feeAmount = (totalPrice * bps) / 10000;
+  const grandTotal = totalPrice + feeAmount;
+  const decimals = order.price.decimals <= 6 ? 2 : 4;
+
+  return (
+    <div className="rounded-xl border border-border divide-y divide-border text-sm">
+      <div className="flex items-center justify-between px-4 py-2">
+        <span className="text-muted-foreground">Item price</span>
+        <span className="font-medium">{formatDisplayPrice(totalPrice.toFixed(decimals))} {order.price.currency}</span>
+      </div>
+      <div className="flex items-center justify-between px-4 py-2">
+        <span className="text-muted-foreground">Platform fee ({(bps / 100).toFixed(bps % 100 === 0 ? 0 : 2)}%)</span>
+        <span className="font-medium">{formatDisplayPrice(feeAmount.toFixed(decimals))} {order.price.currency}</span>
+      </div>
+      <div className="flex items-center justify-between px-4 py-2.5">
+        <span className="font-semibold">Total due</span>
+        <span className="font-bold flex items-center gap-1.5">
+          <CurrencyIcon symbol={order.price.currency} size={13} />
+          {formatDisplayPrice(grandTotal.toFixed(decimals))} {order.price.currency}
+        </span>
       </div>
     </div>
   );
@@ -282,6 +320,8 @@ export function PurchaseDialog({ order, open, onOpenChange, onSuccess }: Purchas
           <div className="flex flex-col">
             <TokenHero order={order} quantity={quantity} />
             <div className="px-5 py-5 space-y-4">
+              <PriceBreakdown order={order} quantity={quantity} />
+
               {isERC1155 && maxQty > 1 ? (
                 <div className="rounded-xl border border-border p-3 space-y-3">
                   <div className="flex items-center justify-between text-sm">
